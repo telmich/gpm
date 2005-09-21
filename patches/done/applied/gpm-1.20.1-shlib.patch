@@ -1,0 +1,48 @@
+Hello,
+
+ There are bogus dependencies when one decides not to build a shared
+library.  In this case "all" depends on "lib/" and programs depend on
+"lib/libgpm.so".  Following is an obvious fix.  Please apply.
+
+  Maciej
+
+-- 
++  Maciej W. Rozycki, Technical University of Gdansk, Poland   +
++--------------------------------------------------------------+
++        e-mail: macro@ds2.pg.gda.pl, PGP key available        +
+
+gpm-1.20.1-shlib.patch
+diff -up --recursive --new-file gpm-1.20.1.macro/configure.in gpm-1.20.1/configure.in
+--- gpm-1.20.1.macro/configure.in	2002-12-24 22:57:16.000000000 +0000
++++ gpm-1.20.1/configure.in	2003-01-18 23:04:19.000000000 +0000
+@@ -83,7 +83,7 @@ fi
+ 
+ ITZ_SYS_ELF
+ if test ${itz_cv_sys_elf} = yes && test x${ac_cv_prog_gcc} = xyes ; then
+-    SHLIB=libgpm.so
++    SHLIB=lib/libgpm.so
+ else
+     SHLIB=
+ fi
+diff -up --recursive --new-file gpm-1.20.1.macro/src/Makefile.in gpm-1.20.1/src/Makefile.in
+--- gpm-1.20.1.macro/src/Makefile.in	2002-12-24 22:57:16.000000000 +0000
++++ gpm-1.20.1/src/Makefile.in	2003-01-18 23:05:07.000000000 +0000
+@@ -67,7 +67,7 @@ prog/%:	prog/%.o
+ #		| $(SED) '\''s/\($*\)\.o\([ :]*\)/\1.o \1.lo\2/g'\'' > $(DEPDIR)/$@'
+ 
+ # Do it all!
+-all:	gpm lib/@SHLIB@ lib/libgpm.a $(PROG)
++all:	gpm @SHLIB@ lib/libgpm.a $(PROG)
+ 
+ gpm:	$(GOBJ)
+ 
+@@ -145,7 +145,7 @@ prog/gpm-root: prog/gpm-root.c
+ 
+ prog/mouse-test:	mice.o twiddler.o synaptics.o
+ 
+-$(PROG):	lib/libgpm.so lib/@SHLIB@ lib/libgpm.a
++$(PROG):	@SHLIB@ lib/libgpm.a
+ 
+ # Subdirectory lib/
+ lib/libgpm.a:	$(LOBJ)
+

@@ -1,0 +1,1224 @@
+diff -ru --exclude=Makefile ./ChangeLog ../imwheel/gpm-imwheel/ChangeLog
+--- ./ChangeLog	Fri Nov 12 08:27:37 1999
++++ ../imwheel/gpm-imwheel/ChangeLog	Sun Feb 27 16:30:46 2000
+@@ -346,6 +346,8 @@
+  	<tob@world.std.com> for braindead chords in t-mouse with 2 button
+  	mice.
+ 
++CHANGED 12/16/98 by Jonathan Atkins. updated for imwheel.
++
+ Tue Nov 17 23:10:04 1998  Ian T Zimmerman  <itz@transbay.net>
+ 
+ 	* configure.in (release): Step to 1.16.0
+@@ -806,6 +808,8 @@
+ Sat Jul 25 21:08:46 1998 Edmund Grimley Evans (edmund@vocalis.com)
+ 
+ 	* mice.c: added M_ms_plus and M_ms_plus_lr
++
++CHANGED 9/8/98 for imwheel by Jonathan Atkins.  Diff in imwheel contains changes
+ 
+ Mon Jul  6 13:00:23 1998 Robin Houston (robin.houston@guardian.co.uk)
+ 
+Only in ../imwheel/gpm-imwheel: ChangeLog.orig
+diff -ru --exclude=Makefile ./debuglog.c ../imwheel/gpm-imwheel/debuglog.c
+--- ./debuglog.c	Fri Nov 12 08:27:37 1999
++++ ../imwheel/gpm-imwheel/debuglog.c	Sun Feb 27 16:30:46 2000
+@@ -58,6 +58,8 @@
+ void
+ gpm_debug_log(int level, char* fmt, ...)
+ {
++  //printf("level=%d\n",level);
++  //printf("gpm_debug_level=%d\n",gpm_debug_level);
+   if (level <= gpm_debug_level) {
+     va_list ap;
+     va_start(ap, fmt);
+Only in ../imwheel/gpm-imwheel: debuglog.c.orig
+diff -ru --exclude=Makefile ./gpm.c ../imwheel/gpm-imwheel/gpm.c
+--- ./gpm.c	Fri Nov 12 08:27:36 1999
++++ ../imwheel/gpm-imwheel/gpm.c	Sun Feb 27 16:30:46 2000
+@@ -5,6 +5,9 @@
+  * Copyright 1994-1997   rubini@linux.it (Alessandro Rubini)
+  * Copyright (C) 1998	Ian Zimmerman <itz@rahul.net>
+  *
++ * Modified on 9/8/1998 by Jonathan Atkins for use with wheel mice
++ *                         <jcatki@home.com>
++ *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of the GNU General Public License as published by
+  *   the Free Software Foundation; either version 2 of the License, or
+@@ -61,6 +64,7 @@
+   DEF_TYPE, DEF_DEV, DEF_SEQUENCE,
+   DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, 0 /* scaley */,
+   DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_TOGGLE, DEF_GLIDEPOINT_TAP,
++  DEF_WHEEL, DEF_NO_MIDDLE,
+   (Gpm_Type *)NULL
+   },
+ };
+@@ -74,6 +78,7 @@
+ int opt_ptrdrag=DEF_PTRDRAG;
+ int opt_kill=0;
+ int opt_repeater=0, opt_double=0;
++int opt_wheel_repeater=0;
+ char* opt_repeater_type = 0;
+ int opt_aged = 0;
+ char *opt_special=NULL; /* special commands, like reboot or such */
+@@ -86,6 +91,7 @@
+ struct winsize win;
+ int maxx, maxy;
+ int fifofd=-1;
++int wheel_fifofd=-1;
+ 
+ int eventFlag=0;
+ Gpm_Cinfo *cinfo[MAX_VC+1];
+@@ -349,7 +355,7 @@
+       gpm_debug_log(LOG_NOTICE,"Skipping a data packet (?)");
+       return NULL;
+       }
+-  gpm_debug_log(LOG_DEBUG,"Data %02x %02x %02x (%02x)",data[0],data[1],data[2],data[3]);
++  gpm_debug_log(LOG_DEBUG,"Data %02x %02x %02x (%02x %02x %02x %02x %02x %02x)",data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8]);
+   return data;
+ }
+ 
+@@ -368,28 +374,52 @@
+   static struct vt_stat stat;
+   static struct timeval tv1={0,0}, tv2; /* tv1==0: first click is single */
+   static struct timeval timeout={0,0};
++  int stick;
+   fd_set fdSet;
+   static int newB=0, oldB=0, oldT=0; /* old buttons and Type to chain events */
+   /* static int buttonlock, buttonlockflag; */
++  static int wheel_fakeup;
++  static unsigned char buttons;
+ 
+ #define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))
+ #define DIF_TIME(t1,t2) ((t2.tv_sec -t1.tv_sec) *1000+ \
+                          (t2.tv_usec-t1.tv_usec)/1000)
+ 
+ 
++  gpm_debug_log(LOG_DEBUG,"processMouse(%d,%p,%p,%d)",fd,event,type,kd_mode);
+   oldT=event->type;
++  wheel_fakeup=0;
+ 
+   if (eventFlag)
+     {
+     eventFlag=0;
+ 
++    gpm_debug_log(LOG_DEBUG,"nEvent.dx=%d  nEvent.dy=%d",nEvent.dx,nEvent.dy);
+     if (m_type->absolute)       /* a pen or other absolute device */
+       {
++      gpm_debug_log(LOG_DEBUG,"absolute coords.");
+       event->x=nEvent.x;
+       event->y=nEvent.y;
+       }
++    else
++      gpm_debug_log(LOG_DEBUG,"not absolute coords.");
+     event->dx=nEvent.dx;
+     event->dy=nEvent.dy;
++    if(opt_wheel)
++      {
++      gpm_debug_log(LOG_DEBUG,"nEvent.stick_x=%d  nEvent.stick_y=%d",nEvent.stick_x,nEvent.stick_y);
++      event->stick_x=nEvent.stick_x;
++      event->stick_y=nEvent.stick_y;
++      }
++    if(opt_wheel && nEvent.buttons&(GPM_W_UP|GPM_W_DOWN|GPM_W_RIGHT|GPM_W_LEFT))
++      {
++      gpm_debug_log(LOG_DEBUG,"Doing wheel button fakeup.");
++      event->buttons=nEvent.buttons&7;
++      oldB=newB; newB=event->buttons;
++      event->type=GPM_UP;
++      wheel_fakeup=1;
++      }
++    else
+     event->buttons=nEvent.buttons;
+     }
+   else
+@@ -411,9 +441,21 @@
+       event->modifiers = nEvent.modifiers; /* propagate modifiers */
+ 
+       /* propagate buttons */
+-      nEvent.buttons = opt_sequence[nEvent.buttons]&7; /* change the order */
++      gpm_debug_log(LOG_DEBUG,"nEvent.buttons=%d  opt_sequence=%d  opt_wheel=%d",nEvent.buttons,opt_sequence[nEvent.buttons&7]&7,opt_wheel);
++      stick=nEvent.buttons&GPM_STICK;
++      nEvent.buttons = (opt_sequence[nEvent.buttons&7]&7)|
++	(opt_wheel?((nEvent.buttons&GPM_W_UP)|(nEvent.buttons&GPM_W_DOWN)|
++		    (nEvent.buttons&GPM_W_RIGHT)|(nEvent.buttons&GPM_W_LEFT))
++	          :0);
+       oldB=newB; newB=nEvent.buttons;
++      gpm_debug_log(LOG_DEBUG,"nEvent.buttons=%d", nEvent.buttons);
+       if (!i) event->buttons=nEvent.buttons;
++      if(opt_wheel)
++      {
++        gpm_debug_log(LOG_DEBUG,"nEvent.stick_x=%d  nEvent.stick_y=%d",nEvent.stick_x,nEvent.stick_y);
++        event->stick_x=nEvent.stick_x;
++        event->stick_y=nEvent.stick_y;
++      }
+ 
+       if (oldB!=newB)
+ 	{
+@@ -425,7 +467,12 @@
+       if (!(m_type->absolute)) /* mouse */
+ 	{
+ 	if (abs(nEvent.dx)+abs(nEvent.dy) > opt_delta)
++	{
++	  gpm_debug_log(LOG_DEBUG,"opt_delta met.");
+ 	  nEvent.dx*=opt_accel, nEvent.dy*=opt_accel;
++	}
++	else
++	  gpm_debug_log(LOG_DEBUG,"opt_delta met.");
+ 
+ 	/* increment the reported dx,dy */
+ 	event->dx+=nEvent.dx;
+@@ -444,9 +491,72 @@
+     
+     } /* eventFlag */
+ 
++  if(!wheel_fakeup)
++  {
+ /*....................................... update the button number */
+ 
+   if ((event->buttons&GPM_B_MIDDLE) && !opt_three) opt_three++;
++  if ((event->buttons&GPM_W_UP || event->buttons&GPM_W_DOWN ||
++	event->buttons&GPM_W_LEFT || event->buttons&GPM_W_RIGHT)
++      && !opt_wheel)
++    opt_wheel++;
++  if(opt_wheel && event->buttons&(GPM_W_UP|GPM_W_DOWN))
++    gpm_debug_log(LOG_DEBUG,"Wheel - %s%s",(event->buttons&GPM_W_UP?"Up ":""),
++	(event->buttons&GPM_W_DOWN?"Down":""));
++  if(opt_wheel && (event->stick_x || event->stick_y))
++    gpm_debug_log(LOG_DEBUG,"Stick - %d,%d",event->stick_x,event->stick_y);
++
++/* .................................... repeat wheel to special fifo */
++  
++  if(wheel_fifofd)
++  {
++    char buffer;
++
++    if((event->buttons&(GPM_W_DOWN|GPM_W_UP|GPM_W_LEFT|GPM_W_RIGHT))
++	&& event->buttons>0)/* button down, not up! (not the wheel motion) */
++    {
++      event->type=GPM_DOWN;
++      if(event->buttons&GPM_W_UP)
++      {
++	buffer=4;
++	gpm_debug_log(LOG_DEBUG,"repeat wheel: %d",buffer);
++	write(wheel_fifofd,&buffer,1);
++      }
++      if(event->buttons&GPM_W_DOWN)
++      {
++	buffer=5;
++	gpm_debug_log(LOG_DEBUG,"repeat wheel: %d",buffer);
++	write(wheel_fifofd,&buffer,1);
++      }
++      if(event->buttons&GPM_W_LEFT)
++      {
++	buffer=6;
++	gpm_debug_log(LOG_DEBUG,"repeat wheel: %d",buffer);
++	write(wheel_fifofd,&buffer,1);
++      }
++      if(event->buttons&GPM_W_RIGHT)
++      {
++	buffer=7;
++	gpm_debug_log(LOG_DEBUG,"repeat wheel: %d",buffer);
++	write(wheel_fifofd,&buffer,1);
++      }
++    }
++    else if (stick)
++    {
++      buffer=8; /* stick x & y delta values follow */
++      gpm_debug_log(LOG_DEBUG,"repeat stick: %d",buffer);
++      write(wheel_fifofd,&buffer,1);
++      buffer=event->stick_x;
++      gpm_debug_log(LOG_DEBUG,"repeat wheel: %d",buffer);
++      write(wheel_fifofd,&buffer,1);
++      buffer=event->stick_y;
++      gpm_debug_log(LOG_DEBUG,"repeat wheel: %d",buffer);
++      write(wheel_fifofd,&buffer,1);
++      event->buttons^=GPM_STICK;
++    }
++  }
++  buttons=event->buttons;
++  event->buttons=event->buttons&7;
+ 
+ /*....................................... we're a repeater, aren't we? */
+ 
+@@ -470,6 +580,7 @@
+       }
+     return 0; /* no events nor information for clients */
+     }
++  event->buttons=buttons;
+ 
+ /*....................................... no, we arent a repeater, go on */
+ 
+@@ -515,11 +626,12 @@
+   else
+     event->type = (event->buttons > oldB ? GPM_DOWN : GPM_UP);
+ 
++  }
+   switch(event->type)                    /* now provide the cooked bits */
+     {
+     case GPM_DOWN:
+       GET_TIME(tv2);
+-      if (tv1.tv_sec && (DIF_TIME(tv1,tv2)<opt_time)) /* check first click */
++      if ((!opt_wheel || (event->buttons&7)) && tv1.tv_sec && (DIF_TIME(tv1,tv2)<opt_time)) /* check first click */
+ 	statusC++, statusC%=3; /* 0, 1 or 2 */
+       else statusC=0;
+       event->type|=(GPM_SINGLE<<statusC);
+@@ -580,7 +692,7 @@
+   if (opt_special && event->type & GPM_DOWN) 
+     return processSpecial(event);
+ 
+-  return 1;
++  return (!wheel_fakeup);
+ }
+ 
+ /*-------------------------------------------------------------------*/
+@@ -706,6 +818,7 @@
+       event.vc = stat.v_active;
+       event.x=statusX;   event.y=statusY;
+       event.dx=maxx;     event.dy=maxy;
++      gpm_debug_log(LOG_DEBUG,"statusB=%d", statusB);
+       event.buttons= statusB;
+       event.clicks=statusC;
+       /* fall through */
+@@ -875,6 +988,8 @@
+   int maxfd=-1;
+   int pending;
+   Gpm_Event event;
++  int wheel_done;
++  Gpm_Event eventbuf;
+ 
+   prgname=argv[0];
+   setuid(0); /* just in case... */
+@@ -1035,7 +1150,7 @@
+     if (ioctl(fd, KDGETMODE, &kd_mode)<0)
+       oops("ioctl(KDGETMODE)");
+     close(fd);
+-    if (kd_mode != KD_TEXT && !opt_repeater)
++    if (kd_mode != KD_TEXT && !opt_repeater && !opt_wheel_repeater)
+       {
+       wait_text(&mouse_table[1].fd);
+       maxfd=max(maxfd,mouse_table[1].fd);
+@@ -1056,15 +1171,38 @@
+       if (FD_ISSET(which_mouse->fd,&selSet))
+ 	  {
+ 	  FD_CLR(which_mouse->fd,&selSet); pending--;
+-	  if (processMouse(which_mouse->fd, &event, m_type, kd_mode))
++	  wheel_done=0;
++	  do
++	    {
++	      gpm_debug_log(LOG_DEBUG,"calling processMouse", event.type, event.buttons);
++	if (processMouse(which_mouse->fd, &event, m_type, kd_mode))
++	  {
++	    memcpy(&eventbuf,&event,sizeof(Gpm_Event));
+ 	    /*
+ 	     * pass it to the client, if any
+ 	     * or to the default handler, if any
+ 	     * or to the selection handler
+ 	     */ /* FIXME -- check event.vc */
+-	    (cinfo[event.vc] && do_client(cinfo[event.vc], &event))
++	    (void)((cinfo[event.vc] && do_client(cinfo[event.vc], &event))
+ 	       || (cinfo[0]        && do_client(cinfo[0],        &event))
+-	       ||  do_selection(&event);
++	       ||  do_selection(&event));
++	    memcpy(&event,&eventbuf,sizeof(Gpm_Event));
++	  }
++	    gpm_debug_log(LOG_DEBUG,"event.type=0x%x  event.buttons=%d", event.type, event.buttons);
++	    if(!wheel_done && opt_wheel &&
++	       (event.type&(GPM_DOWN|GPM_DRAG)) &&
++	       (event.buttons&(GPM_W_UP|GPM_W_DOWN|GPM_W_LEFT|GPM_W_RIGHT)) &&
++	        event.buttons<=GPM_W_RIGHT)
++	      {
++	        gpm_debug_log(LOG_DEBUG,"Button Up!");
++	        gpm_debug_log(LOG_DEBUG,"event.buttons=%d",event.buttons);
++	        gpm_debug_log(LOG_DEBUG,"event.type=%s%s",
++	            (event.type&GPM_DRAG?"GPM_DRAG ":""),
++	            (event.type&GPM_DOWN?"GPM_DOWN":""));
++	        wheel_done=1;
++	        eventFlag=1;
++	      }
++	    } while(eventFlag);
+ 	  }
+       }
+ 
+@@ -1148,3 +1286,5 @@
+ 
+ 
+ 
++/* vim:sw=2:ts=8
++"*/
+Only in ../imwheel/gpm-imwheel: gpm.c.orig
+diff -ru --exclude=Makefile ./gpm.h ../imwheel/gpm-imwheel/gpm.h
+--- ./gpm.h	Fri Nov 12 08:27:37 1999
++++ ../imwheel/gpm-imwheel/gpm.h	Sun Feb 27 16:30:46 2000
+@@ -4,6 +4,9 @@
+  * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
+  * Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
+  *
++ * Modified on 9/8/1998 by Jonathan Atkins for use with wheel mice
++ *                         <jcatki@home.com>
++ *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of the GNU General Public License as published by
+  *   the Free Software Foundation; either version 2 of the License, or
+@@ -69,12 +72,18 @@
+ 
+ #define GPM_NODE_CTL      GPM_NODE_DEV
+ #define GPM_NODE_FIFO     _PATH_DEV	"gpmdata"
++#define GPM_WHEEL_FIFO    _PATH_DEV "gpmwheel"
+ 
+ /*....................................... Cfg buttons */
+ 
+ #define GPM_B_LEFT      4
+ #define GPM_B_MIDDLE    2
+ #define GPM_B_RIGHT     1
++#define GPM_W_UP        8
++#define GPM_W_DOWN      16
++#define GPM_W_RIGHT		32
++#define GPM_W_LEFT		64
++#define GPM_STICK       128
+ 
+ /*....................................... The event types */
+ 
+@@ -115,6 +124,7 @@
+   unsigned char buttons, modifiers;  /* try to be a multiple of 4 */
+   unsigned short vc;
+   short dx, dy, x, y;
++  short stick_x, stick_y;
+   enum Gpm_Etype type;
+   int clicks;
+   enum Gpm_Margin margin;
+Only in ../imwheel/gpm-imwheel: gpm.h.orig
+diff -ru --exclude=Makefile ./gpmCfg.h ../imwheel/gpm-imwheel/gpmCfg.h
+--- ./gpmCfg.h	Fri Nov 12 08:27:37 1999
++++ ../imwheel/gpm-imwheel/gpmCfg.h	Sun Feb 27 16:32:43 2000
+@@ -4,6 +4,9 @@
+  * Copyright 1994-1996   rubini@linux.it
+  * Copyright (C) 1998 	Ian Zimmerman <itz@rahul.net>
+  *
++ * Modified 9/8/1998 by Jonathan Atkins for wheel support
++ *                      <jcatki@home.com>
++ *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of the GNU General Public License as published by
+  *   the Free Software Foundation; either version 2 of the License, or
+@@ -24,7 +27,7 @@
+ 
+ /* $Id: imwheel.patch,v 1.2 2002/05/28 19:13:56 nico Exp $ */
+ 
+-#define GPM_NAME    "gpm-Linux"
++#define GPM_NAME    "gpm-Linux (imwheel)"
+ #define GPM_DATE    "$Date: 2002/05/28 19:13:56 $"
+ 
+ /* timeout for the select() syscall */
+@@ -63,5 +66,7 @@
+ #define DEF_PTRDRAG          1    /* double or triple click */
+ #define DEF_TOGGLE           0
+ #define DEF_GLIDEPOINT_TAP   0    /* tapping emulates no buttons by default */
++#define DEF_WHEEL            0    /* wheel events active? */
++#define DEF_NO_MIDDLE        0    /* deactivate middle button for most mice? */
+ 
+ #endif /* _GPMCFG_INCLUDED */
+Only in ../imwheel/gpm-imwheel: gpmCfg.h.orig
+diff -ru --exclude=Makefile ./gpmInt.h ../imwheel/gpm-imwheel/gpmInt.h
+--- ./gpmInt.h	Fri Nov 12 08:27:37 1999
++++ ../imwheel/gpm-imwheel/gpmInt.h	Sun Feb 27 16:30:46 2000
+@@ -4,6 +4,9 @@
+  * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
+  * Copyright (C) 1998	Ian Zimmerman <itz@rahul.net>
+  *
++ * Modified on 9/8/1998 by Jonathan Atkins for use with wheel mice
++ *                         <jcatki@home.com>
++ *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of the GNU General Public License as published by
+  *   the Free Software Foundation; either version 2 of the License, or
+@@ -67,6 +70,8 @@
+ 
+   int (*repeat_fun)(Gpm_Event *state, int fd); /* repeat this event into fd */
+                           /* itz Mon Jan 11 23:27:54 PST 1999 */
++
++  int wheel;              /* flag for wheel mice */
+ }                   Gpm_Type;
+ 
+ #define GPM_EXTRA_MAGIC_1 0xAA
+@@ -88,6 +93,8 @@
+   int opt_baud,opt_sample,opt_delta, opt_accel, opt_scale, opt_scaley;
+   int opt_time, opt_cluster, opt_three, opt_toggle, opt_glidepoint_tap;
+   Gpm_Type *m_type;
++/* not always initialized */
++  int opt_wheel,opt_nomiddle;
+   int fd;
+ };
+ 
+@@ -107,6 +114,8 @@
+ #define opt_time     (which_mouse->opt_time)
+ #define opt_cluster  (which_mouse->opt_cluster)
+ #define opt_three    (which_mouse->opt_three)
++#define opt_wheel    (which_mouse->opt_wheel)
++#define opt_nomiddle (which_mouse->opt_nomiddle)
+ #define opt_toggle   (which_mouse->opt_toggle)
+ #define opt_glidepoint_tap \
+                      (which_mouse->opt_glidepoint_tap)
+@@ -121,6 +130,7 @@
+ extern int opt_test, opt_ptrdrag;
+ extern int opt_kill;
+ extern int opt_repeater, opt_double;
++extern int opt_wheel_repeater;
+ extern char* opt_repeater_type;
+ extern int opt_kernel, opt_explicittype;
+ extern int opt_aged;
+@@ -128,6 +138,7 @@
+ extern char *opt_special;
+ extern int opt_rawrep;
+ extern int fifofd;
++extern int wheel_fifofd;
+ extern char *consolename; /* the selected one */
+ 
+ extern Gpm_Type *repeated_type;
+Only in ../imwheel/gpm-imwheel: gpmInt.h.orig
+diff -ru --exclude=Makefile ./gpn.c ../imwheel/gpm-imwheel/gpn.c
+--- ./gpn.c	Fri Nov 12 08:27:36 1999
++++ ../imwheel/gpm-imwheel/gpn.c	Sun Feb 27 16:30:46 2000
+@@ -8,6 +8,9 @@
+  * Tue,  5 Jan 1999 23:26:10 +0000, modified by James Troup <james@nocrew.org>
+  * (usage): typo (s/an unexistent/a non-existent/)
+  *
++ * Modified on 9/8/1998 by Jonathan Atkins for use with wheel mice
++ *                         <jcatki@home.com>
++ *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of the GNU General Public License as published by
+  *   the Free Software Foundation; either version 2 of the License, or
+@@ -183,6 +186,8 @@
+ 
+   printf("Usage: %s [options]\n",prgname);
+   printf("  Valid options are (not all of them are implemented)\n"
++		 "    -2               force two button mouse\n"
++		 "    -3               force three button mouse\n"
+          "    -a accel         sets the acceleration (default %d)\n"
+          "    -A [limit]       start with selection disabled (`aged')\n"
+          "    -b baud-rate     sets the baud rate (default %d)\n"
+@@ -197,6 +202,7 @@
+          "    -m mouse-device  sets mouse device\n"
+          "    -M               enable multiple mouse. Following options refer to\n"
+          "                     the second device. Forces \"-R\"\n"
++		 "    -n               disable middle button events (on most mice)\n"
+          "    -o modem-lines   toggle modem lines (\"dtr\", \"rts\", \"both\")\n"
+          "    -p               draw the pointer while striking a selection\n"
+          "    -q               quit after changing mouse behaviour\n"
+@@ -210,7 +216,9 @@
+          "                     Use a non-existent type (e.g. \"help\") to get a list\n"
+          "    -T               test: read mouse, no clients\n"
+          "    -v               print version and exit\n"
+-         "    -V verbosity     increase number of logged messages\n", 
++         "    -V verbosity     increase number of logged messages\n"
++         "    -w               force activate wheel\n"
++         "    -W               activate wheel repeater\n",
+          DEF_ACCEL, DEF_BAUD, DEF_SEQUENCE, DEF_DELTA, DEF_TIME, DEF_LUT,
+          DEF_SCALE, DEF_SAMPLE, DEF_TYPE);
+   return 1;
+@@ -294,7 +302,7 @@
+ int 
+ cmdline(int argc, char **argv)
+ {
+-  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pqr:R::s:S:t:TvV::23";
++  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mno:pqr:R::s:S:t:TvV::wW23";
+   int i, opt;
+   static struct {char *in; char *out;} seq[] = {
+     {"123","01234567"},
+@@ -342,6 +350,7 @@
+           if (0 == opt_repeater_type)
+             opt_repeater_type = "msc";
+           which_mouse=mouse_table+2; break;
++		case 'n': opt_nomiddle=!opt_nomiddle; break;
+         case 'o':
+           if (!strcmp(optarg,"dtr"))       opt_toggle=TIOCM_DTR;
+           else if (!strcmp(optarg,"rts"))  opt_toggle=TIOCM_RTS;
+@@ -375,6 +384,8 @@
+         case 'V': 
+           gpm_debug_level += (0 == optarg ? 1 : strtol(optarg, 0, 0));
+           break;
++		case 'w': opt_wheel=1; break;
++		case 'W': opt_wheel_repeater=1; break;
+         case '2': opt_three=-1; break;
+         case '3': opt_three=1; break;
+         default:
+@@ -397,6 +408,13 @@
+         { oops(GPM_NODE_FIFO); }
+     }
+ 
++  if (opt_wheel_repeater)
++    {
++    if (mkfifo(GPM_WHEEL_FIFO,0666) && errno!=EEXIST)
++      oops(GPM_WHEEL_FIFO);
++    if ((wheel_fifofd=open(GPM_WHEEL_FIFO, O_RDWR|O_NONBLOCK))<0)
++      oops(GPM_WHEEL_FIFO);
++    }
+ 
+   /* duplicate initialization */
+ 
+@@ -498,6 +516,8 @@
+ }
+   
+ 
++/* vim:ts=8:sw=2
++"*/
+ 
+ /* Local Variables: */
+ /* c-indent-level: 2 */
+Only in ../imwheel/gpm-imwheel: gpn.c.orig
+diff -ru --exclude=Makefile ./liblow.c ../imwheel/gpm-imwheel/liblow.c
+--- ./liblow.c	Fri Nov 12 08:27:37 1999
++++ ../imwheel/gpm-imwheel/liblow.c	Sun Feb 27 16:30:46 2000
+@@ -5,6 +5,9 @@
+  * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
+  * Copyright (C) 1998    Ian Zimmerman <itz@rahul.net>
+  * 
++ * Modified on 9/8/1998 by Jonathan Atkins for use with wheel mice
++ *                         <jcatki@home.com>
++ *
+  * xterm management is mostly by jtklehto@stekt.oulu.fi (Janne Kukonlehto)
+  *
+  *   This program is free software; you can redistribute it and/or modify
+@@ -618,7 +621,11 @@
+         case 0: ePtr->buttons=GPM_B_LEFT;   break;
+         case 1: ePtr->buttons=GPM_B_MIDDLE; break;
+         case 2: ePtr->buttons=GPM_B_RIGHT;  break;
+-        default:    /* Nothing */          break;
++        case 3: ePtr->buttons=GPM_W_UP;     break;
++        case 4: ePtr->buttons=GPM_W_DOWN;   break;
++        case 5: ePtr->buttons=GPM_W_LEFT;   break;
++        case 6: ePtr->buttons=GPM_W_RIGHT;  break;
++        default:    /* Nothing */           break;
+         }
+     }
+   /* Coordinates are 33-based */
+Only in ../imwheel/gpm-imwheel: liblow.c.orig
+diff -ru --exclude=Makefile ./mev.c ../imwheel/gpm-imwheel/mev.c
+--- ./mev.c	Fri Nov 12 08:27:37 1999
++++ ../imwheel/gpm-imwheel/mev.c	Sun Feb 27 16:30:46 2000
+@@ -4,6 +4,9 @@
+  * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
+  * Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
+  *
++ * Modified on 9/8/1998 by Jonathan Atkins for use with wheel mice
++ *                         <jcatki@home.com>
++ *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of the GNU General Public License as published by
+  *   the Free Software Foundation; either version 2 of the License, or
+@@ -93,11 +96,12 @@
+ {
+   if (opt_fit) Gpm_FitEvent(event);
+ 
+-  printf("mouse: event 0x%02X, at %2i,%2i (delta %2i,%2i), "
++  printf("mouse: event 0x%02X, at %2i,%2i (delta %2i,%2i), (stick %2i,%2i), "
+          "buttons %i, modifiers 0x%02X\r\n",
+ 	 event->type,
+ 	 event->x, event->y,
+ 	 event->dx, event->dy,
++	 event->stick_x, event->stick_y,
+ 	 event->buttons, event->modifiers);
+ 
+   if (event->type & (GPM_DRAG|GPM_DOWN)) {
+Only in ../imwheel/gpm-imwheel: mev.c.orig
+diff -ru --exclude=Makefile ./mice.c ../imwheel/gpm-imwheel/mice.c
+--- ./mice.c	Fri Nov 12 08:27:37 1999
++++ ../imwheel/gpm-imwheel/mice.c	Sun Feb 27 16:43:42 2000
+@@ -6,6 +6,9 @@
+  * Copyright (C) 1994-1999   Alessandro Rubini <rubini@linux.it>
+  * Copyright (C) 1998,1999   Ian Zimmerman <itz@rahul.net>
+  *
++ * Modified on 9/8/1998 by Jonathan Atkins for use with wheel mice
++ *                         <jcatki@home.com>
++ *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of the GNU General Public License as published by
+  *   the Free Software Foundation; either version 2 of the License, or
+@@ -83,7 +86,9 @@
+   static unsigned char prev=0;
+ 
+   if (data[0] == 0x40 && !(prev|data[1]|data[2]))
+-    state->buttons = GPM_B_MIDDLE; /* third button on MS compatible mouse */
++  { /* third button on MS compatible mouse */
++    state->buttons = (opt_nomiddle?0:GPM_B_MIDDLE);
++  }
+   else
+     state->buttons= ((data[0] & 0x20) >> 3) | ((data[0] & 0x10) >> 4);
+   prev = state->buttons;
+@@ -103,11 +108,14 @@
+ 
+   /* Allow motion *and* button change (Michael Plass) */
+ 
+-  if ((state->dx==0) && (state->dy==0) 
+-      && (state->buttons == (prev&~GPM_B_MIDDLE)))
+-    state->buttons = prev^GPM_B_MIDDLE;  /* no move or change: toggle middle */
+-  else
+-    state->buttons |= prev&GPM_B_MIDDLE;    /* change: preserve middle */
++  if(!opt_nomiddle)
++  {
++    if ((state->dx==0) && (state->dy==0) 
++        && (state->buttons == (prev&~GPM_B_MIDDLE)))
++      state->buttons = prev^GPM_B_MIDDLE;  /* no move or change: toggle middle */
++    else
++      state->buttons |= prev&GPM_B_MIDDLE;    /* change: preserve middle */
++  }
+ 
+   prev=state->buttons;
+ 
+@@ -127,11 +135,14 @@
+ 
+   /* Allow motion *and* button change (Michael Plass) */
+ 
+-  if ((state->dx==0) && (state->dy==0) 
+-      && (state->buttons == (prev&~GPM_B_MIDDLE)))
+-    state->buttons = prev^GPM_B_MIDDLE;  /* no move or change: toggle middle */
+-  else
+-    state->buttons |= prev&GPM_B_MIDDLE;    /* change: preserve middle */
++  if(!opt_nomiddle)
++  {
++    if ((state->dx==0) && (state->dy==0) 
++        && (state->buttons == (prev&~GPM_B_MIDDLE)))
++      state->buttons = prev^GPM_B_MIDDLE;  /* no move or change: toggle middle */
++    else
++      state->buttons |= prev&GPM_B_MIDDLE;    /* change: preserve middle */
++  }
+ 
+   /* Allow the user to reset state of middle button by pressing
+      the other two buttons at once (Edmund GRIMLEY EVANS) */
+@@ -227,7 +238,11 @@
+ {
+   state->buttons= ((data[0] & 0x20) >> 3)	/* left */
+ 		| ((data[3] & 0x10) >> 3)	/* middle */
+-		| ((data[0] & 0x10) >> 4);	/* right */
++		| ((data[0] & 0x10) >> 4)	/* right */
++  		| (((data[3] & 0x0f) == 0x0f)?GPM_W_UP:0)      /* wheel up */
++  		| (((data[3] & 0x0f) == 0x01)?GPM_W_DOWN:0)    /* wheel down */
++  		| (((data[3] & 0x0f) == 0x0e)?GPM_W_LEFT:0)    /* wheel left */
++  		| (((data[3] & 0x0f) == 0x02)?GPM_W_RIGHT:0);  /* wheel right */
+   state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
+   state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
+   /* wheel (dz??) is (data[3] & 0x0f) */
+@@ -240,7 +255,11 @@
+ {
+   state->buttons= ((data[0] & 0x20) >> 3)	/* left */
+ 		| ((data[3] & 0x20) >> 4)	/* middle */
+-		| ((data[0] & 0x10) >> 4);	/* right */
++		| ((data[0] & 0x10) >> 4)	/* right */
++  		| (((data[3] & 0x0f) == 0x0f)?GPM_W_UP:0)      /* wheel up */
++  		| (((data[3] & 0x0f) == 0x01)?GPM_W_DOWN:0)    /* wheel down */
++  		| (((data[3] & 0x0f) == 0x0e)?GPM_W_LEFT:0)    /* wheel left */
++  		| (((data[3] & 0x0f) == 0x02)?GPM_W_RIGHT:0);  /* wheel right */
+   state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
+   state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
+   if (((data[0]&0xC0) != 0x40)||
+@@ -334,15 +353,39 @@
+ {
+   static int tap_active=0; /* there exist glidepoint ps2 mice */
+ 
++  state->stick_x=state->stick_y=0;
+   state->buttons=
+-    !!(data[0]&1) * GPM_B_LEFT +
+-    !!(data[0]&2) * GPM_B_RIGHT +
+-    !!(data[0]&4) * GPM_B_MIDDLE;
++    !!(data[0]&1) * GPM_B_LEFT  |
++    !!(data[0]&2) * GPM_B_RIGHT |
++    (opt_nomiddle?0:!!(data[0]&4) * GPM_B_MIDDLE);
+ 
++  if(data[0]&0xc0)
++  {
++	state->buttons|=GPM_STICK;
++	state->stick_x=(data[2]&0x0F)<<28>>28;
++	state->stick_y=(data[2]>>4)<<28>>28;
++	gpm_debug_log(LOG_DEBUG,"Stick: %d %d\n",state->stick_x,state->stick_y);
++  }
++  else
++	state->buttons|=((data[3]==0xff) ? GPM_W_UP    : 0) | /* wheel up    */
++                    ((data[3]==0x01) ? GPM_W_DOWN  : 0) | /* wheel down  */
++                    ((data[3]==0x0e) ? GPM_W_LEFT  : 0) | /* wheel left  */
++                    ((data[3]==0xfe) ? GPM_W_LEFT  : 0) | /* wheel left:a4tech*/
++                    ((data[3]==0x02) ? GPM_W_RIGHT : 0);  /* wheel right */
++  gpm_debug_log(LOG_DEBUG,"Buttons: %d %d %d (%d %d %d %d) (%d)\n",
++		(state->buttons&GPM_B_LEFT),
++		(state->buttons&GPM_B_MIDDLE),
++		(state->buttons&GPM_B_RIGHT),
++		(state->buttons&GPM_W_UP),
++		(state->buttons&GPM_W_DOWN),
++		(state->buttons&GPM_W_LEFT),
++		(state->buttons&GPM_W_RIGHT),
++		(state->buttons&GPM_STICK));
++  gpm_debug_log(LOG_DEBUG,"wheel? %d\n",opt_wheel);
+   if (data[0]==0 && opt_glidepoint_tap) /* by default this is false */
+     state->buttons = tap_active = opt_glidepoint_tap;
+   else if (tap_active)
+-    if (data[0]==8)
++    if (data[0]==8 && !opt_wheel)
+       state->buttons = tap_active = 0;
+     else state->buttons = tap_active;
+ 
+@@ -353,11 +396,11 @@
+   * rate is set to a reasonable value; the default of 100 Hz is plenty.
+   * (Stephen Tell)
+   */
+-  if(data[1] != 0)
++  if(data[1] != 0 && !(data[0]&0xc0))
+     state->dx=   (data[0] & 0x10) ? data[1]-256 : data[1];
+   else
+     state->dx = 0;
+-  if(data[2] != 0)
++  if(data[2] != 0 && !(data[0]&0xc0))
+     state->dy= -((data[0] & 0x20) ? data[2]-256 : data[2]);
+   else
+     state->dy = 0;
+@@ -389,7 +432,7 @@
+   state->buttons=
+     !!(data[0]&1) * GPM_B_LEFT +
+     !!(data[0]&2) * GPM_B_RIGHT +
+-    !!(data[3]) * GPM_B_MIDDLE;
++    (opt_nomiddle?0:!!(data[3]) * GPM_B_MIDDLE);
+ 
+   if(data[1] != 0)
+     state->dx=   (data[0] & 0x10) ? data[1]-256 : data[1];
+@@ -513,7 +556,7 @@
+     ((data[0] & 32)? ((z)           ? GPM_B_LEFT   :0)  /* graphire stylus */
+                    : ((data[3] &  8)? GPM_B_LEFT   :0)) /* graphire mouse  */
+     +                ((data[3] & 16)? GPM_B_RIGHT  :0) 
+-    +                ((data[3] & 32)? GPM_B_MIDDLE :0);
++    +                ((data[3] & 32) && !opt_nomiddle? GPM_B_MIDDLE :0);
+ 
+   state->dx = (x-ox); 
+   state->dy = (y-oy); /* divide by 5, 'cause it's too much sensitive */
+@@ -666,12 +709,13 @@
+   switch (message & TW_ANY1)
+     {
+     case TW_L1: state->buttons = GPM_B_RIGHT;   break;
+-    case TW_M1: state->buttons = GPM_B_MIDDLE; break;
+-    case TW_R1: state->buttons = GPM_B_LEFT;  break;
+-    case     0: state->buttons = 0;            break;
++	case TW_M1: state->buttons = (opt_nomiddle?0:GPM_B_MIDDLE);
++                                                break;
++    case TW_R1: state->buttons = GPM_B_LEFT;    break;
++    case     0: state->buttons = 0;             break;
+     }
+   /* also, allow R1 R2 R3 (or L1 L2 L3) to be used as mouse buttons */
+-  if (message & TW_ANY2)
++  if ((message & TW_ANY2) && !opt_nomiddle)
+ 	  state->buttons |= GPM_B_MIDDLE;
+   if (message & TW_L3)
+ 	  state->buttons |= GPM_B_LEFT;
+@@ -1011,11 +1055,12 @@
+ static Gpm_Type*
+ I_serial(int fd, unsigned short flags, struct Gpm_Type *type)
+ {
+-  int i; unsigned char c;
++  int i;
++#ifndef DEBUG
++  unsigned char c;
+   fd_set set; struct timeval timeout={0,0}; /* used when not debugging */
+ 
+ 
+-#ifndef DEBUG
+   /* flush any pending input (thanks, Miguel) */
+   FD_ZERO(&set);
+   for(i=0; /* always */ ; i++)
+@@ -1186,6 +1231,7 @@
+    * the vendor name: it is only propaganda, with no information.
+    */
+    
++  opt_wheel=type->wheel;
+   return type;
+ }
+ 
+@@ -1199,9 +1245,221 @@
+   write (fd, s2, sizeof (s2));
+   usleep (30000);
+   tcflush (fd, TCIFLUSH);
++  opt_wheel=1;
++  return type;
++}
++
++/* MouseManPlus, ps2 version: Jon Atkins (XFree86 & hacking!) */
++static Gpm_Type *I_mmplusps2(int fd, unsigned short flags, struct Gpm_Type *type)
++{
++  static unsigned char s1[] = { 0xe6,0xe8,0,0xe8,3,0xe8,2,0xe8,1,0xe6,0xe8,3,0xe8,1,0xe8,2,0xe8,3, };
++  //static unsigned char s2[] = { 246, 230, 244, 243, 100, 232, 3, };
++  write (fd, s1, sizeof (s1));
++  sleep(1);
++  //usleep (30000);
++  //write (fd, s2, sizeof (s2));
++  //usleep (30000);
++  tcflush (fd, TCIFLUSH);
++  opt_wheel=1;
+   return type;
+ }
+ 
++/* Logitech Trackman Marblefx routine by Ric Klaren <klaren@cs.utwente.nl> */
++static int M_marblefx(Gpm_Event *state, unsigned char *data)
++{
++	static unsigned int wheel = 0;  /* for state machine */
++
++	state->buttons = !!(data[0]&1) * GPM_B_LEFT  |
++		!!(data[0]&2) * GPM_B_RIGHT |
++		!!(data[0]&4) * GPM_B_MIDDLE;
++
++	/* the red button pressed or depressed.
++	 * the depress event is fired 3 times followed by a 8 0 0 packet
++	 */
++	if( (data[0] & 0xc0) && (data[1] == 0xD2) )
++	{
++		if (( data[2] & 0x10 ) != 0)    /* pressed? */
++			wheel = 3;
++		else
++			wheel--;
++
++		return -1;
++	}
++
++	if( (wheel == 1) && data[0] == 0x08 && data[1] == 0 && data[2] == 0 )
++	{
++		wheel--;
++		return -1;
++	}
++
++	if( wheel == 3 )        /* wheel 'level' 3 is the real stuff.. else it i
++							   s 'depressing' ;) */
++	{
++		/* eat another dummy packet? */
++		if( data[0] == 0x08 && data[1] == 0 && data[2] == 0 )
++			return -1;
++
++		/* or is it smarter to emulate a wheel? */
++		state->buttons |= GPM_STICK;    // pressed
++
++		/* if red button is pressed take mouse movement as wheel */
++		state->stick_x =   (data[0] & 0x10) ? (data[1]-256) : data[1];
++		state->stick_y = -((data[0] & 0x20) ? data[2]-256 : data[2]);
++
++		/* shut the rest of the mouse up.. */
++		state->dy = state->dx = 0;
++	}
++	else    /* it's normal movement */
++	{
++		state->dx =  (data[0] & 0x10) ? data[1]-256 : data[1];
++		state->dy= -((data[0] & 0x20) ? data[2]-256 : data[2]);
++		state->stick_x = state->stick_y = 0;
++	}
++	return 0;
++}
++
++#define GPM_B_BOTH (GPM_B_LEFT|GPM_B_RIGHT)
++static int M_tmmfx(Gpm_Event *state,  unsigned char *data)
++{
++
++	/*  The Logitech TrackMan Marble FX, mostly cut-n-paste from M_mman */
++	/*  Tido Klaassen (tidklaas@hermes.fho-emden.de), 5.1.2000          */
++
++	static unsigned char buttons=0;
++	static Gpm_Type *mytype=0;
++	unsigned char extended;
++	signed char my_x, my_y;
++
++	/* find mice-entry for toggeling between 3/4-byte-protocoll */
++	if(mytype == 0){
++		mytype=mice;
++		while(mytype->name && strcmp("tmmfx", mytype->name)){
++			mytype++;
++		}
++
++		/* this can't happen, unless someone deletes the entry... */
++		if(!mytype->name){
++			gpm_debug_log(LOG_NOTICE, "internal mice-table broken, exiting");
++			exit(1);
++		}
++	}
++
++	if (data[1]==GPM_EXTRA_MAGIC_1 && data[2]==GPM_EXTRA_MAGIC_2){
++		/* got unexpected fourth byte */
++		gpm_debug_log(LOG_NOTICE,"Extra byte = %02x",*data);
++		if ((extended=(data[0]>>4)) > 0x3){
++			return -1;  /* just a sanity check */
++		}
++		my_x = my_y = 0;
++
++		mytype->packetlen=4;
++		mytype->getextra=0;
++	} 
++	else{
++		/* got 3/4, as expected */
++
++		/* motion is independent of packetlen... */
++		my_x = (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
++		my_y = (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
++
++		buttons = ((data[0] & 0x20) >> 3) | ((data[0] & 0x10) >> 4);
++		if (mytype->packetlen==4){
++			extended=data[3]>>4;
++		}
++	}
++
++	if(mytype->packetlen==4){
++		if(extended == 0){
++			mytype->packetlen=3;
++			mytype->getextra=1;
++		}
++		else {
++			if (extended & 0x2){
++				buttons |= GPM_B_MIDDLE;
++			}
++
++			if (extended & 0x1){
++				/* scroll-button pressed, report ball-movements as stick-data */
++
++				buttons |= GPM_STICK;
++				state->stick_x = (char)  my_x;
++				state->stick_y = (char) -my_y;
++				my_x = 0;
++				my_y = 0;
++			}
++		}
++	}
++	state->buttons = buttons;
++	state->dx = my_x;
++	state->dy = my_y;
++
++	return 0;
++}
++
++/* The Primax Cyber-Navigator is basically a PS/2 mouse with a non-standard
++   wheel and three extra side buttons. We'll map the side buttons to the
++   extra bits in the patched gpm. */
++static int M_pcnps2(Gpm_Event *state,  unsigned char *data)
++{
++	state->stick_x=state->stick_y=0;
++	state->dx=state->dy=0;
++
++	state->buttons=
++		!!(data[0]&1) * GPM_B_LEFT  |
++		!!(data[0]&2) * GPM_B_RIGHT |
++		!!(data[0]&4) * GPM_B_MIDDLE;
++
++	/* The Primax extensions use the 0x10 bit to flag extended
++	   button/wheel reports. Bits 0, 1 and 2 echo the three standard buttons,
++	   if chording. */
++
++	if(((data[0]&0x18)==0x18) && (data[1]==0) && ((data[2]&0x80))!=0){
++		state->buttons&=~(GPM_W_DOWN|GPM_W_UP|GPM_W_LEFT|GPM_W_RIGHT|GPM_STICK);
++		state->buttons|=
++			((data[2]&0xf)==0xf) * GPM_W_UP |
++			((data[2]&0xf)==0x1) * GPM_W_DOWN |
++			(((data[2]&0x10)!=0) * GPM_W_LEFT) |
++			(((data[2]&0x20)!=0) * GPM_W_RIGHT);
++
++		/* There's no room to handle the sixth button. We'll make it an
++		   upwards stick movement. */
++
++#if 0
++		state->buttons|=GPM_STICK;
++		state->stick_x=0;
++		state->stick_y=7*(!!data[2]&0x40);
++#endif
++	} else {
++		/* The Primax mice don't seem to send negative bits in data[0], but they do
++		 * flag extended button events and wheel movement using bit 0x10. */
++		if(data[1] != 0)
++			state->dx=   (data[0] & 0x10) ? data[1]-256 : data[1];
++		else
++			state->dx = 0;
++		if(data[2] != 0)
++			state->dy= -((data[0] & 0x20) ? data[2]-256 : data[2]);
++		else
++			state->dy = 0;
++	}
++	gpm_debug_log(LOG_DEBUG,"Buttons: %d %d %d (%d %d) (%d %d)\n",
++			(state->buttons&GPM_B_LEFT),
++			(state->buttons&GPM_B_MIDDLE),
++			(state->buttons&GPM_B_RIGHT),
++			(state->buttons&GPM_W_UP),
++			(state->buttons&GPM_W_DOWN),
++			(state->buttons&GPM_W_LEFT),
++			(state->buttons&GPM_W_RIGHT));
++	gpm_debug_log(LOG_DEBUG,"wheel? %d\n",opt_wheel);
++
++	return 0;
++}
++
++static Gpm_Type *I_pcnps2(int fd, unsigned short flags, struct Gpm_Type *type)
++{  
++	opt_wheel=type->wheel;
++	return type;
++}
++
+ static Gpm_Type *I_twid(int fd, unsigned short flags, struct Gpm_Type *type)
+ {
+   if (twiddler_key_init() != 0) return NULL;
+@@ -1438,104 +1696,116 @@
+ Gpm_Type mice[]={
+   {"mman", "The \"MouseMan\" and similar devices (3/4 bytes per packet).",
+            "Mouseman", M_mman, I_serial, CS7 | STD_FLG, /* first */
+-                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 1, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 1, 0, 0, 0},
+   {"ms",   "The original ms protocol, with a middle-button extension.",
+            "", M_ms, I_serial, CS7 | STD_FLG,
+-                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0, 0},
+   {"ms+", "Like 'ms', but allows dragging with the middle button.",
+            "", M_ms_plus, I_serial, CS7 | STD_FLG,
+-                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0, 0},
+   {"ms+lr", "'ms+', but you can reset m by pressing lr (see man page).",
+            "", M_ms_plus_lr, I_serial, CS7 | STD_FLG,
+-                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0, 0},
+   {"bare", "Unadorned ms protocol. Needed with some 2-buttons mice.",
+            "Microsoft", M_bare, I_serial, CS7 | STD_FLG,
+-                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0, 0},
+   {"msc",  "Mouse-Systems-Compatible (5bytes). Most 3-button mice.",
+            "MouseSystems", M_msc, I_serial, CS8 | CSTOPB | STD_FLG,
+-                                {0xf8, 0x80, 0x00, 0x00}, 5, 1, 0, 0, R_msc},
++                                {0xf8, 0x80, 0x00, 0x00}, 5, 1, 0, 0, R_msc, 0},
+   {"sun",  "'msc' protocol, but only 3 bytes per packet.",
+            "", M_sun, I_serial, CS8 | CSTOPB | STD_FLG,
+-                                {0xf8, 0x80, 0x00, 0x00}, 3, 1, 0, 0, 0},
++                                {0xf8, 0x80, 0x00, 0x00}, 3, 1, 0, 0, 0, 0},
+   {"mm",   "MM series. Probably an old protocol...",
+            "MMSeries", M_mm, I_serial, CS8 | PARENB|PARODD | STD_FLG,
+-                                {0xe0, 0x80, 0x80, 0x00}, 3, 1, 0, 0, 0},
++                                {0xe0, 0x80, 0x80, 0x00}, 3, 1, 0, 0, 0, 0},
+   {"logi", "Used in some Logitech devices (only serial).",
+            "Logitech", M_logi, I_logi, CS8 | CSTOPB | STD_FLG,
+-                                {0xe0, 0x80, 0x80, 0x00}, 3, 3, 0, 0, 0},
++                                {0xe0, 0x80, 0x80, 0x00}, 3, 3, 0, 0, 0, 0},
+   {"bm",   "Micro$oft busmice and compatible devices.",
+            "BusMouse", M_bm, NULL, STD_FLG, /* bm is sun */
+-                                {0xf8, 0x80, 0x00, 0x00}, 3, 3, 0, 0, 0},
++                                {0xf8, 0x80, 0x00, 0x00}, 3, 3, 0, 0, 0, 0},
+   {"ps2",  "Busmice of the ps/2 series. Most busmice, actually.",
+            "PS/2", M_ps2, NULL, STD_FLG,
+-                                {0xc0, 0x00, 0x00, 0x00}, 3, 1, 0, 0, 0},
++                                {0xc0, 0x00, 0x00, 0x00}, 3, 1, 0, 0, 0, 0},
+   {"ncr",  "Ncr3125pen, found on some laptops",
+            "", M_ncr, NULL, STD_FLG,
+-                                {0x08, 0x08, 0x00, 0x00}, 7, 7, 0, 1, 0},
++                                {0x08, 0x08, 0x00, 0x00}, 7, 7, 0, 1, 0, 0},
+   {"wacom", "Wacom graphire tablet: pen, mouse",
+            "", M_wacom, I_wacom, STD_FLG,
+-                                {0x80, 0x80, 0x80, 0x00}, 8, 8, 0, 0, 0},
++                                {0x80, 0x80, 0x80, 0x00}, 8, 8, 0, 0, 0, 0},
+   {"genitizer", "\"Genitizer\" tablet, in relative mode.",
+            "", M_geni, I_serial, CS8|PARENB|PARODD,
+-                                {0x80, 0x80, 0x00, 0x00}, 3, 1, 0, 0, 0},
++                                {0x80, 0x80, 0x00, 0x00}, 3, 1, 0, 0, 0, 0},
+   {"logim",  "Turn logitech into Mouse-Systems-Compatible.",
+            "", M_logimsc, I_serial, CS8 | CSTOPB | STD_FLG,
+-                                {0xf8, 0x80, 0x00, 0x00}, 5, 1, 0, 0, 0},
++                                {0xf8, 0x80, 0x00, 0x00}, 5, 1, 0, 0, 0, 0},
+   {"pnp",  "Plug and pray. New mice may not run with '-t ms'.",
+            "", M_bare, I_pnp, CS7 | STD_FLG,
+-                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0, 0},
+   {"imps2",   "Microsoft Intellimouse (ps2) - 3 buttons, wheel unused",
+            "", M_ps2, I_imps2, STD_FLG,
+-                                {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
++                                {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0, 1},
+   {"ms3", "Microsoft Intellimouse (serial) - 3 buttons, wheel unused",
+            "", M_ms3, I_pnp, CS7 | STD_FLG,
+-                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0},
++                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0, 1},
+   {"netmouse",  "Genius NetMouse - 2 buttons and 2 buttons 'up'/'down'.",      
+            "", M_netmouse, I_netmouse, CS7 | STD_FLG,
+-                                {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
++                                {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0, 0},
+   {"cal", "Calcomp UltraSlate",
+            "", M_calus, I_calus, CS8 | CSTOPB | STD_FLG,
+-                                {0x80, 0x80, 0x80, 0x00}, 6, 6, 0, 1, 0},
++                                {0x80, 0x80, 0x80, 0x00}, 6, 6, 0, 1, 0, 0},
+   {"calr", "Calcomp UltraSlate - relative mode",
+            "", M_calus_rel, I_calus, CS8 | CSTOPB | STD_FLG,
+-                                {0x80, 0x80, 0x80, 0x00}, 6, 6, 0, 0, 0},
++                                {0x80, 0x80, 0x80, 0x00}, 6, 6, 0, 0, 0, 0},
+   {"twid", "Twidddler keyboard",
+            "", M_twid, I_twid, CS8 | STD_FLG,
+-                                {0x80, 0x00, 0x80, 0x80}, 5, 1, 0, 0, 0},
++                                {0x80, 0x00, 0x80, 0x80}, 5, 1, 0, 0, 0, 0},
+   {"syn", "The \"Synaptics\" serial TouchPad.",
+            "synaptics", M_synaptics_serial, I_serial, CS7 | STD_FLG,
+-                                {0x40, 0x40, 0x40, 0x00}, 6, 6, 1, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 6, 6, 1, 0, 0, 0},
+   {"synps2", "The \"Synaptics\" PS/2 TouchPad",
+            "synaptics_ps2", M_synaptics_ps2, I_synps2, STD_FLG,
+-                                {0x80, 0x80, 0x00, 0x00}, 6, 1, 1, 0, 0},
++                                {0x80, 0x80, 0x00, 0x00}, 6, 1, 1, 0, 0, 0},
+   {"brw",  "Fellowes Browser - 4 buttons (and a wheel) (dual protocol?)",
+            "", M_brw, I_pnp, CS7 | STD_FLG,
+-                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0},
++                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0, 0},
++  {"mm+ps2", "The \"MouseManPlus\" and similar devices (3 button with stick)",
++           "MouseManPlusPS/2", M_ps2, I_mmplusps2, CS8 | STD_FLG,
++                                {0x08, 0x08, 0x00, 0x00}, 3, 1, 0, 0, 0, 1},
++  {"marblefx", "The Logitech Marble FX Trackball (4th button toggles stick)",
++           "MarbleFX", M_marblefx, I_mmplusps2, CS8 | STD_FLG,
++                                {0x08, 0x08, 0x00, 0x00}, 3, 1, 0, 0, 0, 1},
++  {"tmmfx", "Logitech TrackMan Marble FX (serial, 4th button toggles stick)",
++           "TrackManFX", M_tmmfx, I_serial, CS7 | STD_FLG,
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 1, 0, 0, 1},
++  {"pcnps2", "Primax Cyber Navigator (and more?) on a PS/2 port.",
++           "", M_pcnps2, I_pcnps2, STD_FLG,
++                                {0xc0, 0x00, 0x00, 0x00}, 3, 1, 0, 0, 0, 1},
+ 
+ #ifdef HAVE_LINUX_JOYSTICK_H
+   {"js",   "Joystick mouse emulation",
+            "Joystick", M_js, NULL, 0,
+-                              {0xFC, 0x00, 0x00, 0x00}, 12, 12, 0, 0, 0},
++                              {0xFC, 0x00, 0x00, 0x00}, 12, 12, 0, 0, 0, 0},
+ #endif
+ 
+   {"summa",  "Summagraphics or Genius tablet absolute mode(MM-Series)",
+            "", M_summa, I_summa, STD_FLG,
+-                                {0x98, 0x98, 0x00, 0x00}, 5, 1, 0, 1, R_summa}, 
++                                {0x98, 0x98, 0x00, 0x00}, 5, 1, 0, 1, R_summa, 0}, 
+   {"mtouch",  "MicroTouch touch-screens (only button-1 events, by now)",
+            "", M_mtouch, I_mtouch, STD_FLG,
+-                                {0x80, 0x80, 0x80, 0x00}, 5, 1, 0, 1, NULL}, 
++                                {0x80, 0x80, 0x80, 0x00}, 5, 1, 0, 1, NULL, 0}, 
+ 
+   {"acecad",  "Acecad tablet absolute mode(Sumagrapics MM-Series mode)",
+            "", M_summa, I_summa, STD_FLG,
+-                                {0x80, 0x80, 0x00, 0x00}, 7, 1, 0, 1, 0}, 
++                                {0x80, 0x80, 0x00, 0x00}, 7, 1, 0, 1, 0, 0}, 
+ 
+   {"wp",      "Genius WizardPad tablet",
+            "wizardpad", M_wp, I_wp, STD_FLG,
+-                                {0xFA, 0x42, 0x00, 0x00}, 10, 1, 0, 1, 0},
++                                {0xFA, 0x42, 0x00, 0x00}, 10, 1, 0, 1, 0, 0},
+ 
+   {"",     "",
+            "", NULL, NULL, 0,
+-                                {0x00, 0x00, 0x00, 0x00}, 0, 0, 0, 0, 0}
++                                {0x00, 0x00, 0x00, 0x00}, 0, 0, 0, 0, 0, 0}
+ };
+ 
+ /*------------------------------------------------------------------------*/
+Only in ../imwheel/gpm-imwheel: mice.c.orig
+diff -ru --exclude=Makefile ./mouse-test.c ../imwheel/gpm-imwheel/mouse-test.c
+--- ./mouse-test.c	Fri Nov 12 08:27:37 1999
++++ ../imwheel/gpm-imwheel/mouse-test.c	Sun Feb 27 16:30:46 2000
+@@ -10,6 +10,9 @@
+  * where watchdog is used.  Reported by Jim Studt <jim@federated.com>
+  * [Debian bug report #22602]
+  *
++ * Modified on 9/8/1998 by Jonathan Atkins for use with wheel mice
++ *                         <jcatki@home.com>
++ *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of the GNU General Public License as published by
+  *   the Free Software Foundation; either version 2 of the License, or
+@@ -55,6 +58,7 @@
+   DEF_TYPE, DEF_DEV, DEF_SEQUENCE,
+   DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, DEF_SCALE /*scaley*/,
+   DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_TOGGLE, DEF_GLIDEPOINT_TAP,
++  DEF_WHEEL, DEF_NO_MIDDLE,
+   (Gpm_Type *)NULL
+ };
+ 
+Only in ../imwheel/gpm-imwheel: mouse-test.c.orig

@@ -1,0 +1,29 @@
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/mice.c gpm-1.19.5/src/mice.c
+--- gpm-1.19.5.orig/src/mice.c	Thu Oct  4 23:38:59 2001
++++ gpm-1.19.5/src/mice.c	Thu Oct  4 23:38:53 2001
+@@ -449,6 +449,16 @@
+   return 0;
+ }
+ 
++static int R_sun(Gpm_Event *state, int fd)
++{
++  signed char buffer[3];
++
++  buffer[0]= (state->buttons ^ 0x07) | 0x80;
++  buffer[1]= state->dx;
++  buffer[2]= -(state->dy);
++  return write(fd,buffer,3);
++}
++
+ static int M_msc(Gpm_Event *state,  unsigned char *data)
+ {
+   state->buttons= (~data[0]) & 0x07;
+@@ -2177,7 +2187,7 @@
+   {"sun",  "For Sparc mice.",
+            /* 'msc' protocol, but only 3 bytes per packet. */
+            "", M_sun, I_serial, CS8 | CSTOPB | STD_FLG,
+-                                {0xf8, 0x80, 0x00, 0x00}, 3, 1, 0, 0, 0},
++                                {0xf8, 0x80, 0x00, 0x00}, 3, 1, 0, 0, R_sun},
+   {"mm",   "MM series. Probably an old protocol...",
+            "MMSeries", M_mm, I_serial, CS8 | PARENB|PARODD | STD_FLG,
+                                 {0xe0, 0x80, 0x80, 0x00}, 3, 1, 0, 0, 0},

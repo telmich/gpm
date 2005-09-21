@@ -1,0 +1,102 @@
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/gpm.c gpm-1.19.5/src/gpm.c
+--- gpm-1.19.5.orig/src/gpm.c	Thu Oct  4 23:32:33 2001
++++ gpm-1.19.5/src/gpm.c	Thu Oct  4 23:32:26 2001
+@@ -79,6 +79,7 @@
+ int opt_ptrdrag=DEF_PTRDRAG;
+ int opt_kill=0;
+ int opt_repeater=0, opt_double=0;
++int opt_force_repeat = 0;
+ char* opt_repeater_type = 0;
+ int opt_aged = 0;
+ char *opt_special=NULL; /* special commands, like reboot or such */
+@@ -379,7 +380,8 @@
+       do
+ 	{
+ 	j=read(fd,edata-i,i); /* edata is pointer just after data */
+-	if (kd_mode!=KD_TEXT && fifofd != -1 && opt_rawrep && j > 0)
++	if ((kd_mode!=KD_TEXT || opt_force_repeat)
++	    && fifofd != -1 && opt_rawrep && j > 0)
+ 	  write(fifofd, edata-i, j);
+ 	i-=j;
+ 	}
+@@ -499,7 +501,7 @@
+ 
+ /*....................................... we're a repeater, aren't we? */
+ 
+-  if (kd_mode!=KD_TEXT)
++  if ((kd_mode!=KD_TEXT) || opt_force_repeat)
+     {
+     if (fifofd != -1 && ! opt_rawrep)
+       {
+@@ -1127,17 +1129,16 @@
+      * but actually it only matters if you have events.
+      */
+     {
+-    int fd = open_console(O_RDONLY);
+-    if (ioctl(fd, KDGETMODE, &kd_mode)<0)
+-      oops("ioctl(KDGETMODE)");
+-    close(fd);
+-    if (kd_mode != KD_TEXT && !opt_repeater)
+-      {
+-      wait_text(&mouse_table[1].fd);
+-      maxfd=max(maxfd,mouse_table[1].fd);
+-      readySet=connSet;
+-      FD_SET(mouse_table[1].fd,&readySet);
+-      continue; /* reselect */
++      int fd = open_console(O_RDONLY);
++      if (ioctl(fd, KDGETMODE, &kd_mode)<0)
++	oops("ioctl(KDGETMODE)");
++      close(fd);
++      if (kd_mode != KD_TEXT && !opt_repeater && !opt_force_repeat) {
++	wait_text(&mouse_table[1].fd);
++	maxfd=max(maxfd,mouse_table[1].fd);
++	readySet=connSet;
++	FD_SET(mouse_table[1].fd,&readySet);
++	continue; /* reselect */
+       }
+     }
+ /*....................................... got mouse, process event */
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/gpn.c gpm-1.19.5/src/gpn.c
+--- gpm-1.19.5.orig/src/gpn.c	Thu Oct  4 23:32:33 2001
++++ gpm-1.19.5/src/gpn.c	Thu Oct  4 23:32:26 2001
+@@ -172,6 +172,7 @@
+          "    -R mouse-type    enter repeater mode. X should read /dev/gpmdata\n"
+          "                     like it was a mouse-type device.  Default is MouseSystems.\n"
+          "                     You can also specify \"raw\" to relay the raw device data.\n"
++	 "    -F               Force always in repeat mode..\n"
+          "    -s sample-rate   sets the sample rate (default %d)\n"
+          "    -S [commands]    enable special commands (see man page)\n"
+          "    -t mouse-type    sets mouse type (default '%s')\n"
+@@ -291,7 +292,7 @@
+ int 
+ cmdline(int argc, char **argv)
+ {
+-  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:TveV::23";
++  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:FR::s:S:t:TveV::23";
+   int i, opt;
+   static struct {char *in; char *out;} seq[] = {
+     {"123","01234567"},
+@@ -356,6 +357,12 @@
+             opt_repeater_type = "msc";
+           } /*if*/
+           break;
++	case 'F':
++	  opt_force_repeat = 1;
++	  opt_repeater++;
++	  if (0 == opt_repeater_type)
++	    opt_repeater_type = "msc";
++	  break;
+         case 's': opt_sample = atoi(optarg); break;
+         case 'S':
+           if (optarg) opt_special=optarg;
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/headers/gpmInt.h gpm-1.19.5/src/headers/gpmInt.h
+--- gpm-1.19.5.orig/src/headers/gpmInt.h	Thu Sep 20 16:56:25 2001
++++ gpm-1.19.5/src/headers/gpmInt.h	Thu Oct  4 23:32:26 2001
+@@ -171,6 +171,7 @@
+ extern int opt_test, opt_ptrdrag;
+ extern int opt_kill;
+ extern int opt_repeater, opt_double;
++extern int opt_force_repeat;
+ extern char* opt_repeater_type;
+ extern int opt_kernel, opt_explicittype;
+ extern int opt_aged;

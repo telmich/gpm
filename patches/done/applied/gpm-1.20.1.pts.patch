@@ -1,0 +1,25 @@
+diff -ruN gpm-1.20.1/src/headers/gpmInt.h gpm-1.20.1-pts/src/headers/gpmInt.h
+--- gpm-1.20.1/src/headers/gpmInt.h	2002-12-25 00:56:54.000000000 +0200
++++ gpm-1.20.1-pts/src/headers/gpmInt.h	2003-09-17 09:11:13.000000000 +0300
+@@ -82,6 +82,7 @@
+ #define GPM_NULL_DEV         "/dev/null"
+ #define GPM_SYS_CONSOLE      "/dev/console"
+ #define GPM_DEVFS_CONSOLE    "/dev/vc/0"
++#define GPM_PTS_CONSOLE      "/dev/pts/0"
+ #define GPM_OLD_CONSOLE      "/dev/tty0"
+ 
+ /* for adding a mouse; add_mouse */
+diff -ruN gpm-1.20.1/src/tools.c gpm-1.20.1-pts/src/tools.c
+--- gpm-1.20.1/src/tools.c	2002-12-25 00:56:54.000000000 +0200
++++ gpm-1.20.1-pts/src/tools.c	2003-09-17 09:08:07.000000000 +0300
+@@ -46,6 +46,10 @@
+    if (stat(GPM_DEVFS_CONSOLE,&buf) == 0)
+       tmp = GPM_DEVFS_CONSOLE;
+   
++   /* May it be that we are on the network console? */
++   else if(stat(GPM_PTS_CONSOLE,&buf) == 0)
++      tmp = GPM_PTS_CONSOLE;
++  
+    /* Failed, try OLD console */
+    else if(stat(GPM_OLD_CONSOLE,&buf) == 0)
+       tmp = GPM_OLD_CONSOLE;

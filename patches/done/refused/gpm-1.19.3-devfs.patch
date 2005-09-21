@@ -1,0 +1,14 @@
+--- gpm-1.19.3/gpn.c.devfs	Sun Jan 28 12:16:19 2001
++++ gpm-1.19.3/gpn.c	Sun Jan 28 12:17:07 2001
+@@ -440,9 +440,8 @@
+ 
+ #if 1 /* was: "if (!defined(HAVE_SYSLOG) || !defined(HAVE_VSYSLOG))" */
+     if (!freopen("/dev/console","w",stderr)) /* the currently current console */
+-      {
+-        oops("freopen(stderr) failed");
+-      }
++	if(!freopen("/dev/tty", "w", stderr)) /* Try harder */
++		fclose(stderr); /* Yuck, this is bad, but not really a reason to abort */
+ #else
+     fclose(stderr);
+ #endif

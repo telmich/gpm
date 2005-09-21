@@ -1,0 +1,62 @@
+Hello,
+
+ Currently option.consolename is reinitialized to NULL whenever Gpm_Open() 
+is called.  This leads to a crash due to a NULL pointer dereference for a
+second invocation of the function, beacuse consolename is only set up for
+the first one.  I've discovered the bug with mc when switching back from
+the underlying shell (i.e. toggling the program's panels on) -- with
+1.20.1 it would always crash. 
+
+ Following is a trivial fix.  Additionally it prevents a crash that might
+happen if Gpm_get_console() returned NULL and returns an error from
+Gpm_Open() instead.  Finally, gpm_stack is now also checked for being
+non-NULL.
+
+ Please apply,
+
+  Maciej
+
+-- 
++  Maciej W. Rozycki, Technical University of Gdansk, Poland   +
++--------------------------------------------------------------+
++        e-mail: macro@ds2.pg.gda.pl, PGP key available        +
+
+gpm-1.20.1-consolename.patch
+diff -up --recursive --new-file gpm-1.20.1.macro/src/lib/liblow.c gpm-1.20.1/src/lib/liblow.c
+--- gpm-1.20.1.macro/src/lib/liblow.c	2002-12-24 22:57:16.000000000 +0000
++++ gpm-1.20.1/src/lib/liblow.c	2003-01-19 01:15:51.000000000 +0000
+@@ -199,8 +199,6 @@ int Gpm_Open(Gpm_Connect *conn, int flag
+    Gpm_Stst *new = NULL;
+    char* sock_name = 0;
+ 
+-   option.consolename = NULL;
+-
+    gpm_report(GPM_PR_DEBUG,"VC: %d",flag);
+ 
+    /*....................................... First of all, check xterm */
+@@ -242,6 +240,10 @@ int Gpm_Open(Gpm_Connect *conn, int flag
+    if (new->next)
+       conn->vc=new->next->info.vc; /* inherit */
+    else {
++      if (!option.consolename) {
++         gpm_report(GPM_PR_ERR,"option.consolename null");
++         goto err;
++      }   
+       conn->vc=0;                 /* default handler */
+       if (flag > 0) {  /* forced vc number */
+          conn->vc=flag;
+@@ -370,11 +372,11 @@ int Gpm_Open(Gpm_Connect *conn, int flag
+   /*....................................... Error: free all memory */
+    err:
+    gpm_report(GPM_PR_ERR,"Oh, oh, it's an error! possibly I die! ");
+-   do {
++   while(gpm_stack) {
+       new=gpm_stack->next;
+       free(gpm_stack);
+       gpm_stack=new;
+-   } while(gpm_stack);
++   };
+    if (gpm_fd>=0) close(gpm_fd);
+    if (sock_name) {
+       unlink(sock_name);
+

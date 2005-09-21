@@ -1,0 +1,211 @@
+From - Wed Jun  6 23:37:30 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id XAA19571
+	for <rubini@localhost>; Fri, 20 Oct 2000 23:39:21 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini/localhost> (single-drop); Fri, 20 Oct 2000 23:39:21 MEST
+Received: from debye.prosa.it ([213.255.48.146]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id VAA03605 for <rubini@pop.systemy.it>; Fri, 20 Oct 2000 21:10:11 +0200
+Received: by debye.prosa.it (Postfix)
+	id DBDB0BF70; Fri, 20 Oct 2000 21:07:30 +0200 (CEST)
+Delivered-To: rubini@prosa.it
+Received: from ns.prosa.it (ns.prosa.it [213.255.48.149])
+	by debye.prosa.it (Postfix) with ESMTP
+	id CD41CBF6E; Fri, 20 Oct 2000 21:07:29 +0200 (CEST)
+Received: from wien.prosa.it (localhost [127.0.0.1])
+	by ns.prosa.it (Postfix) with ESMTP
+	id 3106EA75E2; Fri, 20 Oct 2000 21:10:05 +0200 (CEST)
+Delivered-To: gpm@ns.prosa.it
+Received: from debye.prosa.it (debye.prosa.it [213.255.48.146])
+	by ns.prosa.it (Postfix) with ESMTP id 3B8A6A75D9
+	for <gpm@ns.prosa.it>; Fri, 20 Oct 2000 21:09:58 +0200 (CEST)
+Received: by debye.prosa.it (Postfix)
+	id A7481BF70; Fri, 20 Oct 2000 21:07:16 +0200 (CEST)
+Delivered-To: gpm@prosa.it
+Received: from penney.prosa.it (penney.prosa.it [213.255.48.131])
+	by debye.prosa.it (Postfix) with ESMTP id 91269BF6E
+	for <gpm@prosa.it>; Fri, 20 Oct 2000 21:07:16 +0200 (CEST)
+Received: from mercure.math.u-bordeaux.fr (mercure.math.u-bordeaux.fr [147.210.16.143])
+	by penney.prosa.it (Postfix) with ESMTP id A51951B6007
+	for <gpm@prosa.it>; Fri, 20 Oct 2000 21:09:56 +0200 (CEST)
+Received: from math.u-bordeaux.fr (sadir.math.u-bordeaux.fr [147.210.16.221])
+	by mercure.math.u-bordeaux.fr (8.9.3/8.9.1) with ESMTP id VAA11093
+	for <gpm@prosa.it>; Fri, 20 Oct 2000 21:09:55 +0200 (MET DST)
+Received: (from allomber@localhost)
+	by math.u-bordeaux.fr (8.9.3+Sun/8.9.1) id VAA09151;
+	Fri, 20 Oct 2000 21:09:55 +0200 (MET DST)
+Date: Fri, 20 Oct 2000 21:09:55 +0200 (MET DST)
+Message-Id: <200010201909.VAA09151@math.u-bordeaux.fr>
+From: Bill Allombert <Bill.Allombert@math.u-bordeaux.fr>
+To: gpm@prosa.it
+Cc: Bill.Allombert@math.u-bordeaux.fr
+Subject: [Gpm] patch for ALPS Glidepoint.
+Sender: gpm-admin@prosa.it
+Errors-To: gpm-admin@prosa.it
+X-BeenThere: gpm@lists.prosa.it
+X-Mailman-Version: 2.0beta4
+Precedence: bulk
+Reply-To: gpm@prosa.it
+List-Id:  <gpm.lists.prosa.it>
+X-UIDL: 37cc9bf9ea94901361d200f5338c6e93
+Status: RO
+
+Hello, 
+
+this is a patch for gpm 1.19.3. to handle ALPS GlidePoint in absolute
+mode. It maps tap as left button and left button as middle
+button. Drags finished because the finger is on the edge of the
+touchpad are locked until the drag restart.
+
+The patch for gpm.c allows the glidepoint to revert to absolute mode
+automatically, for example after a suspend.
+
+Best regards,
+
+Bill Allombert.
+
+allomber@math.u-bordaeux.fr
+
+-------------
+
+diff -u gpm-1.19.3.orig/gpm.c gpm-1.19.3/gpm.c
+--- gpm-1.19.3.orig/gpm.c	Tue Jul 18 14:06:06 2000
++++ gpm-1.19.3/gpm.c	Thu Oct 19 22:36:31 2000
+@@ -341,12 +341,24 @@
+ 
+     if ((data[0]&(m_type->proto)[0]) != (m_type->proto)[1])
+       {
+-      if (m_type->getextra)
++      if (m_type->getextra==1)
+ 	{
+ 	data[1]=GPM_EXTRA_MAGIC_1; data[2]=GPM_EXTRA_MAGIC_2;
+         gpm_debug_log(LOG_DEBUG,"Extra %02x",data[0]);
+ 	return data;
+ 	}
++      /* Bill Allombert Thu Oct 19 20:25:12 UTC 2000 */
++      /* allow touchpads to revert automatically to absolute mode */
++      	if (m_type->getextra==2 && (data[0]&0xc8)==0x08)
++        {
++	  /*TouchPad has returned to relative mode...*/
++  	  /*read the packet...*/
++	  read(fd,data,2);
++  	  /*revert to absolute mode*/
++	  m_type=(m_type->init)(fd, m_type->flags, m_type,-1,NULL);
++	  gpm_debug_log(LOG_DEBUG,"gpm: touchpad returned to absolute.\n");
++	  return NULL;
++	}/*end*/
+       gpm_debug_log(LOG_DEBUG,"Error in protocol");
+       return NULL;
+       }
+diff -u gpm-1.19.3.orig/mice.c gpm-1.19.3/mice.c
+--- gpm-1.19.3.orig/mice.c	Tue Mar  7 15:10:00 2000
++++ gpm-1.19.3/mice.c	Thu Oct 19 22:46:43 2000
+@@ -1280,6 +1280,65 @@
+ 	return 0;
+ }
+ 
++/* ALPS touchpad, ps2 version: Bill Allombert Thu Oct 19 20:19:54 UTC 2000 */
++static int M_alps2(Gpm_Event *state,  unsigned char *data)
++{
++  /*driver for PS2 ALPS TouchPad in Advanced mode 
++    (i.e. absolute x/y/z)
++    bit    | 7 | 6 | 5 | 4 | 3 |   2    |   1    |    0    |
++    byte 0:| 1 | 1 | 1 | 1 | 1 |   1    |   1    |    1    |
++    byte 1:| 0 |               X 6..0                      |
++    byte 2:| 0 |    X 10..7    |   0    | Finger | Gesture |
++    byte 3:| 0 |   Y 9..7  | 1 |(Middle)| Right  | Left    |
++    byte 4:| 0 |                  Y 6..0                   |      
++    byte 5:| 0 |                  Z 6..0                   |
++  */
++  static int ox, oy, draglock=0, enter=0;
++  
++  long x = data[1] | ((data[2]&0x78)<<4);
++  long y = data[4] | ((data[3]&0x70)<<3);
++  long z = data[5];
++  long tap =  data[2]&1,finger=data[2]&2;
++
++  if (!finger)/*leave touchpad*/
++  {
++    state->dx =  state->dy = 0;
++    /* if we are in the edges*/
++    if (x<150  || y<150 || x>950 || y>700 )
++    {
++      if (tap && ox==x && oy==y) 
++        draglock=1;
++    }
++    else if (draglock)
++    {
++      draglock=0;
++    }
++    enter=0;
++  }
++  else if ( !enter )  /* enter touchpad */
++  {
++    state->dx =  state->dy = 0;
++    ox=x; oy=y;
++    enter=1;
++  }
++  else
++  {
++    /*resolution in 240 counts per inch*/
++    /*geometry is normaly 47x31 mm */
++    /*synaptic use roughly 6144 X counts ad reports 11%=676*/
++    /*there is 47/25.4*240=444 counts here*/
++    state->dx = (x-ox)/2;
++    state->dy = (y-oy)/2;
++    ox=x; oy=y;
++  }
++  if (draglock) tap=1;
++  state->buttons=
++    tap * GPM_B_LEFT +
++    ((data[3]&1)?GPM_B_MIDDLE:0) + 
++    ((data[3]&2)?GPM_B_RIGHT:0);
++  return 0;
++}
++
+ /*========================================================================*/
+ /* Then, mice should be initialized */
+ 
+@@ -1913,6 +1972,26 @@
+   return type;
+ }
+ 
++/* ALPS touchpad, ps2 version: Bill Allombert Thu Oct 19 20:19:54 UTC 2000 */
++static Gpm_Type *I_alps2(int fd, unsigned short flags,
++		      struct Gpm_Type *type, int argc, char **argv)
++{
++  int i;
++  unsigned char c = 0;
++  unsigned char magic[] = {0xf5, 0xf5, 0xf5, 0xf5, 0xf4};
++  /* Switch to Advanced mode*/
++  for (i=0; i<sizeof(magic); i++) {
++    write( fd, magic+i, 1 );
++    read( fd, &c, 1 );
++    if (c != 0xfa) 
++    {
++      fprintf( stderr, "alps2: Error switching mode %d :<%x>\n",i,c);
++      return NULL;
++    }
++  }
++  return type;
++}
++
+ /*========================================================================*/
+ /* Finally, the table */
+ #define STD_FLG (CREAD|CLOCAL|HUPCL)
+@@ -2043,6 +2122,9 @@
+            "wizardpad", M_wp, I_wp, STD_FLG,
+                                 {0xFA, 0x42, 0x00, 0x00}, 10, 1, 0, 1, 0},
+ 
++  {"alps2", "ALPS PS2 GlidePoint",
++           "glidepoint_ps2", M_alps2, I_alps2, STD_FLG,
++                                {0xff, 0xff, 0x00, 0x00}, 6, 1, 2, 0, 0},
+   {"",     "",
+            "", NULL, NULL, 0,
+                                 {0x00, 0x00, 0x00, 0x00}, 0, 0, 0, 0, 0}
+
+__
+Gpm mailing list at Gpm@lists.prosa.it
+Send help as subject to gpm-request@lists.prosa.it for help
+Archives at http://www.prosa.it/mailman/gpm
+

@@ -1,0 +1,470 @@
+diff -urN gpm-1.19.3.orig/Makefile.in gpm-1.19.3/Makefile.in
+--- gpm-1.19.3.orig/Makefile.in	Tue Jul 18 16:06:06 2000
++++ gpm-1.19.3/Makefile.in	Tue Jun 26 02:33:16 2001
+@@ -50,7 +50,7 @@
+ 
+ # Main portion: regular build rules
+ 
+-GSRC = gpm.c gpn.c mice.c special.c twiddler.c synaptics.c
++GSRC = closeall.c gpm.c gpn.c mice.c special.c twiddler.c synaptics.c
+ 
+ GOBJ = $(GSRC:.c=.o) debuglog.o 
+ 
+@@ -112,6 +112,7 @@
+ mouse-test:	mice.o twiddler.o synaptics.o
+ 
+ $(PROG):	libgpm.a
++gpm-root:	closeall.o
+ 
+ libgpm.so.@abi_full@:	$(PICS)
+ 	$(CC) @SOLDFLAGS@libgpm.so.@abi_lev@ \
+diff -urN gpm-1.19.3.orig/closeall.c gpm-1.19.3/closeall.c
+--- gpm-1.19.3.orig/closeall.c	Thu Jan  1 03:00:00 1970
++++ gpm-1.19.3/closeall.c	Tue Jun 26 02:33:16 2001
+@@ -0,0 +1,27 @@
++#include <unistd.h>
++#include <errno.h>
++
++#ifdef __linux__
++#include <linux/limits.h>
++#endif
++
++int close_all(void)
++{
++	int fd, max;
++
++	max = sysconf(_SC_OPEN_MAX);
++	if (max <= 0)
++		return -1;
++
++#ifdef __linux__
++	if (max < NR_OPEN)
++		max = NR_OPEN;
++#endif
++
++	for (fd = 3; fd < max; fd++) {
++		if (close(fd) && errno != EBADF)
++			return -1;
++	}
++
++	return 0;
++}
+diff -urN gpm-1.19.3.orig/doc/doc.gpm gpm-1.19.3/doc/doc.gpm
+--- gpm-1.19.3.orig/doc/doc.gpm	Tue Jul 18 16:43:18 2000
++++ gpm-1.19.3/doc/doc.gpm	Tue Jun 26 03:57:17 2001
+@@ -133,7 +133,6 @@
+ 
+ As of release 0.96, a default-handler is released with gpm, and can be
+ used to handle Control-Mouse events to draw menus on the screen.
+-The @code{gpm-root} program, however, needs kernel 1.1.73 or newer.
+ @xref{gpm-root}.
+ 
+ Release 1.00 has been an incompatible one (is is incompatible with
+@@ -1940,17 +1939,9 @@
+ 
+ The program @code{gpm-root} is designed to handle Control-Mouse events to
+ draw menus on the background of the current tty. The actual menus
+-are described by a configuration file in the user's home directory.
+-
+-Please note that @code{gpm-root} needs to run with Linux 1.1.73 or
+-newer, because previous kernels lack some screen handling capabilities
+-required by the program.
++are described by the configuration file, @file{/etc/gpm-root.conf}.
+ 
+ The program uses the files @file{/dev/vcs*} to draw to the console screen.
+-These are available only from kernel 1.1.81 onward. If you miss those
+-device nodes, you should create them using @code{create_vcs} in the
+-distribution directory. The tool won't run with kernels older than 1.1.81,
+-because they lacked a full screen dump/restore capability.
+ 
+ Available command line options are the following:
+ 
+@@ -1961,14 +1952,6 @@
+         Allowed strings are @samp{shift}, @samp{anyAlt}, @samp{leftAlt},
+         @samp{rightAlt}, @samp{control}.
+ 
+-@item -u
+-        Deny using user-specific configuration files. With this
+-        option on, only @file{/etc/gpm-root.conf} will be used as a source
+-        of configuration information. This option
+-        is intended for those system administrators who fear security could
+-        be broken by this daemon. Things should be sufficiently secure, but
+-        if you find a hole please tell me about it.
+-
+ @item -D
+         Do not automatically enter background operation when started,
+         and log messages to the standard error stream, not the syslog
+@@ -2167,9 +2150,8 @@
+ 
+ %M .SH BUGS
+ 
+-Known bugs have been fixed. In particular, if you invoke @code{gpm-root}
+-right after @code{gpm}, it will delay a few seconds before trying to connect
+-to the daemon.
++Anyone with access to the console may cause @code{gpm-root} to run any of
++the commands given in @file{/etc/gpm-root.conf} as root.
+ 
+ @ignore
+ .SH AUTHOR
+@@ -2179,7 +2161,6 @@
+ .nf
+ /dev/gpmctl     The socket used to connect to gpm.
+ /etc/gpm-root.conf  The default configuration file.
+-$(HOME)/.gpm-root   The user configuration file.
+ /dev/vcs*           Virtual Console Screens
+ .fi
+ 
+diff -urN gpm-1.19.3.orig/gpm-root.c gpm-1.19.3/gpm-root.c
+--- gpm-1.19.3.orig/gpm-root.c	Wed Apr 19 09:53:38 2000
++++ gpm-1.19.3/gpm-root.c	Tue Jun 26 02:33:16 2001
+@@ -1,3 +1,4 @@
++#error This should be re-generated from the .y file.
+ 
+ /*  A Bison parser, made from gpm-root.y
+  by  GNU Bison version 1.25
+diff -urN gpm-1.19.3.orig/gpm-root.conf gpm-1.19.3/gpm-root.conf
+--- gpm-1.19.3.orig/gpm-root.conf	Tue Jan 18 00:21:00 2000
++++ gpm-1.19.3/gpm-root.conf	Tue Jun 26 02:36:27 2001
+@@ -18,7 +18,7 @@
+   "tty  8"  f.jptty   "8"
+   ""        f.nop
+   "more of them..." {
+-    
++
+     "tty  9"  f.jptty  "9"
+     "tty 10"  f.jptty  "10"
+     "tty 11"  f.jptty  "11"
+@@ -33,7 +33,6 @@
+ 	  "tty 17" f.jptty  "17"
+       }
+   }
+-    
+ }
+ 
+ button 2 {
+@@ -47,12 +46,10 @@
+   "%b %d %Y"  f.time
+   "%H:%M"     f.time
+   ""          f.nop
+-  "load: "    f.load 
++  "load: "    f.load
+   "free:"     f.free
+   "" f.nop
+-  "report disk usage to ~/du" f.bgcmd  "du ~ | sort -rn > ~/du"
+-  "print mail headers to tty" f.bgcmd
+-	 "grep '^From ' /var/spool/mail/$USER | tail"
++  "report disk usage to ~/du" f.bgcmd "du ~ | sort -rn > ~/du"
+ }
+ 
+ button 3 {
+diff -urN gpm-1.19.3.orig/gpm-root.y gpm-1.19.3/gpm-root.y
+--- gpm-1.19.3.orig/gpm-root.y	Wed Apr 19 09:48:41 2000
++++ gpm-1.19.3/gpm-root.y	Tue Jun 26 06:47:19 2001
+@@ -64,6 +64,8 @@
+ #define VCS_MAJOR	7
+ #endif
+ 
++extern int close_all(void);
++
+ #define MAX_NR_USER_CONSOLES 63 /* <linux/tty.h> needs __KERNEL__ */
+ 
+ #include "gpmInt.h"             /* itz Thu Aug 13 14:10:26 PDT 1998
+@@ -78,6 +80,7 @@
+ #include "wd.h"      /* when debugging macros */
+ 
+ #define USER_CFG   ".gpm-root"
++#undef USER_CFG
+ #define SYSTEM_CFG SYSCONFDIR "/gpm-root.conf"
+ 
+ #define DEFAULT_FORE 7
+@@ -117,7 +120,9 @@
+   /* provide defaults */
+ int opt_mod     =  4;           /* control */
+ int opt_buf     =  0;           /* ask the kernel about it */
++#ifdef USER_CFG
+ int opt_user    =  1;           /* allow user cfg files */
++#endif
+ 
+ 
+ 
+@@ -134,7 +139,7 @@
+ typedef struct Draw {
+   short width;               /* length of longest item */
+   short height;              /* the number of items */
+-  short uid;                 /* owner */
++  int uid;                   /* owner */
+   short buttons;             /* which button */
+   short fore,back,bord,head; /* colors */
+   char *title;               /* name */
+@@ -321,10 +326,18 @@
+                   cfglineno++;
+                 }
+               if (s[i]=='\\') s[i]=getc(cfgfile);
++              if (i>=sizeof(s)-1)
++                {
++                  yyerror("line too long");
++                  if (s[i]!='\n')
++                    while ((c=getc(cfgfile))!='\n' && c!=EOF);
++                  cfglineno++;
++                  break;
++                }
++              i++;
+             }
+-
+           /* get '"' as '\"' */
+-          while (s[i++]!='\"' && s[i-2] !='\\')
++          while (s[i-1]!='\"' && (i < 2 || s[i-2]!='\\'))
+             ;
+           s[i-1]=0; yylval.string=(char *)strdup(s); return T_STRING;
+ 
+@@ -342,7 +355,17 @@
+         }
+       /* get a single word and convert it */
+       do
+-        s[i++]=c;
++        {
++          if (i>=sizeof(s)-1)
++            {
++              yyerror("line too long");
++              if (s[i]!='\n')
++              while ((c=getc(cfgfile))!='\n' && c!=EOF);
++              cfglineno++;
++              break;
++            }
++          s[i++]=c;
++        }
+       while (isalnum(c=getc(cfgfile)) || c=='.');
+       ungetc(c,cfgfile);
+       s[i]=0;
+@@ -447,9 +470,10 @@
+ /*====================================================================*/
+ void f__fix(struct passwd *pass)
+ {
+-  setgid(pass->pw_gid);
+-  initgroups(pass->pw_name, pass->pw_gid);
+-  setuid(pass->pw_uid);
++  if (setgid(pass->pw_gid) < 0 ||
++      initgroups(pass->pw_name, pass->pw_gid) < 0 ||
++      setuid(pass->pw_uid) < 0)
++    exit(1);
+   setenv("HOME",    pass->pw_dir, 1);
+   setenv("LOGNAME", pass->pw_name,1);
+   setenv("USER",    pass->pw_name,1);
+@@ -525,7 +549,6 @@
+ /*---------------------------------------------------------------------*/
+ int f_bgcmd(int mode, DrawItem *self, int uid)
+ {
+-  int i;
+   struct passwd *pass;
+ 
+   switch (mode)
+@@ -545,10 +568,11 @@
+ 	  if (!pass) exit(1);
+ 	  f__fix(pass); /* setgid(), setuid(), setenv(), ... */
+ 	  close(0); close(1); close(2);
+-	  open("/dev/null",O_RDONLY); /* stdin  */
+-	  open("/dev/tty0",O_WRONLY); /* stdout */
+-	  dup(1);                     /* stderr */  
+-	  for (i=3;i<OPEN_MAX; i++) close(i);
++	  if (open("/dev/null",O_RDONLY) != 0 || /* stdin  */
++	      open("/dev/tty0",O_WRONLY) != 1 || /* stdout */
++	      dup(1) != 2)                       /* stderr */
++	    exit(1);
++	  if (close_all()) exit(1);
+ 	  execl("/bin/sh","sh","-c",self->arg,(char *)NULL);
+ 	  exit(1); /* shouldn't happen */
+ 
+@@ -683,22 +707,17 @@
+   FILE *f;
+   double l1,l2,l3;
+ 
+-  l1=l2=l3=0.0;
+-
+   switch (mode)
+     {
+     case F_CREATE: /* modify name, just to fake its length */
+-      self->clientdata=malloc(strlen(self->name)+20);
+-      self->name=realloc(self->name,strlen(self->name)+20);
+-      strcpy(self->clientdata,self->name);
+-      strcat(self->clientdata," %5.2f %5.2f %5.2f");
+-      sprintf(self->name,self->clientdata,l1,l2,l3);
+-      break;
++      /* XXX: no failure checks */
++      self->clientdata=strdup(self->name);
++      self->name=realloc(self->name,strlen(self->name)+3*20);
+ 
+     case F_POST:
+       if (!(f=fopen("/proc/loadavg","r"))) return 1;
+       fscanf(f,"%lf %lf %lf",&l1,&l2,&l3);
+-      sprintf(self->name,self->clientdata,l1,l2,l3);
++      sprintf(self->name,"%s %5.2f %5.2f %5.2f",self->clientdata,l1,l2,l3);
+       fclose(f);
+ 
+     case F_INVOKE:
+@@ -714,23 +733,19 @@
+   long l1,l2;
+   char s[80];
+ 
+-  l1=l2=0;
+   switch (mode)
+     {
+     case F_CREATE: /* modify name, just to fake its length */
+-      self->clientdata=malloc(strlen(self->name)+30);
+-      self->name=realloc(self->name,strlen(self->name)+30);
+-      strcpy(self->clientdata,self->name);
+-      strcat(self->clientdata," %5.2fM mem + %5.2fM swap");
+-      sprintf(self->name,self->clientdata,(double)l1,(double)l2);
+-      break;
++      /* XXX: no failure checks */
++      self->clientdata=strdup(self->name);
++      self->name=realloc(self->name,strlen(self->name)+2*30);
+ 
+     case F_POST:
+       if (!(f=fopen("/proc/meminfo","r"))) return 1;
+-      fgets(s,80,f);
+-      fgets(s,80,f); sscanf(s,"%*s %*s %*s %li",&l1);
+-      fgets(s,80,f); sscanf(s,"%*s %*s %*s %li",&l2);
+-      sprintf(self->name,self->clientdata,
++      fgets(s,sizeof(s),f);
++      fgets(s,sizeof(s),f); sscanf(s,"%*s %*s %*s %ld",&l1);
++      fgets(s,sizeof(s),f); sscanf(s,"%*s %*s %*s %ld",&l2);
++      sprintf(self->name,"%s %5.2fM mem + %5.2fM swap",self->clientdata,
+ 	      (double)l1/1024/1024,(double)l2/1024/1024);
+       fclose(f);
+ 
+@@ -751,6 +766,7 @@
+     {
+     case F_CREATE: /* modify name, just to fake its length */
+       self->clientdata=self->name;
++      /* XXX: "format features" */
+       strftime(s,110,self->clientdata,broken);
+       strcat(s,"1234567890"); /* names can change length */       
+       self->name=(char *)strdup(s);
+@@ -832,20 +848,25 @@
+ /* the return value tells whether it has been newly loaded or not */
+ int getdraw(int uid, int buttons, time_t mtime1, time_t mtime2)
+ {
++#ifdef USER_CFG
+   struct passwd *pass;
++#endif
+   struct stat buf;
+   Draw *new, *np, *op, *pp;
+   int retval=0;
+   time_t mtime;
+ 
+   gpm_debug_log(LOG_DEBUG,"getdraw: %i %i %li %li",uid,buttons,mtime1,mtime2);
++#ifdef USER_CFG
+   pass=getpwuid(uid);
+ 
+   /* deny personal cfg to root for security reasons */
+   if (pass==NULL || !uid || !opt_user) 
+     {
++#endif
+       mtime=mtime2; uid=-1;
+       strcpy(cfgname,SYSTEM_CFG);
++#ifdef USER_CFG
+     }
+   else
+     {
+@@ -853,6 +874,7 @@
+       strcpy(cfgname,pass->pw_dir);
+       strcat(cfgname,"/" USER_CFG);
+     }
++#endif
+ 
+   if (stat(cfgname,&buf)==-1)
+     {
+@@ -926,7 +948,9 @@
+          "Usage: %s [options]\n",prgname);
+   printf("  Valid options are\n"
+          "    -m <number-or-name>   modifier to use\n"
++#ifdef USER_CFG
+          "    -u                    inhibit user configuration files\n"
++#endif
+          "    -D                    don't auto-background and run as daemon\n"
+          "    -V <verbosity-delta>  increase amount of logged messages\n"
+          );
+@@ -972,12 +996,18 @@
+   int opt;
+   
+   gpm_log_daemon = 1;
++#ifdef USER_CFG
+   while ((opt = getopt(argc, argv,"m:uDV::")) != -1)
++#else
++  while ((opt = getopt(argc, argv,"m:DV::")) != -1)
++#endif
+     {
+       switch (opt)
+         {
+         case 'm':  opt_mod=getmask(optarg, tableMod); break;
++#ifdef USER_CFG
+         case 'u':  opt_user=0; break;
++#endif
+         case 'D':  gpm_log_daemon = 0; break;
+         case 'V': 
+           gpm_debug_level += (0 == optarg ? 1 : strtol(optarg, 0, 0));
+@@ -1201,10 +1231,9 @@
+   int evflag;
+   int recursenow=0; /* not on first iteration */
+ 
+-  prgname=argv[0];
+-  setuid(0); /* if we're setuid, force it */
++  prgname = argv[0] ?: "gpm-root";
+ 
+-  if (getuid())
++  if (getuid() != 0 || getuid() != geteuid())
+     {
+       fprintf(stderr,"%s: Must be root\n", prgname);
+       exit(1);
+@@ -1285,7 +1314,13 @@
+     }
+   if (!vc)
+     {
+-      oops("can't open mouse connection");
++      fprintf(stderr,"%s: Can't open mouse connection\n",prgname);
++      exit (1);
++    }
++  if (gpm_fd == -2)
++    {
++      fprintf(stderr,"%s: Can't run in an xterm or rxvt\n",prgname);
++      exit(2);
+     }
+ 
+   conn.eventMask=~0; /* grab everything away form selection */
+diff -urN gpm-1.19.3.orig/special.c gpm-1.19.3/special.c
+--- gpm-1.19.3.orig/special.c	Tue Jan 18 00:34:00 2000
++++ gpm-1.19.3/special.c	Tue Jun 26 02:33:16 2001
+@@ -38,6 +38,8 @@
+ 
+ #include "gpmInt.h"
+ 
++extern int close_all(void);
++
+ /*
+  * This function is only called at button press, to avoid unnecessary
+  * overhead due to function call at every mouse event
+@@ -67,7 +69,7 @@
+  */
+ int processSpecial(Gpm_Event *event)
+ {
+-  char *command=NULL; int i;
++  char *command=NULL;
+   FILE *consolef;
+ 
+   if ((event->type & GPM_TRIPLE)
+@@ -151,10 +153,11 @@
+     
+     case 0: /* child */
+       close(0); close(1); close(2);
+-      open("/dev/null",O_RDONLY); /* stdin  */
+-      open("/dev/tty0",O_WRONLY); /* stdout */
+-      dup(1);                     /* stderr */
+-      for (i=3;i<OPEN_MAX; i++) close(i);
++      if (open("/dev/null",O_RDONLY) != 0 || /* stdin  */
++	  open("/dev/tty0",O_WRONLY) != 1 || /* stdout */
++	  dup(1) != 2)                       /* stderr */
++	exit(1);
++      if (close_all()) exit(1);
+       execl("/bin/sh","sh","-c",command,(char *)NULL);
+       exit(1); /* shouldn't happen */
+       

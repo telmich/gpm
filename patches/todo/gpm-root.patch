@@ -1,0 +1,126 @@
+--- gpm-1.19.2/gpm-root.y.root	Wed Apr 19 01:48:41 2000
++++ gpm-1.19.2/gpm-root.y	Mon Jun 12 23:24:14 2000
+@@ -49,7 +49,8 @@
+ #include <linux/limits.h>   /* OPEN_MAX */
+ #include <linux/vt.h>       /* VT_ACTIVATE */
+ #include <linux/keyboard.h> /* K_SHIFT */
+-#include <utmp.h>         
++#include <utmp.h>
++#include <endian.h>
+ 
+ #ifdef HAVE_SYS_SYSMACROS_H
+ #include <sys/sysmacros.h>
+@@ -447,9 +448,10 @@
+ /*====================================================================*/
+ void f__fix(struct passwd *pass)
+ {
+-  setgid(pass->pw_gid);
+-  initgroups(pass->pw_name, pass->pw_gid);
+-  setuid(pass->pw_uid);
++  if (setgid(pass->pw_gid) < 0 ||
++      initgroups(pass->pw_name, pass->pw_gid) < 0 ||
++      setuid(pass->pw_uid) < 0)
++  exit(1);
+   setenv("HOME",    pass->pw_dir, 1);
+   setenv("LOGNAME", pass->pw_name,1);
+   setenv("USER",    pass->pw_name,1);
+@@ -1045,6 +1047,12 @@
+ static int postcount;
+ static Posted *activemenu;
+ 
++#if __BYTE_ORDER == __BIG_ENDIAN
++#define bigendian 1
++#else
++#define bigendian 0
++#endif
++
+ Posted *postmenu(int fd, FILE *f, Draw *draw, int x, int y, int console)
+ {
+   Posted *new;
+@@ -1062,9 +1070,9 @@
+   lines=dump[0]; columns=dump[1];
+   i=(columns*dump[3]+dump[2])*2+1; /* where to get it */
+   if (i<0) i=1;
+-  new->colorcell=dump[4+i];
++  new->colorcell=dump[4+i-bigendian];
+   gpm_debug_log(LOG_DEBUG,"Colorcell=%02x (at %i,%i = %i)",
+-                new->colorcell,dump[2],dump[3],i);
++                new->colorcell,dump[2],dump[3],i-bigendian);
+ 
+   /* place the box relative to the mouse */
+   if (!postcount) x -= draw->width/2; else x+=2;
+@@ -1078,7 +1086,11 @@
+   new->y=y; new->Y=y+draw->height-1;
+ 
+   /* these definitions are dirty hacks, but they help in writing to the screen */
++#if __BYTE_ORDER == __BIG_ENDIAN
++#define PUTC(c,f,b)   (*(curr++)=((b)<<4)+(f),*(curr++)=(c))
++#else
+ #define PUTC(c,f,b)   (*(curr++)=(c),*(curr++)=((b)<<4)+(f))
++#endif
+ #define PUTS(s,f,b)   for(curr2=s;*curr2;PUTC(*(curr2++),f,b))
+ #define GOTO(x,y)     (curr=dump+4+2*((y)*columns+(x)))
+ 
+--- gpm-1.19.2/gpm-root.c.root	Wed Apr 19 01:53:38 2000
++++ gpm-1.19.2/gpm-root.c	Mon Jun 12 23:25:05 2000
+@@ -43,7 +43,8 @@
+ #include <linux/limits.h>   /* OPEN_MAX */
+ #include <linux/vt.h>       /* VT_ACTIVATE */
+ #include <linux/keyboard.h> /* K_SHIFT */
+-#include <utmp.h>         
++#include <utmp.h>
++#include <endian.h>
+ 
+ #ifdef HAVE_SYS_SYSMACROS_H
+ #include <sys/sysmacros.h>
+@@ -1305,9 +1306,10 @@
+ /*====================================================================*/
+ void f__fix(struct passwd *pass)
+ {
+-  setgid(pass->pw_gid);
+-  initgroups(pass->pw_name, pass->pw_gid);
+-  setuid(pass->pw_uid);
++  if (setgid(pass->pw_gid) < 0 ||
++      initgroups(pass->pw_name, pass->pw_gid) < 0 ||
++      setuid(pass->pw_uid) < 0)
++  exit(1);
+   setenv("HOME",    pass->pw_dir, 1);
+   setenv("LOGNAME", pass->pw_name,1);
+   setenv("USER",    pass->pw_name,1);
+@@ -1903,6 +1905,12 @@
+ static int postcount;
+ static Posted *activemenu;
+ 
++#if __BYTE_ORDER == __BIG_ENDIAN
++#define bigendian 1
++#else
++#define bigendian 0
++#endif
++
+ Posted *postmenu(int fd, FILE *f, Draw *draw, int x, int y, int console)
+ {
+   Posted *new;
+@@ -1920,9 +1928,9 @@
+   lines=dump[0]; columns=dump[1];
+   i=(columns*dump[3]+dump[2])*2+1; /* where to get it */
+   if (i<0) i=1;
+-  new->colorcell=dump[4+i];
++  new->colorcell=dump[4+i-bigendian];
+   gpm_debug_log(LOG_DEBUG,"Colorcell=%02x (at %i,%i = %i)",
+-                new->colorcell,dump[2],dump[3],i);
++                new->colorcell,dump[2],dump[3],i-bigendian);
+ 
+   /* place the box relative to the mouse */
+   if (!postcount) x -= draw->width/2; else x+=2;
+@@ -1936,7 +1944,11 @@
+   new->y=y; new->Y=y+draw->height-1;
+ 
+   /* these definitions are dirty hacks, but they help in writing to the screen */
++#if __BYTE_ORDER == __BIG_ENDIAN
++#define PUTC(c,f,b)   (*(curr++)=((b)<<4)+(f),*(curr++)=(c))
++#else
+ #define PUTC(c,f,b)   (*(curr++)=(c),*(curr++)=((b)<<4)+(f))
++#endif
+ #define PUTS(s,f,b)   for(curr2=s;*curr2;PUTC(*(curr2++),f,b))
+ #define GOTO(x,y)     (curr=dump+4+2*((y)*columns+(x)))
+ 

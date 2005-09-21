@@ -1,0 +1,6 @@
+   * devfs-1: solved myself another way
+   * gpm.screen.diff: there is another patch in unified format
+   * mktemp_secure_problem: applied
+   * OPEN_MAX: solved with "include <linux/limits.h>"
+   * imps-autodetect.patch: applied
+   * gpm-newmouse.patch: applied

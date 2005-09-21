@@ -1,0 +1,177 @@
+--- mice.c-old	Tue Mar  7 15:10:00 2000
++++ mice.c	Mon Jun 19 14:03:57 2000
+@@ -58,6 +58,7 @@
+ 
+ #include <linux/kdev_t.h> /* MAJOR */
+ #include <linux/keyboard.h>
++#include <linux/touchscreen.h>
+ 
+ #ifdef HAVE_LINUX_JOYSTICK_H
+ #include <linux/joystick.h>
+@@ -200,6 +201,7 @@
+ /*  real absolute coordinates for absolute devices,  not very clean */
+ 
+ #define REALPOS_MAX 16383 /*  min 0 max=16383, but due to change.  */
++//#define REALPOS_MAX 0xFFFF /*  min 0 max=16383, but due to change.  */
+ int realposx=-1, realposy=-1;
+ 
+ /*========================================================================*/
+@@ -1070,6 +1072,130 @@
+   return 0;
+ }
+ 
++/**
++ * Convert data from usb devices to event type structure.
++ */
++static int M_usbmt(Gpm_Event *state,  unsigned char *data)
++{
++  /*
++   * This is a simple decoder for the MicroTouch touch screen
++   * usb devices. It uses the "tablet" format and only generates button-1
++   * events. Check README.microtouch for additional information.
++   */
++  int x, y;
++  static int avgx=-1, avgy;       /* average over time, for smooth feeling */
++  static int upx, upy;            /* keep track of last finger-up place */
++  static struct timeval uptv, tv; /* time of last up, and down events */
++  struct tscrn_usb_data_report *stData;
++
++  #define REAL_TO_XCELL(x) ((x * win.ws_col / 0x3FFF)+1)
++  #define REAL_TO_YCELL(y) ((y * win.ws_row / 0x3FFF)+1)
++
++  #define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))
++  #define DIF_TIME(t1,t2) ((t2.tv_sec -t1.tv_sec) *1000+ \
++                           (t2.tv_usec-t1.tv_usec)/1000)
++  #define MIN_XR        0xaf0
++  #define MAX_XR        0x34d0
++  #define MIN_YR        0xc4e
++  #define MAX_YR        0x33f4
++  #define XRAW_TO_X(x)  (((x - MIN_XR)<=0?1:(x - MIN_XR)) * 0x3FFF / (MAX_XR - MIN_XR))
++  #define YRAW_TO_Y(y)  (((y - MIN_YR)<=0?1:(y - MIN_YR)) * 0x3FFF / (MAX_YR - MIN_YR))
++  #define MIN_XC        0xc8
++  #define MAX_XC        0xff78
++  #define MIN_YC        0x0
++  #define MAX_YC        0xff78
++  #define XC_TO_X(x)  (((x - MIN_XC)<=0?1:(x - MIN_XC)) * 0x3FFF / (MAX_XC - MIN_XC))
++  #define YC_TO_Y(y)  (((y - MIN_YC)<=0?1:(y - MIN_YC)) * 0x3FFF / (MAX_YC - MIN_YC))
++
++  stData = (struct tscrn_usb_data_report *)data;
++  if (!IS_TOUCHED(stData))
++  {
++    /*
++     * finger-up event: this is usually offset a few pixels,
++     * so ignore this x and y values. And invalidate avg.
++     */
++    upx = avgx;
++    upy = avgy;
++    GET_TIME(uptv); /* ready for the next finger-down */
++    tv.tv_sec = 0;
++    state->buttons = 0;
++    avgx=-1; /* invalidate avg */
++    return 0;
++  }
++  
++  /* based on compensated coordinates */
++  //x = ((unsigned int)GET_XC(stData))>>2;
++  x = XC_TO_X(GET_XC(stData));
++  if(x <= 0) x = 1;
++  if(x > 0x3fff) x = 0x3fff;
++  y = 0x3fff - YC_TO_Y(GET_YC(stData));
++  //y = (0xffff - (unsigned int)(GET_YC(stData))>>2);
++  if(y <= 0) y = 1;
++  if(y > 0x3fff) y = 0x3fff;
++  /* based on X,Y raw coordinates */
++  //x = XRAW_TO_X(GET_XR(stData));
++  //if(x <= 0) x = 1;
++  //if(x > 0x3fff) x = 0x3fff;
++  //y = 0x3fff - YRAW_TO_Y(GET_YR(stData));
++  //if(y <= 0) y = 1;
++  //if(y > 0x3fff) y = 0x3fff;
++  
++  //syslog(LOG_DEBUG,"coordinates Xc=%u Yc=%u",GET_XC(stData),GET_YC(stData));
++  //syslog(LOG_DEBUG,"coordinates Xr=%u Yr=%u",GET_XR(stData),GET_YR(stData));
++  //syslog(LOG_DEBUG,"  max       X =%u Y =%u",win.ws_col,win.ws_row);
++  //syslog(LOG_DEBUG,"coordinates x =%u y =%u",x,y);
++    
++  if (avgx < 0) /* press event */
++  { 
++    GET_TIME(tv);
++    if (DIF_TIME(uptv, tv) < opt_time)
++    {
++      /* count as button press placed at finger-up pixel */
++      state->buttons = GPM_B_LEFT;
++      realposx = avgx = upx; state->x = REAL_TO_XCELL(realposx);
++      realposy = avgy = upy; state->y = REAL_TO_YCELL(realposy);
++      upx = (upx - x); /* upx and upy become offsets to use for this drag */
++      upy = (upy - y);
++      return 0;
++    }
++    /* else, count as a new motion event */
++    tv.tv_sec = 0; /* invalidate */
++    realposx = avgx = x; state->x = REAL_TO_XCELL(realposx);
++    realposy = avgy = y; state->y = REAL_TO_YCELL(realposy);
++  }
++
++  state->buttons = 0;
++  if (tv.tv_sec)        /* a drag event: use position relative to press */
++  { 
++    x += upx;
++    y += upy;
++    state->buttons = GPM_B_LEFT;
++  }
++
++  realposx = avgx = (9*avgx + x)/10; state->x = REAL_TO_XCELL(realposx);
++  realposy = avgy = (9*avgy + y)/10; state->y = REAL_TO_YCELL(realposy);
++
++  return 0;
++
++  #undef XC_TO_X
++  #undef YC_TO_Y
++  #undef MIN_XC
++  #undef MAX_XC
++  #undef MIN_YC
++  #undef MAX_YC
++  #undef XRAW_TO_X
++  #undef YRAW_TO_Y
++  #undef MIN_XR
++  #undef MAX_XR
++  #undef MIN_YR
++  #undef MAX_YR
++
++  #undef REAL_TO_XCELL
++  #undef REAL_TO_YCELL
++  #undef GET_TIME
++  #undef DIF_TIME
++}
++
+ static int M_mtouch(Gpm_Event *state,  unsigned char *data)
+ {
+   /*
+@@ -1768,6 +1894,15 @@
+   return type;
+ }
+ 
++static Gpm_Type *I_usbmt(int fd, unsigned short flags,
++			  struct Gpm_Type *type, int argc, char **argv)
++{
++  //int i;
++  //for(i=0; i< argc; i++)
++  //  syslog(LOG_DEBUG,"I_usbmt no=%d, val=%s",i,argv[i]);
++  return type;
++}
++
+ static Gpm_Type *I_mtouch(int fd, unsigned short flags,
+ 			  struct Gpm_Type *type, int argc, char **argv)
+ {
+@@ -2042,6 +2177,11 @@
+   {"wp",      "Genius WizardPad tablet",
+            "wizardpad", M_wp, I_wp, STD_FLG,
+                                 {0xFA, 0x42, 0x00, 0x00}, 10, 1, 0, 1, 0},
++                                
++  // usb touch-screen 12-06-2000 RGA
++  {"usbmt",   "MicroTouch touch-screens usb (only button-1 events, by now)",
++           "", M_usbmt, I_usbmt, STD_FLG,
++                                {0x01, 0x01, 0x00, 0x00}, 11, 1, 0, 1, 0},
+ 
+   {"",     "",
+            "", NULL, NULL, 0,

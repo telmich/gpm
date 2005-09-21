@@ -1,0 +1,17 @@
+diff -ur gpm-1.19.6.orig/src/gpm.c gpm-1.19.6/src/gpm.c
+--- gpm-1.19.6.orig/src/gpm.c	Tue Oct  2 00:02:25 2001
++++ gpm-1.19.6/src/gpm.c	Sat Oct  6 03:27:06 2001
+@@ -1030,10 +1030,10 @@
+   len=sizeof(ctladdr.sun_family)+strlen(GPM_NODE_CTL);
+   if (bind(ctlfd,(struct sockaddr *)(&ctladdr),len)==-1)
+       oops(ctladdr.sun_path);
+-   maxfd=max(maxfd,ctlfd);
++  maxfd=max(maxfd,ctlfd);
+ 
+-   /* needs to be 0777, so all users can _try_ to access gpm */
+-   chmod(GPM_NODE_CTL,0777);
++  if (chmod(GPM_NODE_CTL,0600)==-1)
++    oops(GPM_NODE_CTL);
+ 
+ /*....................................... get screen dimensions */
+ 

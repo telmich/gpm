@@ -1,0 +1,129 @@
+diff  -u gpm-1.17.9/mice.c
+--- gpm-1.17.9/mice.c.orig
++++ gpm-1.17.9/mice.c	Mon Jun 25 13:17:49 2001
+@@ -57,6 +57,7 @@
+ 
+ #include <linux/kdev_t.h> /* MAJOR */
+ #include <linux/keyboard.h>
++#include <linux/pc_keyb.h>
+ 
+ #ifdef HAVE_LINUX_JOYSTICK_H
+ #include <linux/joystick.h>
+@@ -1147,17 +1148,109 @@
+   return type;
+ }
+ 
+-/* intellimouse, ps2 version: Ben Pfaff and Colin Plumb */
+-static Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type)
++#define AUX_SEND_ID 0xF2
++#define AUX_ID_ERROR  -1
++#define AUX_ID_PS2    0
++#define AUX_ID_IMPS2  3
++
++/*
++ * Sends the SEND_ID command to the mouse.
++ * Return one of AUX_ID_...
++ */
++static int read_mouse_id(int fd)
+ {
+-  static unsigned char s1[] = { 243, 200, 243, 100, 243, 80, };
+-  static unsigned char s2[] = { 246, 230, 244, 243, 100, 232, 3, };
+-  write (fd, s1, sizeof (s1));
+-  usleep (30000);
+-  write (fd, s2, sizeof (s2));
++  unsigned char c = AUX_SEND_ID;
++  unsigned char id;
++
++  write(fd, &c, 1);
++  read(fd, &c, 1);
++  if (c != AUX_ACK) {
++    return(-1);
++  }
++  read(fd, &id, 1);
++
++#ifdef DEBUG
++  fprintf(stderr, "Returning mouse id %d (ack=%d)\n", id, c);
++#endif
++
++  return(id);
++}
++
++static int write_to_mouse(int fd, unsigned char *data, size_t len)
++{
++  int i;
++  int error = 0;
++  for (i = 0; i < len; i++) {
++    unsigned char c;
++    write(fd, &data[i], 1);
++    read(fd, &c, 1);
++#ifdef DEBUG
++    fprintf(stderr, "Wrote: %02X, Read: %02X\n", data[i], c);
++#endif
++    if (c != AUX_ACK) {
++      error++;
++    }
++  }
+   usleep (30000);
+   tcflush (fd, TCIFLUSH);
+-  return type;
++  return(error);
++}
++
++/* intellimouse, ps2 version: Ben Pfaff and Colin Plumb */
++static Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type)
++{
++  int i;
++  int id;
++  static unsigned char basic_init[] = { AUX_ENABLE_DEV, AUX_SET_SAMPLE, 100 };
++  static unsigned char imps2_init[] = { AUX_SET_SAMPLE, 200, AUX_SET_SAMPLE, 100, AUX_SET_SAMPLE, 80, };
++  static unsigned char ps2_init[] = { AUX_SET_SCALE11, AUX_ENABLE_DEV, AUX_SET_SAMPLE, 100, AUX_SET_RES, 3, };
++
++  /* Do a basic init in case the mouse is confused */
++  write_to_mouse(fd, basic_init, sizeof (basic_init));
++
++  /* Now try again and make sure we have a PS/2 mouse */
++  if (write_to_mouse(fd, basic_init, sizeof (basic_init)) != 0) {
++    gpm_debug_log(LOG_ERR, "imps2: PS/2 mouse failed init");
++    return(NULL);
++  }
++
++  /* Now try to switch to 3 button mode */
++  if (write_to_mouse(fd, imps2_init, sizeof (imps2_init)) != 0) {
++    gpm_debug_log(LOG_ERR, "imps2: PS/2 mouse failed (3 button) init");
++    return(NULL);
++  }
++
++  /* Now read the mouse id */
++  id = read_mouse_id(fd);
++  if (id == AUX_ID_ERROR) {
++    gpm_debug_log(LOG_ERR, "imps2: PS/2 mouse failed to read id");
++    return(NULL);
++  }
++
++  /* And do the real initialisation */
++  if (write_to_mouse(fd, ps2_init, sizeof (ps2_init)) != 0) {
++    gpm_debug_log(LOG_ERR, "imps2: PS/2 mouse failed setup");
++    return(NULL);
++  }
++
++  if (id == AUX_ID_IMPS2) {
++    /* Really an intellipoint, so initialise 3 button mode (4 byte packets) */
++    gpm_debug_log(LOG_NOTICE, "imps2: Auto-detected intellimouse PS/2");
++
++    return type;
++  }
++  if (id == AUX_ID_PS2) {
++    gpm_debug_log(LOG_NOTICE, "imps2: Auto-detected standard PS/2");
++    for (type=mice; type->fun; type++) {
++      if (strcmp(type->name, "ps2") == 0) {
++        return(type);
++      }
++    }
++    /* ps2 was not found!!! */
++    return(NULL);
++  }
++  gpm_debug_log(LOG_ERR, "imps2: Auto-detected unknown mouse type");
++  return(NULL);
+ }
+ 
+ static Gpm_Type *I_twid(int fd, unsigned short flags, struct Gpm_Type *type)

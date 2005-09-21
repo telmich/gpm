@@ -1,0 +1,11 @@
+--- gpm-1.19.3/Makefile.in	2000/07/22 06:50:28	1.1
++++ gpm-1.19.3/Makefile.in	2000/07/22 06:50:45
+@@ -142,7 +142,7 @@
+ 	for i in mev gpm-root; do \
+ 		$(INSTALL_PROGRAM) $$i $(bindir)/$$i ;\
+ 	done
+-	$(INSTALL_PROGRAM) -o root -m 755 disable-paste $(bindir)/disable-paste
++	$(INSTALL_PROGRAM) disable-paste $(bindir)/disable-paste
+ 	# POSIX requires the range of a for loop be nonempty and Bash
+ 	# 2.x goes along; unfortunately that means an additional
+ 	# headache in cases like this

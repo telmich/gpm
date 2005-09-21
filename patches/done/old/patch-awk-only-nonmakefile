@@ -1,0 +1,97 @@
+diff -Naur gpm-1.19.6/doc/manpager gpm-1.19.6-new/doc/manpager
+--- gpm-1.19.6/doc/manpager	Sun Sep 23 20:00:03 2001
++++ gpm-1.19.6-new/doc/manpager	Thu Jan  3 23:37:35 2002
+@@ -1,6 +1,5 @@
+-#! /usr/bin/gawk -f
+-
+-# Warning: this uses gnu-awk features
++#! /usr/bin/awk -f
++# Copyright (c) 1998-2001 Alessandro Rubini
+ 
+ BEGIN {IN=0}
+ 
+@@ -23,18 +22,32 @@
+ 
+ 	        { gsub("^%M ?",""); }
+ 
+-# itz Wed Sep 30 10:28:58 PDT 1998
++# Use gensub for converting tags: itz Sep 30 1998
++#
++# However, the gensub function is gawk-specific, and we want things
++# to work with original-awk too (for portability).
++# Therefore, use a normal gsub, even though it's a subobptimal solution
++# as it may step in extra braces. The good solution will be piping to sed,
++# or match, extract subesxpression, replace, reinsert -- bleah...
++# (ARub, Oct 10 2000)
+ /@b\{/ {
+-  $0 = gensub(/@b\{([^}]+)\}/, "\\\\fB\\1\\\\fP","g");
++  #$0 = gensub(/@b\{([^}]+)\}/, "\\\\fB\\1\\\\fP","g");
++  gsub("@b\{","\\fB");
++  gsub("\}","\\fP");
++} 
++
++/@var\{/ {
++  #$0 = gensub(/@var\{([^}]+)\}/, "\\\\fI\\1\\\\fP","g");
++  gsub("@var\{","\\fB");
++  gsub("\}","\\fP");
+ } 
+ 
+ /@(samp|code|file)\{/ {
+-  $0 = gensub(/@(samp|code|file)\{([^}]+)\}/, "`\\2'","g");
++  #$0 = gensub(/@(samp|code|file)\{([^}]+)\}/, "`\\2'","g");
++  gsub("@(samp|code|file)\{","");
++  gsub("\}","");
+ }
+ 
+-/@var\{/ {
+-  $0 = gensub(/@var\{([^}]+)\}/, "\\\\fI\\1\\\\fP","g");
+-} 
+ 
+ /@xref\{.*\}\./ {
+   gsub(/@xref\{.*\}\./,"");
+@@ -55,6 +68,7 @@
+ 		}
+ 
+ /^@table/       { TABLE=1; }
++/^@itemize/     { TABLE=1; next}
+ 
+ /^@item/        {
+ 	        gsub("^@item *","");
+@@ -63,6 +77,7 @@
+ 		}
+ 
+ /^@end table/   {TABLE=0}
++/^@end itemize/ {TABLE=0}
+ 
+ # discard other texinfo commands
+ 
+@@ -78,9 +93,10 @@
+ 		gsub("\\%","%");
+ 		}
+ 
++
+ # remove leading blanks
+ 
+-/^[ \t]/	{gsub("^[ \t]*","");}
++/^[ \t]/        {gsub("^[ \t]","");}
+ 
+ # put a .LP at blank lines
+ 
+diff -Naur gpm-1.19.6/doc/mktxt gpm-1.19.6-new/doc/mktxt
+--- gpm-1.19.6/doc/mktxt	Sun Sep 23 20:00:03 2001
++++ gpm-1.19.6-new/doc/mktxt	Thu Jan  3 20:08:31 2002
+@@ -1,6 +1,6 @@
+-#! /usr/bin/gawk -f
++#! /usr/bin/awk -f
+ 
+-# Warning: this may use gnu-awk features
++# This shouldn't contain any gawk specific features anymore 
+ 
+ # Program to create ascii from info;
+ # Missing: table of contents
+@@ -29,7 +29,7 @@
+ NODELINE==5  { printf "\t\t\t\t"; NODELINE=0}
+ 
+ 
+-/^* Menu:$/  { KEEP=0 }
++/^\*\ Menu:$/  { KEEP=0 }

@@ -1,0 +1,88 @@
+On Wed, Feb 20, 2002 at 12:13:36AM +0100, Nico Schottelius wrote:
+> Just send the patch to me. I don't mind where it comes from,
+> I mind if it works or not.
+
+Ok, this patch (against 1.20.0-gamma) is based on the Debian patch.
+It adds an ms3 repeater (supporting the wheel), and also fixes the
+ms3 driver to support the wheel.  A couple issues:
+
+- The Debian patch adds wdx and wdy to Gpm_Event, to support (in
+  principle) arbitrary wheel deltas.  1.20.0-gamma supports wheels
+  with the GPM_B_UP and GPM_B_DOWN button bits, so I just threw away
+  everything except one bit of wdy.  I don't think this is a big
+  deal in practice (at least, not for me).
+
+  Code from Debian patch, in case you're interested:
+
+    switch (data[3] & 0x0f) {
+      case 0x0e: state->wdx = +1; break;
+      case 0x02: state->wdx = -1; break;
+      case 0x0f: state->wdy = +1; break;
+      case 0x01: state->wdy = -1; break;
+    }
+
+- The M_ms3 change is untested, but I'm pretty sure it's right.  I
+  may be able to test it later.
+
+Regarding my questions in my first mail, Blaise mailed me privately
+saying that he uses the imps2 repeater with X, and has experienced
+no problems.  I'm not exactly sure why, so I tend to think the ms3
+repeater should be preferred for the reason I described (again,
+unless I misunderstand something).
+
+Andrew
+
+--- mice.c.orig	Tue Feb 19 22:02:23 2002
++++ mice.c	Wed Feb 20 00:15:39 2002
+@@ -369,14 +369,39 @@ static int M_ms3(Gpm_Event *state,  unsi
+ {
+    state->buttons= ((data[0] & 0x20) >> 3)   /* left */
+       | ((data[3] & 0x10) >> 3)   /* middle */
+-      | ((data[0] & 0x10) >> 4);   /* right */
++      | ((data[0] & 0x10) >> 4)   /* right */
++      | (((data[3] & 0x0f) == 0x0f) * GPM_B_UP)     /* wheel up */
++      | (((data[3] & 0x0f) == 0x01) * GPM_B_DOWN);  /* wheel down */
+    state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
+    state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
+-   /* wheel (dz??) is (data[3] & 0x0f) */
+ 
+    return 0;
+ }
+ 
++static int R_ms3(Gpm_Event *state, int fd)
++{
++   char buf[4] = {0, 0, 0, 0};
++   int dx, dy;
++
++   buf[0] |= 0x40;
++
++   if (state->buttons & GPM_B_LEFT)     buf[0] |= 0x20;
++   if (state->buttons & GPM_B_MIDDLE)   buf[3] |= 0x10;
++   if (state->buttons & GPM_B_RIGHT)    buf[0] |= 0x10;
++   if (state->buttons & GPM_B_UP)       buf[3] |= 0x0f;
++   if (state->buttons & GPM_B_DOWN)     buf[3] |= 0x01;
++
++   dx = limit_delta(state->dx, -128, 127);
++   buf[1] = dx & ~0xC0;
++   buf[0] |= (dx & 0xC0) >> 6;
++ 
++   dy = limit_delta(state->dy, -128, 127);
++   buf[2] = dy & ~0xC0;
++   buf[0] |= (dy & 0xC0) >> 4;
++
++   return write(fd,buf,4);
++}
++
+ /* M_brw is a variant of m$ 'Intellimouse' the middle button is different */
+ static int M_brw(Gpm_Event *state,  unsigned char *data)
+ {
+@@ -2065,7 +2090,7 @@ Gpm_Type mice[]={
+                                 {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
+    {"ms3", "Microsoft Intellimouse (serial) - 3 buttons, wheel unused",
+            "", M_ms3, I_pnp, CS7 | STD_FLG,
+-                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0},
++                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, R_ms3},
+    {"netmouse",  "Genius NetMouse (ps2) - 2 buttons and 2 buttons 'up'/'down'.", 
+            "", M_netmouse, I_netmouse, CS7 | STD_FLG,
+                                 {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
+

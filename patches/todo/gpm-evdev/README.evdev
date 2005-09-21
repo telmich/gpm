@@ -1,0 +1,64 @@
+	GPM SUPPORT FOR LINUX EVENT INTERFACE MICE
+
+	Usage:
+	------
+Simply run 
+$ gpm -t evdev -m /dev/input/event##
+Just as it if were a serial or PS/2 mouse.  The hard bit is working out
+which event device your mouse is plugged into.  The way I do this is to
+run
+$ xxd /dev/input/event##
+For all the event devices (in numerical order), and see which one
+produces output when I wave the mouse.
+
+Note that you may need to pass a `-r #' flag to gpm -- I find that it is
+a tad too sensitive by default.
+
+	FAQ:
+	----
+Actually, these aren't FAQs at all since this is the first time I have
+shown the world this code...
+
+1: I get no output from any of the /dev/input/event## devices, what's
+wrong?
+
+Execute the following commands as root:
+$ modprobe input
+$ modprobe hid
+$ modprobe evdev
+These will load the driver if it is available.  If it isn't (i.e. if
+either of these commands fail), you'll need a newer kernel or a backport
+- I would advise getting a newer kernel.  It may also be worth checking
+if you are also sufferring from the problem solved in Question 2...
+
+2: The mouse moves randomly all over the place, or does nothing at all,
+yet I get output from /dev/input/event##, what's with that?
+
+There are two possibilities here - you may have other event devices such
+as USB joysticks or keyboards attached, and the device node you're
+looking at is one of them, or the major and minor numbers of your device
+nodes are incorrect.  It is worth noting that, as shipped, SuSE Linux
+7.1 has the wrong minor numbers on it's event nodes.
+
+If you suffer from the first problem, just try the other event devices
+until you find the mouse.  If you suffer from the second problem execute
+the following commands as root in a bourne-compatible shell e.g. bash:
+$ cd /dev/input
+$ umask 22
+$ rm event*
+$ for i in `seq 0 63`;do mknod event${i} c 13 `echo ${i} 64 + p|dc`;done
+
+3: I don't have a /dev/input directory, or the directory is empty.
+
+If you use devfs, then (as root):
+$ modprobe evdev
+should fix it.
+
+Otherwise, you can run the following commands as root:
+$ mkdir -p /dev/input
+$ cd /dev/input
+$ umask 22
+$ rm event*
+$ for i in `seq 0 63`;do mknod event${i} c 13 `echo ${i} 64 + p|dc`;done
+
+(c) 2001 Philip Willoughby <pgw99@doc.ic.ac.uk>

@@ -1,0 +1,41 @@
+diff -ru gpm-1.19.6/src/gpn.c gpm-1.19.6-patched/src/gpn.c
+--- gpm-1.19.6/src/gpn.c	Sun Sep 23 15:00:03 2001
++++ gpm-1.19.6-patched/src/gpn.c	Mon Jan 21 23:07:52 2002
+@@ -445,7 +445,10 @@
+ /* report should be here and nothing else! */
+ 
+ #if 1 /* was: "if (!defined(HAVE_SYSLOG) || !defined(HAVE_VSYSLOG))" */
++#if 0
+     if (!freopen("/dev/console","w",stderr)) /* the currently current console */
++#endif
++    if (!freopen("/dev/null","w",stderr)) /* the currently current console */
+       {
+         oops("freopen(stderr) failed");
+       }
+diff -ru gpm-1.19.6/src/mice.c gpm-1.19.6-patched/src/mice.c
+--- gpm-1.19.6/src/mice.c	Thu Sep 27 08:50:29 2001
++++ gpm-1.19.6-patched/src/mice.c	Mon Jan 21 22:50:26 2002
+@@ -1409,13 +1409,14 @@
+ 
+   /* Non mman: change from any available speed to the chosen one */
+   for (i=9600; i>=1200; i/=2)
+-      setspeed(fd, i, opt_baud, (type->fun != M_mman) /* write */, flags);
++      setspeed(fd, i, opt_baud, 1 /* (type->fun != M_mman) */ /* write */, flags);
+ 
+   /*
+    * reset the MouseMan/TrackMan to use the 3/4 byte protocol
+    * (Stephen Lee, sl14@crux1.cit.cornell.edu)
+    * Changed after 1.14; why not having "I_mman" now?
+    */
++#if 0
+   if (type->fun==M_mman)
+     {
+       setspeed(fd, 1200, 1200, 0, flags); /* no write */
+@@ -1423,6 +1424,7 @@
+       setspeed(fd, 1200, opt_baud, 0, flags); /* no write */
+       return type;
+     }
++#endif
+ 
+   if(type->fun==M_geni)
+     {

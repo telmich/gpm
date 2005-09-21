@@ -1,0 +1,25 @@
+From: Radoslaw Garbacz <garbacz@posexperts.com.pl>
+To: rubini@linux.it
+Date: Mon, 19 Jun 2000 12:28:02 +0000
+Subject: gpm and usb touchscreen
+
+ My name is Radoslaw Garbacz.
+I have added support to MicroTouch usb devices in gpm application. I
+send You the patch and the source of mice.c (which I changed).
+ Please send me any suggestions about it.
+ If You think that is is good idea to join my changes to official
+release of gpm I'll be very glad.
+I also send You source of microtouch device driver to check my changes.
+
+It is also nessesary to copy touchscreen.h file to ./include/linux
+directory.
+
+I changed the gpm, version 1.19.1.
+
+Best reagrds.
+
+--
+    >>> POS Experts Consulting <<<
+    Radoslaw Garbacz
+       tel : (048 71) 354 80 85
+

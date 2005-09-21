@@ -1,0 +1,77 @@
+2004-03-25  Stepan Kasal  <kasal@ucw.cz>
+
+	* doc/manpager: the first argument to gsub is constant regex,
+	  there is no need to give it as string; this also silences
+	  some gawk warnings.
+
+diff -u -r1.1 manpager
+--- gpm/doc/manpager	27 May 2002 15:35:47 -0000	1.1
++++ gpm/doc/manpager	25 Mar 2004 13:23:46 -0000
+@@ -32,20 +32,20 @@
+ # (ARub, Oct 10 2000)
+ /@b\{/ {
+   #$0 = gensub(/@b\{([^}]+)\}/, "\\\\fB\\1\\\\fP","g");
+-  gsub("@b\{","\\fB");
+-  gsub("\}","\\fP");
++  gsub(/@b\{/,"\\fB");
++  gsub(/\}/,"\\fP");
+ } 
+ 
+ /@var\{/ {
+   #$0 = gensub(/@var\{([^}]+)\}/, "\\\\fI\\1\\\\fP","g");
+-  gsub("@var\{","\\fB");
+-  gsub("\}","\\fP");
++  gsub(/@var\{/,"\\fB");
++  gsub(/\}/,"\\fP");
+ } 
+ 
+ /@(samp|code|file)\{/ {
+   #$0 = gensub(/@(samp|code|file)\{([^}]+)\}/, "`\\2'","g");
+-  gsub("@(samp|code|file)\{","");
+-  gsub("\}","");
++  gsub(/@(samp|code|file)\{/,"");
++  gsub(/\}/,"");
+ }
+ 
+ 
+@@ -54,8 +54,8 @@
+ }
+ 
+ /@ref\{.*\}/ {
+-  gsub("@ref\{","");
+-  gsub("\}","");
++  gsub(/@ref\{/,"");
++  gsub(/\}/,"");
+ }
+ 
+ /@\*/ {
+@@ -89,14 +89,14 @@
+ 
+ 
+ 		{
+-		gsub("[^\\\\]%.*$","");
+-		gsub("\\%","%");
++		gsub(/[^\\]%.*$/,"");
++		gsub(/\%/,"%");
+ 		}
+ 
+ 
+ # remove leading blanks
+ 
+-/^[ \t]/        {gsub("^[ \t]","");}
++/^[ \t]/        {gsub(/^[ \t]/,"");}
+ 
+ # put a .LP at blank lines
+ 
+@@ -112,9 +112,9 @@
+ 
+ # Escape single slashes (e.g. in documentation for `-l' command line option)
+ 
+-		{gsub("\\\\ ", "\\\\ ");}
++		{gsub(/\\ /, "\\\\ ");}
+ 
+-                {gsub("~", "~~");}
++                {gsub(/~/, "~~");}
+ 
+ 	        {print > NAME}
+ 

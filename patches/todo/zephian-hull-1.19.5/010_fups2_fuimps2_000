@@ -1,0 +1,54 @@
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/mice.c gpm-1.19.5/src/mice.c
+--- gpm-1.19.5.orig/src/mice.c	Thu Oct  4 23:40:48 2001
++++ gpm-1.19.5/src/mice.c	Thu Oct  4 23:40:34 2001
+@@ -1837,6 +1837,29 @@
+ #endif
+ }
+ 
++/* PS/2 Init */
++static Gpm_Type *I_fuimps2(int fd, unsigned short flags,
++			   struct Gpm_Type *type, int argc, char **argv)
++{
++  // cmd is used by the write_ps2* macros.
++  unsigned char cmd[15];
++  int tmp, error = 0;
++
++  if (check_no_argv(argc, argv)) return NULL;
++
++  // Magic to enable the IMPS/2 protocol.
++  error += write_ps2 (fd, GPM_AUX_SET_SAMPLE, 200, 2, -1);
++  error += write_ps2 (fd, GPM_AUX_SET_SAMPLE, 100, 2, -1);
++  error += write_ps2 (fd, GPM_AUX_SET_SAMPLE, 80, 2, -1);
++  if (error) {
++    gpm_debug_log(LOG_ERR, "fuimps2: PS/2 mouse failed (3 button) init");
++    return(NULL);
++  }
++
++  return type;
++}
++
++
+ /*
+  * This works with Dexxa Optical Mouse, but because in X same initstring
+  * is named ExplorerPS/2 so I named it in the same way.
+@@ -2197,6 +2220,9 @@
+   {"bm",   "For some busmice, including Microsoft and Logitech busmice.",
+            "BusMouse", M_bm, I_empty, STD_FLG, /* bm is sun */
+                                 {0xf8, 0x80, 0x00, 0x00}, 3, 3, 0, 0, 0},
++  {"fups2","For BROKEN PS/2 mice (round with 6 metal pins).",
++           "PS/2", M_ps2, I_empty, STD_FLG,
++                                {0xc0, 0xc0, 0x00, 0x00}, 3, 1, 0, 0, 0},
+   {"ps2",  "For most busmice connected to a PS/2 port (round with 6 metal\n"
+            "                     pins).",
+            "PS/2", M_ps2, I_ps2, STD_FLG,
+@@ -2222,6 +2248,10 @@
+            "                     connector with 6 pins), 3 buttons (wheel is repeated).",
+            "", M_imps2, I_ps2, STD_FLG,
+                                 {0x08, 0x08, 0x00, 0x00}, 4, 1, 0, 0, 0},
++  {"fuimps2","For BROKEN wheel mice on a PS/2 port\n"
++           "(round connector with 6 pins), 3 buttons (wheel is repeated).",
++           "", M_imps2, I_fuimps2, STD_FLG,
++                                {0xc0, 0xc0, 0x00, 0x00}, 4, 1, 0, 0, 0},
+   {"exps2",   "IntelliMouse Explorer (ps2) - 3 buttons, wheel unused",
+            "ExplorerPS/2", M_ps2, I_ps2, STD_FLG,
+                                 {0x08, 0x08, 0x00, 0x00}, 4, 1, 0, 0, 0},

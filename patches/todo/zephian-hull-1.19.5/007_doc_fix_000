@@ -1,0 +1,24 @@
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/doc/doc.gpm gpm-1.19.5/doc/doc.gpm
+--- gpm-1.19.5.orig/doc/doc.gpm	Wed Sep 19 16:22:22 2001
++++ gpm-1.19.5/doc/doc.gpm	Thu Oct  4 23:37:34 2001
+@@ -403,7 +403,7 @@
+         Set the responsiveness. A higher
+ 	responsiveness is used for a faster cursor motion.
+ 
+-@item -R @var{name}
++@item -R@var{name}
+         Causes @code{gpm} to act as a repeater: any mouse data received while
+         in graphic mode will be produced on the fifo @file{/dev/gpmdata}
+         in protocol @var{name}.  In principle, you can use the same
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/gpn.c gpm-1.19.5/src/gpn.c
+--- gpm-1.19.5.orig/src/gpn.c	Thu Oct  4 23:37:40 2001
++++ gpm-1.19.5/src/gpn.c	Thu Oct  4 23:37:34 2001
+@@ -173,7 +173,7 @@
+          "    -p               draw the pointer while striking a selection\n"
+          "    -q               quit after changing mouse behaviour\n"
+          "    -r number        sets the responsiveness (default %i)\n"
+-         "    -R mouse-type    enter repeater mode. X should read /dev/gpmdata\n"
++         "    -Rmouse-type    enter repeater mode. X should read /dev/gpmdata\n"
+          "                     like it was a mouse-type device.  Default is MouseSystems.\n"
+          "                     You can also specify \"raw\" to relay the raw device data.\n"
+ 	 "    -F               Force always in repeat mode..\n"

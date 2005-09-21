@@ -1,0 +1,1613 @@
+diff -u -r gpm-1.19.3/doc/doc.gpm gpm-1.19.3.wheel/doc/doc.gpm
+--- gpm-1.19.3/doc/doc.gpm	Tue Jul 18 22:43:18 2000
++++ gpm-1.19.3.wheel/doc/doc.gpm	Wed Nov 22 21:47:30 2000
+@@ -852,10 +852,10 @@
+ consoles. 
+ @xref{Default Handlers}.
+ 
+-When a client is involved, it is handled a @code{Gpm_Event}
+-structure, built by the server. The fields for @code{Gpm_Event} are the
++When a client is involved, it is handled a @code{Gpm_EventExt} structure
++built by the server. The fields for @code{Gpm_EventExt} are the
+ following:
+-@tindex Gpm_Event
++@tindex Gpm_EventExt
+ 
+ @table @code
+ 
+@@ -911,8 +911,35 @@
+ 	of them is active at a time, to allow using @code{switch} on the
+ 	value. Vertical outrun takes precedence on horizontal outrun.
+         @xref{Margins}.
++
++@item short dw;       /* Extended element */
++	Wheel1 displacement after last event reading.
++
++@item short w;       /* Extended element */
++	Wheel1 position. It is not checked on an overflow, and therefore
++  using dw is prefered. Another way of wheel processing is provided
++  by FWHEEL and BWHEEL event types. These event types must be disabled,
++  if wheel position is processed in an application.
++
++@item short dw2;       /* Extended element */
++	Wheel2 displacement after last event reading.
++
++@item short w2;       /* Extended element */
++	Wheel2 position. FWHEEL2 and BWHEEL2 are event types for the second
++  wheel, similar to FWHEEL and BWHEEL.
++
++@item int pad[18];       /* Extended element */
++	Reserved for future use.
++
+ @end table
+ 
++Extended elements are those added to original Gpm_Event structure
++in order to enable whell support. Extended elements are accessible
++by an event handler, as well as Gpm_GetEventExt and Gpm_GetSnapshotExt
++functions, while Gpm_GetEvent or Gpm_GetSnapshot operate on the
++original structure. Check if @code{GPM_EVENT_EXT} is
++defined before using extended elements and functions in an application.
++
+ %==========================================================================
+ @node Margins, Event Types, Events, Gpm Internals
+ @section How margins are managed
+@@ -941,7 +968,7 @@
+ @node Event Types, Connection Details, Margins, Gpm Internals
+ @section Event Types
+ 
+-The @code{type} field in @code{Gpm_Event} is made up of bit-wide
++The @code{type} field in @code{Gpm_EventExt} is made up of bit-wide
+ flags. The existing bit masks belong to two groups: bare events and
+ cooked events. The bit-mask @code{GPM_BARE_EVENTS} is provided to
+ extract bare events, by and-ing (@samp{&}) it with the @code{type} field.
+@@ -969,6 +996,17 @@
+ @item GPM_LEAVE
+         This is only delivered by the high level library, too. Events
+         of type @code{GPM_LEAVE} have all other fields undefined.
++@item GPM_FWHEEL
++	Wheel turned forward (toward the user). Turning a wheel more than one
++  notch (Intellimouse) or for a longer time (A4-tech mouse) will produce
++  additional GPM_FWHEEL events. This is an extended type - you need to
++  put '#ifdef GPM_FWHEEL' before 	using the type in your code. 
++@item GPM_BWHEEL
++	Same as GPM_FWHEEL but for turning the wheel back.
++@item GPM_FWHEEL2
++	Wheel 2 turned forward (right). See comments for GPM_FWHEEL
++@item GPM_BWHEEL2
++	Wheel 2 turned back (left).
+ @end table
+ 
+ Cooked events are the following:
+@@ -1022,10 +1060,15 @@
+ 
+ @table @code
+ @item eventMask
+-	A bitmask of the events the client wants
+-	to receive. Both bare and cooked events are
+-	allowed to appear in the mask.
+-
++	A bitmask of the events the client wants to receive.
++	Both bare and cooked events are	allowed to appear in the mask.
++	In particular, GPM_FWHEEL and GPM_BWHEEL can be disabled by
++	omitting the masks:
++
++		Gpm_Connect conn;
++		/* Enable all events, except GPM_FWHEEL and GPM_BWHEEL
++		conn.eventMask =  ~(GPM_FWHEEL | GPM_BWHEEL);
++		
+ @item defaultMask
+ 	A mask to tell which events allow
+ 	a default treatment (the selection one). These are mouse events,
+@@ -1171,7 +1214,7 @@
+ application. It is passed two arguments and returns an integer value,
+ according to the following typedef:
+ 
+-@code{typedef int Gpm_Handler(Gpm_Event *@var{event}, void *@var{clientdata});}
++@code{typedef int Gpm_Handler(Gpm_EventExt *@var{event}, void *@var{clientdata});}
+ @tindex Gpm_Handler
+ 
+ The @var{event} is used to instantiate the mouse event just received,
+@@ -1366,8 +1409,35 @@
+ failure, and 0 after closing the connection. Failure can happen if a
+ signal interrupted the read system call. This function doesn't work with
+ xterm mouse reporting and is meant for internal use by the library.
++
++This function does not return the extended part.
+ @end deftypefun
+ 
++@deftypefun int Gpm_GetEventExt (Gpm_EventExt *@var{event});
++As Gpm_GetEvent, but returns extended part. For backward compatibility
++the application should check @code{GPM_EVENT_EXT}, as given by the following
++example: 
++
++@example @noindent
++    int dw, w, dw2, w, result;
++
++#ifdef GPM_EVENT_EXT
++    @{
++        Gpm_Event mevnt;  
++        result = Gpm_GetEventExt(&mevnt);		
++        w = mevnt.w; dw = nevnt.dw;
++    @}
++#else
++    @{
++        Gpm_Event mevnt;  
++        result = Gpm_GetEvent(&mevnt);		
++        w = dw = w2 = dw2 = 0;
++    @}	
++#endif
++@end example 
++
++@end deftypefun
++	
+ %.........................................................................
+ @deftypefun int Gpm_CharsQueued (void);
+ 
+@@ -1431,7 +1501,7 @@
+ %.........................................................................
+ @deftypefun int Gpm_DrawPointer (int @var{x}, int @var{y}, int @var{fd});
+ 
+-@deftypefunx int GPM_DRAWPOINTER (Gpm_Event *@var{ePtr};)
++@deftypefunx int GPM_DRAWPOINTER (Gpm_EventExt *@var{ePtr};)
+ 
+ 
+ These are actually macros. They should be used to draw the mouse pointer after
+@@ -1512,8 +1582,14 @@
+ events, and applications usually don't want to lose events, the function
+ returns 0 if the input queue is not empty.
+ 
++The functions does not return the extended part.
+ @end deftypefun
+ 
++@deftypefun int Gpm_GetSnapshotExt (Gpm_EventExt *@var{event});
++As Gpm_GetSnapshot, but returns extended part. For backward compatibility
++the application should check whether @code{GPM_EVENT_EXT} has been defined.
++
++@end deftypefun
+ 
+ %--------------------------------------------------------------------------
+ @node High Level Lib, Xterm, Low Level Library, The ClientLib
+@@ -1668,7 +1744,7 @@
+ @end deftypefun
+ 
+ %.........................................................................
+-@deftypefun Gpm_Roi* Gpm_HandleRoi (Gpm_Event *@var{ePtr}, void * @var{clientdata});
++@deftypefun Gpm_Roi* Gpm_HandleRoi (Gpm_EventExt *@var{ePtr}, void * @var{clientdata});
+ 
+ 
+ This function, which should not be invoked by the user, is the dispatching
+@@ -1680,12 +1756,11 @@
+ If no Roi is interested in he event the @code{*gpm_roi_handler} function
+ is invoked (if not null), with null clientdata.
+ 
+-Reported events are all those in @code{Gpm_Event}, and also @code{GPM_ENTER}
++Reported events are all those in @code{Gpm_EventExt}, and also @code{GPM_ENTER}
+ and @code{GPM_LEAVE}. These can be used to toggle highlighting on a
+ button or to drop a menu if the menubutton is entered during a drag.
+ Remember that when Enter or Leave is notified, no other information in
+ the event item should be used.
+-
+ 
+ @end deftypefun
+ 
+diff -u -r gpm-1.19.3/gpm.c gpm-1.19.3.wheel/gpm.c
+--- gpm-1.19.3/gpm.c	Tue Jul 18 22:06:06 2000
++++ gpm-1.19.3.wheel/gpm.c	Wed Nov 22 21:22:45 2000
+@@ -61,6 +61,7 @@
+   DEF_TYPE, DEF_DEV, DEF_SEQUENCE,
+   DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, 0 /* scaley */,
+   DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_GLIDEPOINT_TAP,
++  DEF_SIMWHEEL,
+   (char *)NULL /* extra */,
+   (Gpm_Type *)NULL
+   },
+@@ -230,7 +231,7 @@
+ }
+ 
+ /*-------------------------------------------------------------------*/
+-static  inline int do_selection(Gpm_Event *event)  /* returns 0, always */
++static  inline int do_selection(Gpm_EventExt *event)  /* returns 0, always */
+ {
+   static int x1=1, y1=1, x2, y2;
+ #define UNPOINTER() 0
+@@ -286,7 +287,7 @@
+ 
+ /*-------------------------------------------------------------------*/
+ /* returns 0 if the event has not been processed, and 1 if it has */
+-static inline int do_client(Gpm_Cinfo *cinfo, Gpm_Event *event)
++static inline int do_client(Gpm_Cinfo *cinfo, Gpm_EventExt *event)
+ {
+   Gpm_Connect info=cinfo->data;
+   int fd=cinfo->fd;
+@@ -308,7 +309,7 @@
+ 
+   /* WARNING */ /* This can generate a SIGPIPE... I'd better catch it */
+   MAGIC_P((write(fd,&magic, sizeof(int))));
+-  write(fd,event, sizeof(Gpm_Event));
++  write(fd,event, sizeof(Gpm_EventExt));
+ 
+   return info.defaultMask & GPM_HARD ? res : 1; /* HARD forces pass-on */
+ 
+@@ -384,23 +385,24 @@
+ }
+ 
+ 
+-static int statusX,statusY,statusB; /* to return info */
++static int statusX,statusY,statusW,statusW2,statusB; /* to return info */
+ static int statusC=0; /* clicks */
+-void get_console_size(Gpm_Event *ePtr);
++void get_console_size(Gpm_EventExt *ePtr);
+ 
+ /*-------------------------------------------------------------------*/
+-static inline int processMouse(int fd, Gpm_Event *event, Gpm_Type *type,
++static inline int processMouse(int fd, Gpm_EventExt *event, Gpm_Type *type,
+ 			       int kd_mode)
+ {
+   char *data;
+   static int fine_dx, fine_dy;
+   static int i, j, m;
+-  static Gpm_Event nEvent;
++  static Gpm_EventExt nEvent;
+   static struct vt_stat stat;
+   static struct timeval tv1={0,0}, tv2; /* tv1==0: first click is single */
+   static struct timeval timeout={0,0};
+   fd_set fdSet;
+   static int newB=0, oldB=0, oldT=0; /* old buttons and Type to chain events */
++  static Gpm_Cinfo *ci;
+   /* static int buttonlock, buttonlockflag; */
+ 
+ #define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))
+@@ -409,6 +411,7 @@
+ 
+ 
+   oldT=event->type;
++  memset (event->pad, '\0', GPM_EVENT_PAD_SIZE * sizeof(int));
+ 
+   if (eventFlag)
+     {
+@@ -425,13 +428,14 @@
+     }
+   else
+     {
+-    event->dx=event->dy=0;
++    event->dx=event->dy=event->dw=event->dw2=0;
+ 
+     nEvent.modifiers = 0; /* some mice set them */
+     FD_ZERO(&fdSet); FD_SET(fd,&fdSet); i=0;
+ 
+     do /* cluster loop */
+       {
++      nEvent.dx=nEvent.dy=nEvent.dw=nEvent.dw2=0;
+       if (   ((data=getMouseData(fd,m_type,kd_mode))==NULL)
+ 	  || ((*(m_type->fun))(&nEvent,data)==-1) )
+ 	{
+@@ -439,6 +443,12 @@
+ 	else break;
+ 	}
+ 
++      if (which_mouse->opt_simwheel && (nEvent.buttons & GPM_B_MIDDLE) && nEvent.dy) {
++	nEvent.buttons &= !GPM_B_MIDDLE;
++	nEvent.dw = nEvent.dy;
++	nEvent.dy = 0;
++      }
++
+       event->modifiers = nEvent.modifiers; /* propagate modifiers */
+ 
+       /* propagate buttons */
+@@ -461,6 +471,8 @@
+ 	/* increment the reported dx,dy */
+ 	event->dx+=nEvent.dx;
+ 	event->dy+=nEvent.dy;
++	event->dw+=nEvent.dw;
++	event->dw2+=nEvent.dw2;
+ 	}
+       else /* a pen */
+ 	{
+@@ -490,7 +502,7 @@
+              static struct timeval rept1,rept2;
+              gettimeofday(&rept2, (struct timezone *)NULL);
+              if (((rept2.tv_sec -rept1.tv_sec) *1000+(rept2.tv_usec-rept1.tv_usec)/1000)>250) 
+-                { event->dx=0; event->dy=0; }
++                { event->dx=0; event->dy=0; event->dw=0; event->dw2=0; }
+              rept1=rept2;
+              
+              event->dy=event->dy*((win.ws_col/win.ws_row)+1);
+@@ -512,7 +524,7 @@
+     fine_dx %= opt_scale;           fine_dy %= opt_scaley;
+     }
+ 
+-  if (!event->dx && !event->dy && (event->buttons==oldB))
++  if (!event->dx && !event->dy && !event->dw && !event->dw2 && (event->buttons==oldB))
+     do 
+       { /* so to break */
+       static long awaketime;
+@@ -528,7 +540,8 @@
+ 
+ /*....................................... fill missing fields */
+ 
+-  event->x+=event->dx, event->y+=event->dy;
++  event->x+=event->dx; event->y+=event->dy;
++  event->w+=event->dw; event->w2+=event->dw2;
+   statusB=event->buttons;
+ 
+   i=open_console(O_RDONLY);
+@@ -559,7 +572,31 @@
+   else
+     event->type = (event->buttons > oldB ? GPM_DOWN : GPM_UP);
+ 
+-  switch(event->type)                    /* now provide the cooked bits */
++  ci = cinfo[stat.v_active];
++  if (ci != NULL)
++    {
++    i = (ci->data).eventMask;
++    if (event->w > 0 && (i & GPM_FWHEEL))
++       {
++       event->type |= GPM_FWHEEL;  (event->w)--;
++       }
++    else
++       if (event->w < 0 && (i & GPM_BWHEEL))
++       {
++       event->type |= GPM_BWHEEL;  (event->w)++;
++       }
++    if (event->w2 > 0 && (i & GPM_FWHEEL2))
++       {
++       event->type |= GPM_FWHEEL2;  (event->w2)--;
++       }
++    else
++       if (event->w2 < 0 && (i & GPM_BWHEEL2))
++       {
++       event->type |= GPM_BWHEEL2;  (event->w2)++;
++       }
++    }	
++  
++  switch(event->type & 0x0f)           /* now provide the cooked bits */
+     {
+     case GPM_DOWN:
+       GET_TIME(tv2);
+@@ -567,7 +604,7 @@
+ 	statusC++, statusC%=3; /* 0, 1 or 2 */
+       else statusC=0;
+       event->type|=(GPM_SINGLE<<statusC);
+-    break;
++      break;
+ 
+     case GPM_UP:
+       GET_TIME(tv1);
+@@ -576,6 +613,7 @@
+       event->type|=(GPM_SINGLE<<statusC);
+       break;
+ 
++
+     case GPM_DRAG:
+       event->type |= GPM_MFLAG;
+       event->type|=(GPM_SINGLE<<statusC);
+@@ -583,6 +621,7 @@
+ 
+     case GPM_MOVE:
+       statusC=0;
++
+     default:
+       break;
+     }
+@@ -620,6 +659,7 @@
+ 
+   /* update the global state */
+   statusX=event->x; statusY=event->y;
++  statusW=event->w; statusW2=event->w2;
+ 
+   if (opt_special && event->type & GPM_DOWN) 
+     return processSpecial(event);
+@@ -671,7 +711,7 @@
+   int i;
+   Gpm_Cinfo *cinfoPtr, *next;
+   Gpm_Connect conn;
+-  static Gpm_Event event;
++  static Gpm_EventExt event;
+   static struct vt_stat stat;
+ 
+   gpm_debug_log(LOG_INFO,"Request on %i (console %i)", ci->fd, vc);
+@@ -733,15 +773,16 @@
+         oops("get_shift_state");
+       close(i);
+       event.vc = stat.v_active;
+-      event.x=statusX;   event.y=statusY;
+-      event.dx=maxx;     event.dy=maxy;
++      event.x=statusX;  event.y=statusY; 
++      event.w=statusW;  event.w2=statusW2;
++      event.dx=maxx;    event.dy=maxy;
+       event.buttons= statusB;
+       event.clicks=statusC;
+       /* fall through */
+ 
+     case GPM_REQ_BUTTONS:
+       event.type= (opt_three==1 ? 3 : 2); /* buttons */
+-      write(ci->fd,&event,sizeof(Gpm_Event));
++      write(ci->fd,&event,sizeof(Gpm_EventExt));
+       break;
+ 
+     case GPM_REQ_NOPASTE:
+@@ -868,16 +909,16 @@
+ 
+ /* if the client gets motions, give it the current position */
+   if(request->eventMask & GPM_MOVE)
+-    {
+-    Gpm_Event event={0,0,vc,0,0,statusX,statusY,GPM_MOVE,0,0};
+-    do_client(info, &event);
++    {  Gpm_EventExt event={0,0,vc,0,0,statusX,statusY,GPM_MOVE,0,0,
++                        0,statusW,0,statusW2};
++       do_client(info, &event);
+     }
+ 
+   return newfd;
+ }
+ 
+ /*-------------------------------------------------------------------*/
+-void get_console_size(Gpm_Event *ePtr)
++void get_console_size(Gpm_EventExt *ePtr)
+ {
+   int i, prevmaxx, prevmaxy;
+   struct mouse_features *which_mouse; /* local */
+@@ -899,6 +940,8 @@
+   if (!prevmaxx) { /* first invocation, place the pointer in the middle */
+       statusX = ePtr->x = maxx/2;
+       statusY = ePtr->y = maxy/2;
++      statusW = ePtr->w = 0;	
++      statusW2 = ePtr->w2 = 0;	
+   } else { /* keep the pointer in the same position where it was */
+       statusX = ePtr->x = ePtr->x * maxx / prevmaxx;
+       statusY = ePtr->y = ePtr->y * maxy / prevmaxy;
+@@ -935,7 +978,7 @@
+   struct   timeval timeout;
+   int maxfd=-1;
+   int pending;
+-  Gpm_Event event;
++  Gpm_EventExt event;
+ 
+   prgname=argv[0];
+ 
+diff -u -r gpm-1.19.3/gpm.h gpm-1.19.3.wheel/gpm.h
+--- gpm-1.19.3/gpm.h	Fri Jan 28 09:09:00 2000
++++ gpm-1.19.3.wheel/gpm.h	Wed Nov 22 21:23:55 2000
+@@ -98,6 +98,12 @@
+   GPM_LEAVE=1024            /* leave event, used in Roi's */
+ };
+ 
++#define GPM_WHEEL
++#define GPM_FWHEEL  4096     /* wheel1 move forward */
++#define GPM_BWHEEL  8192     /* wheel1 move backward */
++#define GPM_FWHEEL2 16384    /* wheel2 move forward(right) */
++#define GPM_BWHEEL2 32768    /* wheel2 move backward(left) */
++
+ #define Gpm_StrictSingle(type) (((type)&GPM_SINGLE) && !((type)&GPM_MFLAG))
+ #define Gpm_AnySingle(type)     ((type)&GPM_SINGLE)
+ #define Gpm_StrictDouble(type) (((type)&GPM_DOUBLE) && !((type)&GPM_MFLAG))
+@@ -120,9 +126,24 @@
+   enum Gpm_Margin margin;
+ }              Gpm_Event;
+ 
++#define GPM_EVENT_PAD_SIZE  19   /* Should be enough for now */
++#define GPM_EVENT_EXT
++
++typedef struct Gpm_EventExt {
++  unsigned char buttons, modifiers;  /* try to be a multiple of 4 */
++  unsigned short vc;
++  short dx, dy, x, y;
++  enum Gpm_Etype type;
++  int clicks;
++  enum Gpm_Margin margin;
++  short dw, w;
++  short dw2, w2;
++  int   pad[GPM_EVENT_PAD_SIZE];
++}              Gpm_EventExt;
++
+ /*....................................... The handling function */
+ 
+-typedef int Gpm_Handler(Gpm_Event *event, void *clientdata);
++typedef int Gpm_Handler(Gpm_EventExt *event, void *clientdata);
+ 
+ /*....................................... The connection data structure */
+ 
+@@ -181,6 +202,7 @@
+ extern int Gpm_Open(Gpm_Connect *, int);
+ extern int Gpm_Close(void);
+ extern int Gpm_GetEvent(Gpm_Event *);
++extern int Gpm_GetEventExt(Gpm_EventExt *);
+ extern int Gpm_CharsQueued(void);
+ extern int Gpm_Getc(FILE *);
+ #define    Gpm_Getchar() Gpm_Getc(stdin)
+@@ -246,6 +268,7 @@
+ char *Gpm_GetLibVersion(int *where);
+ char *Gpm_GetServerVersion(int *where);
+ int   Gpm_GetSnapshot(Gpm_Event *ePtr);
++int   Gpm_GetSnapshotExt(Gpm_EventExt *ePtr);
+ 
+ #ifdef __cplusplus
+   };
+diff -u -r gpm-1.19.3/gpmCfg.h gpm-1.19.3.wheel/gpmCfg.h
+--- gpm-1.19.3/gpmCfg.h	Tue Jan 18 09:23:00 2000
++++ gpm-1.19.3.wheel/gpmCfg.h	Thu Sep 21 20:42:12 2000
+@@ -62,5 +62,7 @@
+ #define DEF_TEST             0
+ #define DEF_PTRDRAG          1    /* double or triple click */
+ #define DEF_GLIDEPOINT_TAP   0    /* tapping emulates no buttons by default */
++#define DEF_SIMWHEEL         0    /* simulate wheel with middle button and */
++				  /* y-axis movement */
+ 
+ #endif /* _GPMCFG_INCLUDED */
+diff -u -r gpm-1.19.3/gpmInt.h gpm-1.19.3.wheel/gpmInt.h
+--- gpm-1.19.3/gpmInt.h	Tue Jul 18 22:18:54 2000
++++ gpm-1.19.3.wheel/gpmInt.h	Sat Nov 11 18:55:32 2000
+@@ -56,7 +56,7 @@
+   char *name;
+   char *desc;             /* a descriptive line */
+   char *synonyms;         /* extra names (the XFree name etc) as a list */
+-  int (*fun)(Gpm_Event *state, unsigned char *data);
++  int (*fun)(Gpm_EventExt *state, unsigned char *data);
+   struct Gpm_Type *(*init)(int fd, unsigned short flags,
+ 			   struct Gpm_Type *type, int argc, char **argv);
+   unsigned short flags;
+@@ -66,7 +66,7 @@
+   int getextra;           /* does it get an extra byte? (only mouseman) */
+   int absolute;           /* flag indicating absolute pointing device */
+ 
+-  int (*repeat_fun)(Gpm_Event *state, int fd); /* repeat this event into fd */
++  int (*repeat_fun)(Gpm_EventExt *state, int fd); /* repeat this event into fd */
+                           /* itz Mon Jan 11 23:27:54 PST 1999 */
+ }                   Gpm_Type;
+ 
+@@ -88,6 +88,7 @@
+   char *opt_type, *opt_dev, *opt_sequence;
+   int opt_baud,opt_sample,opt_delta, opt_accel, opt_scale, opt_scaley;
+   int opt_time, opt_cluster, opt_three, opt_glidepoint_tap;
++  int  opt_simwheel;  
+   char *opt_options; /* extra textual configuration */
+   Gpm_Type *m_type;
+   int fd;
+@@ -148,7 +149,7 @@
+        /* mice.c */
+ extern int M_listTypes(void);
+        /* special.c */
+-int processSpecial(Gpm_Event *event);
++int processSpecial(Gpm_EventExt *event);
+ int twiddler_key(unsigned long message);
+ int twiddler_key_init(void);
+ 
+diff -u -r gpm-1.19.3/gpn.c gpm-1.19.3.wheel/gpn.c
+--- gpm-1.19.3/gpn.c	Tue Jul 18 22:06:06 2000
++++ gpm-1.19.3.wheel/gpn.c	Thu Sep 21 20:53:38 2000
+@@ -177,7 +177,9 @@
+          "                     Use a non-existent type (e.g. \"help\") to get a list\n"
+          "    -T               test: read mouse, no clients\n"
+          "    -v               print version and exit\n"
+-         "    -V verbosity     increase number of logged messages\n", 
++         "    -V verbosity     increase number of logged messages\n"
++         "    -w               simulate wheel operation by pressing middle\n"
++         "                     mouse button and y-axis movement\n",
+          DEF_ACCEL, DEF_BAUD, DEF_SEQUENCE, DEF_DELTA, DEF_TIME, DEF_LUT,
+          DEF_SCALE, DEF_SAMPLE, DEF_TYPE);
+   return 1;
+@@ -286,7 +288,7 @@
+ int 
+ cmdline(int argc, char **argv)
+ {
+-  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:TvV::23";
++  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:TvV::w23";
+   int i, opt;
+   static struct {char *in; char *out;} seq[] = {
+     {"123","01234567"},
+@@ -359,6 +361,9 @@
+         case 'v': printf(GPM_NAME " " GPM_RELEASE ", " GPM_DATE "\n"); exit(0);
+         case 'V': 
+           gpm_debug_level += (0 == optarg ? 1 : strtol(optarg, 0, 0));
++          break;
++	case 'w':
++          which_mouse->opt_simwheel=1;
+           break;
+         case '2': opt_three=-1; break;
+         case '3': opt_three=1; break;
+diff -u -r gpm-1.19.3/hltest.c gpm-1.19.3.wheel/hltest.c
+--- gpm-1.19.3/hltest.c	Tue Jan 18 08:34:00 2000
++++ gpm-1.19.3.wheel/hltest.c	Sat Nov 11 19:28:24 2000
+@@ -281,7 +281,7 @@
+  * Gpm_PushRoi on creation, and is used to differentiate them
+  */
+  
+-int handler(Gpm_Event *ePtr, void *clientdata)
++int handler(Gpm_EventExt *ePtr, void *clientdata)
+ {
+ WinInfo *info=clientdata;
+ int number=info->number;
+@@ -391,7 +391,7 @@
+  * This extra handler is only used for the background and left bar
+  */
+ 
+-int xhandler(Gpm_Event *ePtr, void *clientdata)
++int xhandler(Gpm_EventExt *ePtr, void *clientdata)
+ {
+ static int x=0,y=0;
+ int back=0;
+diff -u -r gpm-1.19.3/libcurses.c gpm-1.19.3.wheel/libcurses.c
+--- gpm-1.19.3/libcurses.c	Tue Jan 18 08:34:00 2000
++++ gpm-1.19.3.wheel/libcurses.c	Sat Nov 11 19:20:12 2000
+@@ -47,7 +47,7 @@
+ fd_set selSet;
+ int max, flag, result;
+ int fd=STDIN_FILENO;
+-static Gpm_Event ev;
++static Gpm_EventExt ev;
+ 
+   if (!gpm_flag || gpm_fd==-1) return GET(win);
+   if (gpm_morekeys) return (*gpm_handler)(&ev,gpm_data);
+@@ -76,7 +76,7 @@
+       if (flag==-1)
+ 	continue;
+       
+-      if (Gpm_GetEvent(&ev) && gpm_handler
++      if (Gpm_GetEventExt(&ev) && gpm_handler
+ 	  && (result=(*gpm_handler)(&ev,gpm_data)))
+ 	{
+ 	gpm_hflag=1;
+@@ -93,7 +93,7 @@
+ /* JD patch 11/08/1998 */
+ #define MAXNBPREVCHAR 4         /* I don't think more is usefull, JD */
+     static int nbprevchar=0, prevchar[MAXNBPREVCHAR];
+-    extern gpm_convert_event(char *data, Gpm_Event *event);
++    extern gpm_convert_event(char *data, Gpm_EventExt *event);
+     int c; unsigned char mdata[4];
+ 
+ /* JD patch 11/08/1998 */
+diff -u -r gpm-1.19.3/libhigh.c gpm-1.19.3.wheel/libhigh.c
+--- gpm-1.19.3/libhigh.c	Tue Jan 18 08:34:00 2000
++++ gpm-1.19.3.wheel/libhigh.c	Sat Nov 11 19:18:59 2000
+@@ -132,9 +132,9 @@
+  * It generates also GPM_ENTER and GPM_LEAVE events.
+  */
+ 
+-int Gpm_HandleRoi(Gpm_Event *ePtr, void *clientdata)
++int Gpm_HandleRoi(Gpm_EventExt *ePtr, void *clientdata)
+ {
+-static Gpm_Event backEvent;
++static Gpm_EventExt backEvent;
+ Gpm_Roi *roi=gpm_current_roi;
+ 
+ /*
+diff -u -r gpm-1.19.3/liblow.c gpm-1.19.3.wheel/liblow.c
+--- gpm-1.19.3/liblow.c	Tue Jul 18 22:06:06 2000
++++ gpm-1.19.3.wheel/liblow.c	Sat Nov 11 19:23:43 2000
+@@ -6,6 +6,8 @@
+  * Copyright (C) 1998    Ian Zimmerman <itz@rahul.net>
+  * 
+  * xterm management is mostly by jtklehto@stekt.oulu.fi (Janne Kukonlehto)
++ * imps2 wheel support: Michael Glickman <xsadp@yahoo.com> 2000/09/24
++ *                      Influenced by Jonathan Atkin's patch
+  *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of the GNU General Public License as published by
+@@ -400,7 +402,7 @@
+ }
+ 
+ /*-------------------------------------------------------------------*/
+-int Gpm_GetEvent(Gpm_Event *event)
++int Gpm_GetEventExt(Gpm_EventExt *event)
+ {
+   int count;
+   MAGIC_P((int magic));
+@@ -408,6 +410,7 @@
+   if (!gpm_flag) return 0;
+ 
+ #ifdef GPM_USE_MAGIC
++  
+   if ((count=read(gpm_fd,&magic,sizeof(int)))!=sizeof(int))
+     {
+       if (count==0)
+@@ -421,7 +424,7 @@
+     }
+ #endif
+ 
+-  if ((count=read(gpm_fd,event,sizeof(Gpm_Event)))!=sizeof(Gpm_Event))
++    if ((count=read(gpm_fd,event,sizeof(Gpm_EventExt))) != sizeof(Gpm_EventExt))
+     {
+ #ifndef GPM_USE_MAGIC
+       if (count==0)
+@@ -442,12 +445,22 @@
+       return -1;
+     }
+ 
++  	
+   event->x -= gpm_zerobased;
+   event->y -= gpm_zerobased;
+ 
+   return 1;
+ }
+ 
++int Gpm_GetEvent(Gpm_Event *event)
++{  Gpm_EventExt tmp_event;
++   int  rc;	
++   rc = Gpm_GetEventExt(&tmp_event);
++   if (event != NULL)
++       memcpy(event, &tmp_event, sizeof(Gpm_Event));
++   return rc;		
++}
++
+ 
+ #define MAXNBPREVCHAR 4         /* I don't think more is usefull, JD */
+ static int nbprevchar=0, prevchar[MAXNBPREVCHAR];
+@@ -464,7 +477,7 @@
+ {
+   fd_set selSet;
+   int max, flag, result;
+-  static Gpm_Event ev;
++  static Gpm_EventExt ev;
+   int fd=fileno(f);
+   static int count;
+ 
+@@ -502,7 +515,7 @@
+         if (FD_ISSET(fd,&selSet))
+           return fgetc(f);
+         
+-        if (Gpm_GetEvent(&ev) && gpm_handler 
++        if (Gpm_GetEventExt(&ev) && gpm_handler 
+             && (result=(*gpm_handler)(&ev,gpm_data)))
+           {
+             gpm_hflag=1;
+@@ -516,7 +529,7 @@
+ #define DELAY_MS 100
+         static struct timeval to={0,DELAY_MS*1000};
+         static fd_set selSet;
+-        extern gpm_convert_event(unsigned char *data, Gpm_Event *event);
++        extern gpm_convert_event(unsigned char *data, Gpm_EventExt *event);
+         int c; unsigned char mdata[4];
+ 
+         if (nbprevchar)  /* if there are some consumed char ... */
+@@ -600,7 +613,7 @@
+ }
+ 
+ /*-------------------------------------------------------------------*/
+-int gpm_convert_event(unsigned char *mdata, Gpm_Event *ePtr)
++int gpm_convert_event(unsigned char *mdata, Gpm_EventExt *ePtr)
+ {
+   static struct timeval tv1={0,0}, tv2;
+   static int clicks=0;
+diff -u -r gpm-1.19.3/libxtra.c gpm-1.19.3.wheel/libxtra.c
+--- gpm-1.19.3/libxtra.c	Tue Jan 18 09:23:00 2000
++++ gpm-1.19.3.wheel/libxtra.c	Sat Nov 11 19:16:22 2000
+@@ -5,6 +5,8 @@
+  * Copyright (C) 1998    Ian Zimmerman <itz@rahul.net>
+  * 
+  * xterm management is mostly by Miguel de Icaza
++ * imps2 wheel support: Michael Glickman <xsadp@yahoo.com> 2000/09/24
++ *                      Influenced by Jonathan Atkin's patch
+  *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of the GNU General Public License as published by
+@@ -87,14 +89,14 @@
+  * The return value is the number of buttons, as known to the server,
+  * the ePtr, if any, is filled with information on the current state.
+  */
+-int Gpm_GetSnapshot(Gpm_Event *ePtr)
++int Gpm_GetSnapshotExt(Gpm_EventExt *ePtr)
+ {
+   Gpm_Connect conn;
+-  Gpm_Event event;
++  Gpm_EventExt event;
+   fd_set sillySet;
+   struct timeval to={0,0};
+   int i;
+-
++  
+   if (!gpm_ver_i)
+     {
+       if (0 == Gpm_GetServerVersion(NULL)) {
+@@ -129,14 +131,25 @@
+     return 0;
+   write(gpm_fd,&conn,sizeof(Gpm_Connect));
+ 
+-  if ((i=Gpm_GetEvent(ePtr))!=1)
+-    return -1;
++  if (Gpm_GetEventExt(ePtr)!=1) return -1;
+ 
+   i=ePtr->type; ePtr->type=0;
+   return i; /* number of buttons */
+ }
++
++int Gpm_GetSnapshot(Gpm_Event *ePtr)
++{
++   int rc;
++   Gpm_EventExt eTmp;
++   rc = Gpm_GetSnapshotExt(&eTmp);	
++   if (ePtr)
++      memcpy(ePtr, &eTmp, sizeof(Gpm_Event));
++   return rc;	 	
++	
++}
+   
+ 
+ /* Local Variables: */
+ /* c-indent-level: 2 */
+ /* End: */
++
+diff -u -r gpm-1.19.3/mev.c gpm-1.19.3.wheel/mev.c
+--- gpm-1.19.3/mev.c	Tue Jan 18 09:23:00 2000
++++ gpm-1.19.3.wheel/mev.c	Sat Nov 11 19:17:46 2000
+@@ -90,15 +90,15 @@
+ int opt_pointer =  0;
+ 
+ /*===================================================================*/
+-int user_handler(Gpm_Event *event, void *data)
++int user_handler(Gpm_EventExt *event, void *data)
+ {
+   if (opt_fit) Gpm_FitEvent(event);
+ 
+-  printf("mouse: event 0x%02X, at %2i,%2i (delta %2i,%2i), "
++  printf("mouse: event 0x%05X at %2i,%2i (delta %2i,%2i,%2i,%2i), "
+          "buttons %i, modifiers 0x%02X\r\n",
+ 	 event->type,
+ 	 event->x, event->y,
+-	 event->dx, event->dy,
++	 event->dx, event->dy, event->dw, event->dw2,
+ 	 event->buttons, event->modifiers);
+ 
+   if (event->type & (GPM_DRAG|GPM_DOWN)) {
+@@ -110,7 +110,7 @@
+ }
+ 
+ /*-------------------------------------------------------------------*/
+-int emacs_handler(Gpm_Event *event, void *data)
++int emacs_handler(Gpm_EventExt *event, void *data)
+ {
+   int i,j;
+   static int dragX, dragY;
+@@ -230,8 +230,8 @@
+ /*===================================================================*/
+ int usage(void)
+ {
+-  printf( "(" GPM_NAME ") " GPM_RELEASE ", " GPM_DATE "\n"
+-          "Usage: %s [options]\n",prgname);
++//  printf( "(" GPM_NAME ") " GPM_RELEASE ", " GPM_DATE "\n"
++//          "Usage: %s [options]\n",prgname);
+   printf("  Valid options are\n"
+          "    -C <number>   choose virtual console (beware of it)\n"
+          "    -d <number>   choose the default mask\n"
+@@ -334,8 +334,9 @@
+ void 
+ do_snapshot()
+ {
+-  Gpm_Event event;
+-  int i=Gpm_GetSnapshot(&event);
++  Gpm_EventExt event;
++  int rsize=sizeof(Gpm_EventExt);
++  int i=Gpm_GetSnapshotExt(&event);
+   char *s;
+ 
+   if (-1 == i) {
+@@ -479,8 +480,9 @@
+       } /*if*/
+     } /*if*/
+     if (FD_ISSET(gpm_fd, &readset)) {
+-      Gpm_Event evt;
+-      if (Gpm_GetEvent(&evt) > 0) {
++      Gpm_EventExt evt;
++      if (Gpm_GetEventExt(&evt) > 0) {
++/*      if (Gpm_GetEvent(&evt) > 0) { */
+         my_handler(&evt, 0);
+       } else {
+         fprintf(stderr, "Oops, Gpm_GetEvent()\n");
+diff -u -r gpm-1.19.3/mice.c gpm-1.19.3.wheel/mice.c
+--- gpm-1.19.3/mice.c	Wed Mar  8 01:10:00 2000
++++ gpm-1.19.3.wheel/mice.c	Wed Nov 22 21:51:35 2000
+@@ -25,7 +25,7 @@
+  * This file is part of the mouse server. The information herein
+  * is kept aside from the rest of the server to ease fixing mouse-type
+  * issues. Each mouse type is expected to fill the `buttons', `dx' and `dy'
+- * fields of the Gpm_Event structure and nothing more.
++ * fields of the Gpm_EventExt structure and nothing more.
+  *
+  * Absolute-pointing devices (support by Marc Meis), are expecting to
+  * fit `x' and `y' as well. Unfortunately, to do it the window size must
+@@ -208,7 +208,7 @@
+  * The return value is the number of unprocessed bytes
+  */
+ 
+-static int M_ms(Gpm_Event *state,  unsigned char *data)
++static int M_ms(Gpm_EventExt *state,  unsigned char *data)
+ {
+   /*
+    * some devices report a change of middle-button state by
+@@ -223,17 +223,21 @@
+   prev = state->buttons;
+   state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
+   state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
++  state->dw=      0;
++  state->dw2=     0;
+ 
+   return 0;
+ }
+ 
+-static int M_ms_plus(Gpm_Event *state, unsigned char *data)
++static int M_ms_plus(Gpm_EventExt *state, unsigned char *data)
+ {
+   static unsigned char prev=0;
+ 
+   state->buttons= ((data[0] & 0x20) >> 3) | ((data[0] & 0x10) >> 4);
+   state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
+   state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
++  state->dw=      0;
++  state->dw2=     0;
+ 
+   /* Allow motion *and* button change (Michael Plass) */
+ 
+@@ -248,7 +252,7 @@
+   return 0;
+ }
+ 
+-static int M_ms_plus_lr(Gpm_Event *state,  unsigned char *data)
++static int M_ms_plus_lr(Gpm_EventExt *state,  unsigned char *data)
+ {
+   /*
+    * Same as M_ms_plus but with an addition by Edmund GRIMLEY EVANS
+@@ -258,6 +262,8 @@
+   state->buttons= ((data[0] & 0x20) >> 3) | ((data[0] & 0x10) >> 4);
+   state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
+   state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
++  state->dw=      0;
++  state->dw2=     0;
+ 
+   /* Allow motion *and* button change (Michael Plass) */
+ 
+@@ -285,7 +291,7 @@
+ int SUMMA_BORDER=100;
+ int summamaxx,summamaxy;
+ char summaid=-1;
+-static int M_summa(Gpm_Event *state, unsigned char *data)
++static int M_summa(Gpm_EventExt *state, unsigned char *data)
+ {
+   int x, y;
+ 
+@@ -307,7 +313,7 @@
+ 
+ 
+ /* Thu Jan 28 20:54:47 MET 1999 hof@hof-berlin.de SummaSketch reportformat */
+-static int R_summa(Gpm_Event *state, int fd)
++static int R_summa(Gpm_EventExt *state, int fd)
+ {
+   signed char buffer[5];
+   static int x,y;
+@@ -335,7 +341,7 @@
+ 
+ 
+ /* 'Genitizer' (kw@dtek.chalmers.se 11/12/97) */
+-static int M_geni(Gpm_Event *state,  unsigned char *data)
++static int M_geni(Gpm_EventExt *state,  unsigned char *data)
+ {
+   /* this is a little confusing. If we use the stylus, we
+    * have three buttons (tip, lower, upper), and if
+@@ -352,25 +358,48 @@
+ 
+   state->dx = ((data[1] & 0x3f) ) * ((data[0] & 0x10)?1:-1);   
+   state->dy = ((data[2] & 0x3f) ) * ((data[0] & 0x8)?-1:1);
++  state->dw=      0;
++  state->dw2=     0;
+ 
+   return 0;
+ }
+ 
+ /* m$ 'Intellimouse' (steveb 20/7/97) */
+-static int M_ms3(Gpm_Event *state,  unsigned char *data)
++static int M_ms3(Gpm_EventExt *state,  unsigned char *data)
+ {
+   state->buttons= ((data[0] & 0x20) >> 3)	/* left */
+ 		| ((data[3] & 0x10) >> 3)	/* middle */
+ 		| ((data[0] & 0x10) >> 4);	/* right */
+   state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
+   state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
+-  /* wheel (dz??) is (data[3] & 0x0f) */
++  state->dw=      data[3] & 0x0f;
++  if (data[3] & 0x08)  state->dw -= 16;
++  state->dw2=     0;
++
++  return 0;
++}
++
++/* A4 tech 4D mouse serial (michg@alphalink.com.au 11/11/00) */
++static int M_a4d(Gpm_EventExt *state,  unsigned char *data)
++{
++  state->buttons= ((data[0] & 0x20) >> 3)	/* left */
++		| ((data[3] & 0x10) >> 3)	/* middle */
++		| ((data[0] & 0x10) >> 4);	/* right */
++  state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
++  state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
++  switch(data[3] & 0x0f)
++  { case 0x01: state->dw= 1; state->dw2 =  0; break;
++    case 0x02: state->dw= 0; state->dw2 =  1; break;
++    case 0x0f: state->dw=-1; state->dw2 =  0; break;
++    case 0x0e: state->dw= 0; state->dw2 = -1; break;	
++    default:   state->dw= 0; state->dw2 =  0;
++  }
+ 
+   return 0;
+ }
+ 
+ /* M_brw is a variant of m$ 'Intellimouse' the middle button is different */
+-static int M_brw(Gpm_Event *state,  unsigned char *data)
++static int M_brw(Gpm_EventExt *state,  unsigned char *data)
+ {
+   state->buttons= ((data[0] & 0x20) >> 3)	/* left */
+ 		| ((data[3] & 0x20) >> 4)	/* middle */
+@@ -385,6 +414,9 @@
+ 			data[0], data[1], data[2], data[3]);
+ 	  return -1;
+   }
++  state->dw=      data[3] & 0x0f;
++  if (data[3] & 0x08) state->dw -= 16;
++  state->dw2=     0;
+   /* wheel (dz) is (data[3] & 0x0f) */
+   /* where is the side button? I can sort of detect it at 9600 baud */
+   /* Note this mouse is very noisy */
+@@ -392,35 +424,41 @@
+   return 0;
+ }
+ 
+-static int M_bare(Gpm_Event *state,  unsigned char *data)
++static int M_bare(Gpm_EventExt *state,  unsigned char *data)
+ {
+   /* a bare ms protocol */
+   state->buttons= ((data[0] & 0x20) >> 3) | ((data[0] & 0x10) >> 4);
+   state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
+   state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
++  state->dw=      0;
++  state->dw2=     0;
+   return 0;
+ }
+ 
+-static int M_sun(Gpm_Event *state,  unsigned char *data)
++static int M_sun(Gpm_EventExt *state,  unsigned char *data)
+ {
+   state->buttons= (~data[0]) & 0x07;
+   state->dx=      (signed char)(data[1]);
+   state->dy=     -(signed char)(data[2]);
++  state->dw=      0;
++  state->dw2=     0;
+   return 0;
+ }
+ 
+-static int M_msc(Gpm_Event *state,  unsigned char *data)
++static int M_msc(Gpm_EventExt *state,  unsigned char *data)
+ {
+   state->buttons= (~data[0]) & 0x07;
+   state->dx=      (signed char)(data[1]) + (signed char)(data[3]);
+   state->dy=     -((signed char)(data[2]) + (signed char)(data[4]));
++  state->dw=      0;
++  state->dw2=     0;
+   return 0;
+ }
+ 
+ /* itz Mon Jan 11 23:51:38 PST 1999 this code moved here from gpm.c */
+ /* (processMouse) */
+ 
+-static int R_msc(Gpm_Event *state, int fd)
++static int R_msc(Gpm_EventExt *state, int fd)
+ {
+   signed char buffer[5];
+ 
+@@ -432,39 +470,121 @@
+ 
+ }
+ 
+-static int M_logimsc(Gpm_Event *state,  unsigned char *data) /* same as msc */
++static int M_logimsc(Gpm_EventExt *state,  unsigned char *data) /* same as msc */
+ {
+   state->buttons= (~data[0]) & 0x07;
+   state->dx=      (signed char)(data[1]) + (signed char)(data[3]);
+   state->dy=     -((signed char)(data[2]) + (signed char)(data[4]));
++  state->dw=     0;
++  state->dw2=     0;
+   return 0;
+ }
+ 
+-static int M_mm(Gpm_Event *state,  unsigned char *data)
++static int M_mm(Gpm_EventExt *state,  unsigned char *data)
+ {
+   state->buttons= data[0] & 0x07;
+   state->dx=      (data[0] & 0x10) ?   data[1] : - data[1];
+   state->dy=      (data[0] & 0x08) ? - data[2] :   data[2];
++  state->dw=     0;
++  state->dw2=     0;
+   return 0;
+ }
+ 
+-static int M_logi(Gpm_Event *state,  unsigned char *data) /* equal to mm */
++static int M_logi(Gpm_EventExt *state,  unsigned char *data) /* equal to mm */
+ {
+   state->buttons= data[0] & 0x07;
+   state->dx=      (data[0] & 0x10) ?   data[1] : - data[1];
+   state->dy=      (data[0] & 0x08) ? - data[2] :   data[2];
++  state->dw=     0;
++  state->dw2=     0;
+   return 0;
+ }
+ 
+-static int M_bm(Gpm_Event *state,  unsigned char *data) /* equal to sun */
++static int M_bm(Gpm_EventExt *state,  unsigned char *data) /* equal to sun */
+ {
+   state->buttons= (~data[0]) & 0x07;
+   state->dx=      (signed char)data[1];
+   state->dy=     -(signed char)data[2];
++  state->dw=     0;
++  state->dw2=     0;
++  return 0;
++}
++
++static int M_ps2(Gpm_EventExt *state,  unsigned char *data)
++{
++  static int tap_active=0; /* there exist glidepoint ps2 mice */
++
++  state->buttons=
++    !!(data[0]&1) * GPM_B_LEFT +
++    !!(data[0]&2) * GPM_B_RIGHT +
++    !!(data[0]&4) * GPM_B_MIDDLE;
++
++  if (data[0]==0 && opt_glidepoint_tap) /* by default this is false */
++    state->buttons = tap_active = opt_glidepoint_tap;
++  else if (tap_active)
++    if (data[0]==8)
++      state->buttons = tap_active = 0;
++    else state->buttons = tap_active;
++
++ /* Some PS/2 mice send reports with negative bit set in data[0]
++  * and zero for movement.  I think this is a bug in the mouse, but
++  * working around it only causes artifacts when the actual report is -256;
++  * they'll be treated as zero. This should be rare if the mouse sampling
++  * rate is set to a reasonable value; the default of 100 Hz is plenty.
++  * (Stephen Tell)
++  */
++  if(data[1] != 0)
++    state->dx=   (data[0] & 0x10) ? data[1]-256 : data[1];
++  else
++    state->dx = 0;
++  if(data[2] != 0)
++    state->dy= -((data[0] & 0x20) ? data[2]-256 : data[2]);
++  else
++    state->dy = 0;
++  state->dw=      0;
++  state->dw2=     0;
++  return 0;
++}
++
++static int M_imps2(Gpm_EventExt *state,  unsigned char *data)
++{
++  static int tap_active=0; /* there exist glidepoint ps2 mice */
++
++  state->buttons=
++    !!(data[0]&1) * GPM_B_LEFT +
++    !!(data[0]&2) * GPM_B_RIGHT +
++    !!(data[0]&4) * GPM_B_MIDDLE;
++
++  if (data[0]==0 && opt_glidepoint_tap) /* by default this is false */
++    state->buttons = tap_active = opt_glidepoint_tap;
++  else if (tap_active)
++    if (data[0]==8)
++      state->buttons = tap_active = 0;
++    else state->buttons = tap_active;
++
++ /* Some PS/2 mice send reports with negative bit set in data[0]
++  * and zero for movement.  I think this is a bug in the mouse, but
++  * working around it only causes artifacts when the actual report is -256;
++  * they'll be treated as zero. This should be rare if the mouse sampling
++  * rate is set to a reasonable value; the default of 100 Hz is plenty.
++  * (Stephen Tell)
++  */
++  if(data[1] != 0)
++    state->dx=   (data[0] & 0x10) ? data[1]-256 : data[1];
++  else
++    state->dx = 0;
++  if(data[2] != 0)
++    state->dy= -((data[0] & 0x20) ? data[2]-256 : data[2]);
++  else
++    state->dy = 0;
++  state->dw = (data[3] >= 128) ? data[3]-256 : data[3]; 
++  state->dw2=     0;
++
+   return 0;
+ }
+ 
+-static int M_ps2(Gpm_Event *state,  unsigned char *data)
++/* A4 tech 4D mouse PS/2  michg@alphalink.com.au 2000/11/11 */
++static int M_a4dps2(Gpm_EventExt *state,  unsigned char *data)
+ {
+   static int tap_active=0; /* there exist glidepoint ps2 mice */
+ 
+@@ -495,10 +615,40 @@
+     state->dy= -((data[0] & 0x20) ? data[2]-256 : data[2]);
+   else
+     state->dy = 0;
++ 
++  /* Wheels */
++  switch(data[3] & 0x0f)
++  { case 0x01: state->dw= 1; state->dw2 =  0; break;
++    case 0x02: state->dw= 0; state->dw2 =  1; break;
++    case 0x0f: state->dw=-1; state->dw2 =  0; break;
++    case 0x0e: state->dw= 0; state->dw2 = -1; break;	
++    default:   state->dw= 0; state->dw2 =  0;
++  }
++
+   return 0;
+ }
+ 
+-static int M_netmouse(Gpm_Event *state,  unsigned char *data)
++/*
++static int R_imps2(Gpm_EventExt *state, int fd)
++{
++  unsigned char buffer[4];
++
++  buffer[0] = ((state->buttons & GPM_B_LEFT)   ? 0x01 : 0) |
++	      ((state->buttons & GPM_B_RIGHT)  ? 0x02 : 0) |
++	      ((state->buttons & GPM_B_MIDDLE) ? 0x04 : 0);
++
++  if (state->dx < 0) buffer[0] |= 0x10;
++  if (state->dy > 0) buffer[0] |= 0x20;
++
++  buffer[1] = ( state->dx >= 0) ?  state->dx : 256+state->dx;
++  buffer[2] = (-state->dy >= 0) ? -state->dy : 256-state->dy;
++  buffer[3] = ( state->dw >= 0) ?  state->dw : 256+state->dw; 
++
++  return write(fd,buffer,4);
++}
++*/
++
++static int M_netmouse(Gpm_EventExt *state,  unsigned char *data)
+ {
+   /* Avoid this beasts if you can.  They connect to normal PS/2 port,
+      but their protocol is one byte longer... So if you have notebook
+@@ -533,6 +683,8 @@
+     state->dy= -((data[0] & 0x20) ? data[2]-256 : data[2]);
+   else
+     state->dy = 0;
++  state->dw=      0;
++  state->dw2=     0;
+   return 0;
+ }
+ 
+@@ -566,7 +718,7 @@
+ }
+ 
+ #define GPM_B_BOTH (GPM_B_LEFT|GPM_B_RIGHT)
+-static int M_mman(Gpm_Event *state,  unsigned char *data)
++static int M_mman(Gpm_EventExt *state,  unsigned char *data)
+ {
+   /*
+    * the damned MouseMan has 3/4 bytes packets. The extra byte 
+@@ -598,7 +750,10 @@
+     prev= ((data[0] & 0x20) >> 3) | ((data[0] & 0x10) >> 4);
+     if (mytype->packetlen==4) b=data[3]>>4;
+     }
+-	  
++
++  state->dw=      0;
++  state->dw2=     0;
++  	  
+   if(mytype->packetlen==4) 
+     {
+     if(b == 0) 
+@@ -653,7 +808,7 @@
+ 
+ #define IsA(m) ((WacomModell==(-1))? 0:!strcmp(#m,wcmodell[WacomModell].name))
+ 
+-static int M_wacom(Gpm_Event *state, unsigned char *data)
++static int M_wacom(Gpm_EventExt *state, unsigned char *data)
+ {
+   static int ox=-1, oy;
+   int x, y;
+@@ -694,7 +849,7 @@
+           if (!IsA(UltraPad)){ /* Tool out of active area */ 
+              ox=-1; 
+              state->buttons=0; 
+-             state->dx=state->dy=0; 
++             state->dx=state->dy=state->dw=0;
+           }
+ 
+ 	  return 0; /* nothing more to do so leave */
+@@ -729,6 +884,8 @@
+ 
+       state->dx= (x-ox) / (wmaxx / win.ws_col / wcmodell[WacomModell].treshold);
+       state->dy= (y-oy) / (wmaxy / win.ws_row / wcmodell[WacomModell].treshold);
++	state->dw=  0;
++	state->dw2=  0;
+     }
+ 
+     ox=x; oy=y;    
+@@ -756,7 +913,7 @@
+ #define CAL_Y_MAX 0xF40
+ #define CAL_Y_SIZE (CAL_Y_MAX - CAL_Y_MIN)
+ 
+-static int M_calus(Gpm_Event *state, unsigned char *data)
++static int M_calus(Gpm_EventExt *state, unsigned char *data)
+ {
+    int x, y;
+ 
+@@ -767,7 +924,7 @@
+      + GPM_B_MIDDLE * ((data[0]>>3) & 1)
+      + GPM_B_RIGHT * ((data[0]>>4) & 1);
+ 
+-   state->dx = 0; state->dy = 0;
++   state->dx = 0; state->dy = 0;  state->dw= 0; state->dw2= 0;
+ 
+    state->x = x < CAL_X_MIN ? 0
+      : x > CAL_X_MAX ? win.ws_col+1
+@@ -788,7 +945,7 @@
+   return 0;
+ }
+ 
+-static int M_calus_rel(Gpm_Event *state, unsigned char *data)
++static int M_calus_rel(Gpm_EventExt *state, unsigned char *data)
+ {
+    static int ox=-1, oy;
+    int x, y;
+@@ -805,6 +962,8 @@
+      + GPM_B_RIGHT * ((data[0]>>4) & 1);
+ 
+    state->dx = (x-ox)/5; state->dy = (oy-y)/5;
++   state->dw = 0;
++   state->dw2 = 0;
+    ox=x; oy=y;
+    return 0;
+ }
+@@ -822,7 +981,7 @@
+ #define NCR_DELTA_X    (NCR_RIGHT_X - NCR_LEFT_X)
+ #define NCR_DELTA_Y    (NCR_TOP_Y - NCR_BOTTOM_Y)
+ 
+-static int M_ncr(Gpm_Event *state,  unsigned char *data)
++static int M_ncr(Gpm_EventExt *state,  unsigned char *data)
+ {
+   int x,y;
+ 
+@@ -831,6 +990,7 @@
+ 
+   state->dx = (signed char)data[1]; /* currently unused */
+   state->dy = (signed char)data[2];
++  state->dw = 0;
+ 
+   x = ((int)data[3] << 8) + (int)data[4];
+   y = ((int)data[5] << 8) + (int)data[6];
+@@ -864,7 +1024,7 @@
+   return 0;
+ }
+ 
+-static int M_twid(Gpm_Event *state,  unsigned char *data)
++static int M_twid(Gpm_EventExt *state,  unsigned char *data)
+ {
+   unsigned long message=0UL; int i,h,v;
+   static int lasth, lastv, lastkey, key, lock=0, autorepeat=0;
+@@ -922,6 +1082,8 @@
+     { lasth = h; lastv = v; lock = 1; } 
+   state->dx = -(h-lasth); lasth = h;
+   state->dy = -(v-lastv); lastv = v; 
++  state->dw = 0;
++  state->dw2 = 0;
+ 
+ #elif defined(TWIDDLER_BALLISTIC)
+   {
+@@ -996,7 +1158,7 @@
+ #ifdef HAVE_LINUX_JOYSTICK_H
+ /* Joystick mouse emulation (David Given) */
+ 
+-static int M_js(Gpm_Event *state,  unsigned char *data)
++static int M_js(Gpm_EventExt *state,  unsigned char *data)
+ {
+   struct JS_DATA_TYPE *jdata = (void*)data;
+   static int centerx = 0;
+@@ -1049,12 +1211,15 @@
+   if ((state->dy >= -1) && (state->dy <= 1))
+     state->dy = 0;
+ 
++  state->dw = 0;
++  state->dw2 = 0;
++
+   return 0;
+ }
+ #endif /* have joystick.h */
+ 
+ /* Synaptics TouchPad mouse emulation (Henry Davies) */
+-static int M_synaptics_serial(Gpm_Event *state,  unsigned char *data)
++static int M_synaptics_serial(Gpm_EventExt *state,  unsigned char *data)
+ {
+   syn_process_serial_data (state, data);
+ 
+@@ -1063,14 +1228,14 @@
+ 
+ 
+ /* Synaptics TouchPad mouse emulation (Henry Davies) */
+-static int M_synaptics_ps2(Gpm_Event *state,  unsigned char *data)
++static int M_synaptics_ps2(Gpm_EventExt *state,  unsigned char *data)
+ {
+   syn_process_ps2_data (state, data);
+ 
+   return 0;
+ }
+ 
+-static int M_mtouch(Gpm_Event *state,  unsigned char *data)
++static int M_mtouch(Gpm_EventExt *state,  unsigned char *data)
+ {
+   /*
+    * This is a simple decoder for the MicroTouch touch screen
+@@ -1150,7 +1315,7 @@
+ static int gunze_calib[4]; /* x0,y0 x1,y1 (measured at 1/8 and 7/8) */
+ static int gunze_debounce = 100; /* milliseconds: ignore shorter taps */
+ 
+-static int M_gunze(Gpm_Event *state,  unsigned char *data)
++static int M_gunze(Gpm_EventExt *state,  unsigned char *data)
+ {
+     /*
+      * This generates button-1 events, by now.
+@@ -1257,7 +1422,7 @@
+ /*  Genius Wizardpad tablet  --  Matt Kimball (mkimball@xmission.com)  */
+ static int wizardpad_width = -1;
+ static int wizardpad_height = -1;
+-static int M_wp(Gpm_Event *state,  unsigned char *data)
++static int M_wp(Gpm_EventExt *state,  unsigned char *data)
+ {
+ 	int x, y, pressure;
+ 
+@@ -1593,9 +1758,10 @@
+ 		       struct Gpm_Type *type, int argc, char **argv)
+ {  
+   struct termios tty;
++  char rep1, rep2, rep3, rep4;	
+ 
+   /* accept "-o dtr", "-o rts" and "-o both" */
+-  if (option_modem_lines(fd, argc, argv)) return NULL;
++//  if (option_modem_lines(fd, argc, argv)) return NULL;
+ 
+   /*
+    * Just put the device to 1200 baud. Thanks to Francois Chastrette
+@@ -1616,8 +1782,7 @@
+    * Don't read the silly initialization string. I don't want to see
+    * the vendor name: it is only propaganda, with no information.
+    */
+-   
+-  return type;
++   return type;
+ }
+ 
+ /* intellimouse, ps2 version: Ben Pfaff and Colin Plumb */
+@@ -1991,12 +2156,18 @@
+   {"pnp",  "Plug and pray. New mice may not run with '-t ms'.",
+            "", M_bare, I_pnp, CS7 | STD_FLG,
+                                 {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
+-  {"imps2",   "Microsoft Intellimouse (ps2) - 3 buttons, wheel unused",
+-           "", M_ps2, I_imps2, STD_FLG,
++  {"imps2",   "Microsoft Intellimouse (ps2) - 3 buttons, wheel",
++           "", M_imps2, I_imps2, STD_FLG,
+                                 {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
+-  {"ms3", "Microsoft Intellimouse (serial) - 3 buttons, wheel unused",
++  {"ms3", "Microsoft Intellimouse (serial) - 3 buttons, wheel",
+            "", M_ms3, I_pnp, CS7 | STD_FLG,
+                                 {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0},
++  {"a4dps2", "A4tech 4D (ps2) - 3 buttons and 2 wheels",
++           "", M_a4dps2, I_imps2, CS7 | STD_FLG,
++                                {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
++  {"a4d", "A4tech 4D (serial) - 3 buttons and 2 wheels",
++           "", M_a4d, I_pnp, CS7 | STD_FLG,
++                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0},
+   {"netmouse",  "Genius NetMouse - 2 buttons and 2 buttons 'up'/'down'.",      
+            "", M_netmouse, I_netmouse, CS7 | STD_FLG,
+                                 {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
+@@ -2018,7 +2189,6 @@
+   {"brw",  "Fellowes Browser - 4 buttons (and a wheel) (dual protocol?)",
+            "", M_brw, I_pnp, CS7 | STD_FLG,
+                                 {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0},
+-
+ #ifdef HAVE_LINUX_JOYSTICK_H
+   {"js",   "Joystick mouse emulation",
+            "Joystick", M_js, NULL, 0,
+diff -u -r gpm-1.19.3/mouse-test.c gpm-1.19.3.wheel/mouse-test.c
+--- gpm-1.19.3/mouse-test.c	Tue Jan 18 09:23:00 2000
++++ gpm-1.19.3.wheel/mouse-test.c	Sat Nov 11 19:28:59 2000
+@@ -55,6 +55,7 @@
+   DEF_TYPE, DEF_DEV, DEF_SEQUENCE,
+   DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, DEF_SCALE /*scaley*/,
+   DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_GLIDEPOINT_TAP,
++  DEF_SIMWHEEL,
+   (char *)NULL /* extra */,
+   (Gpm_Type *)NULL
+ };
+@@ -502,7 +503,7 @@
+     struct item *cur=*nextitem;
+     int packetheads=0;
+     int match=0;
+-    Gpm_Event event;
++    Gpm_EventExt event;
+ 
+     if (packetsize!=cur->this->packetlen)
+       {
+@@ -583,7 +584,7 @@
+   for (nextitem=&list; *nextitem; /* nothing */)
+     {
+     struct item *cur=*nextitem;
+-    Gpm_Event event;
++    Gpm_EventExt event;
+ 
+     /* try to decode button press and release */
+     for (i=0;i<got;i++)
+@@ -627,7 +628,7 @@
+   for (nextitem=&list; *nextitem; /* nothing */)
+     {
+     struct item *cur=*nextitem;
+-    Gpm_Event event;
++    Gpm_EventExt event;
+ 
+     /* try to decode button press and release */
+     for (i=0;i<got;i++)
+diff -u -r gpm-1.19.3/special.c gpm-1.19.3.wheel/special.c
+--- gpm-1.19.3/special.c	Tue Jan 18 08:34:00 2000
++++ gpm-1.19.3.wheel/special.c	Sat Nov 11 19:11:28 2000
+@@ -65,7 +65,7 @@
+  * The return value is 0 if the event has been eaten,
+  * 1 if the event is passed on
+  */
+-int processSpecial(Gpm_Event *event)
++int processSpecial(Gpm_EventExt *event)
+ {
+   char *command=NULL; int i;
+   FILE *consolef;
+Only in gpm-1.19.3.wheel: stamp-h
+diff -u -r gpm-1.19.3/synaptics.c gpm-1.19.3.wheel/synaptics.c
+--- gpm-1.19.3/synaptics.c	Tue Jan 18 08:34:00 2000
++++ gpm-1.19.3.wheel/synaptics.c	Sat Nov 11 19:56:45 2000
+@@ -445,7 +445,7 @@
+ /*
+ ** process_corner_taps
+ */
+-void process_corner_taps (Gpm_Event *state, report_type report) 
++void process_corner_taps (Gpm_EventExt *state, report_type report) 
+ {
+   int i = 0;
+ 
+@@ -512,7 +512,7 @@
+ **
+ ** Process the touchpad report.
+ */
+-static void syn_process_data (Gpm_Event *state,
++static void syn_process_data (Gpm_EventExt *state,
+ 			      report_type report) 
+ {
+   location_type loc;
+@@ -1180,7 +1180,7 @@
+ **
+ ** Process the touchpad 6 byte report.
+ */
+-void syn_process_serial_data (Gpm_Event *state,
++void syn_process_serial_data (Gpm_EventExt *state,
+ 			      unsigned char *data) 
+ {
+   report_type   report;
+@@ -1195,7 +1195,7 @@
+ **
+ ** Process the touchpad 6 byte report.
+ */
+-void syn_process_ps2_data (Gpm_Event *state,
++void syn_process_ps2_data (Gpm_EventExt *state,
+ 			   unsigned char *data) 
+ {
+   report_type   report;
+diff -u -r gpm-1.19.3/synaptics.h gpm-1.19.3.wheel/synaptics.h
+--- gpm-1.19.3/synaptics.h	Tue Jan 18 08:34:00 2000
++++ gpm-1.19.3.wheel/synaptics.h	Sat Nov 11 19:57:13 2000
+@@ -58,7 +58,7 @@
+ **
+ ** Process the touchpad 6 byte report.
+ */
+-void syn_process_serial_data (Gpm_Event *state,
++void syn_process_serial_data (Gpm_EventExt *state,
+ 			      unsigned char *data);
+ 
+ 
+@@ -68,7 +68,7 @@
+ **
+ ** Process the touchpad 6 byte report.
+ */
+-void syn_process_ps2_data (Gpm_Event *state,
++void syn_process_ps2_data (Gpm_EventExt *state,
+ 			   unsigned char *data);
+ 
+ 
+Only in gpm-1.19.3: t-mouse.elc

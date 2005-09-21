@@ -1,0 +1,67 @@
+#			-*-makefile-*- (gpm/include)
+#
+# Copyright (C) 2001 Nico Schottelius <nico-gpm@schottelius.org>
+#
+
+#
+# Set ROOT, if you want to install to a virtual root.
+# You can do that also via commandline: make ROOT=/mnt/newroot install
+#ROOT = 
+
+SHELL = /bin/sh
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+# directories
+libdir      = $(ROOT)@libdir@
+datadir     = $(ROOT)@datadir@
+bindir      = $(ROOT)@bindir@
+sbindir     = $(ROOT)@sbindir@
+includedir  = $(ROOT)@includedir@
+sysconfdir  = $(ROOT)@sysconfdir@
+mandir      = $(ROOT)@mandir@
+man1dir     = $(mandir)/man1
+man7dir     = $(mandir)/man7
+man8dir     = $(mandir)/man8
+infodir     = $(ROOT)@infodir@
+
+# it would be nice to figure this out automatically, but the Emacs
+# load path often has many elements, most of them reserved for
+# specialised packages like w3 and auctex.
+lispdir = @lispdir@
+
+# programs
+CC                = @CC@
+RANLIB            = @RANLIB@
+YACC              = @YACC@
+INSTALL           = @INSTALL@
+INSTALL_PROGRAM   = @INSTALL_PROGRAM@
+INSTALL_DATA      = @INSTALL_DATA@
+LN_S              = @LN_S@
+EMACS             = @EMACS@
+ELISP             = @ELISP@
+SHLIB             = @SHLIB@
+SED               = @SED@
+DIFF              = @DIFF@
+TEX               = @TEX@
+TEXINDEX          = @TEXINDEX@
+DVIPS             = @DVIPS@
+MAKEINFO          = @MAKEINFO@ --no-split
+TEXI2HTML         = texi2html -monolithic
+STRIP             = -s
+
+AR                = ar
+ETAGS             = etags
+TAR               = tar
+AWK               = awk
+CP                = cp -a
+MKDIR             = mkdir -p # linux specific, but who cares ?
+                             # gpm is linux specific, too.
+RM                = rm
+
+
+DEPFILE = .depend
+
+# general
+release = @release@

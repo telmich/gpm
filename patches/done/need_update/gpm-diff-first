@@ -1,0 +1,1047 @@
+diff -u -w ../../gpm-1.19.6/src/debuglog.c ./debuglog.c
+--- ../../gpm-1.19.6/src/debuglog.c	Sun Dec 30 00:56:34 2001
++++ ./debuglog.c	Sat Dec 29 15:13:48 2001
+@@ -37,6 +37,7 @@
+ # endif
+ #endif
+ 
++#include <stdlib.h>  /* exit */
+ #include <stdarg.h>
+ #include <stdio.h>
+ #include <string.h>
+@@ -74,13 +75,14 @@
+ gpm_oops(char *f, int n, char *s, ...)
+ {
+   if (LOG_ERR <= gpm_debug_level) {
+-    int pri;
+     va_list ap;
+ 
+ #if(defined(HAVE_VSYSLOG) && defined(HAVE_SYSLOG))
++    int pri;
+     static char fmt[] = ": %m";
+     char* buf = alloca(strlen(s)+sizeof(fmt));
+-    strcpy(buf, s); strcat(buf, fmt);
++    strcpy(buf, s); 
++    strcat(buf, fmt);
+ #endif
+ 
+     va_start(ap, s);
+diff -u -w ../../gpm-1.19.6/src/gpm-root.y ./gpm-root.y
+--- ../../gpm-1.19.6/src/gpm-root.y	Sun Dec 30 00:56:34 2001
++++ ./gpm-root.y	Sat Dec 29 15:17:40 2001
+@@ -1196,7 +1196,7 @@
+   Draw *draw=NULL;
+   DrawItem *item;
+   char s[80];
+-  int posty, postx, postX;
++  int posty=0, postx, postX;
+   struct sigaction childaction;
+   int evflag;
+   int recursenow=0; /* not on first iteration */
+diff -u -w ../../gpm-1.19.6/src/gpm.c ./gpm.c
+--- ../../gpm-1.19.6/src/gpm.c	Sun Dec 30 00:56:34 2001
++++ ./gpm.c	Sat Dec 29 21:53:12 2001
+@@ -27,6 +27,7 @@
+ #include <errno.h>
+ #include <unistd.h>        /* select(); */
+ #include <signal.h>        /* SIGPIPE */
++#include <time.h>          /* time */
+ #include <sys/param.h>
+ #include <sys/fcntl.h>     /* O_RDONLY */
+ #include <sys/wait.h>      /* wait()   */
+@@ -235,6 +251,7 @@
+   } 
+ 
+   fd=open_console(O_WRONLY);
++  gpm_debug_log(LOG_DEBUG,"Paste %i",c);
+   if (ioctl(fd, TIOCLINUX, &c) < 0)
+      oops("ioctl(TIOCLINUX)");
+   close(fd);
+@@ -386,8 +407,25 @@
+       {
+       gpm_debug_log(LOG_NOTICE,"Skipping a data packet (?)");
+       return NULL;
+       }
++
++    /* Better debug output
++      29/12/2001 02:12. pebl*/
++    switch (protocol->packetlength)
++      {
++      case 4:
++	gpm_debug_log(LOG_DEBUG,"Data %02x %02x %02x %02x",data[0],data[1],data[2],data[3]);
++	break;
++      case 5:
++	gpm_debug_log(LOG_DEBUG,"Data %02x %02x %02x %02x %02x",data[0],data[1],data[2],data[3],data[4]);
++	break;
++      case 6:
++	gpm_debug_log(LOG_DEBUG,"Data %02x %02x %02x %02x %02x %02x",data[0],data[1],data[2],data[3],data[4],data[5]);
++	break;
++      default:
+   gpm_debug_log(LOG_DEBUG,"Data %02x %02x %02x (%02x)",data[0],data[1],data[2],data[3]);
++      }
++    
+   return data;
+ }
+ 
+@@ -532,7 +586,10 @@
+        * Return information also if never happens, but enough time has elapsed.
+        * Note: return 1 will segfault due to missing event->vc
+        */
+-      if (time(NULL)<=awaketime) return 0;
++      if (time(NULL)<=awaketime){ 	
++	gpm_debug_log(LOG_DEBUG,"No dy, dx or buttons");
++	return 0;
++      }
+       awaketime=time(NULL)+1;
+       break;
+       }
+@@ -1104,7 +1169,7 @@
+       continue;
+       }
+ 
+-    gpm_debug_log(LOG_DEBUG,"selected %i times",pending);
++    gpm_debug_log(LOG_DEBUG,"select returned %i fd",pending);
+ 
+ /*....................................... manage graphic mode */
+ 
+diff -u -w ../../gpm-1.19.6/src/gpn.c ./gpn.c
+--- ../../gpm-1.19.6/src/gpn.c	Sun Dec 30 00:56:34 2001
++++ ./gpn.c	Sat Dec 29 14:27:12 2001
+@@ -460,7 +463,7 @@
+     check_uniqueness();
+     gpm_debug_log(LOG_INFO,"Signed");
+ 
+-  } /*if*/
++  } /*if(gpm_log_daemon)*/
+ 
+   /*
+    * well, I used to create a symlink in the /tmp dir to be compliant with old
+diff -u -w ../../gpm-1.19.6/src/libcurses.c ./libcurses.c
+--- ../../gpm-1.19.6/src/libcurses.c	Sun Dec 30 00:56:34 2001
++++ ./libcurses.c	Fri Dec 21 16:13:05 2001
+@@ -93,7 +93,7 @@
+ /* JD patch 11/08/1998 */
+ #define MAXNBPREVCHAR 4         /* I don't think more is usefull, JD */
+     static int nbprevchar=0, prevchar[MAXNBPREVCHAR];
+-    extern gpm_convert_event(char *data, Gpm_Event *event);
++    extern int gpm_convert_event(char *data, Gpm_Event *event);
+     int c; unsigned char mdata[4];
+ 
+ /* JD patch 11/08/1998 */
+diff -u -w ../../gpm-1.19.6/src/liblow.c ./liblow.c
+--- ../../gpm-1.19.6/src/liblow.c	Sun Dec 30 00:56:34 2001
++++ ./liblow.c	Fri Dec 21 16:13:11 2001
+@@ -529,7 +529,7 @@
+ #define DELAY_MS 100
+         static struct timeval to={0,DELAY_MS*1000};
+         static fd_set selSet;
+-        extern gpm_convert_event(unsigned char *data, Gpm_Event *event);
++        extern int gpm_convert_event(unsigned char *data, Gpm_Event *event);
+         int c; unsigned char mdata[4];
+ 
+         if (nbprevchar)  /* if there are some consumed char ... */
+diff -u -w ../../gpm-1.19.6/src/mice.c ./mice.c
+--- ../../gpm-1.19.6/src/mice.c	Sun Dec 30 00:56:34 2001
++++ ./mice.c	Sat Dec 29 21:35:11 2001
+@@ -93,7 +93,7 @@
+ 
+ static int parse_argv(argv_helper *info, int argc, char **argv)
+ {
+-    int i, j, errors = 0;
++    int i, j=0, errors = 0;
+     long l;
+     argv_helper *p;
+     char *s, *t;
+@@ -595,8 +605,8 @@
+    * and then switch to 4-byte mode.
+    */
+   static unsigned char prev=0;
+   static Gpm_Type *mytype=mice; /* it is the first */
+-  unsigned char b;
++  unsigned char b = 0;
+ 
+   if (data[1]==GPM_EXTRA_MAGIC_1 && data[2]==GPM_EXTRA_MAGIC_2)
+     {
+@@ -665,10 +675,10 @@
+   int  treshold;
+ } wcmodell[] = {
+   /* ModellName    Magic     MaxX     MaxY  Border  Tresh */
+-     "UltraPad"  , "UD",        0,       0,    250,    20, 
+-  /* "Intuos"    , "GD",        0,       0,      0,    20, not yet supported */
+-     "PenPartner", "CT",        0,       0,      0,    20, 
+-     "Graphire"  , "ET",     5103,    3711,      0,    20
++     {"UltraPad"  , "UD",        0,       0,    250,    20}, 
++  /* {"Intuos"    , "GD",        0,       0,      0,    20}, not yet supported */
++     {"PenPartner", "CT",        0,       0,      0,    20}, 
++     {"Graphire"  , "ET",     5103,    3711,      0,    20}
+   };
+ 
+ #define IsA(m) ((WacomModell==(-1))? 0:!strcmp(#m,wcmodell[WacomModell].name))
+@@ -2045,6 +2107,7 @@
+   * The first three strings are the name, an help line, a long name (if any)
+   * Then come the functions: the decoder and the initializazion function
+   *     (called I_* and M_*)
++  * Flags: 
+   * Follows an array of four bytes: it is the protocol-identification, based
+   *     on the first two bytes of a packet: if
+   *     "((byte0 & proto[0]) == proto[1]) && ((byte1 & proto[2]) == proto[3])"
+diff -u -w ../../gpm-1.19.6/src/mouse-test.c ./mouse-test.c
+--- ../../gpm-1.19.6/src/mouse-test.c	Sun Dec 30 00:56:34 2001
++++ ./mouse-test.c	Sat Dec 29 21:55:30 2001
+@@ -335,7 +371,7 @@
+ 	   devcount);
+     printf("Please move the mouse. Press any key when done\r\n"
+ 	   " (You can specify your device name on cmdline, in order to\r\n"
+-	   "  avoid this step\r\n. Different baud rates are tried at "
++	   "  avoid this step.)\r\n Different baud rates are tried at "
+ 	   "different times\r\n");
+     
+     timeout.tv_sec=10; /* max test time */
+@@ -375,7 +436,7 @@
+ 	  }
+ 	}
+     
+-    } /* devcount>1 */
++    } /* while(devcount>1) */
+ 
+   mousefd=devlist->fd;
+   mousename=devlist->name;
+diff -u -w ../../gpm-1.19.6/src/synaptics.c ./synaptics.c
+--- ../../gpm-1.19.6/src/synaptics.c	Sun Dec 30 00:56:34 2001
++++ ./synaptics.c	Sat Dec 29 21:20:17 2001
+@@ -212,48 +238,49 @@
+ 
+ static param_data_type param_data [] = {
+   /* enabling configuration parameters */
+-  { "edge_motion_enabled",        Flag_Param,    &edge_motion_enabled        },
+-  { "edge_motion_speed_enabled",  Flag_Param,    &edge_motion_speed_enabled  },
+-  { "corner_taps_enabled",        Flag_Param,    &corner_taps_enabled        },
+-  { "taps_enabled",               Flag_Param,    &taps_enabled               },
+-  { "pressure_speed_enabled",     Flag_Param,    &pressure_speed_enabled     },
+-  { "tossing_enabled",            Flag_Param,    &tossing_enabled            },
+-  { "does_toss_use_static_speed", Flag_Param,    &does_toss_use_static_speed },
++  { "edge_motion_enabled",        Flag_Param,    {&edge_motion_enabled        }},
++  { "edge_motion_speed_enabled",  Flag_Param,    {&edge_motion_speed_enabled  }},
++  { "corner_taps_enabled",        Flag_Param,    {&corner_taps_enabled        }},
++  { "taps_enabled",               Flag_Param,    {&taps_enabled               }},
++  { "pressure_speed_enabled",     Flag_Param,    {&pressure_speed_enabled     }},
++  { "tossing_enabled",            Flag_Param,    {&tossing_enabled            }},
++  { "does_toss_use_static_speed", Flag_Param,    {&does_toss_use_static_speed }},
+   /* pressure induced speed related configuration parameters */
+-  { "low_pressure",               Integer_Param, &low_pressure               },
+-  { "speed_up_pressure",          Integer_Param, &speed_up_pressure          },
+-  { "pressure_factor",            Float_Param,   &pressure_factor            },
+-  { "standard_speed_factor",      Float_Param,   &standard_speed_factor      },
++  { "low_pressure",               Integer_Param, {&low_pressure               }},
++  { "speed_up_pressure",          Integer_Param, {&speed_up_pressure          }},
++  { "pressure_factor",            Float_Param,   {&pressure_factor            }},
++  { "standard_speed_factor",      Float_Param,   {&standard_speed_factor      }},
+   /* toss/catch related parameters */
+-  { "min_toss_time",              Integer_Param, &min_toss_time              },
+-  { "max_toss_time",              Integer_Param, &max_toss_time              },
+-  { "toss_cleanup_time",          Integer_Param, &toss_cleanup_time          },
+-  { "min_toss_dist",              Integer_Param, &min_toss_dist              },
+-  { "static_toss_speed",          Integer_Param, &static_toss_speed          },
+-  { "toss_speed_factor",          Float_Param,   &toss_speed_factor          },
++  { "min_toss_time",              Integer_Param, {&min_toss_time              }},
++  { "max_toss_time",              Integer_Param, {&max_toss_time              }},
++  { "toss_cleanup_time",          Integer_Param, {&toss_cleanup_time          }},
++  { "min_toss_dist",              Integer_Param, {&min_toss_dist              }},
++  { "static_toss_speed",          Integer_Param, {&static_toss_speed          }},
++  { "toss_speed_factor",          Float_Param,   {&toss_speed_factor          }},
+   /* edge motion related configuration parameters */
+-  { "edge_speed",                 Integer_Param, &edge_speed                 },
++  { "edge_speed",                 Integer_Param, {&edge_speed                 }},
+   /* corner tap actions */
+-  { "upper_left_action",          Corner_Param,  &corner_actions [0]         },
+-  { "lower_left_action",          Corner_Param,  &corner_actions [1]         },
+-  { "upper_right_action",         Corner_Param,  &corner_actions [2]         },
+-  { "lower_right_action",         Corner_Param,  &corner_actions [3]         },
++  { "upper_left_action",          Corner_Param,  {&corner_actions [0]         }},
++  { "lower_left_action",          Corner_Param,  {&corner_actions [1]         }},
++  { "upper_right_action",         Corner_Param,  {&corner_actions [2]         }},
++  { "lower_right_action",         Corner_Param,  {&corner_actions [3]         }},
+   /* use wmode */
+-  { "use_wmode",		  Flag_Param,	 &use_wmode		     },
+-  { "finger_threshold",		  Integer_Param, &finger_threshold	     },
+-  { "tap_lower_limit",		  Integer_Param, &tap_lower_limit	     },
+-  { "tap_upper_limit",		  Integer_Param, &tap_upper_limit	     },
+-  { "tap_range",		  Integer_Param, &tap_range		     },
+-  { "tap_interval",		  Integer_Param, &tap_interval		     },
+-  { "drag_lock",		  Flag_Param,	 &drag_lock		     },
+-  { "multiple_click_delay",	  Integer_Param, &multiple_click_delay	     },
++  { "use_wmode",		  Flag_Param,	 {&use_wmode		     }},
++  { "finger_threshold",		  Integer_Param, {&finger_threshold	     }},
++  { "tap_lower_limit",		  Integer_Param, {&tap_lower_limit	     }},
++  { "tap_upper_limit",		  Integer_Param, {&tap_upper_limit	     }},
++  { "tap_range",		  Integer_Param, {&tap_range		     }},
++  { "tap_interval",		  Integer_Param, {&tap_interval		     }},
++  { "drag_lock",		  Flag_Param,	 {&drag_lock		     }},
++  { "multiple_click_delay",	  Integer_Param, {&multiple_click_delay	     }},
+   /* end of list */
+-  { NULL,                         Flag_Param,    NULL                        }
++  { NULL,                         Flag_Param,    {NULL                        }}
+ };
+ 
+ 
+ /*
+ ** The information returned in the identification packet.
++** STIG page 10
+ */
+ typedef struct {
+   int info_model_code;
+@@ -264,7 +291,19 @@
+ 
+ /*
+ ** The information returned in the model ID packet.
++** STIG page 11
+ */
++
++#define INFO_ROT180_BITS      0x800000  /* bit 23    */
++#define INFO_PORTRAIT_BITS    0x400000	 /* bit 22    */
++#define INFO_SENSOR_BITS      0x3F0000	 /* bit 16-21 */
++#define INFO_HARDWARE_BITS    0x00FE00	 /* bit 9-15  */
++#define INFO_NEW_ABS_BITS     0x000080	 /* bit 7     */
++#define INFO_CAP_PEN_BITS     0x000040	 /* bit 6     */
++#define INFO_SIMPLE_CMD_BITS  0x000020	 /* bit 5     */
++#define INFO_GEOMETRY_BITS    0x00000F	 /* bit 0-3   */
++
++
+ typedef struct {
+   int info_rot180;
+   int info_portrait;
+@@ -276,83 +315,37 @@
+   int info_geometry;
+ } model_id_type;
+ 
+-/*
+-** The information returned in the extended capibility packet.
+-*/
+-
+-typedef struct {
+-  int cap_ext;
+-  int cap_sleep;
+-  int cap_four_button;
+-  int cap_multi_finger;
+-  int cap_palm_detect;
+-} ext_cap_type;
+-
+-/*
+-** The format of the reported absolute data.
+-*/
+-typedef struct {
+-  int gesture;
+-  int finger;
+-  int left;
+-  int middle;
+-  int down;
+-  int right;
+-  int x;
+-  int y;
+-  int pressure;
+-} report_type;
+-
+-
+-/*
+-** A location record.
+-*/
+-typedef struct {
+-  int x;
+-  int y;
+-} location_type;
+-
+ 
+ /*
+-** The information in the mode byte.
++** The sensor types as of STIG 2.5
++** Page 11
+ */
+-#define RELATIVE_MODE      0x00
+-#define ABSOLUTE_MODE      0x80
+-#define LOW_REPORT_RATE    0x00
+-#define HIGH_REPORT_RATE   0x40
+-#define USE_1200_BAUD      0x00
+-#define USE_9600_BAUD      0x08
+-#define PS2_NO_SLEEP       0x00
+-#define PS2_SLEEP          0x08
+-#define NORMAL_REPORT      0x00
+-#define EXTENDED_REPORT    0x02
+-#define REPORT_W_OFF       0x00
+-#define REPORT_W_ON        0x01
+-
+-
+ static char *model_names [] = {
+   "Unknown",
+-  "Standard TouchPad",
+-  "Mini Module",
+-  "Super Module",
++  "Standard TouchPad (TM41xx134)",
++  "Mini Module (TM41xx156)",
++  "Super Module (TM41xx180)",
+   "",
+   "",
+   "",
+-  "Flexible pad",
+-  "Ultra-thin Module",
+-  "Wide pad Module",
++  "Flexible pad (discontinued)",
++  "Ultra-thin Module (TM41xx220)",
++  "Wide pad Module (TW41xx230)",
+   "",
+-  "Stamp pad Module",
+-  "Sub-mini Module",
+-  "TBD",
++  "Stamp pad Module (TM41xx240)",
++  "Sub-mini Module (TM41xx140)",
++  "MultiSwitch module (TBD)",
+   "",
+-  "Advanced Technology pad",
++  "Advanced Technology pad (TM41xx221)",
+   "Ultra-thin Module, connector reversed"
+ };
+ 
+ 
+ /*
+ ** Define the information known about a sensor.
++** STIG page 14.
++** Resolution only apply for absolute mode.
++** For older models the default resulotion is 85x94.
+ */
+ typedef struct {
+   char *model;
+@@ -381,6 +374,76 @@
+ 
+ 
+ /*
++** The information returned in the extended capability packet.
++** STIG page 15
++*/
++
++#define EXT_CAP_EXTENDED     0x8000     /* Bit 15  */
++#define EXT_CAP_SLEEP        0x0010     /* Bit 4   */
++#define EXT_CAP_FOUR_BUTTON  0x0008     /* Bit 3   */
++#define EXT_CAP_MULTI_FINGER 0X0002     /* Bit 1   */
++#define EXT_CAP_PALM_DETECT  0X0001     /* Bit 0   */
++
++typedef struct {
++  int cap_ext; 
++  int cap_sleep; 
++  int cap_four_button; 
++  int cap_multi_finger; 
++  int cap_palm_detect; 
++} ext_cap_type;
++
++
++
++/*
++** The information in the mode byte.
++** STIG Page 17
++*/
++#define ABSOLUTE_MODE      0x80      /* Bit 7 set */
++#define RELATIVE_MODE      0x00	     /* Bit   */
++#define HIGH_REPORT_RATE   0x40	     /* Bit 6 set 0 = 80 packages per second */
++#define LOW_REPORT_RATE    0x00	     /* Bit           40 packages per second */
++#define USE_9600_BAUD      0x08	     /* Bit 3 for serial protocol */
++#define USE_1200_BAUD      0x00	     /* Bit   */
++#define PS2_SLEEP          0x08	     /* Bit 3 for ps2 protocol */
++#define PS2_NO_SLEEP       0x00	     /* Bit   */
++#define NO_TAPDRAG_GESTURE 0x04      /* Bit 2 for model version >= 4 */
++#define TAPDRAG_GESTURE    0x00      /* Bit   */     
++#define EXTENDED_REPORT    0x02	     /* Bit 1 for serial absolute mode only */
++#define NORMAL_REPORT      0x00	     /* Bit   */
++#define REPORT_W_ON        0x01	     /* Bit 0 set */
++#define REPORT_W_OFF       0x00      /* Bit   */
++
++
++
++/*
++** The format of the reported absolute data.
++*/
++typedef struct {
++  int gesture;
++  int finger;
++  int left;
++  int middle;
++  int down;
++  int right;
++  int x;
++  int y;
++  int pressure;
++} report_type;
++
++
++/*
++** A location record.
++** This is needed to make an average over several packages, 
++** because the reported x,y might not be that accurate.
++*/
++typedef struct {
++  int x;
++  int y;
++} location_type;
++
++
++
++/*
+ ** Parameters for controlling the touchpad.
+ */
+ /* touchpad information */
+@@ -417,7 +481,8 @@
+ **
+ ****************************************************************************/
+ 
++/* Get model name, STIG page 11 */
+ static char *syn_model_name (int sensor) 
+ {
+  if (sensor < 0 || sensor > 16) {
+     return "Reserved";
+@@ -427,24 +492,27 @@
+ }
+ 
+ 
+-/* convert the model id from bits to values */
++/* convert the model id from bits to values 
++*  STIG page 11 
++*/
+ void extract_model_id_info (int model_int, model_id_type *model) 
+ {
+-  model->info_rot180     = check_bits (model_int, 0x00800000);
+-  model->info_portrait   = check_bits (model_int, 0x00400000);
+-  model->info_sensor     = (model_int & 0x003f0000) >> 16;
+-  model->info_hardware   = (model_int & 0x0000fe00) >> 8;
+-  model->info_new_abs    = check_bits (model_int, 0x00000080);
+-  model->info_cap_pen    = check_bits (model_int, 0x00000040);
+-  model->info_simple_cmd = check_bits (model_int, 0x00000020);
+-  model->info_geometry   = model_int & 0x0000000f;
++  model->info_rot180     = check_bits (model_int,  INFO_ROT180_BITS);
++  model->info_portrait   = check_bits (model_int,  INFO_PORTRAIT_BITS);
++  model->info_sensor     =            (model_int & INFO_SENSOR_BITS) >> 16;
++  model->info_hardware   =            (model_int & INFO_HARDWARE_BITS) >> 8;
++  model->info_new_abs    = check_bits (model_int,  INFO_NEW_ABS_BITS);
++  model->info_cap_pen    = check_bits (model_int,  INFO_CAP_PEN_BITS);
++  model->info_simple_cmd = check_bits (model_int,  INFO_SIMPLE_CMD_BITS);
++  model->info_geometry   =            (model_int & INFO_GEOMETRY_BITS);
+ }
+ 
+ 
+-/* Translate the reported data into a record for processing */
++/* Translate the reported data into a record for processing 
++ *  STIG page 14*/
+ static sensor_info_type *syn_get_sensor_info (int sensor_id) 
+ {
+-  if (sensor_id < 0 || sensor_id > 12) {
++  if (sensor_id < 0 || 12 < sensor_id ) {
+     return &sensor_info [0];
+   } else {
+     return &sensor_info [sensor_id];
+@@ -519,14 +589,14 @@
+ 			      int edges) 
+ {
+   gpm_debug_log (LOG_DEBUG,
+-                 "\r%c%c%c%c%c  %4dx%-4d  %3d  %c%c%c%c  %c%c",
++                 "\rSynps2: %c%c%c%c%c  %4dx%-4d  %3d  %c%c%c%c  %c%c",
+                  report.gesture ? 'g' : '-',
+                  report.finger  ? 'f' : '-',  
+ 
+                  report.left    ? 'l' : '-',
+                  report.middle  ? 'm' : '-',  
+-
+                  report.right   ? 'r' : '-',
++
+                  report.x, report.y, report.pressure,
+                  edges & LEFT_EDGE   ? 'l' : '-',
+                  edges & RIGHT_EDGE  ? 'r' : '-',
+@@ -637,6 +707,7 @@
+     last_edges = edges;
+     packet_num++;
+   } else {
++    /* No finger on the pad */
+     /* handle the tossing action if enabled */
+     if (tossing_enabled && !was_tossing &&
+ 	last_finger     &&
+@@ -1045,66 +1120,127 @@
+ /*      Adapted from tpconfig.c by C. Scott Ananian                       */
+ /*------------------------------------------------------------------------*/
+ 
++/* PS2 Synaptics is using LSB, STIG page 29. 
++**
++** After power on or reset:
++** 100 samples per second
++** Resolution is 4 counts per mm
++** Scaling 1:1
++** Stream mode is selected
++** Data reporting is disabled
++** Absolte mode is disabled
++*/
++
++/* Normal ps2 commands, Command set is on STIG page 33  */
++#define PS2_RESET         0xFF      /* Reset */
++#define PS2_RESEND        0xFE      /* Resend command */
++#define PS2_ERROR         0xFC      /* Error, after an resend or disconnect*/
++#define PS2_ACK           0xFA      /* Command acknowledge */
++#define PS2_SAMPLE_RATE   0xF3      /* Set sample rate to the following byte */
++#define PS2_READ_DEVICE   0xF2      /* Read device type */
++#define PS2_READY         0xAA      /* Send after a calibration or ERROR */
++#define PS2_STATUS_REQ    0xE9      /* Send status request */
++#define PS2_RESOLUTION    0xE8      /* Set resolution, to following transmitted byte */
++#define PS2_SCALE_11      0xE6      /* Set scale to 1:1 */
++
++
++/* Additional commands*/
++#define PS2_SYN_CMD       0xE8      /* Four of these each with an following byte encodes a command*/
++#define PS2_SYN_INERT     0xE6      /* This ps2 command is ignored by synaptics */
++#define PS2_SYN_STATUS_OK 0x47      /* Special synaptics Status report is recognized */
++#define PS2_SYN_IDCODE    0x00
++#define PS2_SYN_SET_MODE  0x14      /* Set the mode instead of sample rate (used after a sample rate cmd) */
++
++
++/* These are the commands that can be given (encoded) by PS_SYN_CMD */
++#define PS2_SYN_CMD_IDENTIFY     0x00 /* Identify Touchpad */
++#define PS2_SYN_CMD_MODES        0x01 /* Read Touchpad Modes */
++#define PS2_SYN_CMD_CAPABILITIES 0x02 /* Read capabilities */
++#define PS2_SYN_CMD_MODEL_ID     0x03 /* Read model id */
++#define PS2_SYN_CMD_SERIAL_NO_P  0x06 /* Read serial number prefix */
++#define PS2_SYN_CMD_SERIAL_NO_S  0x07 /* Read serial number suffix */
++#define PS2_SYN_CMD_RESOLUTIONS  0x08 /* Read resolutions */
++
++
++
++
+ typedef unsigned char byte;
+ 
++/* read a byte from the ps/2 port */
++static byte ps2_getbyte(int fd) 
++{
++  byte b;
++
++  read(fd, &b, 1);
++  return b;
++}
++
++
+ /* write a byte to the ps/2 port, handling ACK */
+ static void ps2_putbyte(int fd,
+ 			byte b) 
+ {
+   byte ack;
++
+   write(fd, &b, 1);
+   read(fd, &ack, 1);
+-  if (ack != 0xFA)
++  /* Should check for resend code PS2_RESEND also */
++  if (ack != PS2_ACK)
+     gpm_debug_log (LOG_ERR,"Invalid ACK in synps2 initialization");
+ }
+ 
+-/* read a byte from the ps/2 port */
+-static byte ps2_getbyte(int fd) 
+-{
+-  byte b;
+-  read(fd, &b, 1);
+-  return b;
+-}
+-
+-/* use the Synaptics extended ps/2 syntax to write a special command byte */
++/* use the Synaptics extended ps/2 syntax to write a special command byte 
++* STIG page 36: Send exactly four PS2_SYN_CMD (which is otherwise ignored)
++* and after each a byte with the 2 first bits being the command (LSB). End it with
++* either  PS2_SAMPLE_RATE or PS2_STATUS_REQ. It is hinted to send an inert command
++* first so not have five or more PS2_SYN_CMD by coincident.
++*/
+ static void ps2_send_cmd(int fd,
+ 			 byte cmd) 
+ {
+   int i;
++
+   /* initialize with 'inert' command */
+-  ps2_putbyte(fd, 0xE6);
++  ps2_putbyte(fd, PS2_SYN_INERT);
+   for (i=0; i<4; i++) {
+-    ps2_putbyte(fd, 0xE8);
++    ps2_putbyte(fd, PS2_SYN_CMD);
+     ps2_putbyte(fd, (cmd>>6)&0x3);
+     cmd<<=2;
+   }
+ }
+ 
+-/* write 'cmd' to mode byte 1 */
++/* write 'cmd' to mode byte 1.
++ * See ps2_send_cmd */
+ static void ps2_set_mode1(int fd,
+ 			  byte cmd) 
+ {
+   ps2_send_cmd(fd, cmd);
+-  ps2_putbyte(fd, 0xF3);
++  ps2_putbyte(fd, PS2_SAMPLE_RATE);
+   ps2_putbyte(fd, 0x0A);
+ }
+ 
+-/* write 'cmd' to mode byte 2 */
++/* write 'cmd' to mode byte 2 
++ * See ps2_send_cmd. PS2_SR_SET_MODE stores the touchpad mode encoded in the 
++ * four PS2_SYN_CMD commands
++ */
+ static void ps2_set_mode2(int fd,
+ 			  byte cmd) 
+ {
+   ps2_send_cmd(fd, cmd);
+-  ps2_putbyte(fd, 0xF3);
+-  ps2_putbyte(fd, 0x14);
++  ps2_putbyte(fd, PS2_SAMPLE_RATE);
++  ps2_putbyte(fd, PS2_SYN_SET_MODE);
+ }
+ 
+-/* read three byte status ('a','b','c') corresponding to register 'cmd' */
++/* read three byte status ('a','b','c') corresponding to register 'cmd' 
++*  Special status request for synatips is given after a cmd.
++*  Byte b is PS2_SYN_STATUS_OK to recognize a synaptics
++*/
+ static void ps2_status_rqst(int fd,
+ 			    byte cmd,
+ 			    byte *bytes) 
+ {
+   ps2_send_cmd(fd, cmd);
+-  ps2_putbyte(fd, 0xE9);
++  ps2_putbyte(fd, PS2_STATUS_REQ);
+   bytes [0]=ps2_getbyte(fd);
+   bytes [1]=ps2_getbyte(fd);
+   bytes [2]=ps2_getbyte(fd);
+@@ -1117,8 +1253,8 @@
+ {
+   byte bytes [3];
+ 
+-  ps2_status_rqst (fd, 0x00, bytes);
+-  if (bytes [1] != 0x47) {
++  ps2_status_rqst (fd, PS2_SYN_CMD_IDENTIFY, bytes);
++  if (bytes [1] != PS2_SYN_STATUS_OK) {
+     printf ("PS/2 device doesn't appear to be a synaptics touchpad\n");
+   } else {
+     info->info_minor      = bytes [0];
+@@ -1128,6 +1264,36 @@
+ }
+ 
+ 
++
++
++/* read the extended capibility from the ps2 touchpad, STIG page 15 */
++static void syn_read_ps2_cap (int fd,
++                              ext_cap_type *cap)
++{
++  unsigned char bytes [3];
++  ps2_status_rqst (fd, PS2_SYN_CMD_CAPABILITIES, bytes);
++
++  if (bytes [1] != PS2_SYN_STATUS_OK) {
++    printf ("PS/2 device doesn't appear to be a synaptics touchpad\n");
++  }
++
++  cap->cap_ext          = check_bits (bytes[0], EXT_CAP_EXTENDED >> 16);
++
++  /* If the extended bit is not set it should be assumed that neither of the
++     other capabilites is availible.*/
++  if(cap->cap_ext){
++    cap->cap_sleep        = check_bits (bytes[2], EXT_CAP_SLEEP);
++    cap->cap_four_button  = check_bits (bytes[2], EXT_CAP_FOUR_BUTTON);
++    cap->cap_multi_finger = check_bits (bytes[2], EXT_CAP_MULTI_FINGER);
++    cap->cap_palm_detect  = check_bits (bytes[2], EXT_CAP_PALM_DETECT);
++  }else{
++    cap->cap_sleep        = 0;
++    cap->cap_four_button  = 0;
++    cap->cap_multi_finger = 0;
++    cap->cap_palm_detect  = 0;
++  }
++}
++
+ /* read the model_id from the ps2 touchpad */
+ static void syn_read_ps2_model_id (int fd,
+ 				   model_id_type *model) 
+@@ -1135,75 +1301,97 @@
+   unsigned char bytes [3];
+   int model_int;
+ 
+-  ps2_status_rqst (fd, 0x03, bytes);
++  ps2_status_rqst (fd, PS2_SYN_CMD_MODEL_ID, bytes);
+   model_int = ((bytes [0] << 16) |
+ 	       (bytes [1] << 8)  |
+-	       bytes [2]);
++	       (bytes [2]));
+   extract_model_id_info (model_int, model);
+ }
+ 
+-/* read the extended capibility from the ps2 touchpad */
+-static void syn_read_ps2_cap (int fd,
+-                              ext_cap_type *cap)
+-{
+-  unsigned char bytes [3];
+-  ps2_status_rqst (fd, 0x02, bytes);
+-  cap->cap_ext          = check_bits (bytes[0], 0x80);
+-  cap->cap_sleep        = check_bits (bytes[2], 0x10);
+-  cap->cap_four_button  = check_bits (bytes[2], 0x08);
+-  cap->cap_multi_finger = check_bits (bytes[2], 0x02);
+-  cap->cap_palm_detect  = check_bits (bytes[2], 0x01);
+-}
+ 
+ /* read the modes from the touchpad (in ps/2 format) */
+ static void read_ps2_modes (int fd) 
+ {
+   unsigned char bytes [3];
+ 
+-  ps2_status_rqst (fd, 0x01, bytes);
++  ps2_status_rqst (fd, PS2_SYN_CMD_MODES, bytes);
+ #if DEBUG_SENT_DATA
+   gpm_debug_log (LOG_DEBUG,"PS/2 modes: %02X", bytes [2]);
+ #endif
+ }
+ 
++
++/*
++ *  Translate the incomming data to an uniform report
++ *
++ */
++
++/* STIG page 42
++ * wmode = 0, newer version. Gesture, right and left are repeated.
++ *
++ * byte 0 |     1   |    0   |  Finger  | Reserved |    0   | Gesture |  Right  | Left |  
++ * byte 1 |         y-pos 11-8                     |         x-pos  11-8               |
++ * byte 2 |                           z pressure 0-7                                   |
++ * byte 3 |     1   |    1   | y-pos 12 | x-pos 12 |    0   | Gesture |  Right  | Left |
++ * byte 4 |                                 x - pos 0-7                                |
++ * byte 5 |                                 y - pos 0-7                                |
++ *
++ * STIG page 43
++ * wmode = 0, old version <  3.2.
++ * Second is a second gesture!?
++ *
++ * byte 0 |     1   |    1   |  z-pres 6-7         | Second | Gesture |  Right  | Left |  
++ * byte 1 |  finger |    0   |     0    |                    x-pos  12-8               |
++ * byte 2 |                           x-pos  0-7                                       |
++ * byte 3 |     1   |    0   |               z-pressure 0-5                            |
++ * byte 4 |Reserved |    0   |    0     |              y - pos 8-12                    |
++ * byte 5 |                                 y - pos 0-7                                |
++ *
++ 
++ */
++
+ /* Translate the reported data into a record for processing */
+ static void syn_translate_ps2_report (unsigned char *data,
+ 				      report_type *report) 
+ {
+   int i;
+ 
+-  if (((data [0] & 0xc8) == 0x80) &&
+-      ((data [3] & 0xc8) == 0xc0) &&
+-      ((data [0] & 0x0f) == (data [3] & 0x0f))) {
++  /* Check that this is indead an absolute 6 byte new version packet*/
++  if (((data [0] & 0xc8) == 0x80) && /* Check static in byte 0 */
++      ((data [3] & 0xc8) == 0xc0) && /* Check static in byte 3 */
++      ((data [0] & 0x0F) == (data [3] & 0x0F))) { /* check repeated date */
+     report->gesture  = check_bits (data [0], 0x04);
+     report->finger   = check_bits (data [0], 0x20);
+     report->left     = check_bits (data [0], 0x01);
+     report->middle   = 0;
+     report->right    = check_bits (data [0], 0x02);
+     report->x        = (((data [1] & 0x0f) << 8) |
+ 			((data [3] & 0x10) << 8) |
+-			data [4]);
+-    report->y        = (((data [1] & 0xf0) << 4) |
++			((data [4])));
++    report->y        = (((data [1] & 0xF0) << 4) |
+ 			((data [3] & 0x20) << 7) |
+-			data [5]);
++			((data [5])));
+     report->pressure = data [2];
+-  } else if (((data [0] & 0xc0) == 0xc0) &&
+-	     ((data [1] & 0x60) == 0x00) &&
+-	     ((data [3] & 0xc0) == 0x80) &&
+-	     ((data [4] & 0x60) == 0x00)) {
++  } /* Old style packet maybe */
++   else if (((data [0] & 0xC0) == 0xC0) && /* Static in byte 0*/
++	     ((data [1] & 0x60) == 0x00) && /* Static in byte 1*/
++	     ((data [3] & 0xC0) == 0x80) && /* Static in byte 3*/
++	     ((data [4] & 0x60) == 0x00)) { /* Static in byte 4*/
+     report->gesture  = check_bits (data [0], 0x04);
+     report->finger   = check_bits (data [1], 0x80);
+     report->left     = check_bits (data [0], 0x01);
+     report->middle   = 0;
+     report->right    = check_bits (data [0], 0x02);
+-    report->x        = (((data [1] & 0x1f) << 8) |
+-			data [2]);
++    report->x        = (((data [1] & 0x1F) << 8) |
++			((data [2])));
+     report->y        = (((data [4] & 0x1f) << 8) |
+-			data [5]);
++			((data [5])));
+     report->pressure = (((data [0] & 0x30) << 2 ) |
+-			(data [3] & 0x3f));
+-  } else {
+-    gpm_debug_log (LOG_NOTICE,"tossing PS/2 data: ");
++			((data [3] & 0x3f)));
++   } else { /* Garbage  or not
++	     * The synaptics pad keeps sending data 1 sec after last touch
++	    */
++    gpm_debug_log (LOG_NOTICE,"Garbage or tossing PS/2 data: ");
+     for (i = 0; i < 6; i++)
+       gpm_debug_log (LOG_NOTICE,"%02X ", data [i]);
+     report->gesture  = 0;
+@@ -1217,56 +1405,79 @@
+   }
+ }
+ 
++
++/* STIG page 42
++ * wmode = 1, 
++ *
++ * byte 0 |     1   |    0   |  W 2-3              |    0   | W 1     |  Right  | Left |  
++ * byte 1 |         y-pos 11-8                     |         x-pos  11-8               |
++ * byte 2 |                           z pressure 0-7                                   |
++ * byte 3 |     1   |    1   | y-pos 12 | x-pos 12 |    0   | W 0     |  R/D    | L/U  |
++ * byte 4 |                                 x - pos 0-7                                |
++ * byte 5 |                                 y - pos 0-7                                |
++ *
++ */
++
+ static void syn_translate_ps2_wmode_report (unsigned char *data,
+ 				      report_type *report) 
+ {
+   int i;
+-  static int finger_timer = 0;
+-  static int gesture_timer = 0;
++  static int finger_on_pad_timer = 0;
++  static int time_to_forget_tap = 0;
+   static int gesture_delay = 0;
+   static int stroke_x;
+   static int stroke_y;
+   static int drag_locked = 0;
+ 
++  /* Check that it is an absolute packet */
+   if (((data[0] & 0xc8) == 0x80) && ((data[3] & 0xc8) == 0xc0)) {
+-    unsigned int w = ((data[3] & 0x04) >> 2) |
++
++    unsigned int w = (((data[3] & 0x04) >> 2) |
+ 	    		((data[0] & 0x04) >> 1) |
+-			((data[0] & 0x30) >> 2);
++		      ((data[0] & 0x30) >> 2));
+     report->left     = check_bits (data[0], 0x01);
+     report->middle   = check_bits (data[0] ^ data[3], 0x01);
+     report->down     = check_bits (data[0] ^ data[3], 0x02);
+     report->right    = check_bits (data[0], 0x02);
+-    report->x        = (((data[1] & 0x0f) << 8) |
++    report->x        = (((data[1] & 0x0F) << 8) |
+ 			((data[3] & 0x10) << 8) |
+-			data[4]);
+-    report->y        = (((data[1] & 0xf0) << 4) |
++			((data[4])));
++    report->y        = (((data[1] & 0xF0) << 4) |
+ 			((data[3] & 0x20) << 7) |
+-			data[5]);
++			((data[5])));
+     report->pressure = data[2];
+     report->finger   = (data[2] > finger_threshold);
+     
+     if (report->finger) {
+ 	    
+-      if (finger_timer == 0) { /* finger down */
++      if (finger_on_pad_timer == 0) { /* finger down for the first time */
+ 	stroke_x = report->x;
+ 	stroke_y = report->y;
+       }
+       
+-      if (finger_timer < (tap_upper_limit * 80 / 1000)) finger_timer ++; /* don't want timer to overflow */
+-      
+-      if (gesture_timer > 0) gesture_timer = 1; /* dragging or consecutive tap, gesture to end with finger up */
++      /* don't want timer to overflow */
++      if (finger_on_pad_timer < (tap_upper_limit * 80 / 1000)) 
++	finger_on_pad_timer ++; 
++      
++       /* dragging or consecutive tap, gesture to end with finger up 
++       *  forget fast that there was a tap if this is not a part of a tap.*/
++      if (time_to_forget_tap > 0) 
++	time_to_forget_tap = 1;
+       
+     } else { /* interesting things happen when finger is up */
+ 	    
+-      /* tap determination */
+-      if ((finger_timer > (tap_lower_limit * 80 / 1000)) &&  /* minimum finger down time */
+-	  (finger_timer < (tap_upper_limit * 80 / 1000)) &&  /* maximum finger down time */
++      /* tap determination: Was the finger long enough on the pad and not too
++       * long, while staying at the same place.
++       */
++      if ((finger_on_pad_timer > (tap_lower_limit * 80 / 1000)) &&  /* minimum finger down time */
++	  (finger_on_pad_timer < (tap_upper_limit * 80 / 1000)) &&  /* maximum finger down time */
+ 	  (distance((double)(stroke_x - report->x),  /* maximum range for finger to drift while down */
+ 	    (double)(stroke_y - report->y))
+ 	    < sqr((double)tap_range))) {
+ 
+ 	/* not a consecutive tap? */
+-	if (gesture_timer == 0) gesture_delay = 0; /* right -> don't delay gesture */
++	if (time_to_forget_tap == 0) 
++	  gesture_delay = 0; /* right -> don't delay gesture */
+ 	else { /* a consecutive tap! */
+ 	  gesture_delay = multiple_click_delay * 80 / 1000; /* delay gesture to create multiple click */
+ 	}
+@@ -1274,28 +1485,32 @@
+ 	/* is drag locked */
+ 	if (drag_locked) {
+ 	  drag_locked = 0; /* unlock it and don't gesture. */
+-	  gesture_timer = 0;
+-	} else gesture_timer = tap_interval * 80 / 1000; /* setup gesture time to count down */
++	  time_to_forget_tap = 0;
++	} else 
++	  time_to_forget_tap = tap_interval * 80 / 1000; /* setup gesture time to count down */
+ 	
+-      } else {
++      } else { /* It was not a tap */
+ 	      
+-	/* a drag to lock? */
+-	if (drag_lock && (gesture_timer > 0) && (finger_timer >= (tap_upper_limit * 80 / 1000)))
++	/* a drag to lock?  If user did a tap and quickly hold the finger longer than a tap.
++	*/
++	if (drag_lock && (time_to_forget_tap > 0) && (finger_on_pad_timer >= (tap_upper_limit * 80 / 1000)))
+ 	  drag_locked = 1;
+ 	      
+-	if (gesture_timer > 0) gesture_timer --;
++	if (time_to_forget_tap > 0) time_to_forget_tap --;
+ 	if (gesture_delay > 0) gesture_delay --;
+ 	
+       }
+       
+-      finger_timer = 0;
++      finger_on_pad_timer = 0;
+       
+     }
+     
+-    report->gesture  = ((gesture_timer > 0) && (gesture_delay == 0)) || drag_locked;
++    report->gesture  = ((time_to_forget_tap > 0) && (gesture_delay == 0)) || drag_locked;
+     report->left = (report->left || report->gesture);
+ 
+-  } else {
++  } else { /* Packet is garbage or not?? The synaptics pad keeps sending data 1
++	    * sec after last touch, 
++	    */
+     gpm_debug_log (LOG_NOTICE,"tossing PS/2 data: ");
+     for (i = 0; i < 6; i++)
+       gpm_debug_log (LOG_NOTICE,"%02X ", data [i]);
+@@ -1343,8 +1558,11 @@
+ {
+   report_type   report;
+ 
+-  if (use_wmode) syn_translate_ps2_wmode_report (data, &report);
+-  else syn_translate_ps2_report (data, &report);
++  if (use_wmode) 
++    syn_translate_ps2_wmode_report (data, &report);
++  else 
++    syn_translate_ps2_report (data, &report);
++
+   syn_process_data (state, report);
+ }
+ 
+@@ -1394,7 +1612,8 @@
+   syn_read_ps2_ident (fd, &ident);
+   syn_read_ps2_model_id (fd, &model);
+   syn_read_ps2_cap (fd, &cap);
+-  if (! (cap.cap_ext)) use_wmode = 0; /* wmode not support by the pad */
++  if (! (cap.cap_ext)) 
++    use_wmode = 0; /* wmode not support by the pad */
+   syn_process_config (ident, model);
+ 
+   /* select 6 byte packet, high packet rate, no-sleep */

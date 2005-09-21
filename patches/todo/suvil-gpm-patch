@@ -1,0 +1,143 @@
+--- ../original-gpm-1.19.2/mice.c	Tue Mar  7 15:10:00 2000
++++ mice.c	Wed Jun 14 12:36:42 2000
+@@ -305,7 +305,6 @@
+   return 0;
+ }
+ 
+-
+ /* Thu Jan 28 20:54:47 MET 1999 hof@hof-berlin.de SummaSketch reportformat */
+ static int R_summa(Gpm_Event *state, int fd)
+ {
+@@ -332,7 +331,55 @@
+   return write(fd,buffer,5);
+ }
+ 
++/* Suvil Penbrush Professional tablet support absolute mode*/
++/* Summagraphics MM-Series format*/
++/* (Grzegorz Adam Hankiewicz) gradha@iname.com Wed Jun 14 11:32:27 CEST 2000 */
++int suvilmaxx,suvilmaxy;
++static int M_suvil (Gpm_Event *state, unsigned char *data)
++{
++    int x, y;
++  
++    x = data[2] * 128 + data[1];
++    y = data[4] * 128 + data[3];
++  
++    if (x >= suvilmaxx) x = suvilmaxx;
++    if (y >= suvilmaxy) y = suvilmaxy;
++  
++    state->x = x * win.ws_col / suvilmaxx;
++    state->y = 1 + y * win.ws_row / suvilmaxy;
++  
++    realposx = x * REALPOS_MAX / suvilmaxx;
++    realposy = y * REALPOS_MAX / suvilmaxy;
++  
++    state->buttons =
++        !!(data[0]&1) * GPM_B_LEFT +
++        !!(data[0]&2) * GPM_B_RIGHT +
++        !!(data[0]&4) * GPM_B_MIDDLE;
+ 
++    return 0;
++}
++
++/* Wed Jun 14 11:32:27 CEST 2000 gradha@iname.com */
++static int R_suvil(Gpm_Event *state, int fd)
++{
++   signed char buffer[5];
++   static int x, y;
++
++   buffer[0] = 0x98 + ((state->buttons & GPM_B_LEFT) > 0 ? 1:0) +
++                      ((state->buttons & GPM_B_MIDDLE) > 0 ? 2:0) +
++                      ((state->buttons & GPM_B_RIGHT) > 0 ? 3:0);
++
++   x = realposx * suvilmaxx / REALPOS_MAX ; y = realposy;
++
++   buffer[1] = x & 0x7f;
++   buffer[2] = (x >> 7) & 0x7f;
++   buffer[3] = y & 0x7f;
++   buffer[4] = (y >> 7) & 0x7f;
++
++
++
++   return write (fd, buffer, 5);
++}
+ 
+ /* 'Genitizer' (kw@dtek.chalmers.se 11/12/97) */
+ static int M_geni(Gpm_Event *state,  unsigned char *data)
+@@ -1768,6 +1815,57 @@
+   return type;
+ }
+ 
++static Gpm_Type *I_suvil(int fd, unsigned short flags,
++			 struct Gpm_Type *type, int argc, char **argv) 
++{
++    char byte;
++    char config[5];
++ 
++    #define SUVIL_SP66   0x06
++  
++    write (fd, 0, 1); /* Reset */
++    usleep (400000); /* wait */
++    setspeed (fd, 1200, 1200, 1, B1200|CS7|CREAD|CLOCAL|HUPCL|PARENB|PARODD);
++    write (fd, 0, 1); /* Reset */
++    usleep (400000); /* wait */
++    
++    /* First try setting tablet to tablet mode */
++    write (fd, "X", 1);
++    usleep (3000);
++    
++    /* Now set stablet speed to 9600 */
++    setspeed (fd, 1200, 9600, 1, B9600|CS8|CREAD|CLOCAL|HUPCL|PARENB|PARODD);
++
++    /* Set tablet to not report coordinates and ask model */
++    write (fd, "D?", 2);
++    usleep (3000);
++    read (fd, &byte, 1);
++  
++    switch (byte)
++    {
++        case 'S':
++        case SUVIL_SP66:
++            byte = SUVIL_SP66;
++            /* Set upper left origin and read maximum resolution range */
++            write (fd, "ba", 2);
++            read (fd, config, 5);
++   
++            suvilmaxx = config[2]*128+config[1];
++            suvilmaxy = config[4]*128+config[3];
++   
++            /* Finally set tablet to report absolute coordinates in stream mode */
++            write (fd, "I!@", 3);
++            break;
++            
++        default:
++            /* Don't support this model */
++            return NULL;
++            break;
++    }
++
++    return type;
++}
++
+ static Gpm_Type *I_mtouch(int fd, unsigned short flags,
+ 			  struct Gpm_Type *type, int argc, char **argv)
+ {
+@@ -2043,6 +2141,9 @@
+            "wizardpad", M_wp, I_wp, STD_FLG,
+                                 {0xFA, 0x42, 0x00, 0x00}, 10, 1, 0, 1, 0},
+ 
++  {"suvil", "Suvil Penbrush Professional (sp-66)", "", M_suvil, I_suvil, STD_FLG,
++                                {0x80, 0x80, 0x00, 0x00}, 5, 1, 0, 1, R_suvil},
++
+   {"",     "",
+            "", NULL, NULL, 0,
+                                 {0x00, 0x00, 0x00, 0x00}, 0, 0, 0, 0, 0}
+@@ -2068,7 +2169,7 @@
+ }
+ 
+ 
+-
++
+ /*
+  * Use 4 as indent-level. It used to be 2, but new stuff will be inserted
+  * using 4.

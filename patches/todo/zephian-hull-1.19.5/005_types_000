@@ -1,0 +1,255 @@
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/gpn.c gpm-1.19.5/src/gpn.c
+--- gpm-1.19.5.orig/src/gpn.c	Thu Oct  4 23:35:50 2001
++++ gpm-1.19.5/src/gpn.c	Thu Oct  4 23:35:38 2001
+@@ -8,6 +8,10 @@
+  *
+  * Tue,  5 Jan 1999 23:26:10 +0000, modified by James Troup <james@nocrew.org>
+  * (usage): typo (s/an unexistent/a non-existent/)
++ * (cmdline): modified handling of -t command line argument, so it
++ *            can be used by anyone regardless of whether or not a
++ *            copy of gpm is already running.
++ * (usage): update for new -t option "types".
+  *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of the GNU General Public License as published by
+@@ -177,6 +181,7 @@
+          "    -S [commands]    enable special commands (see man page)\n"
+          "    -t mouse-type    sets mouse type (default '%s')\n"
+          "                     Use a non-existent type (e.g. \"help\") to get a list\n"
++	 "                     or \"types\" to get a list of just the mnemonics.\n"
+          "    -T               test: read mouse, no clients\n"
+          "    -v               print version and exit\n"
+ 	 "    -e               output messages to stderr instead of syslog\n"
+@@ -368,7 +373,21 @@
+           if (optarg) opt_special=optarg;
+           else opt_special="";
+           break;
+-        case 't': opt_type=optarg; break;
++	case 't':
++	  opt_type=optarg;
++	  for (m_type=mice; m_type->fun; m_type++)
++	    if (!strcmp(opt_type,m_type->name)
++		|| !strcasecmp(opt_type,m_type->synonyms))
++	      break;
++
++	  if (!(m_type->fun)) {
++	    /* not found */
++	    if (strcmp(opt_type,"types")==0)
++	      exit(M_listTypes());
++	    else
++	      exit(M_listMice());
++	  }
++	  break;
+         case 'T': opt_test++; break;
+         case 'v': printf(GPM_NAME " " GPM_RELEASE ", " GPM_DATE "\n"); exit(0);
+         case 'V': 
+@@ -421,7 +440,7 @@
+       /* look for the mouse type */
+       m_type = find_mouse_by_name(opt_type);
+       if (!m_type) /* not found */
+-        exit(M_listTypes());
++	exit(M_listMice());
+     } /*for*/
+ 
+   if (opt_repeater) {
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/mice.c gpm-1.19.5/src/mice.c
+--- gpm-1.19.5.orig/src/mice.c	Thu Oct  4 23:35:50 2001
++++ gpm-1.19.5/src/mice.c	Thu Oct  4 23:35:45 2001
+@@ -6,6 +6,12 @@
+  * Copyright (C) 1998,1999   Ian Zimmerman <itz@rahul.net>
+  * Copyright (C) 2001        Nico Schottelius <nicos@pcsystems.de>
+  *
++ * Tue,  5 Jan 1999 23:44:58 +0000, modified by James Troup <james@nocrew.org>:
++ *  Improved (?) descriptions of mouse types.
++ *  (M_listMice): function used by -t help, reworked version of old
++ *                M_listTypes.
++ *  (M_listTypes): function used by -t types; lists only mnemonics.
++ *
+  *   This program is free software; you can redistribute it and/or modify
+  *   it under the terms of the GNU General Public License as published by
+  *   the Free Software Foundation; either version 2 of the License, or
+@@ -50,6 +56,7 @@
+ #include <errno.h>
+ #include <unistd.h>
+ #include <strings.h>
++#include <string.h>
+ #include <ctype.h>
+ 
+ #include <sys/types.h>
+@@ -2113,10 +2120,14 @@
+   */
+ 
+ Gpm_Type mice[]={
+-  {"mman", "The \"MouseMan\" and similar devices (3/4 bytes per packet).",
++  {"mman", "The MouseMan protocol used by new Logitech mice.",
++           /* The \"MouseMan\" and similar devices (3/4 bytes per packet). */
+            "Mouseman", M_mman, I_serial, CS7 | STD_FLG, /* first */
+                                 {0x40, 0x40, 0x40, 0x00}, 3, 1, 1, 0, 0},
+-  {"ms",   "The original ms protocol, with a middle-button extension.",
++  {"ms",   "For Microsoft mice (2 or 3 buttons). Some old 2 button mice\n"
++           "                     send some spurious packets, which can be misunderstood as\n"
++           "                     middle-button events. If this is happens to you, use the\n"
++           "                     'bare' mouse type.",
+            "", M_ms, I_serial, CS7 | STD_FLG,
+                                 {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
+   {"ms+", "Like 'ms', but allows dragging with the middle button.",
+@@ -2125,25 +2136,29 @@
+   {"ms+lr", "'ms+', but you can reset m by pressing lr (see man page).",
+            "", M_ms_plus_lr, I_serial, CS7 | STD_FLG,
+                                 {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
+-  {"bare", "Unadorned ms protocol. Needed with some 2-buttons mice.",
++  {"bare", "For some 2 button Microsoft mice. Same as 'ms' except that\n"
++           "                     gpm will not attempt to simulate a third button.",
+            "Microsoft", M_bare, I_serial, CS7 | STD_FLG,
+                                 {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
+-  {"msc",  "Mouse-Systems-Compatible (5bytes). Most 3-button mice.",
++  {"msc",  "For most 3 button serial mice.",
++           /* Mouse-Systems-Compatible (5bytes). Most 3-button mice. */
+            "MouseSystems", M_msc, I_serial, CS8 | CSTOPB | STD_FLG,
+                                 {0xf8, 0x80, 0x00, 0x00}, 5, 1, 0, 0, R_msc},
+-  {"sun",  "'msc' protocol, but only 3 bytes per packet.",
++  {"sun",  "For Sparc mice.",
++           /* 'msc' protocol, but only 3 bytes per packet. */
+            "", M_sun, I_serial, CS8 | CSTOPB | STD_FLG,
+                                 {0xf8, 0x80, 0x00, 0x00}, 3, 1, 0, 0, 0},
+   {"mm",   "MM series. Probably an old protocol...",
+            "MMSeries", M_mm, I_serial, CS8 | PARENB|PARODD | STD_FLG,
+                                 {0xe0, 0x80, 0x80, 0x00}, 3, 1, 0, 0, 0},
+-  {"logi", "Used in some Logitech devices (only serial).",
++  {"logi", "For old serial Logitech mice.",
+            "Logitech", M_logi, I_logi, CS8 | CSTOPB | STD_FLG,
+                                 {0xe0, 0x80, 0x80, 0x00}, 3, 3, 0, 0, 0},
+-  {"bm",   "Micro$oft busmice and compatible devices.",
++  {"bm",   "For some busmice, including Microsoft and Logitech busmice.",
+            "BusMouse", M_bm, I_empty, STD_FLG, /* bm is sun */
+                                 {0xf8, 0x80, 0x00, 0x00}, 3, 3, 0, 0, 0},
+-  {"ps2",  "Busmice of the ps/2 series. Most busmice, actually.",
++  {"ps2",  "For most busmice connected to a PS/2 port (round with 6 metal\n"
++           "                     pins).",
+            "PS/2", M_ps2, I_empty, STD_FLG,
+                                 {0xc0, 0x00, 0x00, 0x00}, 3, 1, 0, 0, 0},
+   {"ncr",  "Ncr3125pen, found on some laptops",
+@@ -2155,60 +2170,65 @@
+   {"genitizer", "\"Genitizer\" tablet, in relative mode.",
+            "", M_geni, I_serial, CS8|PARENB|PARODD,
+                                 {0x80, 0x80, 0x00, 0x00}, 3, 1, 0, 0, 0},
+-  {"logim",  "Turn logitech into Mouse-Systems-Compatible.",
++  {"logim","For turning on the MouseSystems compatible mode (3 buttons)\n"
++           "                     of some Logitech mice.",
+            "", M_logimsc, I_serial, CS8 | CSTOPB | STD_FLG,
+                                 {0xf8, 0x80, 0x00, 0x00}, 5, 1, 0, 0, 0},
+-  {"pnp",  "Plug and pray. New mice may not run with '-t ms'.",
++  {"pnp",  "For the new 'plug and play' mice produced by Microsoft.\n"
++           "                     Try it if '-t ms' does not work.",
+            "", M_bare, I_pnp, CS7 | STD_FLG,
+                                 {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
+-  {"imps2","Microsoft Intellimouse (ps2) - autodetect 2/3 buttons,wheel unused",
++  {"imps2","For the Microsoft IntelliMouse on a PS/2 port (round\n"
++           "                     connector with 6 pins), 3 buttons (wheel is repeated).",
++
+            "", M_imps2, I_imps2, STD_FLG,
+                                 {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
+   {"exps2",   "IntelliMouse Explorer (ps2) - 3 buttons, wheel unused",
+            "ExplorerPS/2", M_ps2, I_exps2, STD_FLG,
+                                 {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
+-  {"ms3", "Microsoft Intellimouse (serial) - 3 buttons, wheel unused",
++  {"ms3",  "For the Microsoft IntelliMouse (serial), 3 buttons (wheel is repeated).",
+            "", M_ms3, I_pnp, CS7 | STD_FLG,
+                                 {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, R_ms3},
+-  {"netmouse",  "Genius NetMouse (ps2) - 2 buttons and 2 buttons 'up'/'down'.", 
++  {"netmouse","For the \"Genius NetMouse\". This one has two normal buttons plus\n"
++              "                     'up'/'down' buttons.",
+            "", M_netmouse, I_netmouse, CS7 | STD_FLG,
+                                 {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
+-  {"cal", "Calcomp UltraSlate",
++  {"cal", "For a Calcomp UltraSlate",
+            "", M_calus, I_calus, CS8 | CSTOPB | STD_FLG,
+                                 {0x80, 0x80, 0x80, 0x00}, 6, 6, 0, 1, 0},
+-  {"calr", "Calcomp UltraSlate - relative mode",
++  {"calr", "For a Calcomp UltraSlate in relative mode.",
+            "", M_calus_rel, I_calus, CS8 | CSTOPB | STD_FLG,
+                                 {0x80, 0x80, 0x80, 0x00}, 6, 6, 0, 0, 0},
+-  {"twid", "Twidddler keyboard",
++  {"twid", "For the \"Twidddler\" keyboard.",
+            "", M_twid, I_twid, CS8 | STD_FLG,
+                                 {0x80, 0x00, 0x80, 0x80}, 5, 1, 0, 0, 0},
+-  {"syn", "The \"Synaptics\" serial TouchPad.",
++  {"syn", "For the \"Synaptics\" serial TouchPad.",
+            "synaptics", M_synaptics_serial, I_serial, CS7 | STD_FLG,
+                                 {0x40, 0x40, 0x40, 0x00}, 6, 6, 1, 0, 0},
+-  {"synps2", "The \"Synaptics\" PS/2 TouchPad",
++  {"synps2", "For the \"Synaptics\" PS/2 TouchPad",
+            "synaptics_ps2", M_synaptics_ps2, I_synps2, STD_FLG,
+                                 {0x80, 0x80, 0x00, 0x00}, 6, 1, 1, 0, 0},
+-  {"brw",  "Fellowes Browser - 4 buttons (and a wheel) (dual protocol?)",
++  {"brw",  "For the Fellowes Browser - 4 buttons (and a wheel) (dual protocol?).",
+            "", M_brw, I_pnp, CS7 | STD_FLG,
+                                 {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0},
+ 
+ #ifdef HAVE_LINUX_JOYSTICK_H
+-  {"js",   "Joystick mouse emulation",
++  {"js",   "For \"Joystick\" mouse emulation.",
+            "Joystick", M_js, NULL, 0,
+                               {0xFC, 0x00, 0x00, 0x00}, 12, 12, 0, 0, 0},
+ #endif
+ 
+-  {"summa",  "Summagraphics or Genius tablet absolute mode(MM-Series)",
++  {"summa",  "For a Summa/Genius tablet in absolute mode (906,1212B,EasyPainter...).",
+            "", M_summa, I_summa, STD_FLG,
+                                 {0x80, 0x80, 0x00, 0x00}, 5, 1, 0, 1, R_summa},
+-  {"mtouch",  "MicroTouch touch-screens (only button-1 events, by now)",
++  {"mtouch",  "For MicroTouch touch-screens (only button-1 events right now).",
+            "", M_mtouch, I_mtouch, STD_FLG,
+                                 {0x80, 0x80, 0x80, 0x00}, 5, 1, 0, 1, NULL}, 
+   {"gunze",  "Gunze touch-screens (only button-1 events, by now)",
+            "", M_gunze, I_gunze, STD_FLG,
+                                 {0xF9, 0x50, 0xF0, 0x30}, 11, 1, 0, 1, NULL}, 
+ 
+-  {"acecad",  "Acecad tablet absolute mode(Sumagrapics MM-Series mode)",
++  {"acecad", "For Acecad tablet in absolute mode (Sumagrapics MM-Series mode).",
+            "", M_summa, I_summa, STD_FLG,
+                                 {0x80, 0x80, 0x00, 0x00}, 7, 1, 0, 1, 0}, 
+ 
+@@ -2224,18 +2244,37 @@
+ /*------------------------------------------------------------------------*/
+ /* and the help */
+ 
+-int M_listTypes(void)
++int M_listMice(void)
+ {
+   Gpm_Type *type;
+ 
+   printf("\n" GPM_NAME " " GPM_RELEASE ", " GPM_DATE "\n");
+   printf("Available mouse types are:\n\n");
+-  printf("r name   synonym         description\n\n");
+-  for (type=mice; type->fun; type++)
+-    printf("%c %-8s %s\n            Synonyms: %s\n", type->repeat_fun ?'*':' ',
+-	   type->name, type->desc, type->synonyms);
++  printf("name (synonym)       description\n\n");
++  for (type=mice; type->fun; type++) {
++    char buffer[30];
++    if (type->synonyms[0]=='\0')
++      sprintf(buffer,"%s",type->name);
++    else
++      sprintf(buffer,"%s (%s)",type->name,type->synonyms);
++    printf("%-18s - %s\n",buffer, type->desc);
++  }
+ 
+   putchar('\n');
++
++  return 1; /* to exit() */
++}
++
++int M_listTypes(void)
++{
++  Gpm_Type *type;
++
++  /* Only print the mouse mnemonics so that it is easy to parse */
++  for (type=mice; type->fun; type++) {
++    printf("%s\n",type->name);
++    if (type->synonyms[0]!='\0')
++      printf("%s\n", type->synonyms);
++  }
+ 
+   return 1; /* to exit() */
+ }

@@ -1,0 +1,172 @@
+diff -ru gpm-1.19.6/src/gpm.c gpm-1.19.6+clock/src/gpm.c
+--- gpm-1.19.6/src/gpm.c	Mon Oct  1 22:02:25 2001
++++ gpm-1.19.6+clock/src/gpm.c	Mon Oct 29 13:00:33 2001
+@@ -31,6 +31,7 @@
+ #include <sys/fcntl.h>     /* O_RDONLY */
+ #include <sys/wait.h>      /* wait()   */
+ #include <sys/stat.h>      /* mkdir()  */
++#include <time.h>          /* time()   */
+ #include <sys/time.h>      /* timeval */
+ #include <sys/types.h>     /* socket() */
+ #include <sys/socket.h>    /* socket() */
+@@ -82,6 +83,7 @@
+ int opt_aged = 0;
+ char *opt_special=NULL; /* special commands, like reboot or such */
+ int opt_rawrep=0;
++int opt_clock = 0;
+ Gpm_Type *repeated_type=0;
+ 
+ /* devfs */
+@@ -93,6 +95,7 @@
+ struct winsize win;
+ int maxx, maxy;
+ int fifofd=-1;
++static int clock_printed = -1;
+ 
+ int eventFlag=0;
+ Gpm_Cinfo *cinfo[MAX_VC+1];
+@@ -240,6 +243,52 @@
+   close(fd);
+ }
+ 
++#define CLOCK_FMT "%02d:%02d"
++#define CLOCK_LEN 5
++#define POSITION (4 + 2 * (0 * 80 + (maxx - CLOCK_LEN - 1)))
++
++static void display_clock(int restore)
++{
++    int fd;
++    static char save[CLOCK_LEN * 2];
++
++    if ((fd = open("/dev/vcc/a", O_RDWR)) < 1) {
++	if (errno != ENOENT)
++	    oops("open(\"/dev/vcc/a\")");
++	if ((fd = open("/dev/vcsa", O_RDWR)) < 1)
++	    oops("open(\"/dev/vcsa\")");
++    }
++    if (restore == 2) {			/* restore the old characters */
++	lseek(fd, POSITION, 0);
++	write(fd, &save, sizeof(save));
++    } else {				/* print the clock */
++	char buf[CLOCK_LEN * 2], buf0[CLOCK_LEN];
++	time_t t;
++	struct tm *tm;
++	int i, j;
++
++	if (restore == 0) {		/* save the old characters for later */
++	    lseek(fd, POSITION, 0);
++	    read(fd, &save, sizeof(save));
++	}
++	t = time(NULL);
++	tm = localtime(&t);
++	sprintf(buf0, CLOCK_FMT, tm->tm_hour, tm->tm_min);
++	i = j = 0;
++	while (i <= sizeof(buf0)) {	/* add the color attribute */
++	    buf[j++] = buf0[i++];
++	    buf[j++] = '\032';		/* green on blue */
++	}
++	lseek(fd, POSITION, 0);
++	write(fd, &buf, sizeof(buf));
++    }
++    close(fd);
++}
++
++#undef POSITION
++#undef CLOCK_FMT
++#undef CLOCK_LEN
++
+ /*-------------------------------------------------------------------*/
+ static  inline int do_selection(Gpm_Event *event)  /* returns 0, always */
+ {
+@@ -252,6 +301,16 @@
+     case GPM_MOVE:
+       if (x2<1) x2++; else if (x2>maxx) x2--;
+       if (y2<1) y2++; else if (y2>maxy) y2--;
++      if (opt_clock && x2 == maxx && y2 == 1 && (clock_printed < 0 || clock_printed == event->vc)) {
++        selection_copy(x2,y2,x2,y2,3);  /* move pointer before saving content
++					   of the screen, so we don't get
++					   pollution after clock hiding */
++	display_clock(clock_printed);	/* print the clock */
++	clock_printed = event->vc;
++      } else if (clock_printed == event->vc) {
++	display_clock(2);		/* restore the screen */
++	clock_printed = -1;
++      }
+       selection_copy(x2,y2,x2,y2,3); /* just highlight pointer */
+       return 0;
+ 
+diff -ru gpm-1.19.6/src/gpn.c gpm-1.19.6+clock/src/gpn.c
+--- gpm-1.19.6/src/gpn.c	Sun Sep 23 21:00:03 2001
++++ gpm-1.19.6+clock/src/gpn.c	Mon Oct 29 12:34:42 2001
+@@ -155,6 +155,7 @@
+          "    -A [limit]       start with selection disabled (`aged')\n"
+          "    -b baud-rate     sets the baud rate (default %d)\n"
+          "    -B sequence      allows changing the buttons (default '%s')\n"
++         "    -c               enable clock printing\n"
+          "    -d delta         sets the delta value (default %d) (must be 2 or more)\n"
+          "    -D	       debug mode: don't auto-background\n"
+          "    -g tap-button    sets the button (1-3) that is emulated by tapping on\n"
+@@ -290,7 +291,7 @@
+ int 
+ cmdline(int argc, char **argv)
+ {
+-  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:TvV::23";
++  char options[]="a:A::b:B:cd:Dg:hi:kl:m:Mo:pr:R::s:S:t:TvV::23";
+   int i, opt;
+   static struct {char *in; char *out;} seq[] = {
+     {"123","01234567"},
+@@ -321,6 +322,7 @@
+           break;
+         case 'b': opt_baud = atoi(optarg); break;
+         case 'B': opt_sequence = optarg; break;
++        case 'c': opt_clock = 1; break;
+         case 'd': opt_delta = atoi(optarg); break;
+         case 'D': gpm_log_daemon = 0; break;
+         case 'g':
+diff -ru gpm-1.19.6/src/headers/gpmInt.h gpm-1.19.6+clock/src/headers/gpmInt.h
+--- gpm-1.19.6/src/headers/gpmInt.h	Thu Sep 27 14:52:30 2001
++++ gpm-1.19.6+clock/src/headers/gpmInt.h	Mon Oct 29 12:34:42 2001
+@@ -128,6 +128,7 @@
+ extern time_t opt_age_limit;
+ extern char *opt_special;
+ extern int opt_rawrep;
++extern int opt_clock;
+ extern int fifofd;
+ extern char *consolename;
+ 
+diff -ru gpm-1.19.6/src/gpm.c gpm-1.19.6+clockfix/src/gpm.c
+--- gpm-1.19.6/src/gpm.c	Tue Oct 30 13:06:40 2001
++++ gpm-1.19.6+clockfix/src/gpm.c	Tue Oct 30 13:03:46 2001
+@@ -258,7 +258,7 @@
+ 	if ((fd = open("/dev/vcsa", O_RDWR)) < 1)
+ 	    oops("open(\"/dev/vcsa\")");
+     }
+-    if (restore == 2) {			/* restore the old characters */
++    if (restore == -2) {		/* restore the old characters */
+ 	lseek(fd, POSITION, 0);
+ 	write(fd, &save, sizeof(save));
+     } else {				/* print the clock */
+@@ -267,10 +267,12 @@
+ 	struct tm *tm;
+ 	int i, j;
+ 
+-	if (restore == 0) {		/* save the old characters for later */
++	/* save the old characters for later */
++	if (restore == -1) {
+ 	    lseek(fd, POSITION, 0);
+ 	    read(fd, &save, sizeof(save));
+-	}
++        }
++	
+ 	t = time(NULL);
+ 	tm = localtime(&t);
+ 	sprintf(buf0, CLOCK_FMT, tm->tm_hour, tm->tm_min);
+@@ -308,7 +310,7 @@
+ 	display_clock(clock_printed);	/* print the clock */
+ 	clock_printed = event->vc;
+       } else if (clock_printed == event->vc) {
+-	display_clock(2);		/* restore the screen */
++	display_clock(-2);		/* restore the screen */
+ 	clock_printed = -1;
+       }
+       selection_copy(x2,y2,x2,y2,3); /* just highlight pointer */

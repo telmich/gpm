@@ -1,0 +1,24 @@
+diff -ur gpm-1.19.3-orig/gpn.c gpm-1.19.3/gpn.c
+--- gpm-1.19.3-orig/gpn.c	Tue Jul 18 05:06:06 2000
++++ gpm-1.19.3/gpn.c	Fri Dec 15 13:58:37 2000
+@@ -223,13 +223,16 @@
+ static void
+ check_uniqueness(void)
+ {
+-  static char tmp_pidfile [] = GPM_NODE_DIR "gpmXXXXXX";
++  static char tmp_pidfile [64]; 
++  int fd;
+   FILE* fp = 0;
+ 
+-  if (!mktemp(tmp_pidfile + strlen(GPM_NODE_DIR))) {
+-    oops("mktemp()");
++  strncpy (tmp_pidfile, GPM_NODE_DIR "gpmXXXXXX", 63);
++
++  if ((fd = mkstemp(tmp_pidfile)) == -1) {
++    oops("mkstemp()");
+   } /*if*/
+-  if ((fp = fopen(tmp_pidfile,"w")) != NULL) {
++  if ((fp = fdopen(fd,"w")) != NULL) {
+     fprintf(fp,"%d\n",getpid());
+     fclose(fp);
+   } else if (getuid()) {

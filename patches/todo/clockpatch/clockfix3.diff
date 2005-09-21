@@ -1,0 +1,36 @@
+diff -ru gpm-1.19.6/src/gpm.c gpm-1.19.6+clockfix/src/gpm.c
+--- gpm-1.19.6/src/gpm.c	Tue Oct 30 13:06:40 2001
++++ gpm-1.19.6+clockfix/src/gpm.c	Tue Oct 30 13:03:46 2001
+@@ -258,7 +258,7 @@
+ 	if ((fd = open("/dev/vcsa", O_RDWR)) < 1)
+ 	    oops("open(\"/dev/vcsa\")");
+     }
+-    if (restore == 2) {			/* restore the old characters */
++    if (restore == -2) {		/* restore the old characters */
+ 	lseek(fd, POSITION, 0);
+ 	write(fd, &save, sizeof(save));
+     } else {				/* print the clock */
+@@ -267,10 +267,12 @@
+ 	struct tm *tm;
+ 	int i, j;
+ 
+-	if (restore == 0) {		/* save the old characters for later */
++	/* save the old characters for later */
++	if (restore == -1) {
+ 	    lseek(fd, POSITION, 0);
+ 	    read(fd, &save, sizeof(save));
+-	}
++        }
++	
+ 	t = time(NULL);
+ 	tm = localtime(&t);
+ 	sprintf(buf0, CLOCK_FMT, tm->tm_hour, tm->tm_min);
+@@ -308,7 +310,7 @@
+ 	display_clock(clock_printed);	/* print the clock */
+ 	clock_printed = event->vc;
+       } else if (clock_printed == event->vc) {
+-	display_clock(2);		/* restore the screen */
++	display_clock(-2);		/* restore the screen */
+ 	clock_printed = -1;
+       }
+       selection_copy(x2,y2,x2,y2,3); /* just highlight pointer */

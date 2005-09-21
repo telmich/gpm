@@ -1,0 +1,98 @@
+diff -ur ../gpm-1.18.1/configure.in ./configure.in
+--- ../gpm-1.18.1/configure.in	Fri Nov 12 13:27:37 1999
++++ ./configure.in	Tue Mar 27 22:11:46 2001
+@@ -49,7 +49,7 @@
+         lispdir='${datadir}/emacs/site-lisp'
+ fi
+ 
+-AC_CHECK_HEADERS(syslog.h linux/joystick.h ncurses.h ncurses/curses.h curses.h)
++AC_CHECK_HEADERS(syslog.h linux/joystick.h linux/input.h ncurses.h ncurses/curses.h curses.h)
+ 
+ AC_ARG_WITH(curses,
+ [  --without-curses        disable curses support even if curses found])
+diff -ur ../gpm-1.18.1/mice.c ./mice.c
+--- ../gpm-1.18.1/mice.c	Fri Nov 12 13:27:37 1999
++++ ./mice.c	Tue Mar 27 22:11:23 2001
+@@ -60,6 +60,9 @@
+ #include <linux/joystick.h>
+ #endif
+ 
++#ifdef HAVE_LINUX_INPUT_H
++#include <linux/input.h>
++#endif /* HAVE_LINUX_INPUT_H */
+ 
+ #include "gpmInt.h"
+ #include "twiddler.h"
+@@ -948,6 +951,42 @@
+ 	return 0;
+ }
+ 
++#ifdef HAVE_LINUX_INPUT_H
++static int
++M_evdev (Gpm_Event * state, unsigned char *data)
++{
++  struct input_event thisevent;
++  (void) memcpy (&thisevent, data, sizeof (struct input_event));
++  if (thisevent.type == EV_REL)
++    {
++      if (thisevent.code == REL_X)
++	state->dx = (signed char) thisevent.value;
++      else if (thisevent.code == REL_Y)
++	state->dy = (signed char) thisevent.value;
++    }
++  else if (thisevent.type == EV_KEY)
++    {
++      if (thisevent.code == BTN_LEFT)
++	{
++	  state->buttons ^= GPM_B_LEFT;
++	}
++      else if (thisevent.code == BTN_MIDDLE)
++	{
++	  state->buttons ^= GPM_B_MIDDLE;
++	}
++      else if (thisevent.code == BTN_RIGHT)
++	{
++	  state->buttons ^= GPM_B_RIGHT;
++	}
++      else if (thisevent.code == BTN_SIDE)
++	{
++	  state->buttons ^= GPM_B_MIDDLE;
++	}
++    }
++  return 0;
++}
++#endif /* HAVE_LINUX_INPUT_H */
++
+ /*========================================================================*/
+ /* Then, mice should be initialized */
+ 
+@@ -1406,6 +1445,14 @@
+   return type;
+ }
+ 
++#ifdef HAVE_LINUX_INPUT_H
++static Gpm_Type *
++I_evdev (int fd, unsigned short flags, struct Gpm_Type *type)
++{
++  return type;
++}
++#endif /* HAVE_LINUX_INPUT_H */
++
+ /*========================================================================*/
+ /* Finally, the table */
+ #define STD_FLG (CREAD|CLOCAL|HUPCL)
+@@ -1532,6 +1579,14 @@
+   {"wp",      "Genius WizardPad tablet",
+            "wizardpad", M_wp, I_wp, STD_FLG,
+                                 {0xFA, 0x42, 0x00, 0x00}, 10, 1, 0, 1, 0},
++
++#ifdef HAVE_LINUX_INPUT_H
++  {"evdev", "Linux Event Device",
++   "", M_evdev, I_evdev, STD_FLG,
++   {0x00, 0x00, 0x00, 0x00}
++   , 16, 16, 0, 0, NULL}
++  ,
++#endif /* HAVE_LINUX_INPUT_H */
+ 
+   {"",     "",
+            "", NULL, NULL, 0,
