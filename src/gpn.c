@@ -4,7 +4,7 @@
  * Copyright (C) 1993        Andreq Haylett <ajh@gec-mrc.co.uk>
  * Copyright (C) 1994-1999   Alessandro Rubini <rubini@linux.it>
  * Copyright (C) 1998 	     Ian Zimmerman <itz@rahul.net>
- * Copyright (c) 2001 	     Nico Schottelius <nico-gpm@schottelius.org>
+ * Copyright (c) 2001-2005   Nico Schottelius <nico-gpm@schottelius.org>
  *
  * Tue,  5 Jan 1999 23:26:10 +0000, modified by James Troup <james@nocrew.org>
  * (usage): typo (s/an unexistent/a non-existent/)
@@ -136,7 +136,7 @@ void cmdline(int argc, char **argv)
 {
    struct micetab *mouse;
    struct miceopt *opt;
-   char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:TuvV::23";
+   char options[]="a:A::b:B:d:Dfg:hi:kl:m:Mo:pr:R::s:S:t:TuvV::23";
    int  opt_char, tmp;
    int  mouse_no = 1;
 
@@ -160,6 +160,8 @@ void cmdline(int argc, char **argv)
                         exit(usage("delta"));
                      break;
          case 'D':   option.run_status = GPM_RUN_DEBUG;
+                     break;
+         case 'f':   option.run_status = GPM_RUN_FORK;
                      break;
          case 'g':   if (atoi(optarg) > 3)
                         exit(usage("glidepoint tap button"));

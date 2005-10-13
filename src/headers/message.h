@@ -55,9 +55,7 @@
 #define GPM_STRING_OOPS   GPM_TEXT_OOPS FLP
 
 /* running situations */
-#define GPM_RUN_STARTUP 0
-#define GPM_RUN_DAEMON  1
-#define GPM_RUN_DEBUG   2
+enum { GPM_RUN_STARTUP=0, GPM_RUN_DAEMON, GPM_RUN_DEBUG, GPM_RUN_FORK };
 
 /* messages */
 
@@ -76,7 +74,8 @@
          "    -b baud-rate     sets the baud rate (default %d)\n" \
          "    -B sequence      allows changing the buttons (default '%s')\n" \
          "    -d delta         sets the delta value (default %d) (must be 2 or more)\n" \
-         "    -D	             debug mode: don't auto-background\n" \
+         "    -D	             print debug\n" \
+         "    -f               fork to background\n" \
          "    -g tap-button    sets the button (1-3) that is emulated by tapping on\n" \
          "                     a glidepoint mouse, none by default. (mman/ps2 only)\n" \
          "    -i interval      max time interval for multiple clicks (default %i)\n" \

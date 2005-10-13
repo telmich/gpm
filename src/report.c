@@ -4,7 +4,7 @@
  *       - njak ... someone should optimize this code and remove double
  *         fragments.... (self)
  *
- * Copyright (c) 2001,2002   Nico Schottelius <nico-gpm@schottelius.org>
+ * Copyright (c) 2001-2005   Nico Schottelius <nico-gpm@schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -79,6 +79,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
    switch(option.run_status) {
       /******************** STARTUP *****************/
       case GPM_RUN_STARTUP:
+      case GPM_RUN_FORK:
          switch(stat) {
             case GPM_STAT_INFO:
 #ifdef HAVE_VSYSLOG

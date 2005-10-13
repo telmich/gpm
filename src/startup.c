@@ -79,16 +79,19 @@ void startup(int argc, char **argv)
          gpm_report(GPM_PR_OOPS, GPM_MESS_OPEN, GPM_NODE_FIFO);
    }
 
-   if(option.run_status == GPM_RUN_STARTUP) { /* else is debugging */
+   if(option.run_status == GPM_RUN_FORK) { /* else is debugging */
       /* goto background and become a session leader (Stefan Giessler) */  
       switch(fork()) {
          case -1: gpm_report(GPM_PR_OOPS,GPM_MESS_FORK_FAILED);   /* error  */
-         case  0: option.run_status = GPM_RUN_DAEMON; break;      /* child  */
+//         case  0: option.run_status = GPM_RUN_DAEMON; break;      /* child  */
          default: _exit(0);                                       /* parent */
       }
 
       if (setsid() < 0) gpm_report(GPM_PR_OOPS,GPM_MESS_SETSID_FAILED);
    }
+   
+   /* now we are a daemon */
+   option.run_status = GPM_RUN_DAEMON;
 
    /* damon init: check whether we run or not, display message */
    check_uniqueness();
