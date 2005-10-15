@@ -1985,7 +1985,7 @@ static int I_gunze(struct micedev *dev, struct miceopt *opt, struct Gpm_Type *ty
       for (i=0; i<4; i++)
          if (gunze_calib[i] & ~1023) calibok = 0;
       if (gunze_calib[0] == gunze_calib[2]) calibok = 0;
-      if (gunze_calib[1] == gunze_calib[4]) calibok = 0;
+      if (gunze_calib[1] == gunze_calib[3]) calibok = 0;
       fclose(f);
    }
    if (!calibok) {
