@@ -80,7 +80,7 @@ subdirs-exist:
    # make links in subdirectories
 	-@for cfiledirs in prog lib; do $(MKDIR) $$cfiledirs; \
 	cd $$cfiledirs; for cfiles in `echo $(srcdir)/$$cfiledirs/*.c`; \
-	do if [ ! test -e "$$cfiles" ]; then $(LN_S) $$cfiles; fi; done; cd ..; done
+	do if ! test -e "$$cfiles" ; then $(LN_S) $$cfiles; fi; done; cd ..; done
 
 	# make links in srcdir
 	-@for cfiles in `echo $(srcdir)/*.c`; do if [ ! test -e "$$cfiles" ]; then \
