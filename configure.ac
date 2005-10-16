@@ -6,7 +6,7 @@
 # heavily cleaned up
 
 ############################# prework #################################
-AC_INIT(gpm, 1.20.2 (monotone), gpm@lists.linux.it)
+AC_INIT(gpm, 1.20.2 (git), gpm@lists.linux.it)
 AC_PREREQ(2.59)
 AC_CONFIG_SRCDIR([src/gpm.c])
 AC_CONFIG_HEADER([src/headers/config.h])
