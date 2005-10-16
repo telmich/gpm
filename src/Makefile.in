@@ -150,7 +150,7 @@ clean:
 	rm -f $(PROG) $(POBJ) prog/gpm-root.c
 
 distclean: clean
-	rm -f headers/config.h headers/config.h.in Makefile $(DEPFILE)
+	rm -f headers/config.h headers/config.h.in Makefile subdirs-exist $(DEPFILE)
 
 # Configure & unconfigure
 

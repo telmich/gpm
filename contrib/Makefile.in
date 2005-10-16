@@ -28,4 +28,4 @@ dist:
 	$(CP) -r $(srcdir) $(top_builddir)/gpm-$(release)/
 
 clean distclean:
-	$(RM) -f $(srcdir)/emacs/*.elc
+	$(RM) -f $(srcdir)/emacs/*.elc Makefile
