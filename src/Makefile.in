@@ -89,7 +89,7 @@ subdirs-exist:
 	do if ! test -e "$$cfiles" ; then $(LN_S) $$cfiles; fi; done; cd ..; done
 
 	# make links in srcdir
-	-@for cfiles in `echo $(srcdir)/*.c`; do if [ ! test -e "$$cfiles" ]; then \
+	-@for cfiles in `echo $(srcdir)/*.c`; do if ! test -e "$$cfiles" ; then \
 	$(LN_S) $$cfiles; fi; done
 
 	# execute only once
