@@ -67,6 +67,12 @@ prog/%:	prog/%.o
 #	$(SHELL) -ec '$(CC) -M $(GPMCPPFLAGS) $(CPPFLAGS) $< \
 #		| $(SED) '\''s/\($*\)\.o\([ :]*\)/\1.o \1.lo\2/g'\'' > $(DEPDIR)/$@'
 
+ifeq (@SHLIB@,)
+LINK_LIB := lib/libgpm.a
+else
+LINK_LIB := @SHLIB@
+endif
+
 # Do it all!
 all:	gpm @SHLIB@ lib/libgpm.a $(PROG)
 
@@ -155,7 +161,7 @@ prog/gpm-root.c: $(srcdir)/prog/gpm-root.y
 # gpm-root needs an own rule, because gpm-root.c is not in $(srcdir)
 prog/gpm-root: prog/gpm-root.c
 	$(CC) -I. @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@.o $<
-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.a
+	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) $(LINK_LIB)
 
 prog/mouse-test:	$(MICESRC:.c=.o) console.o optparser.o
 
