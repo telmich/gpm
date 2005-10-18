@@ -125,6 +125,7 @@ No|no|N|n) SHARED_LIBS=-lc ;;
 esac    
 
 dnl ceil() may be an inline, so check with no libm first
+dnl need to use variables/return or gcc will optimize ceil() to a noop
 AC_CACHE_CHECK([whether libm is needed for ceil], [gpm_cv_ceil_libm],
 [ceil_found=no
 for i in "" "-lm"; do
@@ -133,7 +134,7 @@ for i in "" "-lm"; do
     AC_LINK_IFELSE([AC_LANG_PROGRAM(
 [#ifdef HAVE_MATH_H
 #include <math.h>
-#endif], [ceil(0.0);])], [ceil_found=yes])
+#endif], [float i=10.0; return ceil(i);])], [ceil_found=yes])
     LIBS=$SAVELIBS
     if test x$ceil_found = xyes; then
         break
