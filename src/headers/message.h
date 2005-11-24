@@ -191,7 +191,7 @@ enum { GPM_RUN_STARTUP=0, GPM_RUN_DAEMON, GPM_RUN_DEBUG, GPM_RUN_FORK };
 #define GPM_MESS_INCORRECT_COORDS   "%s: %s :%i: Incorrect chord \"%s\""
 #define GPM_MESS_INCORRECT_LINE     "%s: %s :%i: Incorrect line:\"%s\""
 #define GPM_MESS_FIRST_DEV          "Use -m device -t protocol [-o options]!"
-
+#define GPM_MESS_ELO_CALIBRATE      "%s: etouch: calibration file %s absent or invalid, using defaults"
 
 /* warnings */
 #define GPM_MESS_REQUEST_ON         "Request on vc %i > %i"

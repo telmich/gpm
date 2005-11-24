@@ -1277,6 +1277,88 @@ static int M_gunze(struct micedev *dev, struct miceopt *opt, unsigned char *data
    #undef DIF_TIME
 }
 
+/*
+ * This decoder is copied and adapted from the above mtouch.
+ */
+static int elo_click_ontouch = 0; /* the bigger the smoother */
+static int M_etouch(Gpm_Event *state,  unsigned char *data)
+{ /*
+   * This is a simple decoder for the EloTouch touch screen devices. 
+   * ELO format SmartSet UTsXXYYZZc 9600,N,8,1
+   * c=checksum = 0xAA+'T'+'U'+s+X+X+Y+Y+Z+Z (XXmax=YYmax=0x0FFF=4095)
+   * s=status   bit 0=init touch  1=stream touch  2=release
+   */
+#define ELO_CLICK_ONTOUCH	/* ifdef then ButtonPress on first Touch 
+				         else first Move then Touch*/
+  int x, y;
+  static int avgx=-1, avgy;       /* average over time, for smooth feeling */
+  static int upx, upy;            /* keep track of last finger-up place */
+  static struct timeval uptv, tv; /* time of last up, and down events */
+
+  #define REAL_TO_XCELL(x) (x * win.ws_col / 0x3FFF)
+  #define REAL_TO_YCELL(y) (y * win.ws_row / 0x3FFF)
+
+  #define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))
+  #define DIF_TIME(t1,t2) ((t2.tv_sec -t1.tv_sec) *1000+ \
+                           (t2.tv_usec-t1.tv_usec)/1000)
+
+  if (data[2]&0x04)	/* FINGER UP - Release */
+  { upx = avgx;		/* ignore this x, y */
+    upy = avgy;		/* store Finger UP possition */
+    GET_TIME(uptv);	/* set time for the next finger-down */
+    tv.tv_sec = 0;	/* NO DRAG */
+    avgx=-1;		/* FINGER IS UP */
+    state->buttons = 0;
+    return 0;
+  }
+
+  /* NOW WE HAVe FINGER DOWN */
+  x = data[3] | (data[4]<<8); x&=0xfff;
+  y = data[5] | (data[6]<<8); x&=0xfff;
+  x = REALPOS_MAX * (x - gunze_calib[0])/(gunze_calib[2]-gunze_calib[0]);
+  y = REALPOS_MAX * (y - gunze_calib[1])/(gunze_calib[3]-gunze_calib[1]);
+  if (x<0) x = 0; if (x > REALPOS_MAX) x = REALPOS_MAX;
+  if (y<0) y = 0; if (y > REALPOS_MAX) y = REALPOS_MAX;
+
+  if (avgx < 0)		/* INITIAL TOUCH, FINGER WAS UP */
+  { GET_TIME(tv);
+    state->buttons = 0;
+    if (DIF_TIME(uptv, tv) < opt_time)
+    {	/* if Initial Touch immediate after finger UP then start DRAG */
+	x=upx; y=upy;  /* A:start DRAG at finger-UP position */ 
+	if (elo_click_ontouch==0)	state->buttons = GPM_B_LEFT;
+    }
+    else /*  1:MOVE to Initial Touch position */
+    {	upx=x; upy=y; /* store position of Initial Touch into upx, upy */
+	if (elo_click_ontouch==0)	tv.tv_sec=0; /* no DRAG */
+    }
+    realposx = avgx = x; state->x = REAL_TO_XCELL(realposx);
+    realposy = avgy = y; state->y = REAL_TO_YCELL(realposy);
+    return 0;
+  } /* endof INITIAL TOUCH */
+
+
+  state->buttons = 0; /* Motion event */
+  if (tv.tv_sec)	/* draging or elo_click_ontouch */
+  { state->buttons = GPM_B_LEFT;
+    if (elo_click_ontouch) 
+    {	x=avgx=upx;	/* 2:BUTTON PRESS at Initial Touch position */
+	y=avgy=upy;
+	tv.tv_sec=0;   /* so next time 3:MOVE again until Finger UP*/
+    } /* else B:continue DRAG to current possition */
+  }
+
+  realposx = avgx = (9*avgx + x)/10; state->x = REAL_TO_XCELL(realposx);
+  realposy = avgy = (9*avgy + y)/10; state->y = REAL_TO_YCELL(realposy);
+  return 0;
+
+  #undef REAL_TO_XCELL
+  #undef REAL_TO_YCELL
+  #undef GET_TIME
+  #undef DIF_TIME
+}
+
+
 /* Support for DEC VSXXX-AA and VSXXX-GA serial mice used on   */
 /* DECstation 5000/xxx, DEC 3000 AXP and VAXstation 4000       */
 /* workstations                                                */
@@ -1996,6 +2078,61 @@ static int I_gunze(struct micedev *dev, struct miceopt *opt, struct Gpm_Type *ty
    return 0;
 }
 
+
+/* simple initialization for the elo touchscreen */
+static Gpm_Type *I_etouch(int fd, unsigned short flags,
+			  struct Gpm_Type *type, int argc, char **argv)
+{
+  struct termios tty;
+  FILE *f;
+  char s[80];
+  int i, calibok = 0;
+
+  /* Calibration config file (copied from I_gunze, below :) */
+  #define ELO_CALIBRATION_FILE SYSCONFDIR "/gpm-calibration"
+   /* accept a few options */
+   static argv_helper optioninfo[] = {
+         {"clickontouch",  ARGV_BOOL, u: {iptr: &elo_click_ontouch}, value: !0},
+         {"",       ARGV_END} 
+   };
+   parse_argv(optioninfo, argc, argv);
+
+  /* Set speed to 9600bps (copied from I_summa, above :) */
+  tcgetattr(fd, &tty);
+  tty.c_iflag = IGNBRK | IGNPAR;
+  tty.c_oflag = 0;
+  tty.c_lflag = 0;
+  tty.c_line = 0;
+  tty.c_cc[VTIME] = 0;
+  tty.c_cc[VMIN] = 1;
+  tty.c_cflag = B9600|CS8|CREAD|CLOCAL|HUPCL;
+  tcsetattr(fd, TCSAFLUSH, &tty);
+
+  /* retrieve calibration, if not existent, use defaults (uncalib) */
+  f = fopen(ELO_CALIBRATION_FILE, "r");
+  if (f) {
+	fgets(s, 80, f); /* discard the comment */
+	if (fscanf(f, "%d %d %d %d", gunze_calib, gunze_calib+1,
+		   gunze_calib+2, gunze_calib+3) == 4)
+	    calibok = 1;
+	/* Hmm... check */
+	for (i=0; i<4; i++)
+	    if ((gunze_calib[i] & 0xfff) != gunze_calib[i]) calibok = 0;
+	if (gunze_calib[0] == gunze_calib[2]) calibok = 0;
+	if (gunze_calib[1] == gunze_calib[4]) calibok = 0;
+	fclose(f);
+  }
+  if (!calibok) {
+        gpm_report(GPM_PR_ERR,GPM_MESS_ELO_CALIBRATE, option.progname, ELO_CALIBRATION_FILE);
+        /* "%s: etouch: calibration file %s absent or invalid, using defaults" */
+	gunze_calib[0] = gunze_calib[1] = 0x010; /* 1/16 */
+	gunze_calib[2] = gunze_calib[3] = 0xff0; /* 15/16 */
+  }
+  return type;
+}
+
+
+
 /*  Genius Wizardpad tablet  --  Matt Kimball (mkimball@xmission.com)  */
 static int I_wp(struct micedev *dev, struct miceopt *opt, struct Gpm_Type *type)
 {
@@ -2111,6 +2248,9 @@ Gpm_Type mice[]={
    {"calr", "Calcomp UltraSlate - relative mode",
            "", M_calus_rel, I_calus, CS8 | CSTOPB | STD_FLG,
                                 {0x80, 0x80, 0x80, 0x00}, 6, 6, 0, 0, 0},
+  {"etouch",  "EloTouch touch-screens (only button-1 events, by now)",
+           "", M_etouch, I_etouch, STD_FLG,
+                                {0xFF, 0x55, 0xFF, 0x54}, 7, 1, 0, 1, NULL}, 
 #ifdef HAVE_LINUX_INPUT_H
    {"evdev", "Linux Event Device",
             "", M_evdev, I_evdev, STD_FLG,
