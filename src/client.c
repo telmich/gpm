@@ -115,7 +115,7 @@ struct client_info *accept_client_connection(int fd)
 #if !defined(__GLIBC__)
    int len;
 #else /* __GLIBC__ */
-   size_t len; /* isn't that generally defined in C ???  -- nico */
+   socklen_t len;
 #endif /* __GLIBC__ */
    struct sockaddr_un addr; /* reuse this each time */
 #ifndef SO_PEERCRED

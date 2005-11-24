@@ -6,16 +6,15 @@
 # heavily cleaned up
 
 ############################# prework #################################
-AC_INIT(gpm, 1.20.2 (monotone), gpm@lists.linux.it)
+AC_INIT(gpm, 1.20.2 (git), gpm@lists.linux.it)
 AC_PREREQ(2.59)
 AC_CONFIG_SRCDIR([src/gpm.c])
 AC_CONFIG_HEADER([src/headers/config.h])
 
 ############################# release version #################################
-release="1.20.2-monotone"
-release_date="Sometime 2004"
-AC_DEFINE_UNQUOTED(GPM_RELEASE,"$release")
-AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date")
+release_date="Sometime 2005"
+AC_DEFINE_UNQUOTED(GPM_RELEASE,PACKAGE_VERSION,[release version string])
+AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date",[release date string])
 
 # These are chosen so that we can switch to the libtool scheme transparently.
 abi=20
@@ -90,7 +89,7 @@ fi
 
 ITZ_CHECK_TYPE(__u32,linux/types.h)
 if test ${itz_cv_type___u32} = yes || test ${ac_cv_type___u32} = yes ; then
-    AC_DEFINE(HAVE___U32)
+    AC_DEFINE(HAVE___U32, 1, [system has __u32 types])
 fi
 
 ITZ_SYS_ELF
@@ -126,6 +125,7 @@ No|no|N|n) SHARED_LIBS=-lc ;;
 esac    
 
 dnl ceil() may be an inline, so check with no libm first
+dnl need to use variables/return or gcc will optimize ceil() to a noop
 AC_CACHE_CHECK([whether libm is needed for ceil], [gpm_cv_ceil_libm],
 [ceil_found=no
 for i in "" "-lm"; do
@@ -134,7 +134,7 @@ for i in "" "-lm"; do
     AC_LINK_IFELSE([AC_LANG_PROGRAM(
 [#ifdef HAVE_MATH_H
 #include <math.h>
-#endif], [ceil(0.0);])], [ceil_found=yes])
+#endif], [float i=10.0; return ceil(i);])], [ceil_found=yes])
     LIBS=$SAVELIBS
     if test x$ceil_found = xyes; then
         break

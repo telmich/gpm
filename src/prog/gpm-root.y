@@ -437,7 +437,7 @@ void f__fix(struct passwd *pass)
    if (setgid(pass->pw_gid) < 0 ||
        initgroups(pass->pw_name, pass->pw_gid) < 0 ||
        setuid(pass->pw_uid) < 0)
-   exit(1);
+      exit(1);
    setenv("HOME",    pass->pw_dir, 1);
    setenv("LOGNAME", pass->pw_name,1);
    setenv("USER",    pass->pw_name,1);

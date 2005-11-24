@@ -67,6 +67,12 @@ prog/%:	prog/%.o
 #	$(SHELL) -ec '$(CC) -M $(GPMCPPFLAGS) $(CPPFLAGS) $< \
 #		| $(SED) '\''s/\($*\)\.o\([ :]*\)/\1.o \1.lo\2/g'\'' > $(DEPDIR)/$@'
 
+ifeq (@SHLIB@,)
+LINK_LIB := lib/libgpm.a
+else
+LINK_LIB := @SHLIB@
+endif
+
 # Do it all!
 all:	gpm @SHLIB@ lib/libgpm.a $(PROG)
 
@@ -80,10 +86,10 @@ subdirs-exist:
    # make links in subdirectories
 	-@for cfiledirs in prog lib; do $(MKDIR) $$cfiledirs; \
 	cd $$cfiledirs; for cfiles in `echo $(srcdir)/$$cfiledirs/*.c`; \
-	do if [ ! test -e "$$cfiles" ]; then $(LN_S) $$cfiles; fi; done; cd ..; done
+	do if ! test -e "$$cfiles" ; then $(LN_S) $$cfiles; fi; done; cd ..; done
 
 	# make links in srcdir
-	-@for cfiles in `echo $(srcdir)/*.c`; do if [ ! test -e "$$cfiles" ]; then \
+	-@for cfiles in `echo $(srcdir)/*.c`; do if ! test -e "$$cfiles" ; then \
 	$(LN_S) $$cfiles; fi; done
 
 	# execute only once
@@ -144,7 +150,7 @@ clean:
 	rm -f $(PROG) $(POBJ) prog/gpm-root.c
 
 distclean: clean
-	rm -f headers/config.h headers/config.h.in Makefile $(DEPFILE)
+	rm -f headers/config.h headers/config.h.in Makefile subdirs-exist $(DEPFILE)
 
 # Configure & unconfigure
 
@@ -155,7 +161,7 @@ prog/gpm-root.c: $(srcdir)/prog/gpm-root.y
 # gpm-root needs an own rule, because gpm-root.c is not in $(srcdir)
 prog/gpm-root: prog/gpm-root.c
 	$(CC) -I. @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@.o $<
-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.a
+	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) $(LINK_LIB)
 
 prog/mouse-test:	$(MICESRC:.c=.o) console.o optparser.o
 
