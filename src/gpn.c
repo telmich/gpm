@@ -82,15 +82,20 @@ static void init_button_sequence(struct miceopt *opt, char *arg)
       {"231", "02461357"},
       {"312", "04152637"},
       {"321", "04261537"},
+      {"111","04444444"}, /* jwz: this allows one to map all three buttons */
+      {"222","02222222"}, /* to button1. */
+      {"333","01111111"},
       {NULL, NULL}
    };
 
    if (strlen(arg) != 3 || atoi(arg) < 100)
       exit(usage("sequence"));
 
-   for (i = 0; seq[i].in && strcmp(seq[i].in, arg); i++);
-      if (!seq[i].in)
-         exit(usage("button sequence"));
+   for (i = 0; seq[i].in && strcmp(seq[i].in, arg); i++) ;
+
+   if (!seq[i].in)
+      exit(usage("button sequence"));
+
    opt->sequence = strdup(seq[i].out); /* I can rewrite on it */
 }
 
