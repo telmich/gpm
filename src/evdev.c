@@ -239,8 +239,8 @@ static void tp_figure_deltas(struct event_device *evdev, struct Gpm_Event *state
       fy(0) = pkt->abs_y;
       if (evdev->pkt_count >= 2 &&
           evdev->touch.gesture != GESTURE_DRAG_PENDING) {
-         state->dx = ((fx(0) - fx(1)) / 2 + (fx(1) - fx(2)) / 2) / 8; //SYN_REL_DECEL_FACTOR;
-         state->dy = ((fy(0) - fy(1)) / 2 + (fy(1) - fy(2)) / 2) / 8; //SYN_REL_DECEL_FACTOR;
+         state->dx = ((fx(0) - fx(1)) * 2 + (fx(1) - fx(2)) / 2) / 2; //SYN_REL_DECEL_FACTOR;
+         state->dy = ((fy(0) - fy(1)) * 2 + (fy(1) - fy(2)) / 2) / 2; //SYN_REL_DECEL_FACTOR;
       }
       evdev->pkt_count++;
    } else  {
