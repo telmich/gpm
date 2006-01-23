@@ -149,7 +149,7 @@ struct evdev_capabilities {
 #define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))
 #define DIF_TIME(t1,t2) ((t2.tv_sec - t1.tv_sec) * 1000 + (t2.tv_usec - t1.tv_usec) / 1000)
 
-#define test_bit(bit, array)    (array[bit / 8] & (1 << (bit % 8)))
+#define test_bit(bit, array)    (((unsigned long *)array)[bit / (8*sizeof(unsigned long))] & (1 << (bit % (8*sizeof(unsigned long)))))
 
 /* ------------- evdev protocol handling routines ---------------------*/
 
