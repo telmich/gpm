@@ -1,0 +1,16 @@
+acconfig.h
+aclocal.m4
+*.o
+*.a
+configure
+Makefile
+Makefile.include
+autom4te.cache
+contrib/Makefile
+config.log
+config.status
+doc/doc.gpm
+src/headers/config.h
+src/prog/gpm-root.c
+src/subdirs-exist
+src/headers/config.h.in
