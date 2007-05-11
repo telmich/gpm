@@ -26,11 +26,11 @@
 
 int main(int argc, char **argv)
 {
-   commandline(argc,argv);
+   if(!commandline(argc,argv))   return 1;
 
-   read_config();
+   if(!read_config())            return 1;
 
-   mice_handler();
+   if(!mice_handler())           return 1;
 
    return 0;
 }

@@ -1,7 +1,7 @@
 /*
  * gpm2 - mouse driver for the console
  *
- * Copyright (c) 2007         Nico Schottelius <nico-gpm@schottelius.org>
+ * Copyright (c) 2007         Nico Schottelius <nico-gpm2 () schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
