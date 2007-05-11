@@ -1,0 +1,11 @@
+This directory should contain the mice-protocol implementations.
+
+Each file (or if bigger: directory) implements one protocol.
+
+You have to create three functions:
+
+   gpm2_open_<protocol>();
+   gpm2_handle_<protocol>();
+   gpm2_close_<protocol>();
+
+It's not yet clear, how to register protocols to gpm2.
