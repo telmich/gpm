@@ -16,6 +16,9 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ *
+ *   Compile and link with: gcc -o display-coords -lgpm display-coords.c
+ *
  ********/
 
 /*
@@ -76,24 +79,15 @@ int main(int argc, char **argv)
 {
    int            vc;                              /* argv: console number */
    Gpm_Connect    conn;                            /* connection to gpm    */
-   //Gpm_Handler*   disp_function = display_data;
    fd_set         fds;
 
    /* select virtual console, 0 if not set */
    vc = (argc == 2) ? strtol(argv[1],NULL,10) : 0;
 
-   char cmd[128];
-
    conn.eventMask    =  GPM_MOVE; /* read only moves            */
-   conn.defaultMask  = ~GPM_HARD;
+   conn.defaultMask  = ~GPM_HARD; /* inverted GPM_HARD mask    */
    conn.minMod       =  0;
    conn.maxMod       = ~0;
-
-   //gpm_zerobased = opt_emacs;
-
-   /* for *_FILENO have a look at
-    * http://www.opengroup.org/onlinepubs/009695399/functions/stdin.html
-    */
 
    if(Gpm_Open(&conn,vc) == -1) {
       printf("Cannot connect to gpm!\n");
