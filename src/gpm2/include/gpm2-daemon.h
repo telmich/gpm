@@ -21,8 +21,21 @@
  *    daemon specific include file
  ********/
 
+#ifndef GPM2_DAEMON
+#define GPM2_DAEMON
+
+/* parameters and options */
+#define GPM2_ARGS       "c:f"
+#define GPM2_CCONFIG    "/etc/gpm2"
+
+struct gpm2_options {
+   char *cconfig;             /* configuration directory */
+} opts;
 
 /* functions */
+void set_defaults();
 int commandline(int argc, char **argv);
 int read_config();
 int mice_handler();
+
+#endif

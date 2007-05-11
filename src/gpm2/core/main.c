@@ -26,6 +26,8 @@
 
 int main(int argc, char **argv)
 {
+   set_defaults();
+
    if(!commandline(argc,argv))   return 1;
 
    if(!read_config())            return 1;
