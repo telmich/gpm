@@ -19,4 +19,10 @@ tmp="tmp"
 # generate built programs
 #
 
-
+for tmp in "${confdir}"/*; do
+   
+   # ignore *.params, those are parameters, not programs
+   if [ "$tmp%.params" != "$tmp" ]; then
+      continue
+   fi
+done
