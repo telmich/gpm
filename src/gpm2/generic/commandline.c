@@ -23,7 +23,7 @@
 
 #include <unistd.h>        /* getopt() */
 
-#include "include/gpm2-daemon.h"
+#include "gpm2-daemon.h"
 
 int commandline(int argc, char **argv)
 {
@@ -32,7 +32,7 @@ int commandline(int argc, char **argv)
    while((opt = getopt(argc,argv,GPM2_ARGS)) != -1) {
       switch(opt) {
          default:
-            gpm2_usage();
+            usage();
             break;
       }
 

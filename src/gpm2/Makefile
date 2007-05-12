@@ -51,12 +51,12 @@ OBJ=
 #
 
 gpm2-daemon: $(GPM2_DAEMON_OBJECTS)
+	$(LD) -o $@ $^
 
 
 #
 # Generic
 #
-$(CINIT_OBJ): $(CINIT_HEADERS)
 
 %.o: %.c .configured
 	$(CC) -c -o $@ $<

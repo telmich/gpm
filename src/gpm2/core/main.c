@@ -22,7 +22,7 @@
  ********/
 
 
-#include "include/gpm2-daemon.h"
+#include "gpm2-daemon.h"
 
 int main(int argc, char **argv)
 {

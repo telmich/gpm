@@ -1,1 +1,5 @@
 core/main.o
+core/set_defaults.o
+generic/commandline.o
+generic/daemon-usage.o
+generic/mini_printf.o
