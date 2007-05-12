@@ -24,7 +24,7 @@ BIN=cinit
 #
 # End user targets
 #
-all: gpm2-daemon
+all: out/gpm2-daemon
 
 
 #
@@ -50,7 +50,7 @@ OBJ=
 # Programs
 #
 
-gpm2-daemon: $(GPM2_DAEMON_OBJECTS)
+out/gpm2-daemon: $(GPM2_DAEMON_OBJECTS)
 	$(LD) -o $@ $^
 
 
