@@ -13,49 +13,53 @@
 #   exit 1
 #fi
 
-DDIR="$(cd $(dirname $0)/../../../; pwd -P)"
-DIR="$(cd $(dirname $0)/../../; pwd -P)"
-REL_DIR="$(echo $DIR | sed 's;.*/;;')"
-VERSION="$(cd "$DIR"; pwd -P | sed 's;.*/cinit-;;')"
-VERSION_CONF="$(head -n1 $(dirname $0)/../../conf/version | sed 's/^"\(.*\)"$/\1/')"
-VERSION_CHANGES="$(head -n1 "$(dirname $0)/../../CHANGES" | sed 's/cinit-\(.*\):$/\1/')"
+DDIR="$(cd $(dirname $0)/../../; pwd -P)"
+DIR="$(cd $(dirname $0)/../; pwd -P)"
+RDIR="$(basename "$DIR")"
+
+VERSION="$(cd "$DIR"; pwd -P | sed 's;.*/gpm-;;')"
+#VERSION_CONF="$(head -n1 $(dirname $0)/../../conf/version | sed 's/^"\(.*\)"$/\1/')"
+#VERSION_CHANGES="$(head -n1 "$(dirname $0)/../../CHANGES" | sed 's/cinit-\(.*\):$/\1/')"
 
 echo "=> Version directory:    $VERSION"
-echo "=> Version conf/version: $VERSION_CONF"
-echo "=> Version CHANGES:      $VERSION_CHANGES"
+#echo "=> Version conf/version: $VERSION_CONF"
+#echo "=> Version CHANGES:      $VERSION_CHANGES"
 
-if [ "$VERSION" = "$VERSION_CONF" -a "$VERSION" = "$VERSION_CHANGES" ]; then
-   echo "=> Version confirmed."
-fi
-
-echo -n "=> Continue? "
-read yes
+#if [ "$VERSION" = "$VERSION_CONF" -a "$VERSION" = "$VERSION_CHANGES" ]; then
+#   echo "=> Version confirmed."
+#fi
 
 #DIR=$1
 #VERSION=$2
-OUT_NAME="$DDIR/cinit-${VERSION}.tar.bz2"
+TAR_NAME="gpm-${VERSION}.tar.bz2"
+OUT_NAME="$DDIR/$TAR_NAME"
 D_HOST=home.schottelius.org
-D_BASE=www/org/schottelius/unix/www/cinit
+D_BASE=www/org/schottelius/unix/www/gpm
 D_DIR=${D_BASE}/archives/
 D_SOURCE=${D_BASE}/browse_source/
 LINK=current
+
+echo "$VERSION in $DIR to $DDIR with $RDIR?"
+echo "Copying to ${D_HOST}:${D_DIR}"
+echo -n "=> Continue? "
+read yes
 
 if [ ! -d "$DIR" ]; then
    echo "$DIR is not a directory"
    exit 1
 fi
 
-( cd "$DIR" && make dist ) || exit 1
+#( cd "$DIR" && make dist ) || exit 1
 
 echo "Creating bzip2 compressed tar"
-tar cj -X $DIR/.exclude -C "$DDIR" -f "$OUT_NAME" "$REL_DIR"
+tar cj -X "$DIR/.exclude" -C "$DDIR" -f "$OUT_NAME" "$RDIR"
 chmod 0644 "$OUT_NAME"
 echo "Transfering to $D_HOST"
 scp "$OUT_NAME" "$D_HOST:$D_DIR"
 echo "Extracting to $D_SOURCE"
 ssh "$D_HOST" "tar xfj $D_DIR/$OUT_NAME -C $D_SOURCE"
 echo "Correcting paranoid permissions"
-ssh "$D_HOST" "find \"$D_SOURCE/$DIR\" -type f -exec chmod 0644 {} \\;"
-ssh "$D_HOST" "find \"$D_SOURCE/$DIR\" -type d -exec chmod 0755 {} \\;"
-ssh "$D_HOST" "cd \"$D_SOURCE\" && rm -f \"$LINK\" && ln -s \"$DIR\" \"$LINK\""
+ssh "$D_HOST" "find \"$D_SOURCE/$RDIR\" -type f -exec chmod 0644 {} \\;"
+ssh "$D_HOST" "find \"$D_SOURCE/$RDIR\" -type d -exec chmod 0755 {} \\;"
+ssh "$D_HOST" "cd \"$D_SOURCE\" && rm -f \"$LINK\" && ln -s \"$RDIR\" \"$LINK\""
 echo "Please do not forget to update the website..."
