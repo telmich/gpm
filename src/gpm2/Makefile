@@ -9,11 +9,11 @@
 #include Makefile.tests
 
 # Build tools / locations
-CC=../tmp/cc
+CC=./tmp/cc
 CFLAGS=
-LD=../tmp/ld
+LD=./tmp/ld
 LDFLAGS=
-STRIP=../tmp/strip
+STRIP=./tmp/strip
 SBIN=../sbin
 
 # directories and files
@@ -58,7 +58,7 @@ gpm2-daemon: $(GPM2_DAEMON_OBJECTS)
 #
 $(CINIT_OBJ): $(CINIT_HEADERS)
 
-%.o: %.c
+%.o: %.c .configured
 	$(CC) -c -o $@ $<
 
 
@@ -66,13 +66,10 @@ $(CINIT_OBJ): $(CINIT_HEADERS)
 #
 # First do configuration, so we include the right variables
 #
-#Makefile: .configured
+Makefile: .configured
 
-.configured: ../conf/*
-	@../bin/cinit.configure.os
-	@../bin/cinit.configure.tools
-	@../bin/cinit.configure.ipc
-	@../bin/cinit.configure.mark
+.configured: conf/*
+	@./scripts/generate_cbuiltconfig.sh conf
 
 $(CINIT_OBJ): $(CONFIG_H)
 

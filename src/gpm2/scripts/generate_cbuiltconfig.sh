@@ -6,6 +6,8 @@
 
 [ "$#" -eq 1 ] || exit 23
 
+set -e
+
 # args
 confdir="$1"
 
@@ -23,7 +25,8 @@ tmpdir="tmp"
 for tmp in "${progdir}"/*; do
    prog=""
    params=""
-   baseprog="$(basename "$tmp")
+   baseprog="$(basename "$tmp")"
+   destprog="$tmpdir/$baseprog"
 
    # ignore *.params, those are parameters, not programs
    if [ "${tmp%.params}" != "${tmp}" ]; then
@@ -38,5 +41,8 @@ for tmp in "${progdir}"/*; do
 
    prog=$(head -n1 "$tmp")
 
-   echo "Creating $tmp: $prog $params"
+   echo "Creating $destprog: $prog $params"
+   echo '#!/bin/sh' > "${destprog}"
+   echo "\"${prog}\" $params \"\$@\"" >> "${destprog}"
+   chmod 0700 "${destprog}"
 done
