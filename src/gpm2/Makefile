@@ -9,11 +9,11 @@
 #include Makefile.tests
 
 # Build tools / locations
-CC=../tmpbin/cc
+CC=../tmp/cc
 CFLAGS=
-LD=../tmpbin/ld
+LD=../tmp/ld
 LDFLAGS=
-STRIP=../tmpbin/strip
+STRIP=../tmp/strip
 SBIN=../sbin
 
 # directories and files
@@ -22,37 +22,35 @@ CONFIG_H=include/config.h
 BIN=cinit
 
 #
-# All objects depend on headers. More or less. FIXME: use gcc -M
+# End user targets
 #
-CINIT_HEADERS=$(shell cat include/listing)
+all: gpm2-daemon
 
-# NEW
-CINIT_OBJ=$(shell cat object_lists/cinit)
 
 #
-# Client modules
+# All objects depend on headers.
 #
-CLIENT=client/msg_svc_on_off.o client/msg_change_status.o client/run_svc.o \
-       client/exec_svc.o client/respawn_svc.o client/run_run_svcs.o \
-       client/connect_sock.o client/begin_msg.o client/sig_terminate.o
+GPM2_DAEMON_HEADERS=$(shell cat deps/gpm2-daemon-headers)
 
-COMMUNICATION=comm/do_change_status.o comm/do_result.o comm/do_svc_name.o
 
-OBJ=$(SERV) $(SERV_OS) $(CLIENT) $(BOTH) $(COMMUNICATION)
-
-CSVC_OBJ=util/cservice.o generic/mini_printf.o util/msg_reboot.o \
-         generic/usage.o \
-         $(CLIENT) $(COMMUNICATION)
-
-CCO_OBJ=util/ccontrol.o generic/mini_printf.o util/msg_reboot.o \
-         generic/usage.o \
-         $(CLIENT) $(COMMUNICATION)
 #
-# End user target
+# Objects
 #
-#all: cinit cservice ccontrol sizecheck docs
-#all: $(BIN)
-all: cinit
+
+GPM2_DAEMON_OBJECTS=$(shell cat deps/gpm2-daemon)
+$(GPM2_DAEMON_OBJECTS): $(GPM2_DAEMON_HEADERS)
+
+CLIENT=
+
+COMMUNICATION=
+
+OBJ=
+
+#
+# Programs
+#
+
+gpm2-daemon: $(GPM2_DAEMON_OBJECTS)
 
 
 #
@@ -68,7 +66,7 @@ $(CINIT_OBJ): $(CINIT_HEADERS)
 #
 # First do configuration, so we include the right variables
 #
-Makefile: .configured
+#Makefile: .configured
 
 .configured: ../conf/*
 	@../bin/cinit.configure.os
