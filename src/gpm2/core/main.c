@@ -28,11 +28,17 @@ int main(int argc, char **argv)
 {
    set_defaults();
 
-   if(!commandline(argc,argv))   return 1;
+   if(!commandline(argc,argv))      return 1;
 
-   if(!read_config())            return 1;
+   if(!read_config(opts.cconfig))   return 1;
 
-   if(!mice_handler())           return 1;
+   /* creates a fork() */
+   if(!mice_handler())              return 1;
+
+   /* listen to messages: exits only on failure or shutdown */
+//   listen_ipc();
+
+//   shutdown_gpm2();
 
    return 0;
 }

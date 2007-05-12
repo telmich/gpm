@@ -35,7 +35,7 @@ struct gpm2_options {
 /* functions */
 int   commandline(int argc, char **argv);
 int   mice_handler();
-int   read_config();
+int   read_config(char *cconfig);
 void  set_defaults();
 void  usage();
 

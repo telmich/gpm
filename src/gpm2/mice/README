@@ -9,3 +9,17 @@ You have to create three functions:
    gpm2_close_<protocol>();
 
 It's not yet clear, how to register protocols to gpm2.
+
+First idea of inclusion:
+
+- create deps/mouse-<protocol> containging all dependencies
+- conf/built-options/mice specifies which mice protocols to include
+- a script generates include/gpm2-daemon-mice.h containg a struct-array
+  that looks like:
+
+   struct mice_protos {
+      char *name;
+      int (*open)();
+      int (*handle)();
+      int (*open)();
+   };
