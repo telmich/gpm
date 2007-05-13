@@ -39,4 +39,11 @@ int   read_config(char *cconfig);
 void  set_defaults();
 void  usage();
 
+/* structs */
+
+struct mouse {
+   /* pointer to init and decode functions */
+   int (*open)(int fd);
+};
+
 #endif

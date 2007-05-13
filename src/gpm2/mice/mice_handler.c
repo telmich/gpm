@@ -21,13 +21,27 @@
  *    handle mice
  ********/
 
+/* unclean headers */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+
 #include "gpm2-daemon.h"
+#include "tmp/protocols.h"
 
 int mice_handler()
 {
    //init_mice();
    //
    //handle_mice();  /* forks and maintains mice */
+
+   /* dirty hack */
+   int ps2test = open("/dev/psaux",O_RDWR);
+
+   gpm2_open_ps2(ps2test);
+
+   close(ps2test);
 
    return 0;
 }

@@ -23,3 +23,22 @@ First idea of inclusion:
       int (*handle)();
       int (*open)();
    };
+
+--------------------------------------------------------------------------------
+More design ideas for using mice:
+
+   - The gpm2_handle function gets a pointer to a char array containing the
+     data packet.
+   - The gpm2_handle function returns what the packet means
+   - gpm2_daemon may then decide what todo with this information
+
+--------------------------------------------------------------------------------
+gpm2_open_*:
+   - needs fd
+   - needs options
+
+--------------------------------------------------------------------------------
+struct datapacket *gpm2_read_*(int fd)
+   - reads one packet
+   - returns it
+--------------------------------------------------------------------------------
