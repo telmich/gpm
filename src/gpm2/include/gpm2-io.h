@@ -24,6 +24,8 @@
 #ifndef GPM2_IO_H
 #define GPM2_IO_H
 
-char *read_packet(int fd, int len);
+char *read_packet(int fd, int len);    /* needed? */
+
+
 
 #endif

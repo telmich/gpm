@@ -33,8 +33,24 @@
 
 int mice_handler()
 {
+   
+   /* init_mice_handler();
+    * open connections to gpm2_daemon:
+    * - one for each mouse:
+    *    * raw channel     (unidirectional)
+    *    * decoded channel (unidirectional)
+    *    * control channel (bidirectional)
+    */
+   init_mice_handler();
+
+   /* init_mice:
+    *
+    * - open mousedev
+    * - drop priviliges after that
+    */
    //init_mice();
-   //
+
+
    //handle_mice();  /* forks and maintains mice */
 
    /* dirty hack */

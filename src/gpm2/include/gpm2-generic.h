@@ -23,5 +23,3 @@
 
 /* generic functions */
 void mini_printf(char *str,int fd);
-
-
