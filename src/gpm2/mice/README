@@ -33,6 +33,25 @@ More design ideas for using mice:
    - gpm2_daemon may then decide what todo with this information
 
 --------------------------------------------------------------------------------
+It would be nice to have a read_config_<proto> that reads and verifies
+the protocol specific options.
+
+For this, it would be nice to have a libcconfig() like this:
+
+   struct cconfig_fd    *cconfig_open(char *dir);
+   struct cconfig_tree  *cconfig_read_tree(struct cconfig_fd *which);
+
+   struct cconfig_element  *cconfig_select_below(char *basepath, struct cconfig_fd *which, ...);
+
+   The tree, cconfig_read_tree creates could consist of elements
+   of the following definition:
+
+   struct cconfig_element {
+      char        *path;
+      struct stat sbuf;
+   };
+
+--------------------------------------------------------------------------------
 gpm2_open_*:
    - needs fd
    - needs options
