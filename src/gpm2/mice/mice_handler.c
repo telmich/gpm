@@ -41,6 +41,7 @@ int mice_handler()
    int ps2test = open("/dev/psaux",O_RDWR);
 
    gpm2_open_ps2(ps2test);
+   gpm2_decode_ps2(ps2test);
 
    close(ps2test);
 

@@ -22,9 +22,8 @@ tmpdir="tmp"
 #
 
 : > "${tmpdir}/protocols.h"
-: > "${tmpdir}/protocol-deps"
 
 for proto in $(head -n1 ${builtoptsdir}/protocols); do
-   echo "int gpm2_open_${proto}(int fd);" >> "${tmpdir}/protocols.h"
-   cat mice/deps/$proto >> "${tmpdir}/protocol-deps"
+   echo "int gpm2_open_${proto}(int fd);" > "${tmpdir}/protocols.h"
+   echo "int gpm2_decode_${proto}(int fd);" >> "${tmpdir}/protocols.h"
 done

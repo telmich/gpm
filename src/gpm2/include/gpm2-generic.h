@@ -18,7 +18,10 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  *
- *    generic functions
+ *    generic functions: used by daemon and clients
  ********/
 
+/* generic functions */
 void mini_printf(char *str,int fd);
+
+
