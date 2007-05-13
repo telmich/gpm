@@ -17,7 +17,24 @@ Possible design of gpm2:
       - relays input data abstracted to clients
       - does *NOT* draw a cursor or something like that
       - can be used by x.org (see below)
+      - opens mice devices?
       - should be portable
+
+   gpm2-io:
+      - gets list of opened fds
+      - uses poll() / select() on mice devices
+      - retrieves data packets
+      - forwards raw data packets to gpm2-daemon
+      - has *NO* root priviliges
+   
+   gpm2-decode:
+      - forwards raw data packets from gpm2-daemon
+      - forwards decoded packages to clients (like gpm2-cdisplay)
+
+   gpm2-raw-relay:
+      - reads data from gpm2-daemon
+      - writes raw data to clients
+      - a client needs to connect n times for n mice
 
    gpm2-cdisplay:
       - Console DISPLAYS: displays mouse cursor on console
