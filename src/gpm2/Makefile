@@ -40,6 +40,8 @@ GPM2_DAEMON_HEADERS=$(shell cat deps/gpm2-daemon-headers)
 GPM2_DAEMON_OBJECTS=$(shell cat deps/gpm2-daemon)
 $(GPM2_DAEMON_OBJECTS): $(GPM2_DAEMON_HEADERS)
 
+GPM2_DAEMON_PROTOCOLS=$(shell cat tmp/protocol-deps)
+
 CLIENT=
 
 COMMUNICATION=
@@ -50,7 +52,7 @@ OBJ=
 # Programs
 #
 
-out/gpm2-daemon: $(GPM2_DAEMON_OBJECTS)
+out/gpm2-daemon: $(GPM2_DAEMON_OBJECTS) $(GPM2_DAEMON_PROTOCOLS)
 	$(LD) -o $@ $^
 
 
