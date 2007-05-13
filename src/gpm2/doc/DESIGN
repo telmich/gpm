@@ -21,10 +21,15 @@ Possible design of gpm2:
       - should be portable
 
    gpm2-io:
-      - gets list of opened fds
+      - gets list of opened fds or of devices
       - uses poll() / select() on mice devices
       - retrieves data packets
-      - forwards raw data packets to gpm2-daemon
+      - forwards raw data packets to gpm2-daemon from devices
+      - either
+         - forwards raw data packets from gpm2-daemon to devices??
+         - decodes mice packets: does protocol handling and
+           forwards decoded packages to gpm2_daemon
+      - has a mouse - fd_in - fd_out list
       - has *NO* root priviliges
    
    gpm2-decode:
@@ -58,19 +63,3 @@ Possible design of gpm2:
       - connects to the gpm2-daemon logging port
       - reads messages
       - relays them to syslog
-
-Configuration:
-   /etc/gpm2/
-      mice/
-         default/
-            mice-userid:   userid of person reading/writing mice devices
-            mice-groupid:  groupid of person reading/writing mice devices
-
-         <name>/
-            device:     link or device to use
-            protocol:   one line, containing protocol
-            opts:       options for that protocol
-            userid:     overwrites default/mice-userid
-            groupid:    overwrites default/mice-groupid
-
-      clients/
