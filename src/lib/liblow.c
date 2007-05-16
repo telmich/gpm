@@ -3,7 +3,7 @@
  *
  * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
  * Copyright (C) 1998    Ian Zimmerman <itz@rahul.net>
- * Copyright 2001        Nico Schottelius (nico-gpm@schottelius.org)
+ * Copyright 2001-2007   Nico Schottelius (nico-gpm@schottelius.org)
  * Copyright 2004        Dmitry Torokhov <dtor@mail.ru>
  *
  * xterm management is mostly by jtklehto@stekt.oulu.fi (Janne Kukonlehto)
@@ -363,7 +363,7 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
          }
          memcpy(tty, console_name, strlen(console_name) - 1);
          sprintf(&tty[strlen(console_name) - 1], "%i", flag);
-      } else { /* use your current vc */
+      } else if (flag==0) { /* use your current vc */
          if (isatty(0)) tty = ttyname(0);             /* stdin */
          if (!tty && isatty(1)) tty = ttyname(1);     /* stdout */
          if (!tty && isatty(2)) tty = ttyname(2);     /* stderr */
@@ -380,7 +380,8 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
          }
 
          conn->vc = atoi(&tty[strlen(console_name) - 1]);
-      }
+      } else /* a default handler -- use console */
+        tty = strdup(console_name);
 
       if (gpm_consolefd == -1) {
          if ((gpm_consolefd = open(tty, O_WRONLY)) < 0) {

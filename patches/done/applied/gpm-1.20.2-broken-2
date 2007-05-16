@@ -1,0 +1,21 @@
+--- gpm-1.20.2-broken/src/lib/liblow.c.orig	2007-05-17 01:09:32.000000000 +0200
++++ gpm-1.20.2-broken/src/lib/liblow.c	2007-05-17 01:45:17.000000000 +0200
+@@ -363,7 +363,7 @@
+          }
+          memcpy(tty, console_name, strlen(console_name) - 1);
+          sprintf(&tty[strlen(console_name) - 1], "%i", flag);
+-      } else { /* use your current vc */
++      } else if (flag==0) { /* use your current vc */
+          if (isatty(0)) tty = ttyname(0);             /* stdin */
+          if (!tty && isatty(1)) tty = ttyname(1);     /* stdout */
+          if (!tty && isatty(2)) tty = ttyname(2);     /* stderr */
+@@ -380,7 +380,8 @@
+          }
+ 
+          conn->vc = atoi(&tty[strlen(console_name) - 1]);
+-      }
++      } else /* a default handler -- use console */
++        tty = strdup(console_name);
+ 
+       if (gpm_consolefd == -1) {
+          if ((gpm_consolefd = open(tty, O_WRONLY)) < 0) {
