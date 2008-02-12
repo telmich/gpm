@@ -32,6 +32,8 @@ include $(top_builddir)/Makefile.include
 
 MANPAGES = gpm.8 mev.1 gpm-root.1 gpm-types.7 mouse-test.1
 
+all: $(srcdir)/gpm.info gpm.man
+
 # HTML (texi2html)
 %.html: %.texinfo
 	if [ $(TEXI2HTML) != "no" ]; then $(TEXI2HTML) $< ;fi
@@ -55,12 +57,13 @@ MANPAGES = gpm.8 mev.1 gpm-root.1 gpm-types.7 mouse-test.1
 	$(AWK) -f $(srcdir)/mktxt $< > $@
 
 # MAN (-)
-$(MANPAGES): doc.gpm $(srcdir)/manpager
+gpm.man: doc.gpm $(srcdir)/manpager
 	$(AWK) -f $(srcdir)/manpager doc.gpm
 	for i in gpm-root.1 gpm-types.7 gpm.8 mev.1 mouse-test.1; do \
 		expand $$i | sed s/^'[ ]*'//g > $$i.new; \
 		mv $$i.new $$i; \
 	done;
+	touch gpm.man
 
 
 # DVI 

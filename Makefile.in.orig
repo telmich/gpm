@@ -23,7 +23,7 @@ SUBDIRS = src doc contrib
 
 ### simple, but effective rules
 
-all: do-all
+all: dep do-all
 
 dep:
 	touch src/$(DEPFILE) # to prevent unecessary warnings
@@ -58,7 +58,7 @@ installdirs:
 ### GENERIC
 
 # do-all goes to all subdirectories and does all
-do-%: dep
+do-%:
 	@target=`echo $@ | $(SED) -e 's/^do-//'`; \
 	for i in $(SUBDIRS) ; do \
 		if test -f ./$$i/Makefile ; then \
@@ -66,7 +66,7 @@ do-%: dep
 		else \
 			true; \
 		fi; \
-       done
+done
 
 
 # Configure & unconfigure

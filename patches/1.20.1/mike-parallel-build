@@ -1,0 +1,77 @@
+if you try to build with `make -j` it'll break for two reasons ...
+
+(1) the toplevel makefile's all target depends on 'dep' and 'do-all' ... if 
+you build this in parallel on a fast machine, 'do-all' will start executing 
+before 'dep' has finished processing, causing the build to fail.  here's the 
+small fix for that (i indented the 'done' to match the rest of the shell 
+code):
+
+--- Makefile.in
++++ Makefile.in
+@@ -25,3 +25,3 @@
+ 
+-all: dep do-all
++all: do-all
+ 
+@@ -61,3 +61,3 @@
+ # do-all goes to all subdirectories and does all
+-do-%:
++do-%: dep
+        @target=`echo $@ | $(SED) -e 's/^do-//'`; \
+@@ -69,3 +69,3 @@
+                fi; \
+-done
++       done
+ 
+
+(2) the doc subdir's all target depends on $(MANPAGES).  the $(MANPAGES) rule 
+executes a for loop on all the $(MANPAGES).  the problem is that make will 
+fork 5 children (1 per manpge) and try to execute the $(MANPAGES) target and 
+each child will stomp the work of the others.  the fix is to put all the 
+manpages under one target ('gpm.man') and have all depend on that instead of 
+$(MANPAGES).  also, i moved the 'all' to the top so that way it's the default 
+target when you run just `make`.
+
+--- doc/Makefile.in
++++ doc/Makefile.in
+@@ -32,6 +32,8 @@
+ 
+ MANPAGES = gpm.8 mev.1 gpm-root.1 gpm-types.7 mouse-test.1
+ 
++all: $(srcdir)/gpm.info gpm.man
++
+ # HTML (texi2html)
+ %.html: %.texinfo
+    if [ $(TEXI2HTML) != "no" ]; then $(TEXI2HTML) $< ;fi
+@@ -55,13 +57,13 @@
+    $(AWK) -f $(srcdir)/mktxt $< > $@
+ 
+ # MAN (-)
+-$(MANPAGES): doc.gpm $(srcdir)/manpager
++gpm.man: doc.gpm $(srcdir)/manpager
+    $(AWK) -f $(srcdir)/manpager doc.gpm
+    for i in gpm-root.1 gpm-types.7 gpm.8 mev.1 mouse-test.1; do \
+        expand $$i | sed s/^'[ ]*'//g > $$i.new; \
+        mv $$i.new $$i; \
+    done;
+-
++   touch gpm.man
+ 
+ # DVI 
+ # This rule is somewhat a rewrite of texi2dvi. I like make more than sh :-)
+@@ -97,8 +99,6 @@
+ 
+ # Main portion
+ 
+-all: $(srcdir)/gpm.info $(MANPAGES)
+-
+ # why gpmdoc.ps and gpm.ps??
+ # there is no gpm.ps in my tree and no rule to generate gpm.ps.
+ gpmdoc.ps: gpm.ps
+
+-mike
+_______________________________________________
+gpm mailing list
+gpm@lists.linux.it
+http://lists.linux.it/listinfo/gpm
+
