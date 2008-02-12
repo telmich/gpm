@@ -5,7 +5,9 @@
 
 # set root, if you want to install to a virtual root
 ROOT = 
-DESTDIR = $(ROOT)
+ifndef ROOT
+ROOT = $(DESTDIR)
+endif
 
 SHELL = /bin/sh
 

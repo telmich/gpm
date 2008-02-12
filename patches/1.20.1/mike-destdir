@@ -1,0 +1,21 @@
+Makefile.include.in utilizes DESTDIR, but it currently doesnt do anything with 
+it :)
+
+here's a small change where the behavior is to set ROOT equal to DESTDIR only 
+if the user hasnt specified ROOT via cmdline
+
+--- Makefile.include.in
++++ Makefile.include.in
+@@ -7,3 +7,5 @@
+ ROOT =
+-DESTDIR = $(ROOT)
++ifndef ROOT
++ROOT = $(DESTDIR)
++endif
+
+-mike
+_______________________________________________
+gpm mailing list
+gpm@lists.linux.it
+http://lists.linux.it/listinfo/gpm
+
