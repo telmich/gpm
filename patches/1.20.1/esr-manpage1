@@ -1,0 +1,47 @@
+From: esr@thyrsus.com
+To: rubini@gnu.org
+Subject: problems in gpm-types.7
+Date: Sat, 20 Nov 2004 23:02:13 -0500
+>
+This is automatically generated email about problems in a man page for which
+you appear to be responsible.  If you are not the right person or list, tell
+me and I will attempt to correct my database.
+
+See http://catb.org/~esr/doclifter/problems.html for details on how and
+why these patches were generated.  Feel free to email me with any questions.
+Note: These patches do not change the mod date of any manual page.  You
+may wish to do that by hand.
+
+Problems with gpm-types.7:
+
+My records indicate that you have accepted this patch, so this is just
+a reminder.  Please try to get a release with the patch incorporated
+to the Fedora folks in time for Fedora Core 4.
+
+1. Missing or garbled name section.  The most common form of garbling
+is a missing - or extra -. Or your manual page may have been generated
+by a tool that doesn't emit a NAME section as it should.  These
+problems make it impossible to lift the page to DocBook.  They
+can also confuse some implementations of man -k.
+
+--- gpm-types.7	2003-02-16 19:50:16.000000000 -0500
++++ gpm-types.7	2003-02-16 19:51:06.000000000 -0500
+@@ -1,8 +1,7 @@
+ .TH GPM-TYPES 7 "July 2000"
+ .UC 4
+ .SH NAME
+-This manual page describes what pointer types (mice, tablets,
+-etc) are currently managed by gpm.
++gpm-types \- pointer types (mice, tablets, etc.) managed by gpm.
+ .br
+ The information below is extracted from the texinfo file, which is the
+ preferred source of information.
+-----------------------------
+
+--
+                             Eric S. Raymond
+_______________________________________________
+gpm mailing list
+gpm@lists.linux.it
+http://lists.linux.it/listinfo/gpm
+

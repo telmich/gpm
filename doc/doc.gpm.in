@@ -575,8 +575,7 @@ explains how to write a gpm client.
 %M .TH GPM-TYPES 7 "July 2000"
 %M .UC 4
 %M .SH NAME
-%M This manual page describes what pointer types (mice, tablets,
-%M etc) are currently managed by gpm.
+%M gpm-types \- pointer types (mice, tablets, etc.) managed by gpm.
 %M .br
 %M The information below is extracted from the texinfo file, which is the
 %M preferred source of information.
