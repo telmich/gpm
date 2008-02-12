@@ -192,14 +192,11 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
    char *tty = NULL;
    char *term = NULL;
    int i;
-   extern struct options option;
    static int checked_con = 0;
    struct sockaddr_un addr;
    struct winsize win;
    Gpm_Stst *new = NULL;
    char* sock_name = 0;
-
-   option.consolename = NULL;
 
    gpm_report(GPM_PR_DEBUG,"VC: %d",flag);
 
