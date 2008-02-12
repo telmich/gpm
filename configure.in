@@ -7,8 +7,8 @@ AC_INIT(src/gpm.c)
 AC_PREREQ(2.12)
 AC_CONFIG_HEADER(src/headers/config.h)
 
-release=1.20.1
-release_date="Decembre 2002"
+release=1.20.3
+release_date="Summer 2008"
 AC_DEFINE_UNQUOTED(GPM_RELEASE,"$release")
 AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date")
 
