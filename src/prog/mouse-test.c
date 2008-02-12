@@ -3,7 +3,7 @@
  *
  * Copyright 1995   rubini@linux.it (Alessandro Rubini)
  * Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
- * Copyright (C) 2002 Nico Schottelius <nico-gpm@schottelius.org>
+ * Copyright (C) 2002 Nico Schottelius <nico@schottelius.org>
  *
  * Tue,  5 Jan 1999 23:15:23 +0000, modified by James Troup <james@nocrew.org>:
  * (main): exclude devices with a minor number of 130 from
@@ -50,8 +50,21 @@
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif
 
+
+/* this material is needed to pass options to mice.c */
+struct mouse_features mymouse = {
+   DEF_TYPE, DEF_DEV, DEF_SEQUENCE,
+   DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, DEF_SCALE /*scaley*/,
+   DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_GLIDEPOINT_TAP,
+   (char *)NULL /* extra */,
+   (Gpm_Type *)NULL,
+   -1 /* fd */
+};
+
 /* and this is a workaroud */
 struct winsize win;
+
+struct mouse_features *which_mouse=&mymouse;
 
 char *progname;
 char *consolename;
@@ -65,9 +78,9 @@ struct item {
 
 struct device {
    char *name;
-   struct micedev mdev;
+   int fd;
    struct device *next;
-} *devlist;
+};  
 
 static int message(void)
 {
@@ -135,48 +148,47 @@ void killed(int signo)
 /*----------------------------------------------------------------------------- 
    Place the description here.
  -----------------------------------------------------------------------------*/
-void gpm_makedev(char *name)
+struct device **gpm_makedev(struct device **current, char *name)
 {
-   struct device *dev;
-   int fd;
-   int modes;
-
+   int fd; int modes;
    if ((fd=open(name,O_RDWR|O_NONBLOCK))==-1) {
       perror(name);
-   } else {
-      modes = fcntl(fd, F_GETFL);
-      if (0 > fcntl(fd, F_SETFL, modes & ~O_NONBLOCK)) {
-         close(fd);
-         perror(name);
-      } else {
-         dev = malloc(sizeof(struct device));
-         if (!dev) gpm_report(GPM_PR_OOPS,"malloc()");
-         dev->name=strdup(name);
-         if (!dev->name) gpm_report(GPM_PR_OOPS,"malloc()");
-         dev->mdev.fd=fd;
-         dev->mdev.private = NULL;
-         dev->next=devlist;
-         devlist = dev;
-         devcount++;
-      }
+      return current;
    }
+   modes = fcntl(fd, F_GETFL);
+   if (0 > fcntl(fd, F_SETFL, modes & ~O_NONBLOCK)) {
+      close(fd);
+      perror(name);
+      return current;
+   }
+
+   *current=malloc(sizeof(struct device));
+   if (!*current) gpm_report(GPM_PR_OOPS,"malloc()");
+   (*current)->name=strdup(name);
+   if (!(*current)->name) gpm_report(GPM_PR_OOPS,"malloc()");
+   (*current)->fd=fd;
+   (*current)->next=NULL;
+   devcount++;
+   return &((*current)->next);
 }
 
-int (*I_serial)(struct micedev *dev, struct miceopt *opt, struct Gpm_Type *type);
+Gpm_Type *(*I_serial)(int fd, unsigned short flags, struct Gpm_Type *type,
+		      int argc, char **argv);
 
 
 /*----------------------------------------------------------------------------- 
    Place the description here.
  -----------------------------------------------------------------------------*/
-int mousereopen(struct micedev *dev, char *name, Gpm_Type *type, struct miceopt *opts)
+int mousereopen(int oldfd, char *name, Gpm_Type *type)
 {
+   int fd;
    if (!type) type=mice+1; /* ms */
-   close(dev->fd);
+   close(oldfd);
    usleep(100000);
-   dev->fd=open(name,O_RDWR);
-   if (dev->fd < 0) gpm_report(GPM_PR_OOPS,name);
-   I_serial(dev, opts, type); /* ms initialization */
-   return dev->fd;
+   fd=open(name,O_RDWR);
+   if (fd < 0) gpm_report(GPM_PR_OOPS,name);
+   (*I_serial)(fd,type->flags,type,1,&type->name); /* ms initialization */
+   return fd;
 }
 
 int noneofthem(void)
@@ -269,9 +281,10 @@ int main(int argc, char **argv)
 {
    struct item *list=NULL;
    struct item **nextitem;
-   struct device *nextdev;
+   struct device *devlist=NULL;
+   struct device **nextdev;
    Gpm_Type *cursor;
-   int i;
+   int i, mousefd;
    char *mousename;
 #define BUFLEN 512
    char buf[BUFLEN];
@@ -281,9 +294,6 @@ int main(int argc, char **argv)
    int trial, readamount,packetsize,got;
    int baudtab[4]={1200,9600,4800,2400};
 #define BAUD(i) (baudtab[(i)%4])
-   struct miceopt opt = {0};
-   struct micedev mdev = {0};
-
    consolename = Gpm_get_console();
 
    if (!isatty(fileno(stdin))) {
@@ -296,8 +306,8 @@ int main(int argc, char **argv)
 
    /* init the list of possible devices */
 
-   for (i=1; i<argc; i++)
-      gpm_makedev(argv[i]);
+   for (nextdev=&devlist, i=1; i<argc; i++)
+      nextdev=gpm_makedev(nextdev,argv[i]);
 
    if (argc==1) { /* no cmdline, get all devices */
       FILE *f;
@@ -310,7 +320,7 @@ int main(int argc, char **argv)
       if (!f) gpm_report(GPM_PR_OOPS,"popen()");
       while (fgets(s,64,f)) {
          s[strlen(s)-1]='\0'; /* trim '\n' */
-         gpm_makedev(s);
+         nextdev=gpm_makedev(nextdev,s);
       }
       pclose(f);
    }
@@ -335,18 +345,19 @@ int main(int argc, char **argv)
 
       /* BUG */ /* Logitech initialization is not performed */
 
-      opt.baud=BAUD(trial);
-      printf("\r\nTrying with %i baud\r\n",opt.baud);
+      opt_baud=BAUD(trial);
+      printf("\r\nTrying with %i baud\r\n",opt_baud);
       trial++;
 
       FD_ZERO(&devSet); FD_ZERO(&gotSet);
       FD_SET(fileno(stdin),&devSet); maxfd=fileno(stdin);
       printf("\r\n The possible device nodes are:\r\n");
-      for (nextdev=devlist; nextdev; nextdev=nextdev->next) {
-         printf("\t%s\r\n", nextdev->name);
-         FD_SET(nextdev->mdev.fd, &devSet);
-         maxfd=max(nextdev->mdev.fd,maxfd);
-         I_serial(&nextdev->mdev, &opt, mice+1); /* try ms mode */
+      for (nextdev=&devlist; *nextdev; nextdev=&((*nextdev)->next)) {
+         printf("\t%s\r\n", (*nextdev)->name);
+         FD_SET((*nextdev)->fd,&devSet);
+         maxfd=max((*nextdev)->fd,maxfd);
+         (*I_serial)((*nextdev)->fd,(mice+1)->flags,mice+1,
+		  1, &(mice+1)->name); /* try ms mode */
       }
 
       savSet=devSet;
@@ -368,43 +379,43 @@ int main(int argc, char **argv)
             getchar();
             break;
          }
-         for (nextdev=devlist; nextdev; nextdev=nextdev->next)
-	         if (FD_ISSET(nextdev->mdev.fd,&devSet)) {
+         for (nextdev=&devlist; *nextdev; nextdev=&((*nextdev)->next))
+	         if (FD_ISSET((*nextdev)->fd,&devSet)) {
 	            gotthem++;
-	            FD_CLR(nextdev->mdev.fd,&savSet);
-	            FD_SET(nextdev->mdev.fd,&gotSet);
+	            FD_CLR((*nextdev)->fd,&savSet);
+	            FD_SET((*nextdev)->fd,&gotSet);
 	         }
       }
-      if (gotthem) for (nextdev=devlist; nextdev; /* nothing */ ) {
-	      cur=nextdev;
-	      if (!FD_ISSET(cur->mdev.fd,&gotSet)) {
+      if (gotthem) for (nextdev=&devlist; *nextdev; /* nothing */ ) {
+	      cur=*nextdev;
+	      if (!FD_ISSET(cur->fd,&gotSet)) {
 	         printf("removing \"%s\" from the list\r\n",cur->name);
-	         nextdev=cur->next;
-	         close(cur->mdev.fd);
+	         *nextdev=cur->next;
+	         close(cur->fd);
 	         free(cur->name);
 	         free(cur);
 	         devcount--;
 	      } else {
-	         read(cur->mdev.fd,buf,80); /* flush */
-	         nextdev=cur->next; /* follow list */
+	         read(cur->fd,buf,80); /* flush */
+	         nextdev=&(cur->next); /* follow list */
 	      }
 	   }
     
    } /* devcount>1 */
 
-   mdev=devlist->mdev;
+   mousefd=devlist->fd;
    mousename=devlist->name;
    free(devlist);
    printf("\r\nOk, so your mouse device is \"%s\"\r\n",mousename);
 
    /* now close and reopen it, complete with initialization */
-   opt.baud=BAUD(0);
-   mousereopen(&mdev, mousename, NULL,&opt);
-
+   opt_baud=BAUD(0);
+   mousefd=mousereopen(mousefd,mousename,NULL);
+  
    FD_ZERO(&checkSet);
-   FD_SET(mdev.fd,&checkSet);
+   FD_SET(mousefd,&checkSet);
    FD_SET(fileno(stdin),&checkSet);
-   maxfd=max(mdev.fd, fileno(stdin));
+   maxfd=max(mousefd,fileno(stdin));
 
 /*====================================== Identify mouse type */
   
@@ -429,7 +440,7 @@ int main(int argc, char **argv)
    printf("\r\nNow please press and release your left mouse button,\r\n"
 	 "one time only\r\n\r\n");
 
-   i=read(mdev.fd, buf, 1);
+   i=read(mousefd,buf,1);
    if (i==-1 && errno==EINVAL)
       readamount=3;
    else
@@ -455,7 +466,7 @@ int main(int argc, char **argv)
       else
          nextitem=&(cur->next);
    }
-   read(mdev.fd, buf, BUFLEN); /* flush */
+   read(mousefd,buf,BUFLEN); /* flush */
 
 /*====================================== Packet size - second step */
 
@@ -473,12 +484,12 @@ int main(int argc, char **argv)
    while (packetsize==1) {
       int success3=0,success5=0;
 	
-      opt.baud=BAUD(trial);
-      printf("\tBaud rate is %i\r\n",opt.baud);
-      mousereopen(&mdev, mousename,NULL, &opt);
+      opt_baud=BAUD(trial);
+      printf("\tBaud rate is %i\r\n",opt_baud);
+      mousefd=mousereopen(mousefd,mousename,NULL);
 	
       printf("\r\n==> Detecting the packet size\r\n");
-      got=eventlist(mdev.fd,buf,BUFLEN,GPM_B_LEFT,readamount);
+      got=eventlist(mousefd,buf,BUFLEN,GPM_B_LEFT,readamount);
 	
       /* try three -- look at repeating arrays of 6 bytes */
       for (i=0;i<got-12;i++)
@@ -502,6 +513,7 @@ int main(int argc, char **argv)
    }
 
 /*====================================== Use that info to discard protocols */
+  
    for (nextitem=&list; *nextitem; /* nothing */) {
       struct item *cur=*nextitem;
       int packetheads=0;
@@ -518,7 +530,7 @@ int main(int argc, char **argv)
          if ( ((buf[i]  &(cur->this->proto)[0]) == (cur->this->proto)[1])
 	      && ((buf[i+1]&(cur->this->proto)[2]) == (cur->this->proto)[3]) ) {
 	         packetheads++;
-	         if ((*(cur->this->fun))(&mdev, &opt, buf+i, &event)==-1) {
+	         if ((*(cur->this->fun))(&event,buf+i)==-1) {
                packetheads--;
                continue;
             }
@@ -582,7 +594,7 @@ int main(int argc, char **argv)
  * First trial: remove the "-t ms" extension if spurious buttons come in
  */
 
-   got=eventlist(mdev.fd,buf,BUFLEN,0,readamount);
+   got=eventlist(mousefd,buf,BUFLEN,0,readamount);
    pending=0;
    for (nextitem=&list; *nextitem; /* nothing */) {
       struct item *cur=*nextitem;
@@ -592,7 +604,7 @@ int main(int argc, char **argv)
       for (i=0;i<got;i++) {
          if ( ((buf[i]  &(cur->this->proto)[0]) == (cur->this->proto)[1])
             && ((buf[i+1]&(cur->this->proto)[2]) == (cur->this->proto)[3]) ) {
-               if ((*(cur->this->fun))(&mdev, &opt, buf+i, &event)==-1) continue;
+               if ((*(cur->this->fun))(&event,buf+i)==-1) continue;
                i+=packetsize-1;
                if (event.buttons) pending--;
          }
@@ -612,8 +624,8 @@ int main(int argc, char **argv)
  */
 
    printf("\r\n==> Looking for '-t mman'and enhanced ms\r\n");
-   mousereopen(&mdev, mousename, mice /* mman */, &opt);
-   got=eventlist(mdev.fd, buf, BUFLEN, GPM_B_MIDDLE, readamount);
+   mousefd=mousereopen(mousefd,mousename, mice /* mman */);
+   got=eventlist(mousefd,buf,BUFLEN,GPM_B_MIDDLE,readamount);
 
    /* if it uses the 4-byte protocol, find it in a rude way */
    for (pending=0,i=0;i<got-16;i++)
@@ -634,7 +646,7 @@ int main(int argc, char **argv)
       for (i=0;i<got;i++) {
          if ( ((buf[i]  &(cur->this->proto)[0]) == (cur->this->proto)[1])
             && ((buf[i+1]&(cur->this->proto)[2]) == (cur->this->proto)[3]) ) {
-               if ((*(cur->this->fun))(&mdev,&opt,buf+i,&event)==-1) continue;
+               if ((*(cur->this->fun))(&event,buf+i)==-1) continue;
                i+=packetsize-1;
                if (event.buttons && event.buttons!=GPM_B_MIDDLE) pending--;
 	            if (event.buttons==GPM_B_MIDDLE) pending++;
@@ -665,16 +677,16 @@ int main(int argc, char **argv)
       char *Xtognames[3]={"'ClearDTR' and 'ClearRTS'","'ClearDTR'","'ClearRTS'"}; 
       int alllines,lines, index;
 
-      ioctl(mdev.fd, TIOCMGET, &alllines);
+      ioctl(mousefd, TIOCMGET, &alllines);
 
       printf("\r\nSome mice change protocol to three-buttons-aware if some\r\n"
 		   "\r\ncontrol lines are toggled after opening\r\n");
       for (index=0;index<3;index++) {
-         mousereopen(&mdev, mousename, NULL, &opt);
+         mousereopen(mousefd,mousename,NULL);
          lines = alllines & ~toggle[index];
-         ioctl(mdev.fd, TIOCMSET, &lines);
+         ioctl(mousefd, TIOCMSET, &lines);
          printf("\r\n==> Trying with '-o %s'\r\n",tognames[index]);
-         got=eventlist(mdev.fd, buf, BUFLEN, GPM_B_MIDDLE, readamount);
+         got=eventlist(mousefd,buf,BUFLEN,GPM_B_MIDDLE,readamount);
     
          /* if it uses the 5-byte protocol, find it in a rude way */
          for (pending=0,i=0;i<got-20;i++)
@@ -705,7 +717,7 @@ int main(int argc, char **argv)
 	
    getchar();
 
-   got=eventlist(mdev.fd,buf,BUFLEN,GPM_B_MIDDLE,readamount);
+   got=eventlist(mousefd,buf,BUFLEN,GPM_B_MIDDLE,readamount);
 
    /* if it uses the 5-byte protocol, find it in a rude way */
    for (pending=0,i=0;i<got-20;i++)

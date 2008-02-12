@@ -1,7 +1,7 @@
 /*
  * defines used for messaging
  *
- * Copyright (c) 2001,2002    Nico Schottelius <nico-gpm@schottelius.org>
+ * Copyright (c) 2001,2002    Nico Schottelius <nico@schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -55,7 +55,9 @@
 #define GPM_STRING_OOPS   GPM_TEXT_OOPS FLP
 
 /* running situations */
-enum { GPM_RUN_STARTUP=0, GPM_RUN_DAEMON, GPM_RUN_DEBUG, GPM_RUN_FORK };
+#define GPM_RUN_STARTUP 0
+#define GPM_RUN_DAEMON  1
+#define GPM_RUN_DEBUG   2
 
 /* messages */
 
@@ -74,8 +76,7 @@ enum { GPM_RUN_STARTUP=0, GPM_RUN_DAEMON, GPM_RUN_DEBUG, GPM_RUN_FORK };
          "    -b baud-rate     sets the baud rate (default %d)\n" \
          "    -B sequence      allows changing the buttons (default '%s')\n" \
          "    -d delta         sets the delta value (default %d) (must be 2 or more)\n" \
-         "    -D	             print debug\n" \
-         "    -f               fork to background\n" \
+         "    -D	             debug mode: don't auto-background\n" \
          "    -g tap-button    sets the button (1-3) that is emulated by tapping on\n" \
          "                     a glidepoint mouse, none by default. (mman/ps2 only)\n" \
          "    -i interval      max time interval for multiple clicks (default %i)\n" \
@@ -95,6 +96,7 @@ enum { GPM_RUN_STARTUP=0, GPM_RUN_DAEMON, GPM_RUN_DEBUG, GPM_RUN_FORK };
          "    -S [commands]    enable special commands (see man page)\n" \
          "    -t mouse-type    sets mouse type (default '%s')\n" \
          "                     Use a non-existent type (e.g. \"help\") to get a list\n" \
+         "    -T               test: read mouse, no clients\n" \
          "    -v               print version and exit\n" \
          "    -V verbosity     increase number of logged messages\n\n\n" \
          "    Examples:\n\n" \
@@ -166,8 +168,7 @@ enum { GPM_RUN_STARTUP=0, GPM_RUN_DAEMON, GPM_RUN_DEBUG, GPM_RUN_FORK };
 #define GPM_MESS_SELECT_TIMES       "selected %i times"
 
 #define GPM_MESS_OPTION_NO_ARG      "%s: Option \"%s\" takes no argument: ignoring \"%s\""
-#define GPM_MESS_INVALID_ARG        "%s: Invalid argument \"%s\" for option \"%s\""
-#define GPM_MESS_MISSING_ARG        "%s: Option \"%s\" requires an argument"
+#define GPM_MESS_INVALID_ARG        "%s: Invalid arg. \"%s\" to \"%s\""
 #define GPM_MESS_CONT_WITH_ERR      "%s: Continuing despite errors in option parsing"
 #define GPM_MESS_TOO_MANY_OPTS      "%s: Too many options for \"-t %s\""
 
@@ -191,11 +192,11 @@ enum { GPM_RUN_STARTUP=0, GPM_RUN_DAEMON, GPM_RUN_DEBUG, GPM_RUN_FORK };
 #define GPM_MESS_INCORRECT_COORDS   "%s: %s :%i: Incorrect chord \"%s\""
 #define GPM_MESS_INCORRECT_LINE     "%s: %s :%i: Incorrect line:\"%s\""
 #define GPM_MESS_FIRST_DEV          "Use -m device -t protocol [-o options]!"
-#define GPM_MESS_ELO_CALIBRATE      "%s: etouch: calibration file %s absent or invalid, using defaults"
+
 
 /* warnings */
 #define GPM_MESS_REQUEST_ON         "Request on vc %i > %i"
-#define GPM_MESS_FAILED_CONNECT     "Failed gpm connect attempt by uid %d for vc %d"
+#define GPM_MESS_FAILED_CONNECT     "Failed gpm connect attempt by uid %d for vc %s"
 #define GPM_MESS_ZERO_SCREEN_DIM    "zero screen dimension, assuming 80x25"
 #define GPM_MESS_STRANGE_DATA       "Data on strange file descriptor %d"
 #define GPM_MESS_RESIZING           "%s pid %i is resizing :-)"

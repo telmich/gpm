@@ -1,39 +1,21 @@
-2005-04-26 Nico Schottelius <nico-gpm@schottelius.org>
-   * added patches from Dmitry Torokhov <dtor_core@ameritech.net>:
-      many cleanups, evdev support
-   * changed old e-mail
-
-2004-05-18 Nico Schottelius <nico-gpm@schottelius.org>
-   * added sources into the monotone tree
-
-2004-03-30 Nico Schottelius <nico-gpm@schottelius.org>
-   * changed maintainer email
-   * applied two patches from Stepan Kasal <kasal@ucw.cz>
-     (gpm-no-makeinfo.patch, gpm-awksub.patch)
-   * applied patches from  Maciej W. Rozycki
-     (gpm-1.20.1-ceil.patch, gpm-1.20.1-consolename.patch,
-      gpm-1.20.1-shlib.patch, gpm-1.20.1-contrib.patch)
-   * fixed bug in Makefile.in with ash (read -p text variable instead read -p text)
-   * added /dev/pts/0 to valid consoles (who contributed this patch?)
-
-2002-12-24 Nico Schottelius <nico-gpm@schottelius.org>
+2002-12-24 Nico Schottelius <nico@schottelius.org>
    * removed src/prog/Makefile*: it's easier with one Makefile
    * some cleanups to Makefile.in,src/Makefile.in
    
    ==> gpm-1.20.1 release
    
-2002-12-02 Nico Schottelius <nico-gpm@schottelius.org>
+2002-12-02 Nico Schottelius <nico@schottelius.org>
    * added src/prog, src/lib so I don't confuse library / program
      and normal source files...
    * modified src/Makefile.in to fit latest the new directory structure  
    * added src/prog/Makefile.in, src/lib/Makefile.in
 
-2002-11-30 Nico Schottelius <nico-gpm@schottelius.org>
+2002-11-30 Nico Schottelius <nico@schottelius.org>
    * today leaving the hospital ->
       gpm-1.20.1rc2 will be released, minor fixes/patches will be accepted
       until 15th of Decembre...after that stable 1.20.1 should be out.
 
-2002-11-26 Nico Schottelius <nico-gpm@schottelius.org>
+2002-11-26 Nico Schottelius <nico@schottelius.org>
    * gpn.c: moved some opt_ to option. structure
    * gpn.c: cleanup up cmdline
    * startup_n_daemon.c renamed to startup.c as the demon part is old_main
@@ -44,7 +26,7 @@
    * updated -h informations
    * added -DSYSCONFDIR patch from Ben Pfaff -> synaptics should work again
 
-2002-11-23 Nico Schottelius <nico-gpm@schottelius.org>
+2002-11-23 Nico Schottelius <nico@schottelius.org>
    * some minimal changes to the Makefile.in, make dist works perfectly now!
    * typo in MANIFEST
    * removed gpmCfg.h from source tree. Merged with gpmInt.h
@@ -54,7 +36,7 @@
    * added GPM_RELESE_DATE
    * replacing date in doc/doc.gpm.in with @release_date@
 
-2002-11-22 Nico Schottelius <nico-gpm@schottelius.org>
+2002-11-22 Nico Schottelius <nico@schottelius.org>
    * heavy work on -M,-o,-m,-t -> gpn.c,server_tools.c,...more description
      follows
    * added add_mouse in server_tools.c
@@ -62,7 +44,7 @@
    * changes to gpn.c to let add_mouse work
    * updated doc/doc.gpm.in
 
-2002-11-08 Nico Schottelius <nico-gpm@schottelius.org>
+2002-11-08 Nico Schottelius <nico@schottelius.org>
    * added main.c, which will replace earlier main() function
    * correct the running gpm check, now we start with a stale pidfile, too.
    * added new struct options option
@@ -71,18 +53,18 @@
 2002-07-17 Dmitry V. Levin <ldv@altlinux.org>
    * bugfix: restored fields order in struct Gpm_Event to avoid ABI change.
 
-2002-06-30 Nico Schottelius <nico-gpm@schottelius.org>
+2002-06-30 Nico Schottelius <nico@schottelius.org>
    * removed some files, updated cvs.
 
-2002-05-31 Nico Schottelius <nico-gpm@schottelius.org>
+2002-05-31 Nico Schottelius <nico@schottelius.org>
    * applied patch from Kerry Scott McLeod <gt2921b@prism.gatech.edu>,
      which fixes some gpm_open() problems (gpm06122002-cvs-tty.patch)
 
-2002-05-31 Nico Schottelius <nico-gpm@schottelius.org>
+2002-05-31 Nico Schottelius <nico@schottelius.org>
    * included latest updates to the synaptics driver from peter berg larsen
      (patches/done/applied/diff_synaptics_c_7.gz)
 
-2002-05-27 Nico Schottelius <nico-gpm@schottelius.org>
+2002-05-27 Nico Schottelius <nico@schottelius.org>
    * together with Alessandro's help there is now cvs access to gpm
    * added Sven Dickert's <Sven.Dickert@planb.de> patch 
       - ms3 wheel / repeater
@@ -93,50 +75,50 @@
    * updated TODO
    * moved ChangeLog to Changelog
      
-2002-05-11 Nico Schottelius <nico-gpm@schottelius.org>
+2002-05-11 Nico Schottelius <nico@schottelius.org>
    * updated the FAQ
    * fixed problem with long filenames through linking (src/Makefile.in)
    * added VSXXX-AA ("hockey puck") mice support: patch from
      "Maciej W. Rozycki" <macro@ds2.pg.gda.pl>
    * fixed minor problems with libgpm.so (shlib-patch, Maciej W. Rozycki)
 
-2002-04-26 Nico Schottelius <nico-gpm@schottelius.org>
+2002-04-26 Nico Schottelius <nico@schottelius.org>
    * most of the exams are written, so time is back for gpm:
      applied 3/4 of Peter Berg Larsen's [pebl@math.ku.dk] synaptics patch
    * added doc/HACK_GPM, added a note in README  
 
-2002-03-11 Nico Schottelius <nico-gpm@schottelius.org>
+2002-03-11 Nico Schottelius <nico@schottelius.org>
    * replaced 2spaces/tabs with three spaces in synaptics.c
    * removed DEBUG_SYNAPTICS in synaptic.c
 
-2002-03-10 Nico Schottelius <nico-gpm@schottelius.org>
+2002-03-10 Nico Schottelius <nico@schottelius.org>
    * added doc/support for vendor information about mouse support.
      first document is from logitech
 
-2002-03-03 Nico Schottelius <nico-gpm@schottelius.org>
+2002-03-03 Nico Schottelius <nico@schottelius.org>
    * added M_imps2 patch, which looks now for unsigned data instead of signed
       (Paul ...)
    * applied ms3 repeater patch from Andrew
 
-2002-02-28 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-28 Nico Schottelius <nico@schottelius.org>
    * removed warnings about labels (missing semicolon at the end of
      switch() statement)
    * added stdlib.h for exit() to report-lib.c  
 
-2002-02-24 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-24 Nico Schottelius <nico@schottelius.org>
    * changed DEF_CLUSTER from 10 to 0 in headers/gpmCfg.h. This makes the mouse
      faster on modern machines, slower on 386. (Proposal by 
      Andrew Pimlott and Alessandro Rubini)
    * add DEF_CLUSTER into doc/FAQ if the mouse is too slow.  
 
-2002-02-23 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-23 Nico Schottelius <nico@schottelius.org>
    * bugfix: problems in processConn/devfs code. snprintf() didn't work the way
      I expected, so sprintf() and strncpy are used.
    * bugfix: gpm-root won't compile outside the srcdir (Makefile problem)
 
      ==> released gpm-1.20.0
    
-2002-02-22 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-22 Nico Schottelius <nico@schottelius.org>
    * bugfix: sedsid() in gpn.c should only be executed, if running as daemon
       ==> gpm -D works now fine again.
    * bugfix: if condition in gpm.c, gpm_exited() must leave
@@ -144,7 +126,7 @@
    * bugfix: hltest.c: could possibly run with devfs and without it...
    * modifications to Makefile.in
    
-2002-02-20 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-20 Nico Schottelius <nico@schottelius.org>
    * removed gpm_oops and replaced it with gpm_report(GPM_PR_OOPS) although
      the report function should normally not exit....but this way we can
      decide better, if we should take _exit() or exit(). A simple 
@@ -163,22 +145,22 @@
    * moved devfs parts to gpmInt.h (where it belongs to...)   
    * removed debugging in gpmInt.h
 
-2002-02-10 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-10 Nico Schottelius <nico@schottelius.org>
    * replaced two with three spaces in mouse-test.c (possibly cindent would have
      helped, too. But I didn't use it until today)
 
-2002-02-10 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-10 Nico Schottelius <nico@schottelius.org>
    * renamed the oops() function to gpm_oops() so we don't pollute
      user space!
 
-2002-02-10 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-10 Nico Schottelius <nico@schottelius.org>
    * added patches from Andreas Mohr: fixed many typos, added descriptions,
      removed warnings (that were patches I really like, although they were
      diffed against gpm-1.19.6.)
      This first patch also included I_ps2, R_ps2
 
      
-2002-02-06 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-06 Nico Schottelius <nico@schottelius.org>
    * added report-lib.c: this is used in libgpm.
    * added tools.c: used by clients (libgpm) and server. (Gpm_Open)
    * added event device patch
@@ -188,21 +170,21 @@
 
    * released gpm-1.20.0-gamma to mailing list.
 
-2002-02-04 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-04 Nico Schottelius <nico@schottelius.org>
    * checked twiddler.c: indent is now okay and gpm_report,too.
 
-2002-02-02 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-02 Nico Schottelius <nico@schottelius.org>
    * checking new functions/debugging other problems in gpm.c,gpn.c,
      mice.c,liblow.c
    * replaced tabs in mice.c with 3 spaces.
    * removed more 'bad' report code (fprintf(stderr, .. ) is deprecated!)
 
-2002-01-29 Nico Schottelius <nico-gpm@schottelius.org>
+2002-01-29 Nico Schottelius <nico@schottelius.org>
    * removed default device completly. (gpm.c)
    * added x_high_y() and cnt_digits()
    * replaced all 2/4 spaces in gpn.c with 3 spaces.
 
-2002-01-14 Nico Schottelius <nico-gpm@schottelius.org>
+2002-01-14 Nico Schottelius <nico@schottelius.org>
    * applied patch from Blaise Gassend <blaisegassend@yahoo.com>:
       - added an imps2 repeater
       - slight changes to imps2 and synps2 so that roller motions could be
@@ -217,18 +199,18 @@
    * cleanup some old gpm_debug_log calls. 
    * added FIXME directives for people, who have time to fix some code.
 
-2002-01-08 Nico Schottelius <nico-gpm@schottelius.org>
+2002-01-08 Nico Schottelius <nico@schottelius.org>
    * applied awk patch from Jason Gurtz and Mark Hymers
      (markh@linuxfromscratch.org)
 
-2002-01-07 Nico Schottelius <nico-gpm@schottelius.org>
+2002-01-07 Nico Schottelius <nico@schottelius.org>
    * updated TODO file.
    * removed -V option (currently gpm_debug_level is not supported anymore)
    * added #defines for message strings to message.h
    * renamed check_devfs to get_console
    * added some initializations to Gpm_Open
 
-2002-01-05 Nico Schottelius <nico-gpm@schottelius.org>
+2002-01-05 Nico Schottelius <nico@schottelius.org>
    * finished report.c (gpm_report) which should replace all output
      functions now
    * removed devfs.c (last devfs code is now in gpn.c)
@@ -239,24 +221,24 @@
    * applied following pataches:
       - gpm-1.19.3-owl-warnings.diff (removed strings.h include)[Solar Designer]
 
-2001-12-02 Nico Schottelius <nico-gpm@schottelius.org>
+2001-12-02 Nico Schottelius <nico@schottelius.org>
    * added sample initscript from Solar Designer to contrib/init
 
-2001-11-06 Nico Schottelius <nico-gpm@schottelius.org>
+2001-11-06 Nico Schottelius <nico@schottelius.org>
    * removed src/Makefile.dep, added easy dependencies
    * removed headers/general.h, defines.h, gpm-mess.h
    * cleaned up doc/Makefile.in
    * primary ROOT support (for installing in virtual tree)
    
-2001-10-03 Nico Schottelius <nico-gpm@schottelius.org>
+2001-10-03 Nico Schottelius <nico@schottelius.org>
    * moved doc/doc.gpm to doc/doc.gpm.in, version is replaced by configure
 
-2001-10-02 Nico Schottelius <nico-gpm@schottelius.org>
+2001-10-02 Nico Schottelius <nico@schottelius.org>
    * added src/Makefile.dep, which produces dep files for src/Makefile.
    * updated MANIFEST, README
    * removed devfs from mouse-test.c, it's not needed there.
 
-2001-09-27 Nico Schottelius <nico-gpm@schottelius.org>
+2001-09-27 Nico Schottelius <nico@schottelius.org>
    * added double include protection into new header files
    * gpm.c: removed unecessary variables. fixed possible problem with
      braces. thanks to gcc -Wall
@@ -265,39 +247,39 @@
    * mice.c: added missing string.h, added braces. removed variables.
    * src/Makefile.in: removed ELISP, those files are in contrib/ now
 
-2001-09-23 Nico Schottelius <nico-gpm@schottelius.org>
+2001-09-23 Nico Schottelius <nico@schottelius.org>
 	***** Release 1.19.5
    * fixed libc5 and Linux 2.0 problems
    * new problem with the main Makefile
 
-2001-09-13 Nico Schottelius <nico-gpm@schottelius.org>
+2001-09-13 Nico Schottelius <nico@schottelius.org>
    * Makefile fixes (doc/)
    * minor devfs changes
    * added synaptics patch: now all 4 buttons of touchpads are supported.
      (Chun-Chung Chen supplied this patch)
 
-2001-09-08 Nico Schottelius <nico-gpm@schottelius.org>
+2001-09-08 Nico Schottelius <nico@schottelius.org>
    * new directory structure
    * new file structure
    * bug in liblow.c fixed: thanks to Jakub Bogusz
    
-2001-09-04 Nico Schottelius <nico-gpm@schottelius.org>
+2001-09-04 Nico Schottelius <nico@schottelius.org>
    * removed <linux/pc_keyb.h> from source, so we can compile under Linux 2.0
    * rewrote parts of the readme, updated it
 
-2001-09-02 Nico Schottelius <nico-gpm@schottelius.org>
+2001-09-02 Nico Schottelius <nico@schottelius.org>
 	***** Release 1.19.4
    * introduced problems with libc5 and linux 2.0!
 
-2001-08-21 Nico Schottelius <nico-gpm@schottelius.org>
+2001-08-21 Nico Schottelius <nico@schottelius.org>
    * several files: applied some old patches (imps autodetect, mktemp
      secure problem, IntelliMouse Explorer), preparing next gpm release.
 
-2001-04-23 Nico Schottelius <nico-gpm@schottelius.org>
+2001-04-23 Nico Schottelius <nico@schottelius.org>
    * gpm.c: removed default taking of /dev/mouse (problem with devfs).
      Instead print help message, to use the -m 'dev' option
 
-2001-04-22 Nico Schottelius <nico-gpm@schottelius.org>
+2001-04-22 Nico Schottelius <nico@schottelius.org>
 	* gpm.c, liblow.c, mouse-test.c: primary devfs support added. Now gpm will
      at least start, but some of the hardcoded ttys are still there.
 

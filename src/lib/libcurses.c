@@ -2,7 +2,7 @@
  * libcurses.c - client library - curses level (gpm-Linux)
  *
  * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
- * Copyright 2002        nico-gpm@schottelius.org (Nico Schottelius)
+ * Copyright 2002        nico@schottelius.org (Nico Schottelius)
  * 
  * xterm management is mostly by Miguel de Icaza
  *

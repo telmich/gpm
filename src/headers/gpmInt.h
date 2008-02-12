@@ -3,7 +3,7 @@
  *
  * Copyright (C) 1994-1999  Alessandro Rubini <rubini@linux.it>
  * Copyright (C) 1998	    Ian Zimmerman <itz@rahul.net>
- * Copyright (C) 2001-2004  Nico Schottelius <nico-gpm@schottelius.org>
+ * Copyright (C) 2001,20022002co Schottelius <nico@schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -23,7 +23,8 @@
 #ifndef _GPMINT_INCLUDED
 #define _GPMINT_INCLUDED
 
-#include <sys/time.h>   /* timeval */
+#include <sys/types.h>          /* time_t */ /* for whom ????  FIXME */
+
 #include "gpm.h"
 
 #if !defined(__GNUC__)
@@ -34,12 +35,23 @@
 /* timeout for the select() syscall */
 #define SELECT_TIME 86400 /* one day */
 
+#ifdef HAVE_LINUX_TTY_H
+#include <linux/tty.h>
+#endif
+
+/* FIXME: still needed ?? */
+/* How many virtual consoles are managed? */
+#ifndef MAX_NR_CONSOLES
+#  define MAX_NR_CONSOLES 64 /* this is always sure */
+#endif
+
+#define MAX_VC    MAX_NR_CONSOLES  /* doesn't work before 1.3.77 */
+
 /* How many buttons may the mouse have? */
 /* #define MAX_BUTTONS 3  ===> not used, it is hardwired :-( */
 
 /* all the default values */
 #define DEF_TYPE          "ms"
-#define DEF_REP_TYPE     "msc"
 #define DEF_DEV           NULL     /* use the type-related one */
 #define DEF_LUT   "-a-zA-Z0-9_./\300-\326\330-\366\370-\377"
 #define DEF_SEQUENCE     "123"     /* how buttons are reordered */
@@ -50,10 +62,12 @@
 #define DEF_SCALE           10
 #define DEF_TIME           250    /* time interval (ms) for multiple clicks */
 #define DEF_THREE            0    /* have three buttons? */
+#define DEF_KERNEL           0    /* no kernel module, by default */
 
 /* 10 on old computers (<=386), 0 on current machines */
 #define DEF_CLUSTER          0    /* maximum number of clustered events */
 
+#define DEF_TEST             0
 #define DEF_PTRDRAG          1    /* double or triple click */
 #define DEF_GLIDEPOINT_TAP   0    /* tapping emulates no buttons by default */
 
@@ -69,6 +83,11 @@
 #define GPM_SYS_CONSOLE      "/dev/console"
 #define GPM_DEVFS_CONSOLE    "/dev/vc/0"
 #define GPM_OLD_CONSOLE      "/dev/tty0"
+
+/* for adding a mouse; add_mouse */
+#define GPM_ADD_DEVICE        0
+#define GPM_ADD_TYPE          1
+#define GPM_ADD_OPTIONS       2
 
 /*** mouse commands ***/ 
 
@@ -98,95 +117,126 @@
 
 /*....................................... Structures */
 
-struct micedev {
-   int   fd;
-   int   timeout;             /* the protocol driver wants to be called 
-                                 after X msec even if there is no new data
-                                 arrived (-1 to disable/default) */
-   void  *private;            /* private data maintained by protocol driver */
-};
-
-struct miceopt {
-   char  *sequence;
-   int   baud;
-   int   sample;
-   int   delta;
-   int   accel;
-   int   scalex, scaley;
-   int   time;
-   int   cluster;
-   int   three_button;
-   int   glidepoint_tap;
-   int   absolute;         /* device reports absolute coordinates - initially copied
-                              from Gpm_Type; allows same protocol (type) control devices
-                              in absolute and relative mode */
-   char  *text;            /* extra textual options supplied via '-o text' */
-};
-
 /*
  * and this is the entry in the mouse-type table
  */
 typedef struct Gpm_Type {
-   char *name;
-   char *desc;             /* a descriptive line */
-   char *synonyms;         /* extra names (the XFree name etc) as a list */
-   int (*fun)(struct micedev *dev, struct miceopt *opt, unsigned char *data, Gpm_Event *state);
-   int (*init)(struct micedev *dev, struct miceopt *opt, struct Gpm_Type *type);
-   unsigned short flags;
-   unsigned char proto[4];
-   int packetlen;
-   int howmany;            /* how many bytes to read at a time */
-   int getextra;           /* does it get an extra byte? (only mouseman) */
-   int absolute;           /* flag indicating absolute pointing device */
+  char *name;
+  char *desc;             /* a descriptive line */
+  char *synonyms;         /* extra names (the XFree name etc) as a list */
+  int (*fun)(Gpm_Event *state, unsigned char *data);
+  struct Gpm_Type *(*init)(int fd, unsigned short flags,
+			   struct Gpm_Type *type, int argc, char **argv);
+  unsigned short flags;
+  unsigned char proto[4];
+  int packetlen;
+  int howmany;            /* how many bytes to read at a time */
+  int getextra;           /* does it get an extra byte? (only mouseman) */
+  int absolute;           /* flag indicating absolute pointing device */
 
-   int (*repeat_fun)(Gpm_Event *state, int fd); /* repeat this event into fd */
+  int (*repeat_fun)(Gpm_Event *state, int fd); /* repeat this event into fd */
                           /* itz Mon Jan 11 23:27:54 PST 1999 */
 }                   Gpm_Type;
 
 #define GPM_EXTRA_MAGIC_1 0xAA
 #define GPM_EXTRA_MAGIC_2 0x55
 
+typedef struct Gpm_Cinfo {
+  Gpm_Connect data;
+  int fd;
+  struct Gpm_Cinfo *next;
+}              Gpm_Cinfo;
+
+
+/*....................................... Global variables */
+
+/* this structure is used to hide the dual-mouse stuff */
+
+struct mouse_features {
+  char *opt_type, *opt_dev, *opt_sequence;
+  int opt_baud,opt_sample,opt_delta, opt_accel, opt_scale, opt_scaley;
+  int opt_time, opt_cluster, opt_three, opt_glidepoint_tap;
+  char *opt_options; /* extra textual configuration */
+  Gpm_Type *m_type;
+  int fd;
+};
+
+extern struct mouse_features mouse_table[3], *which_mouse; /*the current one*/
+
+// looks unused; delete
+//typedef struct Opt_struct_type {int a,B,d,i,p,r,V,A;} Opt_struct_type;
+
+/* this is not very clean, actually, but it works fine */
+#define opt_type     (which_mouse->opt_type)
+#define opt_dev      (which_mouse->opt_dev)
+#define opt_sequence (which_mouse->opt_sequence)
+#define opt_baud     (which_mouse->opt_baud)
+#define opt_sample   (which_mouse->opt_sample)
+#define opt_delta    (which_mouse->opt_delta)
+#define opt_accel    (which_mouse->opt_accel)
+#define opt_scale    (which_mouse->opt_scale)
+#define opt_scaley   (which_mouse->opt_scaley)
+#define opt_time     (which_mouse->opt_time)
+#define opt_cluster  (which_mouse->opt_cluster)
+#define opt_three    (which_mouse->opt_three)
+#define opt_glidepoint_tap (which_mouse->opt_glidepoint_tap)
+#define opt_options  (which_mouse->opt_options)
+
+#define m_type       (which_mouse->m_type)
+
+/* the other variables */
+
+extern char *opt_lut;
+extern int opt_test, opt_ptrdrag;
+extern int opt_kill;
+extern int opt_kernel, opt_explicittype;
+extern int opt_aged;
+extern time_t opt_age_limit;
 extern char *opt_special;
+extern int opt_rawrep;
+extern int fifofd;
+extern int opt_double;
+
+extern Gpm_Type *repeated_type;
 extern Gpm_Type mice[];             /* where the hell are the descriptions...*/
+extern struct winsize win;
+extern int maxx, maxy;
+extern Gpm_Cinfo *cinfo[MAX_VC+1];
 
 /* new variables <CLEAN> */
 
 /* structure prototypes */
-struct repeater {
-   int      fd;
-   int      raw;
-   Gpm_Type *type;
-};
 
 /* contains all mice */
 struct micetab {
    struct micetab *next;
-   struct micedev dev;
-   struct miceopt options;
-   Gpm_Type       *type;
-   char           *device;
-   int            buttons;    /* mouse's button state from last read */
-   struct timeval timestamp;  /* last time mouse data arrived */ 
-};
+   char *device;
+   char *protocol;
+   char *options;
+};  
 
 struct options {
    int autodetect;            /* -u [aUtodetect..'A' is not available] */
+   int no_mice;               /* number of mice */
+   int repeater;              /* repeat data */
+   char *repeater_type;       /* repeat data as which mouse type */
    int run_status;            /* startup/daemon/debug */
    char *progname;            /* hopefully gpm ;) */
+   struct micetab *micelist;  /* mice and their options */
+   char *consolename;         /* /dev/tty0 || /dev/vc/0 */
 };
 
 /* global variables */
 struct options option;        /* one should be enough for us */
-extern struct repeater repeater; /* again, only one */
-extern struct micetab *micelist;
 
 /* new variables </CLEAN> */
 
+
 /*....................................... Prototypes */
          /* server_tools.c */
-struct micetab *add_mouse(void);
-void init_mice(void);
-void cleanup_mice(void);
+void add_mouse (int type, char *value);
+int  init_mice (struct micetab *micelist);
+int  reset_mice(struct micetab *micelist);
 
          /* startup.c */
 void startup(int argc, char **argv);
@@ -196,15 +246,17 @@ int old_main();
 
        /* gpn.c */
 void cmdline(int argc, char **argv);
-int  giveInfo(int request, int fd);
-int  usage(char *whofailed);
+int giveInfo(int request, int fd);
+int loadlut(char *charset);
+int usage(char *whofailed);
+struct Gpm_Type *find_mouse_by_name(char *name);
 void check_uniqueness(void);
-void kill_gpm(void);
+void check_kill(void);
+
 
        /* mice.c */
 extern int M_listTypes(void);
-
-      /* special.c */
+       /* special.c */
 int processSpecial(Gpm_Event *event);
 int twiddler_key(unsigned long message);
 int twiddler_key_init(void);

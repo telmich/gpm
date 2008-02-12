@@ -4,7 +4,7 @@
  *       - njak ... someone should optimize this code and remove double
  *         fragments.... (self)
  *
- * Copyright (c) 2001-2005   Nico Schottelius <nico-gpm@schottelius.org>
+ * Copyright (c) 2001,2002   Nico Schottelius <nico@schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@
 
 #include "headers/gpmInt.h"
 #include "headers/message.h"
-#include "headers/console.h"
 
 /*
  * gpm_report
@@ -71,7 +70,7 @@
 
 void gpm_report(int line, char *file, int stat, char *text, ... )
 {
-   FILE *f = NULL;
+   FILE *console = NULL;
    va_list ap;
 
    va_start(ap,text);
@@ -79,7 +78,6 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
    switch(option.run_status) {
       /******************** STARTUP *****************/
       case GPM_RUN_STARTUP:
-      case GPM_RUN_FORK:
          switch(stat) {
             case GPM_STAT_INFO:
 #ifdef HAVE_VSYSLOG
@@ -140,11 +138,11 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
                syslog(LOG_DAEMON | LOG_WARNING, GPM_STRING_WARN);
                vsyslog(LOG_DAEMON | LOG_WARNING, text, ap);
 #endif               
-               if ((f = fopen(GPM_SYS_CONSOLE, "a")) != NULL) {
-                  fprintf(f, GPM_STRING_WARN);
-                  vfprintf(f, text, ap);
-                  fprintf(f, "\n");
-                  fclose(f);
+               if((console = fopen(GPM_SYS_CONSOLE,"a")) != NULL) {
+                  fprintf(console,GPM_STRING_WARN);
+                  vfprintf(console,text,ap);
+                  fprintf(console,"\n");
+                  fclose(console);
                }   
                break;
  
@@ -153,18 +151,18 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_ERR);
                vsyslog(LOG_DAEMON | LOG_ERR, text, ap);
 #endif               
-               if ((f = fopen(GPM_SYS_CONSOLE, "a")) != NULL) {
-                  fprintf(f, GPM_STRING_ERR);
-                  vfprintf(f, text, ap);
-                  fprintf(f, "\n");
-                  fclose(f);
+               if((console = fopen(GPM_SYS_CONSOLE,"a")) != NULL) {
+                  fprintf(console,GPM_STRING_ERR);
+                  vfprintf(console,text,ap);
+                  fprintf(console,"\n");
+                  fclose(console);
                }
 
-               if ((f = fopen(console.device, "a")) != NULL) {
-                  fprintf(f, GPM_STRING_ERR);
-                  vfprintf(f, text, ap);
-                  fprintf(f, "\n");
-                  fclose(f);
+               if((console = fopen(option.consolename,"a")) != NULL) {
+                  fprintf(console,GPM_STRING_ERR);
+                  vfprintf(console,text,ap);
+                  fprintf(console,"\n");
+                  fclose(console);
                }
                break;
 
@@ -186,24 +184,24 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
       case GPM_RUN_DEBUG:
          switch(stat) {
             case GPM_STAT_INFO:
-               f = stdout;
-               fprintf(f, GPM_STRING_INFO); break;
+               console = stdout;
+               fprintf(console,GPM_STRING_INFO); break;
             case GPM_STAT_WARN:
-               f = stderr;
-               fprintf(f, GPM_STRING_WARN); break;
+               console = stderr;
+               fprintf(console,GPM_STRING_WARN); break;
             case GPM_STAT_ERR:
-               f = stderr;
-               fprintf(f, GPM_STRING_ERR); break;
+               console = stderr;
+               fprintf(console,GPM_STRING_ERR); break;
             case GPM_STAT_DEBUG:
-               f = stderr;
-               fprintf(f, GPM_STRING_DEBUG); break;
+               console = stderr;
+               fprintf(console,GPM_STRING_DEBUG); break;
             case GPM_STAT_OOPS:
-               f = stderr;
-               fprintf(f, GPM_STRING_OOPS); break;
+               console = stderr;
+               fprintf(console,GPM_STRING_OOPS); break;
          }
 
-         vfprintf(f, text, ap);
-         fprintf(f, "\n");
+         vfprintf(console,text,ap);
+         fprintf(console,"\n");
          
          if(stat == GPM_STAT_OOPS) exit(1);
 

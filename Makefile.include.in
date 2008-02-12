@@ -1,12 +1,11 @@
 #			-*-makefile-*- (gpm/include)
 #
-# Copyright (C) 2001 Nico Schottelius <nico-gpm@schottelius.org>
+# Copyright (C) 2001 Nico Schottelius <nico@schottelius.org>
 #
 
-#
-# Set ROOT, if you want to install to a virtual root.
-# You can do that also via commandline: make ROOT=/mnt/newroot install
-#ROOT = 
+# set root, if you want to install to a virtual root
+ROOT = 
+DESTDIR = $(ROOT)
 
 SHELL = /bin/sh
 

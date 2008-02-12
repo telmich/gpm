@@ -3,7 +3,7 @@
  *
  * *several tools only needed by the server*
  *
- * Copyright (c) 2002         Nico Schottelius <nico-gpm@schottelius.org>
+ * Copyright (c) 2002         Nico Schottelius <nico@schottelius.org>
  * 
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -21,80 +21,151 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
-#include <string.h>
-#include <stdlib.h> /* malloc() */
-#include <sys/fcntl.h>
-
 #include "headers/gpmInt.h"
 #include "headers/message.h"
 
-struct micetab *micelist;
+#include <stdlib.h> /* malloc() */
 
-/* DESCR:   allocate a new mouse and to the list of mice. initialization follows later */
-/* RETURN:  new mouse structure */
+/* DESCR:   add this to the list of mice. initialization follows later */
+/* RETURN:  - */
 /* COMMENT: does error handling and exiting itself */
-struct micetab *add_mouse(void)
+void add_mouse(int type, char *value)
 {
-   struct micetab *mouse;
+   struct micetab *tmp = option.micelist;
 
-   gpm_report(GPM_PR_DEBUG, "adding mouse device");
-   if (!(mouse = malloc(sizeof(struct micetab))))
-      gpm_report(GPM_PR_OOPS, GPM_MESS_NO_MEM);
+   /* PREAMBLE for all work: */
+   /* -m /dev/misc/psaux -t ps2 [ -o options ] */
 
-   memset(mouse, 0, sizeof(struct micetab));
+   switch(type) {
 
-   mouse->dev.timeout = -1;
+      /*---------------------------------------------------------------------*/
+      /********************** -m mousedevice *********************************/
+      /*---------------------------------------------------------------------*/
 
-   mouse->options.sequence = NULL;
-   mouse->options.sample = DEF_SAMPLE;
-   mouse->options.delta = DEF_DELTA;
-   mouse->options.accel = DEF_ACCEL;
-   mouse->options.scalex = DEF_SCALE;
-   mouse->options.scaley = DEF_SCALE;
-   mouse->options.time = DEF_TIME;
-   mouse->options.cluster = DEF_CLUSTER;
-   mouse->options.three_button = DEF_THREE;
-   mouse->options.glidepoint_tap = DEF_GLIDEPOINT_TAP;
-   mouse->options.text = NULL;
+      case GPM_ADD_DEVICE:
 
-   mouse->next = micelist;
-   micelist = mouse;
+         /* first invocation */
+         if(option.micelist == NULL) {
+            gpm_report(GPM_PR_DEBUG,"adding mouse device: %s",value);
+            option.micelist = (struct micetab *) malloc(sizeof(struct micetab));
+            if(!option.micelist) gpm_report(GPM_PR_OOPS,GPM_MESS_NO_MEM);
+            option.micelist->next      = NULL;
+            option.micelist->device    = value;
+            option.micelist->protocol  = NULL;
+            option.micelist->options   = NULL;
+            return;
+         }
+         
+         /* find actual mouse */
+         while(tmp->device != NULL && tmp->protocol != NULL && tmp->next !=NULL)
+            tmp = tmp->next;
 
-   return mouse;
-}
+         gpm_report(GPM_PR_DEBUG,"finished searching");
 
-/* DESCR:   mice initialization. calls appropriate init functions. */
-/* COMMENT: does error handling and exiting itself */
-void init_mice(void)
-{
-   struct micetab *mouse;
+         /* found end of micelist, add new mouse */
+         if(tmp->next == NULL && tmp->protocol != NULL) {
+            gpm_report(GPM_PR_DEBUG,"next mouse making");
+            tmp->next = (struct micetab *) malloc(sizeof(struct micetab));
+            if(!tmp) gpm_report(GPM_PR_OOPS,GPM_MESS_NO_MEM);
+            tmp->next      = NULL;
+            tmp->device    = value;
+            tmp->protocol  = NULL;
+            tmp->options   = NULL;
+            return;
+         } else gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
+         
+         //} else if(tmp->device != NULL && tmp->protocol == NULL)
+         // gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV); /* -m -m */
 
-   for (mouse = micelist; mouse; mouse = mouse->next) {
-      if (!strcmp(mouse->device, "-"))
-         mouse->dev.fd = 0; /* use stdin */
-      else if ((mouse->dev.fd = open(mouse->device, O_RDWR | O_NDELAY)) < 0)
-         gpm_report(GPM_PR_OOPS, GPM_MESS_OPEN, mouse->device);
-   
-      /* and then reset the flag */
-      fcntl(mouse->dev.fd, F_SETFL, fcntl(mouse->dev.fd, F_GETFL) & ~O_NDELAY);
+         
+         break;
 
-      /* init the device, and use the return value as new mouse type */
-      if (mouse->type->init)
-         if (mouse->type->init(&mouse->dev, &mouse->options, mouse->type))
-            gpm_report(GPM_PR_OOPS, GPM_MESS_MOUSE_INIT);
+      /*---------------------------------------------------------------------*/
+      /************************* -t type / protocol **************************/
+      /*---------------------------------------------------------------------*/
+
+      case GPM_ADD_TYPE:
+         if(option.micelist == NULL) gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
+         
+         /* skip to next mouse, where either device or protocol is missing */
+         while(tmp->device != NULL && tmp->protocol != NULL && tmp->next !=NULL)
+            tmp = tmp->next;
+         
+         /* check whether device (-m) is there, if so, write protocol */
+         if(tmp->device == NULL) gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
+         else {
+            gpm_report(GPM_PR_DEBUG,"adding mouse type: %s",value);
+            tmp->protocol = value;
+            option.no_mice++;          /* finally we got our mouse */
+         }
+
+         break;
+
+      /*---------------------------------------------------------------------*/
+      /*************************** -o options ********************************/
+      /*---------------------------------------------------------------------*/
+
+      case GPM_ADD_OPTIONS:
+         if(option.micelist == NULL) gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
+
+         /* look for the last mouse */
+         tmp = option.micelist;
+         while(tmp->next != NULL) tmp = tmp->next;
+
+         /* if -m or -t are missing exit */
+         if(tmp->device == NULL || tmp->protocol == NULL)
+            gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
+         else {
+            gpm_report(GPM_PR_DEBUG,"adding mouse options: %s",value);
+            tmp->options = value;
+         }   
+         break;
    }
 }
 
-/* DESCR:   when leaving, we should reset mice to their normal state */
+/* DESCR:   mice initialization. currently print mice. */
+/* RETURN:  0 - failed to init one or more devices 
+            1 - init was fine */
 /* COMMENT: does error handling and exiting itself */
-void cleanup_mice(void)
+int init_mice(struct micetab *micelist)
 {
-   struct micetab *tmp;
+   struct micetab *tmp = micelist;
+   
+   while(tmp != NULL) {           /* there are still mice to init */
+      gpm_report(GPM_PR_DEBUG,"initialize %s with proto %s",tmp->device,tmp->protocol);
+      if(tmp->options != NULL) {
+         gpm_report(GPM_PR_DEBUG,"and options %s",tmp->options);
+      }
+      tmp = tmp->next;
+   }
 
-   while ((tmp = micelist)) {
-      if (micelist->dev.private)
-         free(micelist->dev.private);
-      micelist = micelist->next;
-      free(tmp);
+   gpm_report(GPM_PR_DEBUG,"finished initialization");
+   return 1;
+}
+
+/* DESCR:   when leaving, we should reset mice to their normal state */
+/* RETURN:  0 - failed to reset one or more devices 
+            1 - reset was fine */
+/* COMMENT: does error handling and exiting itself */
+int reset_mice(struct micetab *micelist)
+{
+   struct micetab *tmp = micelist;
+   struct micetab *end = tmp;
+
+   while(tmp != NULL) { /* FIXME! I never get NULL, as free()d before */
+      end = tmp;
+      while(tmp->next != NULL) {       /* set end to the last mouse */
+         end = tmp;
+         tmp = tmp->next;
+      }
+
+      gpm_report(GPM_PR_DEBUG,"reset: %s with proto %s",end->device,end->protocol);
+      if(tmp->options != NULL) {
+         gpm_report(GPM_PR_DEBUG,"and options %s",end->options);
+      }
+      free(end);                       /* be clean() */
+      tmp = micelist;                  /* reset to the first mice again */
    }   
+
+   return 1;
 }

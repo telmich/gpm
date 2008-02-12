@@ -9,12 +9,6 @@ is more or less a bug...
 /*============================================================================*/
 From: maintainer (Nico)
 
-   liblow.c:Gpm_Connect/Open (option.consolename is == NULL)
-   
-
-/*============================================================================*/
-From: maintainer (Nico)
-
 src/headers/config.h:
    SBINDIR and SYSCONFDIR are corrupted: ${prefix} should disappear!
 

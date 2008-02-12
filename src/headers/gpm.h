@@ -3,7 +3,7 @@
  *
  * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
  * Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
- * Copyright (C) 2002 Nico Schottelius <nico-gpm@schottelius.org>
+ * Copyright (C) 2002 Nico Schottelius <nico@schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by

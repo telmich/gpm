@@ -6,7 +6,7 @@
 ================================================================================
 
 Last edited:
-Nico Schottelius <nico-gpm@schottelius.org>, 24 Dec 2002
+Nico Schottelius <nico@schottelius.org>, 24 Dec 2002
 
 Intro:
 
@@ -16,11 +16,11 @@ items marked with a 'D' are done.
 
 Tasks:
 
-2002-12-24 Nico Schottelius <nico-gpm@schottelius.org>
+2002-12-24 Nico Schottelius <nico@schottelius.org>
    * -D must be checked before calling anything else.
       Currently, -m mousedev -D -t ps2 calls add_mouse first without debug
 
-2002-11-21 Nico Schottelius <nico-gpm@schottelius.org>
+2002-11-21 Nico Schottelius <nico@schottelius.org>
    * remove -M, allow multiply -m,-t; -> allow n mice and cleaner code
     --> means use of add_mouse(), init_mice()
    * remove old opt_* 
@@ -28,15 +28,15 @@ D  * cleanup gpn.c/cmdline to its real purpose
    * make protocol / port autodection: gpm -u [later...]
       => ONLY FOR DEVFS!
 
-2002-11-09 Nico Schottelius <nico-gpm@schottelius.org>
+2002-11-09 Nico Schottelius <nico@schottelius.org>
 D  * cleanup gpm further: main.c
    * do init,protocol,disable functions forced
 D  * introducte global option structure
 
-2002-03-10 Nico Schottelius <nico-gpm@schottelius.org>
+2002-03-10 Nico Schottelius <nico@schottelius.org>
    * make buffer accessable from X and vice versa
 
-2002-03-02 Nico Schottelius <nico-gpm@schottelius.org>
+2002-03-02 Nico Schottelius <nico@schottelius.org>
 D  * remove large messages: (just cd $srcdir...)
       /home/user/nico/computer/sources/linux/gpm/gpm-1.20.1/src/mice.c ->
       src/mice.c or mice.c
@@ -45,11 +45,11 @@ D  * remove large messages: (just cd $srcdir...)
          gcc -o file filename.c -> filename.c
          gcc -o file /path/to/filename.c -> /path/to/filename.c
    
-2002-02-20 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-20 Nico Schottelius <nico@schottelius.org>
    * add contrib/other/TPdetect.cc [Allan Sandfeld Jensen
    <snowwolf@one2one-networks.com>] to the gpm source.
 
-2002-02-08 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-08 Nico Schottelius <nico@schottelius.org>
    * fix problems with the following clients:
       - gpm-root complains about /dev/vcs0 in devfs
       - disable-past: segmenatation fault
@@ -61,14 +61,14 @@ D  * add better ps2 initialization: after mouse is screwed up with synps2
      [ btw, currenty I_empty is used :( ]
 D  * update documentation and MANIFEST
 
-2002-02-04 Nico Schottelius <nico-gpm@schottelius.org>
+2002-02-04 Nico Schottelius <nico@schottelius.org>
    * use gpm_report in all gpm sources. Check for run_status.
      [ report_lib does not need run_status! ]
    * export synaptic.c messages to message.h
    * cleanup debugging support in synaptics.c
    * remove all strings in c files and place them into message.h
 
-2002-01-07 Nico Schottelius <nico-gpm@schottelius.org>
+2002-01-07 Nico Schottelius <nico@schottelius.org>
    * cleanup gpm-root (it will not run currently with devfs)
 D  * add pseudo root support
 D  * add protocol reset (after synps2 i.e.)
@@ -83,7 +83,7 @@ D  * cleanup Gpm_Open (problem with devfs still exists)
 2001-09-29 Frédéric L. W. Meunier <0@pervalidus.net>
    * Add GNU screen support to libgpm.
 
-2001-09-23 Nico Schottelius <nico-gpm@schottelius.org>
+2001-09-23 Nico Schottelius <nico@schottelius.org>
 D  * put dependings from sources to src/.depend
 D  * set version _everywhere_ via configure (doc.gpm and others)
 D  * really remove oops() output, add clearer text to the user(also use stderr)

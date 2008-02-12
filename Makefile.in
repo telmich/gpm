@@ -3,7 +3,7 @@
 # Copyright 1994,1997  rubini@linux.it
 # Copyright 1997       dickey@clark.net
 # Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
-# Copyright (C) 2001 Nico Schottelius <nico-gpm@schottelius.org>
+# Copyright (C) 2001 Nico Schottelius <nico@schottelius.org>
 #
 
 SHELL = /bin/sh
@@ -23,7 +23,7 @@ SUBDIRS = src doc contrib
 
 ### simple, but effective rules
 
-all: do-all
+all: dep do-all
 
 dep:
 	touch src/$(DEPFILE) # to prevent unecessary warnings
@@ -34,7 +34,6 @@ check: all
 uninstall:	do-uninstall
 
 clean: do-clean
-	rm -fr autom4te.cache
 
 Makefile: $(srcdir)/Makefile.in config.status
 	./config.status
@@ -59,7 +58,7 @@ installdirs:
 ### GENERIC
 
 # do-all goes to all subdirectories and does all
-do-%: dep
+do-%:
 	@target=`echo $@ | $(SED) -e 's/^do-//'`; \
 	for i in $(SUBDIRS) ; do \
 		if test -f ./$$i/Makefile ; then \
@@ -67,7 +66,7 @@ do-%: dep
 		else \
 			true; \
 		fi; \
-	done
+done
 
 
 # Configure & unconfigure
@@ -78,7 +77,7 @@ barf:
 	@echo 'This command is intended for maintainers to use; it'
 	@echo 'deletes files that may need special tools to rebuild.'
 	@echo 'If you want to continue, please press return.'
-	@read -p "Hit Ctrl+C to abort." anything
+	@read -p "Hit Ctrl+C to abort."
 
 
 # who / what does need tags
@@ -90,7 +89,7 @@ TAGS:	$(SRCS) $(HDRS) src/prog/gpm-root.y do-TAGS
 # 1. Cleanup the tree, remove all generated files and so on
 distclean: barf clean do-clean do-distclean
 	rm -f config.log config.status config.cache Makefile Makefile.include
-	rm -f aclocal.m4 configure config.h.in
+	rm -f configure
 	rm -rf gpm-$(release) gpm-$(release).tar.bz2 gpm-$(release).tar.gz
 	rm -f src/$(DEPFILE)
 

@@ -37,7 +37,6 @@
 #include <sys/param.h>
 
 #include "headers/gpmInt.h"
-#include "headers/console.h"
 
 /*
  * This function is only called at button press, to avoid unnecessary
@@ -79,7 +78,7 @@ int processSpecial(Gpm_Event *event)
     return 1;
 
   /* devfs change */
-  consolef = fopen(console.device, "w");
+  consolef=fopen(option.consolename,"w");
   if (!consolef) consolef=stderr;
   if (event->type & GPM_TRIPLE) /* just triggered: make noise and return */
     {
@@ -154,7 +153,7 @@ int processSpecial(Gpm_Event *event)
     case 0: /* child */
       close(0); close(1); close(2);
       open(GPM_NULL_DEV,O_RDONLY); /* stdin  */
-      open(console.device, O_WRONLY); /* stdout */
+      open(option.consolename,O_WRONLY); /* stdout */
       dup(1);                     /* stderr */
       for (i=3;i<OPEN_MAX; i++) close(i);
       execl("/bin/sh","sh","-c",command,(char *)NULL);

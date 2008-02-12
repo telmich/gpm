@@ -209,9 +209,7 @@
 */
 
 
-#ifdef HAVE_MATH_H
 #include <math.h>                /* ceil */
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -832,9 +830,9 @@ static int           last_corner_action = GPM_B_NOT_SET;
 static int           last_finger_action = GPM_B_NOT_SET;
 static int           last_normal_button_actions[6] = 
   {GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET};
-static int           last_stick_button_actions[8]  = 
+static int           last_stick_button_actions[3]  = 
   {GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET};
-static int           last_4_way_button_actions[8] =
+static int           last_4_way_button_actions[4] =
   {GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET};
 
 /* toss status information */
@@ -867,7 +865,7 @@ static int           is_always_scrolling = 0;     /* Only report scrolling, no m
 static int           scrolling_speed_timer = 0;
 static int           scrolling_amount_left = 0;   /* Tells how much to scroll up or down */
 
-static int           mouse_fd;
+
 
 
 
@@ -884,7 +882,6 @@ static int           mouse_fd;
 ** which makes reading the debug data harder, only dump the report if it is different 
 ** than the previously dumped.
 */
-#if DEBUG_REPORTS
 static void tp_dump_report_data (report_type report,
 				 int edges,
 				 Gpm_Event* state) 
@@ -937,7 +934,7 @@ static void tp_dump_report_data (report_type report,
 	      (multi_finger_pressure>4500 && multi_finger_xy>50000? 'f':' '));
 
 }
-#endif
+
 
 /* syn_dump_info
 **
@@ -1161,8 +1158,8 @@ static int tp_process_action(touchpad_action_type *action_list, int mask)
 	status = GPM_B_NOT_SET;
 	break;
       case Reset_Touchpad_Action:
-	syn_ps2_reset(mouse_fd);
-	syn_ps2_absolute_mode(mouse_fd);
+	syn_ps2_reset(which_mouse->fd);
+	syn_ps2_absolute_mode(which_mouse->fd);
 	status = GPM_B_NOT_SET;
 	break;
       case Toggle_Four_Way_Button_Action:
@@ -1486,22 +1483,7 @@ static int syn_ps2_process_extended_packets( unsigned char *data,
   }
 
   /* Multiplexing with the stick (guest) device. */
-  if (stick_pressure_enabled) {
-    tmp_buttons = report->pressure == 0 ? GPM_B_NONE : last_stick_buttons;
-    if (tmp_buttons || last_stick_buttons) {
-      tp_process_repeating_actions(state,tmp_buttons,last_stick_buttons,
-              &last_stick_button_actions[0],stick_actions);
-      last_stick_buttons = tmp_buttons;
-    }
-  }
-  if (four_way_button_enabled) {
-    tmp_buttons = report->pressure == 0 ? GPM_B_NONE : last_4_way_buttons;
-    if (tmp_buttons || last_4_way_buttons) {
-      tp_process_repeating_actions(state,tmp_buttons,last_4_way_buttons,
-              &last_4_way_button_actions[0],four_button_actions);     
-      last_4_way_buttons = tmp_buttons;
-    }
-  }
+  state->buttons |= last_4_way_buttons | last_stick_buttons;
 
   return 0;
 }
@@ -2968,8 +2950,10 @@ static void syn_ps2_translate_error(unsigned char *data,
 	     data [0],data [1],data [2],data [3],data [4],data [5]);
 
   if (reset_on_error_enabled) {
-    syn_ps2_reset(mouse_fd);
-    syn_ps2_absolute_mode(mouse_fd);
+    /* Hack to get the fd: which_mouse is the current mouse,
+       and as the synaptic code is called, it is the current mouse. */
+    syn_ps2_reset(which_mouse->fd);
+    syn_ps2_absolute_mode(which_mouse->fd);
   }
   
   report->left        = 0;
@@ -3124,15 +3108,13 @@ static void syn_ps2_translate_wmode_data (unsigned char *data,
 **
 ** Process the touchpad 6 byte report.
 */
-void syn_process_serial_data (int fd, Gpm_Event *state,
+void syn_process_serial_data (Gpm_Event *state,
 			      unsigned char *data) 
 {
   /* initialize the state */
   state->buttons = 0;
   state->dx      = 0;
   state->dy      = 0;
-
-  mouse_fd = fd; /* cheat */
 
   syn_serial_translate_data (data, &cur_report);
   if (wmode_enabled){
@@ -3214,7 +3196,7 @@ int syn_serial_init (int fd)
 **
 ** Process the touchpad 6 byte report.
 */
-void syn_process_ps2_data (int fd, Gpm_Event *state,
+void syn_process_ps2_data (Gpm_Event *state,
 			   unsigned char *data) 
 {
   /*   gpm_report(GPM_PR_DEBUG,"Data %02x %02x %02x %02x %02x %02x",data[0],data[1],data[2],data[3],data[4],data[5]); */
@@ -3224,7 +3206,6 @@ void syn_process_ps2_data (int fd, Gpm_Event *state,
   state->dx      = 0;
   state->dy      = 0;
 
-  mouse_fd = fd; /* cheat */
 
   if (wmode_enabled) {
     syn_ps2_translate_wmode_data (data, &cur_report);

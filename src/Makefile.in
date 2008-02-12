@@ -3,7 +3,7 @@
 # Copyright 1994,1997  rubini@linux.it
 # Copyright 1997       dickey@clark.net
 # Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
-# Copyright (C) 2001,2002 Nico Schottelius <nico-gpm@schottelius.org>
+# Copyright (C) 2001,2002 Nico Schottelius <nico@schottelius.org>
 #
 
 srcdir = @srcdir@
@@ -12,16 +12,15 @@ top_builddir = ..
 include $(top_builddir)/Makefile.include
 
 # Main portion: regular build rules
-MICESRC = mice.c twiddler.c synaptics.c @EVDEV_SRCS@
 
-GSRC = main.c gpm.c gpn.c special.c startup.c server_tools.c console.c \
-       selection.c client.c optparser.c $(MICESRC)
+GSRC = main.c gpm.c gpn.c mice.c special.c twiddler.c synaptics.c \
+       startup.c server_tools.c
 
-GOBJ = $(GSRC:.c=.o) report.o
+GOBJ = $(GSRC:.c=.o) report.o tools.o
 
-LSRC = lib/liblow.c lib/libhigh.c lib/libxtra.c lib/report-lib.c lib/tools.c
+LSRC = lib/liblow.c lib/libhigh.c lib/libxtra.c lib/report-lib.c
 
-LOBJ = $(LSRC:.c=.o) @CURSES_OBJS@
+LOBJ = $(LSRC:.c=.o) tools.o @CURSES_OBJS@
 
 PICS = $(LOBJ:.o=.lo)
 
@@ -67,44 +66,25 @@ prog/%:	prog/%.o
 #	$(SHELL) -ec '$(CC) -M $(GPMCPPFLAGS) $(CPPFLAGS) $< \
 #		| $(SED) '\''s/\($*\)\.o\([ :]*\)/\1.o \1.lo\2/g'\'' > $(DEPDIR)/$@'
 
-ifeq (@SHLIB@,)
-LINK_LIB := lib/libgpm.a
-else
-LINK_LIB := @SHLIB@
-endif
-
 # Do it all!
-all:	gpm @SHLIB@ lib/libgpm.a $(PROG)
+all:	gpm lib/@SHLIB@ lib/libgpm.a $(PROG)
 
 gpm:	$(GOBJ)
-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ @LIBM@ $(LIBS)
 
-prog/mouse-test:	prog/mouse-test.o
-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ @LIBM@ $(LIBS)
-
-subdirs-exist:
+# construct dependings of sourcefiles and link sourcefiles
+$(DEPFILE) dep: prog/gpm-root.c
    # make links in subdirectories
 	-@for cfiledirs in prog lib; do $(MKDIR) $$cfiledirs; \
 	cd $$cfiledirs; for cfiles in `echo $(srcdir)/$$cfiledirs/*.c`; \
-	do if ! test -e "$$cfiles" ; then $(LN_S) $$cfiles; fi; done; cd ..; done
+	do $(LN_S) $$cfiles 2>/dev/null; done; cd ..; done
 
 	# make links in srcdir
-	-@for cfiles in `echo $(srcdir)/*.c`; do if ! test -e "$$cfiles" ; then \
-	$(LN_S) $$cfiles; fi; done
+	-@for cfiles in `echo $(srcdir)/*.c`; do $(LN_S) $$cfiles 2>/dev/null; done
 
-	# execute only once
-	touch $@
-
-# construct dependings of sourcefiles and link sourcefiles
-$(DEPFILE) dep: subdirs-exist prog/gpm-root.c
-	# cleanup
-	echo "" > "$(DEPFILE)"
 	# create dependencies
-	for DEPS in `echo *.c lib/*.c prog/*.c`; do \
+	for DEPS in `echo *.c */*.c`; do \
 	$(CC) -I. -I $(srcdir) -M @CPPFLAGS@ $(CPPFLAGS) $$DEPS | \
-	$(SED) 's/^\(.*\)\.o\([ :]+\)/\1.o \1.lo\2/g' >> $(DEPFILE) ; done
-#	$(SED) 's/^\(.*\)\.o\([ :]*\)/\1.o \1.lo\2/g' >> $(DEPFILE) ; done
-#	$(SED) 's/\($*\)\.o\([ :]*\)/\1.o \1.lo\2/g'  >> $(DEPFILE) ; done
+	$(SED) 's/\($*\)\.o\([ :]*\)/\1.o \1.lo\2/g'  >> $(DEPFILE) ; done
 
 ### INSTALL
 check:	all
@@ -150,22 +130,22 @@ clean:
 	rm -f $(PROG) $(POBJ) prog/gpm-root.c
 
 distclean: clean
-	rm -f headers/config.h headers/config.h.in Makefile subdirs-exist $(DEPFILE)
+	rm -f headers/config.h headers/config.h.in Makefile $(DEPFILE)
 
 # Configure & unconfigure
 
 # Subdirectory prog/
-prog/gpm-root.c: $(srcdir)/prog/gpm-root.y
+prog/gpm-root.c:	$(srcdir)/prog/gpm-root.y
 	$(YACC) $(YFLAGS) $< && mv y.tab.c prog/gpm-root.c
 
 # gpm-root needs an own rule, because gpm-root.c is not in $(srcdir)
 prog/gpm-root: prog/gpm-root.c
 	$(CC) -I. @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@.o $<
-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) $(LINK_LIB)
+	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.a
 
-prog/mouse-test:	$(MICESRC:.c=.o) console.o optparser.o
+prog/mouse-test:	mice.o twiddler.o synaptics.o
 
-$(PROG):	@SHLIB@ lib/libgpm.a
+$(PROG):	lib/libgpm.so lib/@SHLIB@ lib/libgpm.a
 
 # Subdirectory lib/
 lib/libgpm.a:	$(LOBJ)

@@ -2,7 +2,7 @@
 #
 # Copyright (C) 1994 Alessandro Rubini <rubini@linux.it>
 # Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
-# Copyright (C) 2001 Nico Schottelius <nico-gpm@schottelius.org>
+# Copyright (C) 2001 Nico Schottelius <nico@schottelius.org>
 #
 #
 # Do you ever got headache from reading Makefiles ? I will help you and
@@ -32,8 +32,6 @@ include $(top_builddir)/Makefile.include
 
 MANPAGES = gpm.8 mev.1 gpm-root.1 gpm-types.7 mouse-test.1
 
-all: $(srcdir)/gpm.info gpm.man
-
 # HTML (texi2html)
 %.html: %.texinfo
 	if [ $(TEXI2HTML) != "no" ]; then $(TEXI2HTML) $< ;fi
@@ -50,20 +48,19 @@ all: $(srcdir)/gpm.info gpm.man
 
 # INFO (makeinfo)
 %.info: %.texinfo
-	if [ "@MAKEINFO@" != "no" ]; then $(MAKEINFO) $< -o $@; fi
+	if [ "$(MAKEINFO)" != "no" ]; then $(MAKEINFO) $< -o $@; fi
 
 # TXT (-)
 %.txt: %.info
 	$(AWK) -f $(srcdir)/mktxt $< > $@
 
 # MAN (-)
-gpm.man: doc.gpm $(srcdir)/manpager
+$(MANPAGES): doc.gpm $(srcdir)/manpager
 	$(AWK) -f $(srcdir)/manpager doc.gpm
 	for i in gpm-root.1 gpm-types.7 gpm.8 mev.1 mouse-test.1; do \
 		expand $$i | sed s/^'[ ]*'//g > $$i.new; \
 		mv $$i.new $$i; \
 	done;
-	touch gpm.man
 
 
 # DVI 
@@ -99,6 +96,8 @@ gpm.man: doc.gpm $(srcdir)/manpager
 	fi
 
 # Main portion
+
+all: $(srcdir)/gpm.info $(MANPAGES)
 
 # why gpmdoc.ps and gpm.ps??
 # there is no gpm.ps in my tree and no rule to generate gpm.ps.

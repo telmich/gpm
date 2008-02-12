@@ -1,10 +1,3 @@
-* From 1.20.2 to 1.20.3:
-   o not yet released
-
-* From 1.20.1 to 1.20.2:
-   o This is a "gpm is still alive and broken"-release!
-   o Have a look at included file doc/README.1.20.2 for more information.
-
 * From 1.20.0 to 1.20.1: (bugfixes/code clean)
    o synaptics ps2 touchpad support
    o code cleanup in various main files

@@ -4,7 +4,7 @@
 %
 % Copyright 1994,1995,1998   rubini@linux.it (Alessandro Rubini)
 % Copyright (C) 1998 Ian Zimmerman <itz@speakeasy.org>
-% Copyright (C) 2001-2005 Nico Schottelius <nico-gpm@schottelius.org>
+% Copyright (C) 2001,2002 Nico Schottelius <Nico@Schottelius.org>
 %
 %%%%
 
@@ -39,7 +39,7 @@
 @format
 @dircategory Miscellaneous
 @direntry
-* Gpm: (gpm).   Text-mode mouse library and server daemon.
+* Gpm: (gpm).   A server wich hands mouse events to non-X programs.
 @end direntry
 @end format
 @end ifinfo
@@ -57,7 +57,7 @@
 This file is a user's and programmer's manual for gpm @value{version}.
 
 Copyright (C) 1994,1995,1998 Alessandro Rubini
-Copyright (C) 2001-2005 Nico Schottelius
+Copyright (C) 2001,2002 Nico Schottelius
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -535,7 +535,7 @@ security risks when using them.
 Andrew Haylett <ajh@gec-mrc.co.uk> (the original selection code)
 Ian Zimmerman <itz@speakeasy.org> (old maintainer)
 Alessandro Rubini <rubini@linux.it> (old maintainer (still helps a lot))
-Nico Schottelius <nico-gpm@schottelius.org> (maintainer)
+Nico Schottelius <nico@schottelius.org> (maintainer)
 
 Many many contributors, to both selection and gpm.
 .fi
@@ -575,7 +575,8 @@ explains how to write a gpm client.
 %M .TH GPM-TYPES 7 "July 2000"
 %M .UC 4
 %M .SH NAME
-%M gpm-types \- pointer types (mice, tablets, etc.) managed by gpm.
+%M This manual page describes what pointer types (mice, tablets,
+%M etc) are currently managed by gpm.
 %M .br
 %M The information below is extracted from the texinfo file, which is the
 %M preferred source of information.

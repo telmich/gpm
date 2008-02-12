@@ -2,7 +2,7 @@
  * twiddler.c - support for the twiddler keyboard
  *
  * Copyright 1998   rubini@linux.it (Alessandro Rubini)
- * Changed 04/23/2001 nico-gpm@schottelius.org (Nico Schottelius)
+ * Changed 04/23/2001 nico@schottelius.org (Nico Schottelius)
  *  --> removed hard wired dev names. Instead used symbolic constants and
  *     generated option.consolename
  *
@@ -54,7 +54,6 @@
 #include "headers/gpm.h"
 #include "headers/gpmInt.h"
 #include "headers/message.h"
-#include "headers/console.h"
 #include "headers/twiddler.h"
 
 
@@ -135,6 +134,17 @@ struct twiddler_fun_struct {
    int (*fun)(char *string);
 };
 
+
+/* The same silly function as in gpm.c */
+static inline int open_console(const int mode)
+{
+   int fd;
+   extern struct options option;
+   if ((fd=open(option.consolename, mode)) < 0) gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN,option.consolename);
+   return fd;
+}
+
+
 /*===================================================================*/
 /*              This part deals with pushing keys                  */
 
@@ -165,7 +175,7 @@ int twiddler_console(char *s)
 int twiddler_exec(char *s)
 {
    int pid;
-
+   extern struct options option;
    switch(pid=fork()) {
       case -1: return -1;
       case 0:
@@ -174,7 +184,7 @@ int twiddler_exec(char *s)
          close(2); /* very rude! */
       
          open(GPM_NULL_DEV,O_RDONLY);
-         open(console.device, O_WRONLY);
+         open(option.consolename,O_WRONLY);
          dup(1);
          execl("/bin/sh", "sh", "-c", s, NULL);
          exit(1); /* shouldn't happen */

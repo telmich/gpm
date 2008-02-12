@@ -1,6 +1,6 @@
 #        -*-makefile-*- (gpm/contrib)
 #
-# Copyright (C) 2001 Nico Schottelius <nico-gpm@schottelius.org>
+# Copyright (C) 2001 Nico Schottelius <nico@schottelius.org>
 #
 
 
@@ -9,7 +9,7 @@ top_builddir = ..
 
 include $(top_builddir)/Makefile.include
 
-all: $(addprefix $(srcdir)/,$(ELISP))
+all: $(srcdir)/$(ELISP)
 
 install: all
 	if [ -n "$(ELISP)" ]; then for i in `echo $(ELISP)`; do \
@@ -21,11 +21,11 @@ install: all
 
 uninstall:
 	if [ -n "$(ELISP)" ]; then for i in `echo $(ELISP)`; do \
-		rm -f $(lispdir)/`basename $$i` ;\
+		rm -f $(lispdir)/$$i ;\
 	done; fi 
 
 dist:
 	$(CP) -r $(srcdir) $(top_builddir)/gpm-$(release)/
 
 clean distclean:
-	$(RM) -f $(srcdir)/emacs/*.elc Makefile
+	$(RM) -f $(srcdir)/emacs/*.elc

@@ -62,7 +62,7 @@
 **
 ** Process the touchpad 6/7/8 byte data.
 */
-void syn_process_serial_data (int fd, Gpm_Event *state,
+void syn_process_serial_data (Gpm_Event *state,
 			      unsigned char *data);
 
 
@@ -72,7 +72,7 @@ void syn_process_serial_data (int fd, Gpm_Event *state,
 **
 ** Process the touchpad 6 byte data.
 */
-void syn_process_ps2_data (int fd, Gpm_Event *state,
+void syn_process_ps2_data (Gpm_Event *state,
 			   unsigned char *data);
 
 

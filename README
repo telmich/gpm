@@ -2,7 +2,7 @@
  * README -- gpm 1.xx
  *
  * Copyright 1995-2000   rubini@linux.it (Alessandro Rubini)
- * Copyright 2001-2004   nico-gpm@schottelius.org (Nico Schottelius)
+ * Copyright 2001,2002   nico-gpm@schottelius.org (Nico Schottelius)
  *
  *******/
 
@@ -53,45 +53,9 @@ The latest releases can always be found in one of the following places:
   ftp://ftp.linux.it/pub/People/rubini/gpm/
   http:// or ftp://ftp.schottelius.org/pub/linux/gpm
 
-The current homepage for gpm is available at
+Currently there is no homepage for gpm available. 
 
-   http://linux.schottelius.org/gpm/
-
-GPM is now using monotone as its version control system.
-It's hosting site is linux.schottelius.org, the collection is
-org.schottelius.gpm.
-
-Here's a small manual howto get gpm via monotone: 
-
-----------------------------------------------------------------------
-
-# create a database
-scice% monotone --db=gpm.db db init 
-
-# get the server key
-scice% wget -q  http://linux.schottelius.org/gpm/server-key.pub 
-
-# read the server key
-scice% monotone --db=gpm.db read < server-key.pub
-monotone: read 1 packet
-
-# do an anonymous pull
-scice% monotone --key="" --db=gpm.db pull linux.schottelius.org org.schottelius.gpm
-monotone: warning: doing anonymous pull
-monotone: rebuilding merkle trees for collection org.schottelius.gpm
-monotone: connecting to linux.schottelius.org
-monotone: [bytes in: 722110] [bytes out: 7405] 
-monotone: exchanged goodbyes and flushed output on fd 7 (peer linux.schottelius.org), disconnecting
-
-# extract source from the database to a directory
-scice% monotone --db=gpm.db --branch=org.schottelius.gpm checkout your-destination-directory                                           
-monotone: fetching heads of branch 'org.schottelius.gpm'
-
-----------------------------------------------------------------------
-
-GPM's cvs tree (and cvs in general) is DEPRECATED.
-
-Still, there is an 'old' cvs tree available:
+You can get the latest cvs tree of gpm:
 
 $ cvs -d :pserver:cvs@ar.linux.it:/data/cvs login
 (Logging in to cvs@ar.linux.it)
@@ -120,7 +84,7 @@ make distclean config! Otherwise there will be no configure script!
 
 If any errors occur, please report them to me. Something like this
 could be an easy (though brutal) way to do it:
- make clean;(uname -a; make) | mail -s "gpm compile err." nico-gpm@schottelius.org
+ make clean;(uname -a; make) | mail -s "gpm compile err." nicos-gpm@pcsystems.de
 
 What remains to do after installation is a little configuration
 

@@ -3,7 +3,7 @@
  *
  * *main.c*
  *
- * Copyright (c) 2002         Nico Schottelius <nico-gpm@schottelius.org>
+ * Copyright (c) 2002         Nico Schottelius <nico@schottelius.org>
  *
  * small main routine
  *

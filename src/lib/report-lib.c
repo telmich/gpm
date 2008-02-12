@@ -1,7 +1,7 @@
 /*
  * report-lib.c: the exported version of gpm_report. used in Gpm_Open and co.
  *
- * Copyright (c) 2001        Nico Schottelius <nico-gpm@schottelius.org>
+ * Copyright (c) 2001        Nico Schottelius <nico@schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
