@@ -1,0 +1,135 @@
+AC_REVISION(configure.in,v 1.6 2002/05/27 nico)
+
+dnl Process this file with autoconf to produce a configure script.
+dnl written jan/1997 - T.E.Dickey <dickey@clark.net>
+
+AC_INIT(src/gpm.c)
+AC_PREREQ(2.12)
+AC_CONFIG_HEADER(src/headers/config.h)
+
+release=1.20.1
+release_date="Decembre 2002"
+AC_DEFINE_UNQUOTED(GPM_RELEASE,"$release")
+AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date")
+
+dnl These are chosen so that we can switch to the libtool scheme
+dnl transparently.
+abi=20
+abi_age=19
+abi_rev=0
+
+abi_lev=`expr $abi - $abi_age`
+abi_full=$abi_lev.$abi_age.$abi_rev
+
+dnl Make srcdir an absolute path.
+if test x$srcdir = x ; then
+        srcdir = `pwd`
+else
+        srcdir=`cd $srcdir && pwd`
+fi
+
+AC_PROG_CC
+AC_PROG_RANLIB
+AC_PROG_INSTALL
+AC_PROG_YACC
+AC_PROG_LN_S
+
+# check for programs.
+AC_PATH_PROG(DVIPS,dvips,no)
+AC_PATH_PROG(TEXI2HTML,texi2html,no)
+AC_PATH_PROG(TEX,tex,no)
+AC_PATH_PROG(TEXINDEX,texindex,no)
+AC_PATH_PROG(MAKEINFO,makeinfo,no)
+AC_PATH_PROG(DIFF,diff,no)
+AC_PATH_PROG(SED,sed,no)
+AC_PATH_PROG(emacs,emacs,no)
+
+if test ${ac_cv_path_emacs} = no ; then
+        EMACS=:
+        ELISP=
+else
+        EMACS=${ac_cv_path_emacs}
+        ELISP="emacs/t-mouse.el emacs/t-mouse.elc"
+fi
+
+if test $EMACS != : ; then
+        ITZ_PATH_SITE_LISP
+        lispdir=${itz_cv_path_site_lisp}
+else
+        lispdir='${datadir}/emacs/site-lisp'
+fi
+
+AC_CHECK_HEADERS(syslog.h linux/input.h linux/joystick.h ncurses.h ncurses/curses.h curses.h)
+
+AC_ARG_WITH(curses,
+[  --without-curses        disable curses support even if curses found])
+
+CURSES_OBJS=
+
+case $with_curses in
+No|no|N|n) : ;;
+        *) if   test ${ac_cv_header_ncurses_h} = yes || 
+                test ${ac_cv_header_ncurses_curses_h} = yes ||
+                test ${ac_cv_header_curses_h} = yes ; then
+        CURSES_OBJS=lib/libcurses.o ; fi ;;
+esac
+
+AC_CHECK_HEADERS(sys/sysmacros.h linux/major.h linux/tty.h)
+
+ITZ_CHECK_TYPE(__u32,linux/types.h)
+if test ${itz_cv_type___u32} = yes || test ${ac_cv_type___u32} = yes ; then
+    AC_DEFINE(HAVE___U32)
+fi
+
+ITZ_SYS_ELF
+if test ${itz_cv_sys_elf} = yes && test x${ac_cv_prog_gcc} = xyes ; then
+    SHLIB=libgpm.so
+else
+    SHLIB=
+fi
+
+AC_CHECK_FUNCS(vsyslog syslog)
+AC_FUNC_ALLOCA
+
+case $with_curses in
+No|no|N|n) SHARED_LIBS=-lc ;;
+*)
+    SAVELIBS=$LIBS
+    LIBS=
+    for i in tinfo ncurses termcap termlib; do
+        if test x$LIBS = x; then
+            AC_CHECK_LIB($i, tputs)
+        else :; fi
+    done
+    TERMLIBS=$LIBS
+    LIBS=
+    for i in ncurses curses; do
+        if test x$LIBS = x; then
+            AC_CHECK_LIB($i, wgetch,,,$TERMLIBS)
+        else :; fi
+    done
+    SHARED_LIBS="$LIBS $TERMLIBS -lc"
+    LIBS=$SAVELIBS ;;
+esac    
+
+GPMXTERM=
+AC_SUBST(GPMXTERM)
+AC_SUBST(release)
+AC_SUBST(release_date)
+AC_SUBST(abi_lev)
+AC_SUBST(abi_full)
+AC_SUBST(EMACS)
+AC_SUBST(ELISP)
+AC_SUBST(SHLIB)
+AC_SUBST(PICFLAGS)
+AC_SUBST(SOLDFLAGS)
+AC_SUBST(CURSES_OBJS)
+AC_SUBST(SHARED_LIBS)
+AC_SUBST(lispdir)
+
+CPPFLAGS='-I$(srcdir) $(DEFS) -include headers/config.h -Wall -DSYSCONFDIR="\"$(sysconfdir)\"" -DSBINDIR="\"$(sbindir)\""'
+LDFLAGS='-L$(srcdir)'
+
+dnl AC_DEFINE_UNQUOTED(SYSCONFDIR,"$sysconfdir")
+dnl AC_DEFINE_UNQUOTED(SBINDIR,"$sbindir")
+AC_OUTPUT(Makefile.include Makefile doc/Makefile src/Makefile contrib/Makefile doc/doc.gpm)
