@@ -77,7 +77,8 @@ barf:
 	@echo 'This command is intended for maintainers to use; it'
 	@echo 'deletes files that may need special tools to rebuild.'
 	@echo 'If you want to continue, please press return.'
-	@read -p "Hit Ctrl+C to abort."
+	@echo -n "Hit Ctrl+C to abort."
+	@read somevar
 
 
 # who / what does need tags

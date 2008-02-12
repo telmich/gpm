@@ -1,0 +1,31 @@
+http://ftp.frugalware.org/pub/other/people/alex/upstart-mess/source/base/gpm/gpm-1.20.1-ceilf-gcc4.patch
+
+--- gpm-1.20.1/src/Makefile.in.orig	Sat Feb  1 17:15:55 2003
++++ gpm-1.20.1/src/Makefile.in	Sat Feb  1 17:23:43 2003
+@@ -70,6 +70,7 @@
+ all:	gpm lib/@SHLIB@ lib/libgpm.a $(PROG)
+ 
+ gpm:	$(GOBJ)
++	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $(GOBJ) @LIBS@ $(LIBS) -lm
+ 
+ # construct dependings of sourcefiles and link sourcefiles
+ $(DEPFILE) dep: prog/gpm-root.c
+@@ -139,13 +140,14 @@
+ 	$(YACC) $(YFLAGS) $< && mv y.tab.c prog/gpm-root.c
+ 
+ # gpm-root needs an own rule, because gpm-root.c is not in $(srcdir)
+-prog/gpm-root: prog/gpm-root.c
++prog/gpm-root: prog/gpm-root.c lib/libgpm.so
+ 	$(CC) -I. @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@.o $<
+-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.a
++	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.so
+ 
+-prog/mouse-test:	mice.o twiddler.o synaptics.o
++prog/mouse-test:	prog/mouse-test.o mice.o twiddler.o synaptics.o
++	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS) -lm
+ 
+-$(PROG):	lib/libgpm.so lib/@SHLIB@ lib/libgpm.a
++$(PROG):	lib/libgpm.so
+ 
+ # Subdirectory lib/
+ lib/libgpm.a:	$(LOBJ)
