@@ -1,9 +1,0 @@
-CVS_ADD="";
-CVS_REMOVE="";
-for a in *.gz;
-   do CVS_ADD="$CVS_ADD $a";
-   CVS_REMOVE="$CVS_REMOVE ${a%.gz}";
-done;
-cvs add $CVS_ADD
-rm $CVS_REMOVE
-cvs remove $CVS_REMOVE
