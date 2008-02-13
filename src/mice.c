@@ -135,7 +135,7 @@ static int parse_argv(argv_helper *info, int argc, char **argv)
       switch(p->type) {
          case ARGV_BOOL:
             if (*s) {
-               gpm_report(GPM_PR_ERR,GPM_MESS_OPTION_NO_ARG,option.progname,p->name,s);
+               gpm_report(GPM_PR_ERR,GPM_MESS_OPTION_NO_ARG, option.progname,p->name,s);
                errors++;
             }
             *(p->u.iptr) = p->value;

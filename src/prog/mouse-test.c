@@ -3,7 +3,7 @@
  *
  * Copyright 1995   rubini@linux.it (Alessandro Rubini)
  * Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
- * Copyright (C) 2002 Nico Schottelius <nico@schottelius.org>
+ * Copyright (C) 2002-2008 Nico Schottelius <nico-gpm2008 at schottelius.org>
  *
  * Tue,  5 Jan 1999 23:15:23 +0000, modified by James Troup <james@nocrew.org>:
  * (main): exclude devices with a minor number of 130 from
@@ -44,6 +44,7 @@
 
 #include "headers/message.h" /* to print */
 #include "headers/gpmInt.h" /* to get mouse types */
+#include "headers/daemon.h" /* FIXME: do not use that..rewrite mouse-test, anyway */
 
 #ifndef min
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -63,6 +64,8 @@ struct mouse_features mymouse = {
 
 /* and this is a workaroud */
 struct winsize win;
+/* this too */
+struct options option;
 
 struct mouse_features *which_mouse=&mymouse;
 
