@@ -1,0 +1,16 @@
+our ppc64 team hit a snag with gpm and linux headers based on 2.6 kernel:
+
+http://bugs.gentoo.org/show_bug.cgi?id=66222
+
+simple fix is to change the second '*' glob to a '+':
+-    $(SED) 's/^\(.*\)\.o\([ :]*\)/\1.o \1.lo\2/g' >> $(DEPFILE) ; done
++    $(SED) 's/^\(.*\)\.o\([ :]+\)/\1.o \1.lo\2/g' >> $(DEPFILE) ; done
+
+this hasnt caused any known regressions on any other arch that has tested gpm 
+in Gentoo (alpha/amd64/arm/hppa/ia64/mips/ppc/ppc64/sparc/x86)
+-mike
+_______________________________________________
+gpm mailing list
+gpm@lists.linux.it
+http://lists.linux.it/listinfo/gpm
+
