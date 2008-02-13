@@ -1,3 +1,7 @@
+* From 1.20.1 to 1.20.3:
+   o many cleanups
+   o etouch support
+* From 1.20.1 to 1.20.2:
 * From 1.20.0 to 1.20.1: (bugfixes/code clean)
    o synaptics ps2 touchpad support
    o code cleanup in various main files
