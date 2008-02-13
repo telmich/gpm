@@ -4,7 +4,7 @@
  *
  * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
  * Copyright (C) 1998    Ian Zimmerman <itz@rahul.net>
- * Copyright 2001        Nico Schottelius (nico@schottelius.org)
+ * Copyright 2001-2008   Nico Schottelius (nico-gpm2008 at schottelius.org)
  * 
  * xterm management is mostly by jtklehto@stekt.oulu.fi (Janne Kukonlehto)
  *
@@ -258,8 +258,10 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
             gpm_report(GPM_PR_ERR,"checking tty name failed");
             goto err;
          }   
-         /* do we really need this check ? */
-         if(strncmp(tty,option.consolename,strlen(option.consolename)-1)
+         /* do we really need these checks? */
+         if(option.consolename==NULL) goto err;
+
+         if(strncmp(tty, option.consolename, strlen(option.consolename)-1)
             || !isdigit(tty[strlen(option.consolename)-1])) {
             gpm_report(GPM_PR_ERR,"strncmp/isdigit/option.consolename failed");
             goto err;
