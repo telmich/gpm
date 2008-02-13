@@ -214,6 +214,10 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
    /* check whether we know what name the console is: what's with the lib??? */
    if(checked_con == 0) {
       option.consolename = Gpm_get_console();
+	  if (!option.console) {
+		  gpm_report(GPM_PR_ERR,"unable to open gpm console, check your /dev filesystem!\n");
+		  goto err;
+	  }
       checked_con++;
    }   
 
