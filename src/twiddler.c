@@ -136,16 +136,6 @@ struct twiddler_fun_struct {
 };
 
 
-/* The same silly function as in gpm.c 
-int open_console(const int mode)
-{
-   int fd;
-   extern struct options option;
-   if ((fd=open(option.consolename, mode)) < 0) gpm_report(GPM_PR_OOPS, GPM_MESS_OPEN, option.consolename);
-   return fd;
-} */
-
-
 /*===================================================================*/
 /*              This part deals with pushing keys                  */
 
