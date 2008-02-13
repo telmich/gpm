@@ -120,66 +120,6 @@ int opt_resize=0; /* not really an option */
  */
 /*-------------------------------------------------------------------*/
 
-/* build_argv is used for mouse initialization routines */
-static char **build_argv(char *argv0, char *str, int *argcptr, char sep)
-{
-   int argc = 1;
-   char **argv;
-   char *s;
-
-   /* argv0 is never NULL, but the extra string may well be */
-   if (str)
-      for (s=str; sep && (s = strchr(s, sep)); argc++) s++;
-   
-   argv = calloc(argc+2, sizeof(char **));
-   if (!argv) gpm_report(GPM_PR_OOPS,GPM_MESS_ALLOC_FAILED);
-   argv[0] = argv0;
-
-   if (!str) {
-      *argcptr = argc; /* 1 */
-      return argv;
-   }
-   /* else, add arguments */
-   s = argv[1] = strdup(str);
-   argc = 2; /* first to fill */
-
-   /* ok, now split: the first one is in place, and s is the whole string */
-   for ( ; sep && (s = strchr(s, sep)) ; argc++) {
-      *s = '\0';
-      s++;
-      argv[argc] = s;
-   }
-   *argcptr = argc;
-   return argv;
-}
-
-/*-------------------------------------------------------------------*/
-/* The old console option is removed. We are taking stderr now
- * In the next update there should also be support for syslog
- ********************************************************************/
-
-static inline int open_console(const int mode)
-{
-   int fd;
-   struct stat sb;
-   int maj, twelve=12;
-   struct serial_struct si;
-
-   fd = open(option.consolename, mode);
-   if (fd != -1) {
-      fstat(fd, &sb);
-      maj = major(sb.st_rdev);
-      if (maj != 4 && (maj < 136 || maj > 143)) {
-          if (ioctl (fd, TIOCLINUX, &twelve) < 0) {
-              if (si.line > 0)
-                  gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_SERIALCON);
-          }
-      }
-   return fd;
-   } else
-   gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
-}
-
 /*-------------------------------------------------------------------*/
 static inline int wait_text(int *fdptr)
 {
