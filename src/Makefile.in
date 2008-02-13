@@ -1,9 +1,9 @@
 #			-*-makefile-*- (gpm/src)
 #
-# Copyright 1994,1997  rubini@linux.it
-# Copyright 1997       dickey@clark.net
-# Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
-# Copyright (C) 2001,2002 Nico Schottelius <nico@schottelius.org>
+# Copyright 1994,1997  		rubini@linux.it
+# Copyright 1997       		dickey@clark.net
+# Copyright (C) 1998 		Ian Zimmerman <itz@rahul.net>
+# Copyright (C) 2001-2008 	Nico Schottelius <nico-gpm2008 at schottelius.org>
 #
 
 srcdir = @srcdir@
@@ -13,7 +13,7 @@ include $(top_builddir)/Makefile.include
 
 # Main portion: regular build rules
 
-GSRC = main.c gpn.c mice.c special.c twiddler.c synaptics.c 	\
+GSRC = daemon/main.c gpn.c mice.c special.c twiddler.c synaptics.c 	\
        daemon/startup.c daemon/server_tools.c 						\
        daemon/open_console.c daemon/build_argv.c 					\
 		 daemon/gpm.c daemon/gpm-killed.c
@@ -147,7 +147,7 @@ prog/gpm-root: prog/gpm-root.c lib/libgpm.so
 	$(CC) -I. @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@.o $<
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.so
 
-prog/mouse-test:	prog/mouse-test.o mice.o twiddler.o synaptics.o
+prog/mouse-test:	prog/mouse-test.o mice.o twiddler.o synaptics.o prog/open_console.o
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS) -lm
 
 $(PROG):	lib/libgpm.so

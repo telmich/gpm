@@ -31,7 +31,7 @@
 #include "headers/message.h"        /* messaging in gpm  */
 #include "headers/daemon.h"         /* daemon internals  */
 
-static inline int open_console(const int mode)
+int open_console(const int mode)
 {
    int                  fd;
    int                  maj;

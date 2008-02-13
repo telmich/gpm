@@ -48,6 +48,9 @@ extern struct options option; /* one should be enough for us */
  */
 
 void gpm_killed(int signo);
+int open_console(const int mode);
+char **build_argv(char *argv0, char *str, int *argcptr, char sep);
+
 
 
 #endif
