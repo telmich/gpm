@@ -13,8 +13,9 @@ include $(top_builddir)/Makefile.include
 
 # Main portion: regular build rules
 
-GSRC = main.c gpm.c gpn.c mice.c special.c twiddler.c synaptics.c \
-       startup.c server_tools.c
+GSRC = main.c gpn.c mice.c special.c twiddler.c synaptics.c \
+       daemon/startup.c daemon/server_tools.c \
+		 daemon/gpm.c daemon/gpm-killed.c
 
 GOBJ = $(GSRC:.c=.o) report.o tools.o
 

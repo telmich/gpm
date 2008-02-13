@@ -4,7 +4,7 @@
  *       - njak ... someone should optimize this code and remove double
  *         fragments.... (self)
  *
- * Copyright (c) 2001,2002   Nico Schottelius <nico@schottelius.org>
+ * Copyright (c) 2001-2008   Nico Schottelius <nico-gpm2008 at schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 
 #include "headers/gpmInt.h"
 #include "headers/message.h"
+#include "headers/daemon.h"   /* FIXME: this is wrong; we need report fpr lib und daemon */
 
 /*
  * gpm_report

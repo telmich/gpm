@@ -76,6 +76,8 @@
 #include "headers/synaptics.h"
 #include "headers/message.h"
 
+#include "headers/daemon.h"
+
 /*========================================================================*/
 /* Parsing argv: helper dats struct function (should they get elsewhere?) */
 /*========================================================================*/

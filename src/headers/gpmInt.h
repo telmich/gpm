@@ -215,20 +215,6 @@ struct micetab {
    char *options;
 };  
 
-struct options {
-   int autodetect;            /* -u [aUtodetect..'A' is not available] */
-   int no_mice;               /* number of mice */
-   int repeater;              /* repeat data */
-   char *repeater_type;       /* repeat data as which mouse type */
-   int run_status;            /* startup/daemon/debug */
-   char *progname;            /* hopefully gpm ;) */
-   struct micetab *micelist;  /* mice and their options */
-   char *consolename;         /* /dev/tty0 || /dev/vc/0 */
-};
-
-/* global variables */
-struct options option;        /* one should be enough for us */
-
 /* new variables </CLEAN> */
 
 

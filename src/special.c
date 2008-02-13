@@ -37,6 +37,8 @@
 #include <sys/param.h>
 
 #include "headers/gpmInt.h"
+#include "headers/daemon.h"         /* daemon internals */
+
 
 /*
  * This function is only called at button press, to avoid unnecessary

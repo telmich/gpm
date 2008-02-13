@@ -56,6 +56,7 @@
 #include "headers/message.h"
 #include "headers/twiddler.h"
 
+#include "headers/daemon.h"
 
 /* 
  * Each table is made up of 256 entries, as these are the possible chords

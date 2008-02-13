@@ -34,6 +34,7 @@
 
 #include "headers/gpmInt.h"
 #include "headers/message.h"
+#include "headers/daemon.h"
 
 /* what todo atexit */
 static void gpm_exited(void)
@@ -45,10 +46,7 @@ static void gpm_exited(void)
 
 void startup(int argc, char **argv)
 {
-   extern struct options option;
-   extern int errno;
-
-   int i,opt;
+   int i, opt;
 
    static struct {
       char *in;

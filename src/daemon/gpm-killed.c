@@ -21,14 +21,23 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
-static void gpm_killed(int signo)
+#include <signal.h>                 /* SIG*              */
+#include <stdlib.h>                 /* exit()            */
+#include <unistd.h>                 /* getpid()          */
+
+#include "headers/message.h"        /* messaging in gpm */
+#include "headers/daemon.h"         /* daemon internals */
+
+void gpm_killed(int signo)
 {
    if(signo == SIGWINCH) {
-      gpm_report(GPM_PR_WARN,GPM_MESS_RESIZING, option.progname, getpid());
+      gpm_report(GPM_PR_WARN, GPM_MESS_RESIZING, option.progname, getpid());
       opt_resize++;
       return;
    }
-   if(signo==SIGUSR1)
+   if(signo==SIGUSR1) {
      gpm_report(GPM_PR_WARN,GPM_MESS_KILLED_BY, option.progname, getpid(), option.progname);
+   }
+
    exit(0);
 }

@@ -192,11 +192,11 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
    char *tty = NULL;
    char *term = NULL;
    int i;
-   static int checked_con = 0;
    struct sockaddr_un addr;
    struct winsize win;
    Gpm_Stst *new = NULL;
    char* sock_name = 0;
+   static char *consolename = NULL;
 
    gpm_report(GPM_PR_DEBUG,"VC: %d",flag);
 
@@ -212,13 +212,12 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
    /*....................................... No xterm, go on */
 
    /* check whether we know what name the console is: what's with the lib??? */
-   if(checked_con == 0) {
-      option.consolename = Gpm_get_console();
-	  if (!option.console) {
-		  gpm_report(GPM_PR_ERR,"unable to open gpm console, check your /dev filesystem!\n");
-		  goto err;
-	  }
-      checked_con++;
+   if(!consolename) {
+      consolename = Gpm_get_console();
+	   if(!consolename) {
+		   gpm_report(GPM_PR_ERR,"unable to open gpm console, check your /dev filesystem!\n");
+		   goto err;
+	   }
    }   
 
    /*
@@ -246,10 +245,10 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
       conn->vc=0;                 /* default handler */
       if (flag > 0) {  /* forced vc number */
          conn->vc=flag;
-         if((tty = malloc(strlen(option.consolename)+Gpm_cnt_digits(flag))) == NULL)
+         if((tty = malloc(strlen(consolename) + Gpm_cnt_digits(flag))) == NULL)
             gpm_report(GPM_PR_OOPS,GPM_MESS_NO_MEM);
-         memcpy(tty,option.consolename,strlen(option.consolename)-1);
-         sprintf(&tty[strlen(option.consolename)-1],"%i",flag);
+         memcpy(tty, consolename, strlen(consolename)-1);
+         sprintf(&tty[strlen(consolename) - 1], "%i", flag);
       } else { /* use your current vc */ 
          if (isatty(0)) tty = ttyname(0);             /* stdin */
          if (!tty && isatty(1)) tty = ttyname(1);     /* stdout */
@@ -258,16 +257,8 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
             gpm_report(GPM_PR_ERR,"checking tty name failed");
             goto err;
          }   
-         /* do we really need these checks? */
-         if(option.consolename==NULL) goto err;
-
-         if(strncmp(tty, option.consolename, strlen(option.consolename)-1)
-            || !isdigit(tty[strlen(option.consolename)-1])) {
-            gpm_report(GPM_PR_ERR,"strncmp/isdigit/option.consolename failed");
-            goto err;
-         }
           
-         conn->vc=atoi(&tty[strlen(option.consolename)-1]);
+         conn->vc=atoi(&tty[strlen(consolename)-1]);
       }
 
       if (gpm_consolefd == -1)

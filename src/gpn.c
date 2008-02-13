@@ -56,6 +56,8 @@ typedef unsigned int __u32;
 #include "headers/gpmInt.h"
 #include "headers/gpm.h"
 
+#include "headers/daemon.h"
+
 extern int errno;
 
 /*===================================================================*/

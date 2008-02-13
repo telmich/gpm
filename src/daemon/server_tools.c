@@ -3,7 +3,7 @@
  *
  * *several tools only needed by the server*
  *
- * Copyright (c) 2002         Nico Schottelius <nico@schottelius.org>
+ * Copyright (c) 2002-2008    Nico Schottelius <nico-gpm2008 at schottelius.org>
  * 
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -23,6 +23,7 @@
 
 #include "headers/gpmInt.h"
 #include "headers/message.h"
+#include "headers/daemon.h"
 
 #include <stdlib.h> /* malloc() */
 
