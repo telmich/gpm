@@ -38,6 +38,7 @@
 #include <sys/un.h>        /* struct sockaddr_un */
 
 #include <linux/vt.h>      /* VT_GETSTATE */
+#include <linux/serial.h>  /* for serial console check */
 #include <sys/kd.h>        /* KDGETMODE */
 #include <termios.h>       /* winsize */
 
@@ -151,10 +152,23 @@ static char **build_argv(char *argv0, char *str, int *argcptr, char sep)
 static inline int open_console(const int mode)
 {
    int fd;
+   struct stat sb;
+   int maj, twelve=12;
+   struct serial_struct si;
 
-   if ((fd=open(option.consolename, mode)) < 0)
-      gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
+   fd = open(option.consolename, mode);
+   if (fd != -1) {
+      fstat(fd, &sb);
+      maj = major(sb.st_rdev);
+      if (maj != 4 && (maj < 136 || maj > 143)) {
+          if (ioctl (fd, TIOCLINUX, &twelve) < 0) {
+              if (si.line > 0)
+                  gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_SERIALCON);
+          }
+      }
    return fd;
+   } else
+   gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
 }
 
 /*-------------------------------------------------------------------*/

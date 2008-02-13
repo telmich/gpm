@@ -1,0 +1,47 @@
+here's a patch which detects & aborts if gpm is run on a serial console
+
+--- src/headers/message.h
++++ src/headers/message.h
+@@ -125,2 +125,3 @@
+ #define GPM_MESS_OPEN_CON           "Opening console failed."
++#define GPM_MESS_OPEN_SERIALCON     "We seem to be on a serial console."
+ #define GPM_MESS_READ_FIRST         "Error in read()ing first: %s"
+
+--- ./src/gpm.c.org Sat Feb 23 16:42:23 2002
++++ ./src/gpm.c Tue Mar 12 00:20:19 2002
+@@ -38,2 +38,3 @@
+ #include <linux/vt.h>      /* VT_GETSTATE */
++#include <linux/serial.h>  /* for serial console check */
+ #include <sys/kd.h>        /* KDGETMODE */
+@@ -178,8 +154,21 @@
+ static inline int open_console(const int mode)
+ {
+    int fd;
+-
+-   if ((fd=open(option.consolename, mode)) < 0)
+-      gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
++   struct stat sb;
++   int maj, twelve=12;
++   struct serial_struct si;
++
++   fd = open(option.consolename, mode);
++   if (fd != -1) {
++      fstat(fd, &sb);
++      maj = major(sb.st_rdev);
++      if (maj != 4 && (maj < 136 || maj > 143)) {
++          if (ioctl (fd, TIOCLINUX, &twelve) < 0) {
++              if (si.line > 0)
++                  gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_SERIALCON);
++          }
++      }
+    return fd;
++   } else
++   gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
+ }
+
+-mike
+_______________________________________________
+gpm mailing list
+gpm@lists.linux.it
+http://lists.linux.it/listinfo/gpm
+

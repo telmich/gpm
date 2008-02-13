@@ -132,6 +132,7 @@
 #define GPM_MESS_NOTWRITE           "Can you write to %s?"
 #define GPM_MESS_WRITE_ERR          "write(): %s"
 #define GPM_MESS_OPEN_CON           "Opening console failed."
+#define GPM_MESS_OPEN_SERIALCON     "We seem to be on a serial console."
 #define GPM_MESS_READ_FIRST         "Error in read()ing first: %s"
 #define GPM_MESS_READ_REST          "Error in read()ing rest: %s"
 #define GPM_MESS_REMOVE_FILES       "Removing files %s and %s"
