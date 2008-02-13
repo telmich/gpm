@@ -1,10 +1,10 @@
 /*
- * general purpose mouse support for Linux
+ * general purpose mouse support
  *
  * Copyright (C) 1993        Andreq Haylett <ajh@gec-mrc.co.uk>
  * Copyright (C) 1994-1999   Alessandro Rubini <rubini@linux.it>
- * Copyright (C) 1998         Ian Zimmerman <itz@rahul.net>
- * Copyright (c) 2001,2002   Nico Schottelius <nico@schottelius.org>
+ * Copyright (C) 1998        Ian Zimmerman <itz@rahul.net>
+ * Copyright (c) 2001-2008   Nico Schottelius <nico-gpm2008 at schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -42,8 +42,10 @@
 #include <sys/kd.h>        /* KDGETMODE */
 #include <termios.h>       /* winsize */
 
-#include "headers/gpmInt.h"
+#include "headers/gpmInt.h"   /* old daemon header */
 #include "headers/message.h"
+
+#include "headers/daemon.h"   /* clean daemon header */
 
 /* who the f*** runs gpm without glibc? doesn't have dietlibc __socklent_t? */
 #if !defined(__GLIBC__)
@@ -54,9 +56,10 @@
 #define max(a,b) ((a)>(b) ? (a) : (b))
 #endif
 
-extern int errno;
+/* global variables */
+struct options option;        /* one should be enough for us */
 
-static void gpm_killed(int);
+extern int errno;
 
 /*
  * all the values duplicated for dual-mouse operation are
@@ -88,7 +91,6 @@ char *opt_special=NULL; /* special commands, like reboot or such */
 int opt_rawrep=0;
 Gpm_Type *repeated_type=0;
 
-static int opt_resize=0; /* not really an option */
 struct winsize win;
 int maxx, maxy;
 int fifofd=-1;
@@ -104,6 +106,13 @@ time_t opt_age_limit = 0;
 /* argc and argv for mice initialization */
 static int mouse_argc[3]; /* 0 for default (unused) and two mice */
 static char **mouse_argv[3]; /* 0 for default (unused) and two mice */
+
+
+/***********************************************************************
+ * Clean global variables
+ */
+int opt_resize=0; /* not really an option */
+
 
 /*===================================================================*/
 /*
@@ -915,19 +924,6 @@ void get_console_size(Gpm_Event *ePtr)
      opt_scaley=opt_scale*50*maxx/80/maxy;
      gpm_report(GPM_PR_DEBUG,GPM_MESS_X_Y_VAL,opt_scale,opt_scaley);
    }
-}
-
-/*-------------------------------------------------------------------*/
-static void gpm_killed(int signo)
-{
-   if(signo==SIGWINCH) {
-      gpm_report(GPM_PR_WARN,GPM_MESS_RESIZING, option.progname, getpid());
-      opt_resize++;
-      return;
-   }
-   if (signo==SIGUSR1)
-     gpm_report(GPM_PR_WARN,GPM_MESS_KILLED_BY,option.progname, getpid(),option.progname);
-   exit(0);
 }
 
 /*-------------------------------------------------------------------*/
