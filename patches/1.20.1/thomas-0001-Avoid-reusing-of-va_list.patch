@@ -1,0 +1,131 @@
+From 1d829d74e667262300a942b70ae0965578c86854 Mon Sep 17 00:00:00 2001
+From: Tomas Janousek <tjanouse@redhat.com>
+Date: Wed, 25 Jul 2007 11:33:40 +0200
+Subject: [PATCH] Avoid reusing of va_list
+
+This fixes https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=246219
+(gpm uses variable argument lists incorrectly)
+
+Signed-off-by: Tomas Janousek <tjanouse@redhat.com>
+---
+ src/report.c |   33 +++++++++++++++++++++++----------
+ 1 files changed, 23 insertions(+), 10 deletions(-)
+
+diff --git a/src/report.c b/src/report.c
+index 9bfb9d9..80be414 100644
+--- a/src/report.c
++++ b/src/report.c
+@@ -72,9 +72,16 @@
+ void gpm_report(int line, char *file, int stat, char *text, ... )
+ {
+    FILE *console = NULL;
+-   va_list ap;
++   va_list ap, ap3;
++#ifdef HAVE_VSYSLOG
++   va_list ap2;
++#endif
+ 
+    va_start(ap,text);
++   va_copy(ap3, ap);
++#ifdef HAVE_VSYSLOG
++   va_copy(ap2, ap);
++#endif
+ 
+    switch(option.run_status) {
+       /******************** STARTUP *****************/
+@@ -83,7 +90,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
+             case GPM_STAT_INFO:
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_INFO | LOG_USER, GPM_STRING_INFO);
+-               vsyslog(LOG_INFO | LOG_USER, text, ap);
++               vsyslog(LOG_INFO | LOG_USER, text, ap2);
+ #endif               
+                fprintf(stderr,GPM_STRING_INFO);
+                vfprintf(stderr,text,ap);
+@@ -93,7 +100,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
+             case GPM_STAT_WARN:
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_DAEMON | LOG_WARNING, GPM_STRING_WARN);
+-               vsyslog(LOG_DAEMON | LOG_WARNING, text, ap);
++               vsyslog(LOG_DAEMON | LOG_WARNING, text, ap2);
+ #endif               
+                fprintf(stderr,GPM_STRING_WARN);
+                vfprintf(stderr,text,ap);
+@@ -103,7 +110,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
+             case GPM_STAT_ERR:
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_ERR);
+-               vsyslog(LOG_DAEMON | LOG_ERR, text, ap);
++               vsyslog(LOG_DAEMON | LOG_ERR, text, ap2);
+ #endif               
+                fprintf(stderr,GPM_STRING_ERR);
+                vfprintf(stderr,text,ap);
+@@ -113,7 +120,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
+             case GPM_STAT_OOPS:
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_OOPS);
+-               vsyslog(LOG_DAEMON | LOG_ERR, text, ap);
++               vsyslog(LOG_DAEMON | LOG_ERR, text, ap2);
+ #endif               
+                fprintf(stderr,GPM_STRING_OOPS);
+                vfprintf(stderr,text,ap);
+@@ -130,14 +137,14 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
+             case GPM_STAT_INFO:
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_INFO | LOG_USER, GPM_STRING_INFO);
+-               vsyslog(LOG_INFO | LOG_USER, text, ap);
++               vsyslog(LOG_INFO | LOG_USER, text, ap2);
+ #endif
+                break;
+ 
+             case GPM_STAT_WARN:
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_DAEMON | LOG_WARNING, GPM_STRING_WARN);
+-               vsyslog(LOG_DAEMON | LOG_WARNING, text, ap);
++               vsyslog(LOG_DAEMON | LOG_WARNING, text, ap2);
+ #endif               
+                if((console = fopen(GPM_SYS_CONSOLE,"a")) != NULL) {
+                   fprintf(console,GPM_STRING_WARN);
+@@ -150,7 +157,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
+             case GPM_STAT_ERR:
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_ERR);
+-               vsyslog(LOG_DAEMON | LOG_ERR, text, ap);
++               vsyslog(LOG_DAEMON | LOG_ERR, text, ap2);
+ #endif               
+                if((console = fopen(GPM_SYS_CONSOLE,"a")) != NULL) {
+                   fprintf(console,GPM_STRING_ERR);
+@@ -161,7 +168,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
+ 
+                if((console = fopen(option.consolename,"a")) != NULL) {
+                   fprintf(console,GPM_STRING_ERR);
+-                  vfprintf(console,text,ap);
++                  vfprintf(console,text,ap3);
+                   fprintf(console,"\n");
+                   fclose(console);
+                }
+@@ -170,7 +177,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
+             case GPM_STAT_OOPS:
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_OOPS);
+-               vsyslog(LOG_DAEMON | LOG_ERR, text, ap);
++               vsyslog(LOG_DAEMON | LOG_ERR, text, ap2);
+ #endif               
+                fprintf(stderr,GPM_STRING_OOPS);
+                vfprintf(stderr,text,ap);
+@@ -208,6 +215,12 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
+ 
+          break;
+    } /* switch for current modus */
++
++   va_end(ap);
++   va_end(ap3);
++#ifdef HAVE_VSYSLOG
++   va_end(ap2);
++#endif
+ } /* gpm_report */   
+ 
+ 
+-- 
+1.5.2.2
+
