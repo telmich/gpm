@@ -1,0 +1,29 @@
+This could be the home of the new driver structure in gpm2.
+
+Some ideas:
+
+- clean seperation: one directory per driver
+- shared objects: make each driver being a shared object
+- and put those objects into libexec?
+- and make etc/gpm2/enabled_drivers a list of drivers to be enabled
+- each driver has the following functions:
+   * int gpm2_dr_<name>_detect(struct gpm2_dr_info *): detect whether a supported mouse is connected
+      returns:
+         -1: cannot detect mice
+         0: no mouse detected
+         1: mouse detected
+   * int gpm2_dr_<name>_init(struct gpm2_dr_info *): init mouse
+      returns:
+         0: mouse init failed
+         1: mouse init success
+   * gpm2_dr_<name>_handle(struct gpm2_dr_info *): the main function that handles the mouse
+      --> perhaps need to pass info from gpm2_dr_<name>_init to gpm2_dr_<name>_handle
+
+- gpm2 passes a structure to all functions:
+   struct gpm2_dr_info {
+      char *dev;
+      char *opts;
+   }
+
+- gpm2 creates a fork for each mouse connected
+- gpm2 forks die on sigterm (normally issued by gpm2)
