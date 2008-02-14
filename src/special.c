@@ -157,7 +157,9 @@ int processSpecial(Gpm_Event *event)
       open(GPM_NULL_DEV,O_RDONLY); /* stdin  */
       open(option.consolename,O_WRONLY); /* stdout */
       dup(1);                     /* stderr */
-      for (i=3;i<OPEN_MAX; i++) close(i);
+      int open_max = sysconf(_SC_OPEN_MAX);
+      if (open_max == -1) open_max = 1024;
+      for (i=3;i<open_max; i++) close(i);
       execl("/bin/sh","sh","-c",command,(char *)NULL);
       exit(1); /* shouldn't happen */
       
