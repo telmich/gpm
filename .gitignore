@@ -1,5 +1,3 @@
-acconfig.h
-aclocal.m4
 *.o
 *.a
 configure
