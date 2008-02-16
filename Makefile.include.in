@@ -48,8 +48,8 @@ DIFF              = @DIFF@
 TEX               = @TEX@
 TEXINDEX          = @TEXINDEX@
 DVIPS             = @DVIPS@
-MAKEINFO          = @MAKEINFO@ --no-split
-TEXI2HTML         = texi2html -monolithic
+MAKEINFO          = @MAKEINFO@
+TEXI2HTML         = texi2html
 STRIP             = -s
 
 AR                = ar

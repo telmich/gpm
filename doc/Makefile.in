@@ -36,7 +36,7 @@ all: $(srcdir)/gpm.info gpm.man
 
 # HTML (texi2html)
 %.html: %.texinfo
-	if [ $(TEXI2HTML) != "no" ]; then $(TEXI2HTML) $< ;fi
+	if [ $(TEXI2HTML) != "no" ]; then $(TEXI2HTML) -monolithic $< ;fi
 
 # TEXINFO (-)
 %.texinfo: doc.% Makefile
@@ -50,7 +50,7 @@ all: $(srcdir)/gpm.info gpm.man
 
 # INFO (makeinfo)
 %.info: %.texinfo
-	if [ "$(MAKEINFO)" != "no" ]; then $(MAKEINFO) $< -o $@; fi
+	if [ "$(MAKEINFO)" != "no" ]; then $(MAKEINFO) --no-split $< -o $@; fi
 
 # TXT (-)
 %.txt: %.info
