@@ -112,6 +112,6 @@ time_t opt_age_limit = 0;
 int opt_resize=0; /* not really an option */
 
 
-static int statusC=0; /* clicks */
+int  statusC = 0; /* clicks */
 void get_console_size(Gpm_Event *ePtr);
 
