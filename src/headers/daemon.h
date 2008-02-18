@@ -56,5 +56,8 @@ int open_console(const int mode);
 char **build_argv(char *argv0, char *str, int *argcptr, char sep);
 int wait_text(int *fdptr);
 
+void selection_copy(int x1, int y1, int x2, int y2, int mode);
+void selection_paste(void);
+
 
 #endif

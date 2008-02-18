@@ -21,6 +21,7 @@
 
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
+#include "headers/gpmInt.h"         /* daemon internals */
 
 /*-------------------------------------------------------------------*/
 static  inline int do_selection(Gpm_Event *event)  /* returns 0, always */
