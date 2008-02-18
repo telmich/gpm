@@ -64,6 +64,7 @@ struct options option;        /* one should be enough for us */
 int mouse_argc[3]; /* 0 for default (unused) and two mice */
 char **mouse_argv[3]; /* 0 for default (unused) and two mice */
 
+int opt_aged = 0;
 
 /*
  * all the values duplicated for dual-mouse operation are
@@ -90,7 +91,7 @@ char *opt_lut=DEF_LUT;
 int opt_test=DEF_TEST;
 int opt_ptrdrag=DEF_PTRDRAG;
 int opt_double=0;
-int opt_aged = 0;
+
 char *opt_special=NULL; /* special commands, like reboot or such */
 int opt_rawrep=0;
 Gpm_Type *repeated_type=0;

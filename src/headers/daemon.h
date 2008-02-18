@@ -44,6 +44,8 @@ extern int              opt_resize;       /* not really an option          */
 extern struct options   option;           /* one should be enough for us   */
 extern int              mouse_argc[3];    /* 0 for default (unused)        */
 extern char           **mouse_argv[3];    /* and two mice                  */
+extern int              opt_aged;
+
 
 /*************************************************************************
  * Functions

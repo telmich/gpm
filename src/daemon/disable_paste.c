@@ -22,7 +22,7 @@
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 
-static void disable_paste(int vc)
+void disable_paste(int vc)
 {
    opt_aged++;
    gpm_report(GPM_PR_INFO,GPM_MESS_DISABLE_PASTE,vc);
