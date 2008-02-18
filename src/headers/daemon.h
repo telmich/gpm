@@ -40,8 +40,10 @@ struct options {
  * Global variables
  */
 
-extern int opt_resize;        /* not really an option */
-extern struct options option; /* one should be enough for us */
+extern int              opt_resize;       /* not really an option          */
+extern struct options   option;           /* one should be enough for us   */
+extern int              mouse_argc[3];    /* 0 for default (unused)        */
+extern char           **mouse_argv[3];    /* and two mice                  */
 
 /*************************************************************************
  * Functions
@@ -50,7 +52,7 @@ extern struct options option; /* one should be enough for us */
 void gpm_killed(int signo);
 int open_console(const int mode);
 char **build_argv(char *argv0, char *str, int *argcptr, char sep);
-
+int wait_text(int *fdptr);
 
 
 #endif

@@ -59,7 +59,11 @@
 /* global variables */
 struct options option;        /* one should be enough for us */
 
-extern int errno;
+/* FIXME: BRAINDEAD..ok not really, but got to leave anyway... */
+/* argc and argv for mice initialization */
+int mouse_argc[3]; /* 0 for default (unused) and two mice */
+char **mouse_argv[3]; /* 0 for default (unused) and two mice */
+
 
 /*
  * all the values duplicated for dual-mouse operation are
@@ -102,11 +106,6 @@ fd_set selSet, readySet, connSet;
 time_t last_selection_time;
 time_t opt_age_limit = 0;
 
-/* BRAINDEAD..ok not really, but got to leave anyway... FIXME */
-/* argc and argv for mice initialization */
-static int mouse_argc[3]; /* 0 for default (unused) and two mice */
-static char **mouse_argv[3]; /* 0 for default (unused) and two mice */
-
 
 /***********************************************************************
  * Clean global variables
@@ -120,33 +119,6 @@ int opt_resize=0; /* not really an option */
  */
 /*-------------------------------------------------------------------*/
 
-/*-------------------------------------------------------------------*/
-static inline int wait_text(int *fdptr)
-{
-   int fd;
-   int kd_mode;
-
-   close(*fdptr);
-   do
-   {
-      sleep(2);
-      fd = open_console(O_RDONLY);
-      if (ioctl(fd, KDGETMODE, &kd_mode)<0)
-         gpm_report(GPM_PR_OOPS,GPM_MESS_IOCTL_KDGETMODE);
-      close(fd);
-   }
-   while (kd_mode != KD_TEXT) ;
-
-   /* reopen, reinit (the function is only used if we have one mouse device) */
-   if ((*fdptr=open(opt_dev,O_RDWR))<0)
-      gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN,opt_dev);
-   if (m_type->init)
-      m_type=(m_type->init)(*fdptr, m_type->flags, m_type, mouse_argc[1],
-              mouse_argv[1]);
-   return (1);
-}
-
-/*-------------------------------------------------------------------*/
 static inline void selection_copy(int x1, int y1, int x2, int y2, int mode)
 {
 /*
