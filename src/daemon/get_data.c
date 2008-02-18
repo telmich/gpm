@@ -19,13 +19,16 @@
  *
  ********/
 
+#include <unistd.h>                 /* read             */
+
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
+#include "headers/gpmInt.h"         /* daemon internals */
 
 /*-------------------------------------------------------------------*
  * This  was inline, and incurred in a compiler bug (2.7.0)
  *-------------------------------------------------------------------*/
-static int get_data(Gpm_Connect *where, int whence)
+int get_data(Gpm_Connect *where, int whence)
 {
    static int i;
 

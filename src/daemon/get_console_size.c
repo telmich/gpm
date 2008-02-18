@@ -19,8 +19,12 @@
  *
  ********/
 
+#include <unistd.h>                 /* close             */
+#include <fcntl.h>                  /* open              */
+
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
+#include "headers/gpmInt.h"         /* daemon internals */
 
 void get_console_size(Gpm_Event *ePtr)
 {

@@ -45,6 +45,7 @@ extern struct options   option;           /* one should be enough for us   */
 extern int              mouse_argc[3];    /* 0 for default (unused)        */
 extern char           **mouse_argv[3];    /* and two mice                  */
 extern int              opt_aged;
+extern int        statusX,statusY,statusB;
 
 
 /*************************************************************************

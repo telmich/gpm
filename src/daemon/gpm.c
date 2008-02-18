@@ -65,6 +65,7 @@ int mouse_argc[3]; /* 0 for default (unused) and two mice */
 char **mouse_argv[3]; /* 0 for default (unused) and two mice */
 
 int opt_aged = 0;
+int statusX,statusY,statusB; /* to return info */
 
 /*
  * all the values duplicated for dual-mouse operation are
@@ -111,7 +112,6 @@ time_t opt_age_limit = 0;
 int opt_resize=0; /* not really an option */
 
 
-static int statusX,statusY,statusB; /* to return info */
 static int statusC=0; /* clicks */
 void get_console_size(Gpm_Event *ePtr);
 
