@@ -13,11 +13,14 @@ include $(top_builddir)/Makefile.include
 
 # Main portion: regular build rules
 
-GSRC = daemon/main.c gpn.c mice.c special.c twiddler.c synaptics.c 	\
-       daemon/startup.c daemon/server_tools.c 								\
-       daemon/open_console.c daemon/build_argv.c 							\
-       daemon/wait_text.c															\
-		 daemon/gpm.c daemon/gpm-killed.c
+GSRC = gpn.c mice.c special.c twiddler.c synaptics.c 									\
+		daemon/build_argv.c daemon/disable_paste.c daemon/do_client.c				\
+		daemon/do_selection.c daemon/get_console_size.c daemon/get_data.c			\
+		daemon/getmousedata.c daemon/gpm.c daemon/gpm-killed.c						\
+		daemon/header.c daemon/main.c daemon/old_main.c									\
+		daemon/open_console.c daemon/processconn.c daemon/processmouse.c			\
+		daemon/processrequest.c daemon/selection_copy.c daemon/selection_paste.c\
+		daemon/server_tools.c daemon/startup.c daemon/wait_text.c
 
 
 GOBJ = $(GSRC:.c=.o) report.o tools.o
