@@ -19,12 +19,15 @@
  *
  ********/
 
+#include <unistd.h>                 /* write             */
+
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
+#include "headers/gpmInt.h"         /* daemon internals */
 
 /*-------------------------------------------------------------------*/
 /* returns 0 if the event has not been processed, and 1 if it has */
-static inline int do_client(Gpm_Cinfo *cinfo, Gpm_Event *event)
+int do_client(Gpm_Cinfo *cinfo, Gpm_Event *event)
 {
    Gpm_Connect info=cinfo->data;
    int fd=cinfo->fd;
