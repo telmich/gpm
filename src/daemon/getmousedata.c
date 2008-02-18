@@ -19,14 +19,21 @@
  *
  ********/
 
+#include <errno.h>                  /* guess what        */
+#include <unistd.h>                 /* read              */
+#include <stdlib.h>                 /* exit              */
+#include <string.h>                 /* strerror          */
+#include <linux/kd.h>               /* KD*               */
+
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
+#include "headers/gpmInt.h"         /* daemon internals */
 
 /*-------------------------------------------------------------------
  * fetch the actual device data from the mouse device, dependent on
  * what Gpm_Type is being passed.
  *-------------------------------------------------------------------*/
-static inline char *getMouseData(int fd, Gpm_Type *type, int kd_mode)
+char *getMouseData(int fd, Gpm_Type *type, int kd_mode)
 {
    static unsigned char data[32]; /* quite a big margin :) */
    char *edata=data+type->packetlen;
