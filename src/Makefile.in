@@ -13,7 +13,7 @@ include $(top_builddir)/Makefile.include
 
 # Main portion: regular build rules
 
-GSRC = gpn.c mice.c special.c twiddler.c synaptics.c 									\
+GSRC = mice.c special.c twiddler.c synaptics.c 									\
 		daemon/build_argv.c daemon/disable_paste.c daemon/do_client.c				\
 		daemon/do_selection.c daemon/get_console_size.c daemon/get_data.c			\
 		daemon/getmousedata.c daemon/gpm.c daemon/gpm-killed.c						\

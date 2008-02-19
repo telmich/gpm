@@ -22,4 +22,65 @@
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 
+/*****************************************************************************
+ * Check the command line and / or set the appropriate variables
+ * Can't believe it, today cmdline() really does what the name tries to say
+ *****************************************************************************/
+void cmdline(int argc, char **argv)
+{
+   extern struct options option;
+   char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:TuvV::23";
+   int  opt;
 
+   /* initialize for the dual mouse */ 
+   mouse_table[2]=mouse_table[1]=mouse_table[0]; /* copy defaults */
+   which_mouse = mouse_table+1; /* use the first */
+
+   while ((opt = getopt(argc, argv, options)) != -1) {
+      switch (opt) {
+         case 'a': opt_accel = atoi(optarg);             break;
+         case 'A': opt_aged++;
+                   if (optarg)
+                     opt_age_limit = atoi(optarg);       break;
+         case 'b': opt_baud = atoi(optarg);              break;
+         case 'B': opt_sequence = optarg;                break;
+         case 'd': opt_delta = atoi(optarg);             break;
+         case 'D': option.run_status = GPM_RUN_DEBUG;    break;
+         case 'g': opt_glidepoint_tap=atoi(optarg);      break;
+         case 'h': exit(usage(NULL));
+         case 'i': opt_time=atoi(optarg);                break;
+         case 'k': check_kill();                         break;
+         case 'l': opt_lut = optarg;                     break;
+         case 'm': add_mouse(GPM_ADD_DEVICE,optarg);     
+                   opt_dev = optarg;                     break; /* GO AWAY!*/
+         case 'M': opt_double++; option.repeater++;
+            if (option.repeater_type == 0)
+               option.repeater_type = "msc";
+            which_mouse=mouse_table+2;                   break;
+         case 'o': add_mouse(GPM_ADD_OPTIONS,optarg);
+                   gpm_report(GPM_PR_DEBUG,"options: %s",optarg);
+                   opt_options = optarg;                 break; /* GO AWAY */
+         case 'p': opt_ptrdrag = 0;                      break;
+         case 'r':
+            /* being called responsiveness, I must take the inverse */
+            opt_scale=atoi(optarg);
+            if(!opt_scale || opt_scale > 100) opt_scale=100; /* the maximum */
+            else opt_scale=100/opt_scale;                break;
+         case 'R':
+            option.repeater++;
+            if (optarg) option.repeater_type = optarg;
+            else        option.repeater_type = "msc";    break;
+         case 's': opt_sample = atoi(optarg);            break;
+         case 'S': if (optarg) opt_special = optarg;
+                   else opt_special="";                  break;
+         case 't': add_mouse(GPM_ADD_TYPE,optarg);
+                   opt_type = optarg;                    break; /* GO AWAY */
+         case 'u': option.autodetect = 1;                break;
+         case 'T': opt_test++;                           break;
+         case 'v': printf(GPM_MESS_VERSION "\n");        exit(0);
+         case '2': opt_three = -1;                       break;
+         case '3': opt_three =  1;                       break;
+         default: exit(usage("commandline"));
+      }
+   }
+}

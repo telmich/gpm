@@ -64,7 +64,7 @@ int do_selection(Gpm_Event *event)  /* returns 0, always */
                return 0;
 
             case GPM_B_RIGHT:
-               if (opt_three==1)
+               if ((which_mouse->opt_three)==1)
                   selection_copy(x1,y1,x2,y2,event->clicks);
                else
                   selection_paste();
