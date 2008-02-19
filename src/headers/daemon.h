@@ -133,6 +133,7 @@ extern Gpm_Cinfo       *cinfo[MAX_VC+1];
 extern struct mouse_features  mouse_table[3],
                              *which_mouse;      /*the current one*/
 
+extern Gpm_Type         mice[];
 
 
 

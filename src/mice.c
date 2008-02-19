@@ -4,7 +4,7 @@
  * Copyright (C) 1993        Andrew Haylett <ajh@gec-mrc.co.uk>
  * Copyright (C) 1994-2000   Alessandro Rubini <rubini@linux.it>
  * Copyright (C) 1998,1999   Ian Zimmerman <itz@rahul.net>
- * Copyright (C) 2001,2002   Nico Schottelius <nicos@pcsystems.de>
+ * Copyright (C) 2001-2008   Nico Schottelius <nico-gpm2008 at schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -72,11 +72,11 @@
 
 
 #include "headers/gpmInt.h"
+#include "headers/daemon.h"
 #include "headers/twiddler.h"
 #include "headers/synaptics.h"
 #include "headers/message.h"
 
-#include "headers/daemon.h"
 
 /*========================================================================*/
 /* Parsing argv: helper dats struct function (should they get elsewhere?) */
