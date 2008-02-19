@@ -601,8 +601,8 @@ static int M_ps2(Gpm_Event *state,  unsigned char *data)
       !!(data[0]&2) * GPM_B_RIGHT +
       !!(data[0]&4) * GPM_B_MIDDLE;
 
-   if (data[0]==0 && opt_glidepoint_tap) /* by default this is false */
-      state->buttons = tap_active = opt_glidepoint_tap;
+   if (data[0]==0 && (which_mouse->opt_glidepoint_tap)) /* by default this is false */
+      state->buttons = tap_active = (which_mouse->opt_glidepoint_tap);
    else if (tap_active) {
       if (data[0]==8)
          state->buttons = tap_active = 0;
@@ -638,8 +638,8 @@ static int M_imps2(Gpm_Event *state,  unsigned char *data)
    state->buttons= ((data[0] & 1) << 2)   /* left              */
       | ((data[0] & 6) >> 1);             /* middle and right  */
    
-   if (data[0]==0 && opt_glidepoint_tap) // by default this is false
-      state->buttons = tap_active = opt_glidepoint_tap;
+   if (data[0]==0 && (which_mouse->opt_glidepoint_tap)) // by default this is false
+      state->buttons = tap_active = (which_mouse->opt_glidepoint_tap);
    else if (tap_active) {
       if (data[0]==8)
          state->buttons = tap_active = 0;
@@ -786,7 +786,7 @@ static int M_mman(Gpm_Event *state,  unsigned char *data)
          mytype->getextra=1;
       } else {
          if (b & 0x2) prev |= GPM_B_MIDDLE;
-         if (b & 0x1) prev |= opt_glidepoint_tap;
+         if (b & 0x1) prev |= (which_mouse->opt_glidepoint_tap);
       }
    }
    state->buttons=prev;
@@ -1247,7 +1247,7 @@ static int M_mtouch(Gpm_Event *state,  unsigned char *data)
 
    if (avgx < 0) { /* press event */
       GET_TIME(tv);
-      if (DIF_TIME(uptv, tv) < opt_time) {
+      if (DIF_TIME(uptv, tv) < (which_mouse->opt_time)) {
          /* count as button press placed at finger-up pixel */
          state->buttons = GPM_B_LEFT;
          realposx = avgx = upx; state->x = REAL_TO_XCELL(realposx);
@@ -1352,7 +1352,7 @@ static int M_gunze(Gpm_Event *state,  unsigned char *data)
       GET_TIME(tv);
       timediff = DIF_TIME(uptv, tv);
       released = 0;
-      if (timediff > gunze_debounce && timediff < opt_time) {
+      if (timediff > gunze_debounce && timediff < (which_mouse->opt_time)) {
          /* count as button press placed at finger-up pixel */
          dragging = 1;
          state->buttons = GPM_B_LEFT;
@@ -1439,7 +1439,7 @@ static int M_etouch(Gpm_Event *state,  unsigned char *data)
   if (avgx < 0)		/* INITIAL TOUCH, FINGER WAS UP */
   { GET_TIME(tv);
     state->buttons = 0;
-    if (DIF_TIME(uptv, tv) < opt_time)
+    if (DIF_TIME(uptv, tv) < (which_mouse->opt_time))
     {	/* if Initial Touch immediate after finger UP then start DRAG */
 	x=upx; y=upy;  /* A:start DRAG at finger-UP position */ 
 	if (elo_click_ontouch==0)	state->buttons = GPM_B_LEFT;
@@ -1654,7 +1654,7 @@ static Gpm_Type* I_serial(int fd, unsigned short flags,
 
    /* Non mman: change from any available speed to the chosen one */
    for (i=9600; i>=1200; i/=2)
-      setspeed(fd, i, opt_baud, (type->fun != M_mman) /* write */, flags);
+      setspeed(fd, i, (which_mouse->opt_baud), (type->fun != M_mman) /* write */, flags);
 
    /*
     * reset the MouseMan/TrackMan to use the 3/4 byte protocol
@@ -1664,7 +1664,7 @@ static Gpm_Type* I_serial(int fd, unsigned short flags,
    if (type->fun==M_mman) {
       setspeed(fd, 1200, 1200, 0, flags); /* no write */
       write(fd, "*X", 2);
-      setspeed(fd, 1200, opt_baud, 0, flags); /* no write */
+      setspeed(fd, 1200, (which_mouse->opt_baud), 0, flags); /* no write */
       return type;
    }
 
@@ -1719,15 +1719,15 @@ static Gpm_Type* I_logi(int fd, unsigned short flags,
    type->howmany = busmouse ? 3 : 1;
 
    /* change from any available speed to the chosen one */
-   for (i=9600; i>=1200; i/=2) setspeed(fd, i, opt_baud, 1 /* write */, flags);
+   for (i=9600; i>=1200; i/=2) setspeed(fd, i, (which_mouse->opt_baud), 1 /* write */, flags);
 
    /* this stuff is peculiar of logitech mice, also for the serial ones */
    write(fd, "S", 1);
-   setspeed(fd, opt_baud, opt_baud, 1 /* write */,
+   setspeed(fd, (which_mouse->opt_baud), (which_mouse->opt_baud), 1 /* write */,
       CS8 |PARENB |PARODD |CREAD |CLOCAL |HUPCL);
 
    /* configure the sample rate */
-   for (i=0;opt_sample<=sampletab[i].sample;i++) ;
+   for (i=0;(which_mouse->opt_sample)<=sampletab[i].sample;i++) ;
    write(fd,sampletab[i].code,1);
    return type;
 }
@@ -2012,7 +2012,7 @@ static Gpm_Type *I_twid(int fd, unsigned short flags,
    * the twiddler is a serial mouse: just drop dtr
    * and run at 2400 (unless specified differently) 
    */
-   if(opt_baud==DEF_BAUD) opt_baud = 2400;
+   if((which_mouse->opt_baud)==DEF_BAUD) (which_mouse->opt_baud) = 2400;
    argv[1] = "dtr"; /* argv[1] is guaranteed to be NULL (this is dirty) */
    return I_serial(fd, flags, type, argc, argv);
 }
@@ -2022,7 +2022,7 @@ static Gpm_Type *I_calus(int fd, unsigned short flags,
 {
    if (check_no_argv(argc, argv)) return NULL;
 
-   if (opt_baud == 1200) opt_baud=9600; /* default to 9600 */
+   if ((which_mouse->opt_baud) == 1200) (which_mouse->opt_baud)=9600; /* default to 9600 */
    return I_serial(fd, flags, type, argc, argv);
 }
 
@@ -2168,10 +2168,10 @@ static Gpm_Type *I_gunze(int fd, unsigned short flags,
    parse_argv(optioninfo, argc, argv);
     
    /* check that the baud rate is valid */
-   if (opt_baud == DEF_BAUD) opt_baud = 19200; /* force 19200 as default */
-   if (opt_baud != 9600 && opt_baud != 19200) {
+   if ((which_mouse->opt_baud) == DEF_BAUD) (which_mouse->opt_baud) = 19200; /* force 19200 as default */
+   if ((which_mouse->opt_baud) != 9600 && (which_mouse->opt_baud) != 19200) {
       gpm_report(GPM_PR_ERR,GPM_MESS_GUNZE_WRONG_BAUD,option.progname, argv[0]);
-      opt_baud = 19200;
+      (which_mouse->opt_baud) = 19200;
    }
    tcgetattr(fd, &tty);
    tty.c_iflag = IGNBRK | IGNPAR;
@@ -2180,7 +2180,7 @@ static Gpm_Type *I_gunze(int fd, unsigned short flags,
    tty.c_line = 0;
    tty.c_cc[VTIME] = 0;
    tty.c_cc[VMIN] = 1;
-   tty.c_cflag = (opt_baud == 9600 ? B9600 : B19200) |CS8|CREAD|CLOCAL|HUPCL;
+   tty.c_cflag = ((which_mouse->opt_baud) == 9600 ? B9600 : B19200) |CS8|CREAD|CLOCAL|HUPCL;
    tcsetattr(fd, TCSAFLUSH, &tty);
 
    /* FIXME: try to find some information about the device */
