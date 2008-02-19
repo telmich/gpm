@@ -58,8 +58,6 @@ typedef unsigned int __u32;
 
 #include "headers/daemon.h"
 
-extern int errno;
-
 /*===================================================================*/
 /* octal digit */
 static int isodigit(const unsigned char c)
@@ -239,7 +237,7 @@ void cmdline(int argc, char **argv)
 
    /* initialize for the dual mouse */ 
    mouse_table[2]=mouse_table[1]=mouse_table[0]; /* copy defaults */
-   which_mouse=mouse_table+1; /* use the first */
+   which_mouse = mouse_table+1; /* use the first */
 
    while ((opt = getopt(argc, argv, options)) != -1) {
       switch (opt) {
