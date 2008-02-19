@@ -3,7 +3,7 @@
  *
  * Copyright (C) 1994-1999  Alessandro Rubini <rubini@linux.it>
  * Copyright (C) 1998	    Ian Zimmerman <itz@rahul.net>
- * Copyright (C) 2001,20022002co Schottelius <nico@schottelius.org>
+ * Copyright (C) 2001-2008  Nico Schottelius <nico-gpm2008 at schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -140,13 +140,6 @@ typedef struct Gpm_Type {
 
 #define GPM_EXTRA_MAGIC_1 0xAA
 #define GPM_EXTRA_MAGIC_2 0x55
-
-typedef struct Gpm_Cinfo {
-  Gpm_Connect data;
-  int fd;
-  struct Gpm_Cinfo *next;
-}              Gpm_Cinfo;
-
 
 /*....................................... Global variables */
 

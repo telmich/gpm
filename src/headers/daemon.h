@@ -22,7 +22,13 @@
 #define _GPM_DAEMON_H
 
 /*************************************************************************
- * Types
+ * Includes
+ */
+#include "gpm.h"           /* Gpm_Event         */
+#include <sys/select.h>    /* fd_set            */
+
+/*************************************************************************
+ * Types / structures
  */
 
 struct options {
@@ -35,6 +41,13 @@ struct options {
    struct micetab *micelist;  /* mice and their options */
    char *consolename;         /* /dev/tty0 || /dev/vc/0 */
 };
+
+typedef struct Gpm_Cinfo {
+   Gpm_Connect data;
+   int fd;
+   struct Gpm_Cinfo *next;
+} Gpm_Cinfo;
+
 
 /*************************************************************************
  * Global variables
@@ -50,6 +63,12 @@ extern int              statusX,
                         statusB,
                         statusC;          /* clicks */
 
+extern fd_set           selSet,
+                        readySet,
+                        connSet;
+extern int              eventFlag;
+
+
 
 
 /*************************************************************************
@@ -59,10 +78,19 @@ extern int              statusX,
 void gpm_killed(int signo);
 int open_console(const int mode);
 char **build_argv(char *argv0, char *str, int *argcptr, char sep);
-int wait_text(int *fdptr);
+
+int do_client(Gpm_Cinfo *cinfo, Gpm_Event *event);
+int do_selection(Gpm_Event *event);
+
+
+void get_console_size(Gpm_Event *ePtr);
+
+int processConn(int fd);
+int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode);
 
 void selection_copy(int x1, int y1, int x2, int y2, int mode);
 void selection_paste(void);
 
+int wait_text(int *fdptr);
 
 #endif
