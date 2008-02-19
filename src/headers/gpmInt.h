@@ -115,24 +115,6 @@
 // looks unused; delete
 //typedef struct Opt_struct_type {int a,B,d,i,p,r,V,A;} Opt_struct_type;
 
-/* this is not very clean, actually, but it works fine */
-#define opt_type     (which_mouse->opt_type)
-#define opt_dev      (which_mouse->opt_dev)
-#define opt_sequence (which_mouse->opt_sequence)
-#define opt_baud     (which_mouse->opt_baud)
-#define opt_sample   (which_mouse->opt_sample)
-#define opt_delta    (which_mouse->opt_delta)
-#define opt_accel    (which_mouse->opt_accel)
-#define opt_scale    (which_mouse->opt_scale)
-#define opt_scaley   (which_mouse->opt_scaley)
-#define opt_time     (which_mouse->opt_time)
-#define opt_cluster  (which_mouse->opt_cluster)
-#define opt_three    (which_mouse->opt_three)
-#define opt_glidepoint_tap (which_mouse->opt_glidepoint_tap)
-#define opt_options  (which_mouse->opt_options)
-
-#define m_type       (which_mouse->m_type)
-
 /* the other variables */
 
 extern char *opt_lut;
