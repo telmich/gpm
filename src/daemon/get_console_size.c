@@ -58,8 +58,8 @@ void get_console_size(Gpm_Event *ePtr)
       * the following operation is based on the observation that 80x50
       * has square cells. (An author-centric observation ;-)
       */
-     opt_scaley=opt_scale*50*maxx/80/maxy;
-     gpm_report(GPM_PR_DEBUG,GPM_MESS_X_Y_VAL,opt_scale,opt_scaley);
+     (which_mouse->opt_scaley)=(which_mouse->opt_scale)*50*maxx/80/maxy;
+     gpm_report(GPM_PR_DEBUG,GPM_MESS_X_Y_VAL,(which_mouse->opt_scale),(which_mouse->opt_scaley));
    }
 }
 
