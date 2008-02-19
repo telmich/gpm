@@ -1,21 +1,48 @@
-static inline int processRequest(Gpm_Cinfo *ci, int vc) 
-{
-   int i;
-   Gpm_Cinfo *cinfoPtr, *next;
-   Gpm_Connect conn;
-   static Gpm_Event event;
-   static struct vt_stat stat;
+/*
+ * general purpose mouse (gpm)
+ *
+ * Copyright (c) 2008        Nico Schottelius <nico-gpm2008 at schottelius.org>
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ *
+ ********/
 
-   gpm_report(GPM_PR_INFO,GPM_MESS_CON_REQUEST, ci->fd, vc);
+#include "headers/message.h"        /* messaging in gpm */
+#include "headers/daemon.h"         /* daemon internals */
+
+
+int processRequest(Gpm_Cinfo *ci, int vc) 
+{
+   int                     i;
+   Gpm_Cinfo              *cinfoPtr;
+   Gpm_Cinfo              *next;
+   Gpm_Connect             conn;
+   static Gpm_Event        event;
+   static struct vt_stat   stat;
+
+   gpm_report(GPM_PR_INFO, GPM_MESS_CON_REQUEST, ci->fd, vc);
+
    if (vc>MAX_VC) return -1;
 
    /* itz 10-22-96 this shouldn't happen now */
-   if (vc==-1) gpm_report(GPM_PR_OOPS,GPM_MESS_UNKNOWN_FD);
+   if (vc==-1) gpm_report(GPM_PR_OOPS, GPM_MESS_UNKNOWN_FD);
 
    i=get_data(&conn,ci->fd);
 
    if (!i) { /* no data */
-      gpm_report(GPM_PR_INFO,GPM_MESS_CLOSE);
+      gpm_report(GPM_PR_INFO, GPM_MESS_CLOSE);
       close(ci->fd);
       FD_CLR(ci->fd,&connSet);
       FD_CLR(ci->fd,&readySet);
