@@ -1,9 +1,9 @@
 /* -*-mode:C;tab-width:3-*-
  * gpm.h - public include file for gpm
  *
- * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
- * Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
- * Copyright (C) 2002 Nico Schottelius <nico@schottelius.org>
+ * Copyright 1994,1995     rubini@linux.it (Alessandro Rubini)
+ * Copyright 1998          Ian Zimmerman <itz@rahul.net>
+ * Copyright 2002-2008     Nico Schottelius <nico-gpm2008 at schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@
 #ifndef _GPM_H_
 #define _GPM_H_
 
-/* $Id: gpm.h,v 1.5 2002/11/30 13:20:10 nico Exp $ */
-
 #include <paths.h>              /* _PATH_VARRUN etc. */
 
 #ifdef __cplusplus
@@ -35,7 +33,7 @@ extern "C" {
 
 #define GPM_XTERM_ON \
   printf("%c[?1001s",27), fflush(stdout), /* save old hilit tracking */ \
-  printf("%c[?1000h",27), fflush(stdout) /* enable mouse tracking */
+  printf("%c[?1000h",27), fflush(stdout)  /* enable mouse tracking */
 
 #define GPM_XTERM_OFF \
   printf("%c[?1000l",27), fflush(stdout), /* disable mouse tracking */ \

@@ -52,10 +52,6 @@
    typedef unsigned int __socklen_t;
 #endif    /* __GLIBC__ */
 
-#ifndef max
-#define max(a,b) ((a)>(b) ? (a) : (b))
-#endif
-
 /* global variables */
 struct options option;        /* one should be enough for us */
 
@@ -103,7 +99,6 @@ int fifofd=-1;
 
 int eventFlag=0;
 Gpm_Cinfo *cinfo[MAX_VC+1];
-fd_set selSet, readySet, connSet;
 
 time_t last_selection_time;
 time_t opt_age_limit = 0;
@@ -115,3 +110,5 @@ int opt_resize=0; /* not really an option */
 int  statusC = 0; /* clicks */
 void get_console_size(Gpm_Event *ePtr);
 
+/* in daemon.h */
+fd_set selSet, readySet, connSet;

@@ -24,7 +24,7 @@
 #include "headers/gpmInt.h"         /* daemon internals */
 
 /*-------------------------------------------------------------------*/
-static  inline int do_selection(Gpm_Event *event)  /* returns 0, always */
+int do_selection(Gpm_Event *event)  /* returns 0, always */
 {
    static int x1=1, y1=1, x2, y2;
 #define UNPOINTER() 0

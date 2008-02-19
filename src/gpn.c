@@ -53,10 +53,15 @@ typedef unsigned int __u32;
 #endif
 
 #include "headers/message.h"
-#include "headers/gpmInt.h"
-#include "headers/gpm.h"
 
 #include "headers/daemon.h"
+
+#include "headers/gpmInt.h"
+
+
+
+#include "headers/gpm.h"
+
 
 /*===================================================================*/
 /* octal digit */

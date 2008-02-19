@@ -39,14 +39,6 @@
 #include <linux/tty.h>
 #endif
 
-/* FIXME: still needed ?? */
-/* How many virtual consoles are managed? */
-#ifndef MAX_NR_CONSOLES
-#  define MAX_NR_CONSOLES 64 /* this is always sure */
-#endif
-
-#define MAX_VC    MAX_NR_CONSOLES  /* doesn't work before 1.3.77 */
-
 /* How many buttons may the mouse have? */
 /* #define MAX_BUTTONS 3  ===> not used, it is hardwired :-( */
 
@@ -117,44 +109,8 @@
 
 /*....................................... Structures */
 
-/*
- * and this is the entry in the mouse-type table
- */
-typedef struct Gpm_Type {
-  char *name;
-  char *desc;             /* a descriptive line */
-  char *synonyms;         /* extra names (the XFree name etc) as a list */
-  int (*fun)(Gpm_Event *state, unsigned char *data);
-  struct Gpm_Type *(*init)(int fd, unsigned short flags,
-			   struct Gpm_Type *type, int argc, char **argv);
-  unsigned short flags;
-  unsigned char proto[4];
-  int packetlen;
-  int howmany;            /* how many bytes to read at a time */
-  int getextra;           /* does it get an extra byte? (only mouseman) */
-  int absolute;           /* flag indicating absolute pointing device */
-
-  int (*repeat_fun)(Gpm_Event *state, int fd); /* repeat this event into fd */
-                          /* itz Mon Jan 11 23:27:54 PST 1999 */
-}                   Gpm_Type;
-
 #define GPM_EXTRA_MAGIC_1 0xAA
 #define GPM_EXTRA_MAGIC_2 0x55
-
-/*....................................... Global variables */
-
-/* this structure is used to hide the dual-mouse stuff */
-
-struct mouse_features {
-  char *opt_type, *opt_dev, *opt_sequence;
-  int opt_baud,opt_sample,opt_delta, opt_accel, opt_scale, opt_scaley;
-  int opt_time, opt_cluster, opt_three, opt_glidepoint_tap;
-  char *opt_options; /* extra textual configuration */
-  Gpm_Type *m_type;
-  int fd;
-};
-
-extern struct mouse_features mouse_table[3], *which_mouse; /*the current one*/
 
 // looks unused; delete
 //typedef struct Opt_struct_type {int a,B,d,i,p,r,V,A;} Opt_struct_type;
@@ -190,48 +146,13 @@ extern int opt_rawrep;
 extern int fifofd;
 extern int opt_double;
 
-extern Gpm_Type *repeated_type;
-extern Gpm_Type mice[];             /* where the hell are the descriptions...*/
+//extern Gpm_Type *repeated_type;
+//extern Gpm_Type mice[];             /* where the hell are the descriptions...*/
 extern struct winsize win;
 extern int maxx, maxy;
-extern Gpm_Cinfo *cinfo[MAX_VC+1];
-
-/* new variables <CLEAN> */
-
-/* structure prototypes */
-
-/* contains all mice */
-struct micetab {
-   struct micetab *next;
-   char *device;
-   char *protocol;
-   char *options;
-};  
-
-/* new variables </CLEAN> */
 
 
 /*....................................... Prototypes */
-         /* server_tools.c */
-void add_mouse (int type, char *value);
-int  init_mice (struct micetab *micelist);
-int  reset_mice(struct micetab *micelist);
-
-         /* startup.c */
-void startup(int argc, char **argv);
-
-         /* gpm.c */
-int old_main();
-
-       /* gpn.c */
-void cmdline(int argc, char **argv);
-int giveInfo(int request, int fd);
-int loadlut(char *charset);
-int usage(char *whofailed);
-struct Gpm_Type *find_mouse_by_name(char *name);
-void check_uniqueness(void);
-void check_kill(void);
-
 
        /* mice.c */
 extern int M_listTypes(void);
