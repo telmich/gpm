@@ -218,7 +218,7 @@
 #include <sys/ioctl.h>
 
 #include "headers/gpm.h"
-#include "headers/gpmInt.h"       /* which_mouse */
+#include "headers/daemon.h"       /* which_mouse */
 #include "headers/synaptics.h"
 #include "headers/message.h"
 
