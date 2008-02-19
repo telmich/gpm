@@ -51,8 +51,8 @@ char *getMouseData(int fd, Gpm_Type *type, int kd_mode)
    if (kd_mode!=KD_TEXT && fifofd != -1 && opt_rawrep)
       write(fifofd, data, howmany);
 
-   if ((data[0]&(m_type->proto)[0]) != (m_type->proto)[1]) {
-      if (m_type->getextra == 1) {
+   if ((data[0]&((which_mouse->m_type)->proto)[0]) != ((which_mouse->m_type)->proto)[1]) {
+      if ((which_mouse->m_type)->getextra == 1) {
          data[1]=GPM_EXTRA_MAGIC_1; data[2]=GPM_EXTRA_MAGIC_2;
          gpm_report(GPM_PR_DEBUG,GPM_EXTRA_DATA,data[0]);
          return data;
@@ -68,7 +68,7 @@ char *getMouseData(int fd, Gpm_Type *type, int kd_mode)
     * tried ps2 with the original selection package, which called usleep()
     */
 
-   if((i=m_type->packetlen-howmany)) /* still to get */
+   if((i=(which_mouse->m_type)->packetlen-howmany)) /* still to get */
       do {
          j = read(fd,edata-i,i); /* edata is pointer just after data */
          if (kd_mode!=KD_TEXT && fifofd != -1 && opt_rawrep && j > 0)
@@ -81,7 +81,7 @@ char *getMouseData(int fd, Gpm_Type *type, int kd_mode)
       return NULL;
    }
 
-   if ((data[1]&(m_type->proto)[2]) != (m_type->proto)[3]) {
+   if ((data[1]&((which_mouse->m_type)->proto)[2]) != ((which_mouse->m_type)->proto)[3]) {
       gpm_report(GPM_PR_INFO,GPM_MESS_SKIP_DATA);
       return NULL;
    }
