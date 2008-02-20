@@ -19,10 +19,15 @@
  *
  ********/
 
+#include <fcntl.h>                  /* open              */
+#include <unistd.h>                 /* close             */
+#include <time.h>                   /* time              */
+
+
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 
-static inline void selection_copy(int x1, int y1, int x2, int y2, int mode)
+void selection_copy(int x1, int y1, int x2, int y2, int mode)
 {
 /*
  * The approach in "selection" causes a bus error when run under SunOS 4.1

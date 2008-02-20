@@ -151,6 +151,7 @@ extern struct mouse_features  mouse_table[3],
 extern Gpm_Type         mice[];
 extern Gpm_Type         *repeated_type;
 
+time_t                  last_selection_time;
 
 
 
@@ -158,23 +159,20 @@ extern Gpm_Type         *repeated_type;
  * Functions
  */
 
+char **build_argv(char *argv0, char *str, int *argcptr, char sep);
 void disable_paste(int vc);
 
-
-void gpm_exited(void);
-void gpm_killed(int signo);
-int open_console(const int mode);
-char **build_argv(char *argv0, char *str, int *argcptr, char sep);
-
-int do_client(Gpm_Cinfo *cinfo, Gpm_Event *event);
-int do_selection(Gpm_Event *event);
-
+int   do_client(Gpm_Cinfo *cinfo, Gpm_Event *event);
+int   do_selection(Gpm_Event *event);
 
 void  get_console_size(Gpm_Event *ePtr);
 int   get_data(Gpm_Connect *where, int whence);
 char *getMouseData(int fd, Gpm_Type *type, int kd_mode);
 
+void  gpm_exited(void);
+void  gpm_killed(int signo);
 
+int   open_console(const int mode);
 int old_main();
 
 int processConn(int fd);
