@@ -142,6 +142,7 @@ extern Gpm_Type         mice[];
  * Functions
  */
 
+void gpm_exited(void);
 void gpm_killed(int signo);
 int open_console(const int mode);
 char **build_argv(char *argv0, char *str, int *argcptr, char sep);
@@ -152,8 +153,11 @@ int do_selection(Gpm_Event *event);
 
 void get_console_size(Gpm_Event *ePtr);
 
+int old_main();
+
 int processConn(int fd);
 int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode);
+int processRequest(Gpm_Cinfo *ci, int vc);
 
 void selection_copy(int x1, int y1, int x2, int y2, int mode);
 void selection_paste(void);

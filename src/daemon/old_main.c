@@ -51,23 +51,23 @@ int old_main()
    for (i = 1; i <= 1+opt_double; i++) {
       which_mouse=mouse_table+i; /* used to access options */
 
-      if (!opt_dev) gpm_report(GPM_PR_OOPS,GPM_MESS_NEED_MDEV);
+      if (!(which_mouse->opt_dev)) gpm_report(GPM_PR_OOPS,GPM_MESS_NEED_MDEV);
 
-      if(!strcmp(opt_dev,"-")) fd=0; /* use stdin */
-      else if( (fd=open(opt_dev,O_RDWR | O_NDELAY)) < 0)
-         gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN,opt_dev); 
+      if(!strcmp((which_mouse->opt_dev),"-")) fd=0; /* use stdin */
+      else if( (fd=open((which_mouse->opt_dev),O_RDWR | O_NDELAY)) < 0)
+         gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN,(which_mouse->opt_dev)); 
              
       /* and then reset the flag */
       fcntl(fd,F_SETFL,fcntl(fd,F_GETFL) & ~O_NDELAY);
 
       /* create argc and argv for this device */
-      mouse_argv[i] = build_argv(opt_type, opt_options, &mouse_argc[i], ',');
+      mouse_argv[i] = build_argv((which_mouse->opt_type), (which_mouse->opt_options), &mouse_argc[i], ',');
 
       /* init the device, and use the return value as new mouse type */
-      if (m_type->init)
-         m_type=(m_type->init)(fd, m_type->flags, m_type, mouse_argc[i],
+      if ((which_mouse->m_type)->init)
+         (which_mouse->m_type)=((which_mouse->m_type)->init)(fd, (which_mouse->m_type)->flags, (which_mouse->m_type), mouse_argc[i],
          mouse_argv[i]);
-      if (!m_type) gpm_report(GPM_PR_OOPS,GPM_MESS_MOUSE_INIT);
+      if (!(which_mouse->m_type)) gpm_report(GPM_PR_OOPS,GPM_MESS_MOUSE_INIT);
 
       which_mouse->fd=fd;
       maxfd=max(fd, maxfd);
@@ -187,7 +187,7 @@ int old_main()
          which_mouse=mouse_table+i; /* used to access options */
          if (FD_ISSET(which_mouse->fd,&selSet)) {
             FD_CLR(which_mouse->fd,&selSet); pending--;
-            if (processMouse(which_mouse->fd, &event, m_type, kd_mode))
+            if (processMouse(which_mouse->fd, &event, (which_mouse->m_type), kd_mode))
                /* pass it to the client, if any
                 * or to the default handler, if any
                 * or to the selection handler

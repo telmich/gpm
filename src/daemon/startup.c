@@ -37,7 +37,7 @@
 #include "headers/daemon.h"
 
 /* what todo atexit */
-static void gpm_exited(void)
+void gpm_exited(void)
 {
    gpm_report(GPM_PR_DEBUG,GPM_MESS_REMOVE_FILES, GPM_NODE_PID, GPM_NODE_CTL);
    unlink(GPM_NODE_PID);
