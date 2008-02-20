@@ -98,22 +98,22 @@ void startup(int argc, char **argv)
    /* duplicate initialization */
    for (i=1; i <= 1+opt_double; i++) {
       which_mouse=mouse_table+i; /* used to access options */
-      if (opt_accel < 1) exit(usage("acceleration"));
-      if (opt_delta < 2) exit(usage("delta"));
-      if (strlen(opt_sequence) != 3 || atoi(opt_sequence)<100)
+      if ((which_mouse->opt_accel) < 1) exit(usage("acceleration"));
+      if ((which_mouse->opt_delta) < 2) exit(usage("delta"));
+      if (strlen((which_mouse->opt_sequence)) != 3 || atoi((which_mouse->opt_sequence))<100)
          exit(usage("sequence"));
-      if (opt_glidepoint_tap > 3) exit(usage("glidepoint tap button"));
-      if (opt_glidepoint_tap)
-         opt_glidepoint_tap=GPM_B_LEFT >> (opt_glidepoint_tap-1);
+      if ((which_mouse->opt_glidepoint_tap) > 3) exit(usage("glidepoint tap button"));
+      if ((which_mouse->opt_glidepoint_tap))
+         (which_mouse->opt_glidepoint_tap)=GPM_B_LEFT >> ((which_mouse->opt_glidepoint_tap)-1);
 
       /* choose the sequence */
-      for (opt=0; seq[opt].in && strcmp(seq[opt].in,opt_sequence); opt++) ;
+      for (opt=0; seq[opt].in && strcmp(seq[opt].in,(which_mouse->opt_sequence)); opt++) ;
       if(!seq[opt].in) exit(usage("button sequence"));
-      opt_sequence=strdup(seq[opt].out); /* I can rewrite on it */
+      (which_mouse->opt_sequence)=strdup(seq[opt].out); /* I can rewrite on it */
 
       /* look for the mouse type */
-      m_type = find_mouse_by_name(opt_type);
-      if (!m_type) /* not found */
+      (which_mouse->m_type) = find_mouse_by_name((which_mouse->opt_type));
+      if (!(which_mouse->m_type)) /* not found */
          exit(M_listTypes());
    }
 
