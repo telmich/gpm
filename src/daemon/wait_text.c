@@ -43,10 +43,10 @@ int wait_text(int *fdptr)
    } while (kd_mode != KD_TEXT);
 
    /* reopen, reinit (the function is only used if we have one mouse device) */
-   if ((*fdptr=open(opt_dev,O_RDWR))<0)
-      gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN,opt_dev);
-   if (m_type->init)
-      m_type=(m_type->init)(*fdptr, m_type->flags, m_type, mouse_argc[1],
+   if ((*fdptr=open((which_mouse->opt_dev),O_RDWR))<0)
+      gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN,(which_mouse->opt_dev));
+   if ((which_mouse->m_type)->init)
+      (which_mouse->m_type)=((which_mouse->m_type)->init)(*fdptr, (which_mouse->m_type)->flags, (which_mouse->m_type), mouse_argc[1],
               mouse_argv[1]);
    return (1);
 }
