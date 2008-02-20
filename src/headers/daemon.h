@@ -114,6 +114,7 @@ struct mouse_features {
  * Global variables
  */
 
+extern char             *opt_special;
 extern int              opt_resize;       /* not really an option          */
 extern struct options   option;           /* one should be enough for us   */
 extern int              mouse_argc[3];    /* 0 for default (unused)        */
@@ -123,17 +124,22 @@ extern int              statusX,
                         statusY,
                         statusB,
                         statusC;          /* clicks */
+extern int              fifofd;
+extern int              opt_rawrep;
 
 extern fd_set           selSet,
                         readySet,
                         connSet;
 extern int              eventFlag;
+extern struct winsize   win;
+
 extern Gpm_Cinfo       *cinfo[MAX_VC+1];
 
 extern struct mouse_features  mouse_table[3],
                              *which_mouse;      /*the current one*/
 
 extern Gpm_Type         mice[];
+extern Gpm_Type         *repeated_type;
 
 
 
@@ -151,14 +157,17 @@ int do_client(Gpm_Cinfo *cinfo, Gpm_Event *event);
 int do_selection(Gpm_Event *event);
 
 
-void get_console_size(Gpm_Event *ePtr);
-int get_data(Gpm_Connect *where, int whence);
+void  get_console_size(Gpm_Event *ePtr);
+int   get_data(Gpm_Connect *where, int whence);
+char *getMouseData(int fd, Gpm_Type *type, int kd_mode);
+
 
 int old_main();
 
 int processConn(int fd);
 int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode);
 int processRequest(Gpm_Cinfo *ci, int vc);
+int processSpecial(Gpm_Event *event);
 
 void selection_copy(int x1, int y1, int x2, int y2, int mode);
 void selection_paste(void);

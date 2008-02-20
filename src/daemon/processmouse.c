@@ -19,9 +19,20 @@
  *
  ********/
 
+#include <sys/stat.h>               /* stat              */
+#include <linux/kd.h>               /* KD                */
+#include <linux/vt.h>               /* vt                */
+#include <fcntl.h>                  /* open              */
+#include <unistd.h>                 /* close             */
+#include <time.h>                   /* time              */
+#include <sys/time.h>               /* gettimeofday      */
+
+
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 
+
+#define  abs(value)              ((value) < 0 ? -(value) : (value))
 
 /*-------------------------------------------------------------------
  * call getMouseData to get hardware device data, call mouse device's fun() 
@@ -51,7 +62,7 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
    if (eventFlag) {
       eventFlag=0;
 
-      if (m_type->absolute) {     /* a pen or other absolute device */
+      if ((which_mouse->m_type)->absolute) {     /* a pen or other absolute device */
          event->x=nEvent.x;
          event->y=nEvent.y;
       }
@@ -65,8 +76,8 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
       FD_ZERO(&fdSet); FD_SET(fd,&fdSet); i=0;
 
       do { /* cluster loop */
-         if(((data=getMouseData(fd,m_type,kd_mode))==NULL)
-            || ((*(m_type->fun))(&nEvent,data)==-1) ) {
+         if(((data=getMouseData(fd,(which_mouse->m_type),kd_mode))==NULL)
+            || ((*((which_mouse->m_type)->fun))(&nEvent,data)==-1) ) {
             if (!i) return 0;
             else break;
          }
@@ -74,7 +85,7 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
          event->modifiers = nEvent.modifiers; /* propagate modifiers */
 
          /* propagate buttons */
-         nEvent.buttons = (opt_sequence[nEvent.buttons&7]&7) |
+         nEvent.buttons = ((which_mouse->opt_sequence)[nEvent.buttons&7]&7) |
             (nEvent.buttons & ~7); /* change the order */
          oldB=newB; newB=nEvent.buttons;
          if (!i) event->buttons=nEvent.buttons;
@@ -85,9 +96,9 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
          }
 
          /* propagate movement */
-         if (!(m_type->absolute)) { /* mouse */
-            if (abs(nEvent.dx)+abs(nEvent.dy) > opt_delta)
-               nEvent.dx*=opt_accel, nEvent.dy*=opt_accel;
+         if (!((which_mouse->m_type)->absolute)) { /* mouse */
+            if (abs(nEvent.dx)+abs(nEvent.dy) > (which_mouse->opt_delta))
+               nEvent.dx*=(which_mouse->opt_accel), nEvent.dy*=(which_mouse->opt_accel);
 
             /* increment the reported dx,dy */
             event->dx+=nEvent.dx;
@@ -104,19 +115,19 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
 
          select(fd+1,&fdSet,(fd_set *)NULL,(fd_set *)NULL,&timeout/* zero */);
 
-      } while (i++ <opt_cluster && nEvent.buttons==oldB && FD_ISSET(fd,&fdSet));
+      } while (i++ <(which_mouse->opt_cluster) && nEvent.buttons==oldB && FD_ISSET(fd,&fdSet));
      
    } /* if(eventFlag) */
 
 /*....................................... update the button number */
 
-   if ((event->buttons&GPM_B_MIDDLE) && !opt_three) opt_three++;
+   if ((event->buttons&GPM_B_MIDDLE) && !(which_mouse->opt_three)) (which_mouse->opt_three)++;
 
 /*....................................... we're a repeater, aren't we? */
 
    if (kd_mode!=KD_TEXT) {
       if (fifofd != -1 && ! opt_rawrep) {
-         if (m_type->absolute) { /* hof Wed Feb  3 21:43:28 MET 1999 */ 
+         if ((which_mouse->m_type)->absolute) { /* hof Wed Feb  3 21:43:28 MET 1999 */ 
             /* prepare the values from a absolute device for repeater mode */
             static struct timeval rept1,rept2;
             gettimeofday(&rept2, (struct timezone *)NULL);
@@ -139,10 +150,10 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
 /*....................................... no, we arent a repeater, go on */
 
    /* use fine delta values now, if delta is the information */
-   if (!(m_type)->absolute) {
+   if (!((which_mouse->m_type))->absolute) {
       fine_dx+=event->dx;             fine_dy+=event->dy;
-      event->dx=fine_dx/opt_scale;    event->dy=fine_dy/opt_scaley;
-      fine_dx %= opt_scale;           fine_dy %= opt_scaley;
+      event->dx=fine_dx/(which_mouse->opt_scale);    event->dy=fine_dy/(which_mouse->opt_scaley);
+      fine_dx %= (which_mouse->opt_scale);           fine_dy %= (which_mouse->opt_scaley);
    }
 
    /* up and down, up and down, ... who does a do..while(0) loop ???
@@ -195,7 +206,7 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
    switch(event->type) {                /* now provide the cooked bits */
       case GPM_DOWN:
          GET_TIME(tv2);
-         if (tv1.tv_sec && (DIF_TIME(tv1,tv2)<opt_time)) /* check first click */
+         if (tv1.tv_sec && (DIF_TIME(tv1,tv2)<(which_mouse->opt_time))) /* check first click */
             statusC++, statusC%=3; /* 0, 1 or 2 */
          else
             statusC=0;

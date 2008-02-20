@@ -52,8 +52,9 @@
    typedef unsigned int __socklen_t;
 #endif    /* __GLIBC__ */
 
-/* global variables */
+/* global variables that are in daemon.h */
 struct options option;        /* one should be enough for us */
+Gpm_Type *repeated_type = 0;
 
 /* FIXME: BRAINDEAD..ok not really, but got to leave anyway... */
 /* argc and argv for mice initialization */
@@ -91,7 +92,6 @@ int opt_double=0;
 
 char *opt_special=NULL; /* special commands, like reboot or such */
 int opt_rawrep=0;
-Gpm_Type *repeated_type=0;
 
 struct winsize win;
 int maxx, maxy;

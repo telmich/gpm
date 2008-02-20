@@ -123,16 +123,9 @@ extern int opt_kill;
 extern int opt_kernel, opt_explicittype;
 extern int opt_aged;
 extern time_t opt_age_limit;
-extern char *opt_special;
-extern int opt_rawrep;
-extern int fifofd;
 extern int opt_double;
 
-//extern Gpm_Type *repeated_type;
-//extern Gpm_Type mice[];             /* where the hell are the descriptions...*/
-extern struct winsize win;
 extern int maxx, maxy;
-
 
 /*....................................... Prototypes */
 

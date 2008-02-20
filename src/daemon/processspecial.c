@@ -1,9 +1,9 @@
 /*
  * special commands support for gpm
  *
- * Copyright 1996 rubini@linux.it (Alessandro Rubini)
- * Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
- * Copyright (C) 2001 Nico@Schottelius.org (Nico Schottelius)
+ * Copyright 1996       Alessandro Rubini <rubini@linux.it>
+ * Copyright 1998       Ian Zimmerman     <itz@rahul.net>
+ * Copyright 2001-2008  Nico Schottelius <nico-gpm2008 at schottelius.org>
  *
  * Based on an idea by KARSTEN@piobelix.physik.uni-karlsruhe.de
  * (Karsten Ballueder)
