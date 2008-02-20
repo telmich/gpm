@@ -19,6 +19,13 @@
  *
  ********/
 
+#include <unistd.h>                 /* close             */
+#include <fcntl.h>                  /* open              */
+#include <stdlib.h>                 /* free              */
+#include <linux/vt.h>               /* vt                */
+
+
+
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 
@@ -76,7 +83,7 @@ int processRequest(Gpm_Cinfo *ci, int vc)
    /* Aha, request for information (so-called snapshot) */
    switch(conn.vc) {
       case GPM_REQ_SNAPSHOT:
-         i=open_console(O_RDONLY);
+         i = open_console(O_RDONLY);
          ioctl(i,VT_GETSTATE,&stat);
          event.modifiers=6; /* code for the ioctl */
          if (ioctl(i,TIOCLINUX,&(event.modifiers))<0)
@@ -91,7 +98,7 @@ int processRequest(Gpm_Cinfo *ci, int vc)
          /* missing break or do you want this ??? */
 
       case GPM_REQ_BUTTONS:
-         event.type= (opt_three==1 ? 3 : 2); /* buttons */
+         event.type= ((which_mouse->opt_three)==1 ? 3 : 2); /* buttons */
          write(ci->fd,&event,sizeof(Gpm_Event));
          break;
 

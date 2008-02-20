@@ -63,13 +63,6 @@
 #define DEF_PTRDRAG          1    /* double or triple click */
 #define DEF_GLIDEPOINT_TAP   0    /* tapping emulates no buttons by default */
 
-/*....................................... Strange requests (iff conn->pid==0)*/
-
-#define GPM_REQ_SNAPSHOT 0
-#define GPM_REQ_BUTTONS  1
-#define GPM_REQ_CONFIG   2
-#define GPM_REQ_NOPASTE  3
-
 /* misc :) */
 #define GPM_NULL_DEV         "/dev/null"
 #define GPM_SYS_CONSOLE      "/dev/console"
@@ -124,8 +117,6 @@ extern int opt_kernel, opt_explicittype;
 extern int opt_aged;
 extern time_t opt_age_limit;
 extern int opt_double;
-
-extern int maxx, maxy;
 
 /*....................................... Prototypes */
 

@@ -108,6 +108,13 @@ struct mouse_features {
 
 #define MAX_VC    MAX_NR_CONSOLES  /* doesn't work before 1.3.77 */
 
+/*................................... Strange requests (iff conn->pid==0)*/
+
+#define GPM_REQ_SNAPSHOT 0
+#define GPM_REQ_BUTTONS  1
+#define GPM_REQ_CONFIG   2
+#define GPM_REQ_NOPASTE  3
+
 
 
 /*************************************************************************
@@ -126,6 +133,9 @@ extern int              statusX,
                         statusC;          /* clicks */
 extern int              fifofd;
 extern int              opt_rawrep;
+extern int              maxx,
+                        maxy;
+
 
 extern fd_set           selSet,
                         readySet,
@@ -147,6 +157,9 @@ extern Gpm_Type         *repeated_type;
 /*************************************************************************
  * Functions
  */
+
+void disable_paste(int vc);
+
 
 void gpm_exited(void);
 void gpm_killed(int signo);
