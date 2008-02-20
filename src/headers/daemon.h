@@ -152,6 +152,7 @@ int do_selection(Gpm_Event *event);
 
 
 void get_console_size(Gpm_Event *ePtr);
+int get_data(Gpm_Connect *where, int whence);
 
 int old_main();
 

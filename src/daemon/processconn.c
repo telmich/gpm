@@ -19,6 +19,14 @@
  *
  ********/
 
+#include <sys/socket.h>             /* accept            */
+#include <stdlib.h>                 /* malloc            */
+#include <unistd.h>                 /* close             */
+#include <sys/un.h>                 /* unix socket       */
+#include <sys/stat.h>               /* stat              */
+#include <string.h>                 /* str*              */
+#include <errno.h>                  /* errno.h           */
+
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 
