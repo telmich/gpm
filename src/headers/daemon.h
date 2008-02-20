@@ -123,6 +123,7 @@ struct mouse_features {
 
 extern char             *opt_special;
 extern int              opt_resize;       /* not really an option          */
+extern time_t           opt_age_limit;
 extern struct options   option;           /* one should be enough for us   */
 extern int              mouse_argc[3];    /* 0 for default (unused)        */
 extern char           **mouse_argv[3];    /* and two mice                  */
@@ -152,6 +153,7 @@ extern Gpm_Type         mice[];
 extern Gpm_Type         *repeated_type;
 
 time_t                  last_selection_time;
+
 
 
 

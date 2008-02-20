@@ -19,10 +19,14 @@
  *
  ********/
 
+#include <time.h>                   /* time              */
+#include <fcntl.h>                  /* open              */
+#include <unistd.h>                 /* close             */
+
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 
-static inline void selection_paste(void)
+void selection_paste(void)
 {
    char c=3;
    int fd;
