@@ -42,27 +42,6 @@
 /* How many buttons may the mouse have? */
 /* #define MAX_BUTTONS 3  ===> not used, it is hardwired :-( */
 
-/* all the default values */
-#define DEF_TYPE          "ms"
-#define DEF_DEV           NULL     /* use the type-related one */
-#define DEF_LUT   "-a-zA-Z0-9_./\300-\326\330-\366\370-\377"
-#define DEF_SEQUENCE     "123"     /* how buttons are reordered */
-#define DEF_BAUD          1200
-#define DEF_SAMPLE         100
-#define DEF_DELTA           25
-#define DEF_ACCEL            2
-#define DEF_SCALE           10
-#define DEF_TIME           250    /* time interval (ms) for multiple clicks */
-#define DEF_THREE            0    /* have three buttons? */
-#define DEF_KERNEL           0    /* no kernel module, by default */
-
-/* 10 on old computers (<=386), 0 on current machines */
-#define DEF_CLUSTER          0    /* maximum number of clustered events */
-
-#define DEF_TEST             0
-#define DEF_PTRDRAG          1    /* double or triple click */
-#define DEF_GLIDEPOINT_TAP   0    /* tapping emulates no buttons by default */
-
 /* misc :) */
 #define GPM_NULL_DEV         "/dev/null"
 #define GPM_SYS_CONSOLE      "/dev/console"

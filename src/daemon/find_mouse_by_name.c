@@ -19,6 +19,9 @@
  *
  ********/
 
+#include <string.h>                 /* str*              */
+#include <ctype.h>                  /* isspace           */
+
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 
