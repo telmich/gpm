@@ -19,6 +19,9 @@
  *
  ********/
 
+#include <signal.h>                 /* kill              */
+#include <unistd.h>                 /* kill, getpid      */
+
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 
