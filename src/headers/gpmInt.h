@@ -69,11 +69,6 @@
 #define GPM_DEVFS_CONSOLE    "/dev/vc/0"
 #define GPM_OLD_CONSOLE      "/dev/tty0"
 
-/* for adding a mouse; add_mouse */
-#define GPM_ADD_DEVICE        0
-#define GPM_ADD_TYPE          1
-#define GPM_ADD_OPTIONS       2
-
 /*** mouse commands ***/ 
 
 #define GPM_AUX_SEND_ID    0xF2
@@ -110,13 +105,10 @@
 
 /* the other variables */
 
-extern char *opt_lut;
-extern int opt_test, opt_ptrdrag;
 extern int opt_kill;
 extern int opt_kernel, opt_explicittype;
 extern int opt_aged;
 extern time_t opt_age_limit;
-extern int opt_double;
 
 /*....................................... Prototypes */
 

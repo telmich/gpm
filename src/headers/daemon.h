@@ -96,7 +96,6 @@ struct mouse_features {
    int fd;
 };
 
-
 /*************************************************************************
  * Macros
  */
@@ -115,19 +114,32 @@ struct mouse_features {
 #define GPM_REQ_CONFIG   2
 #define GPM_REQ_NOPASTE  3
 
+/* for adding a mouse; add_mouse */
+#define GPM_ADD_DEVICE        0
+#define GPM_ADD_TYPE          1
+#define GPM_ADD_OPTIONS       2
+
 
 
 /*************************************************************************
  * Global variables
  */
 
+extern char             *opt_lut;
 extern char             *opt_special;
+
 extern int              opt_resize;       /* not really an option          */
 extern time_t           opt_age_limit;
 extern struct options   option;           /* one should be enough for us   */
 extern int              mouse_argc[3];    /* 0 for default (unused)        */
 extern char           **mouse_argv[3];    /* and two mice                  */
-extern int              opt_aged;
+
+extern int              opt_aged,
+                        opt_ptrdrag,
+                        opt_test,
+                        opt_double;
+
+
 extern int              statusX,
                         statusY,
                         statusB,
@@ -206,7 +218,6 @@ void check_kill(void);
 
 /* gpm.c */
 int old_main();
-
 
 
 #endif
