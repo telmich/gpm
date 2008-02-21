@@ -19,14 +19,22 @@
  *
  ********/
 
+#include <stdint.h>                 /* datatypes         */
+#include <fcntl.h>                  /* open              */
+#include <stdlib.h>                 /* malloc            */
+#include <string.h>                 /* str*              */
+#include <errno.h>                  /* errno.h           */
+#include <unistd.h>                 /* getuid            */
+
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
+#include "headers/gpmInt.h"         /* GPM_SYS_CONSOLE  */
 
 int loadlut(char *charset)
 {
    int i, c, fd;
    unsigned char this, next;
-   static __u32 long_array[9]={
+   static uint32_t long_array[9]={
       0x05050505, /* ugly, but preserves alignment */
       0x00000000, /* control chars     */
       0x00000000, /* digits            */
@@ -56,6 +64,8 @@ int loadlut(char *charset)
       free(option.consolename); /* allocated by main */
       if((option.consolename=malloc(strlen(GPM_SYS_CONSOLE)+1)) == NULL)
          gpm_report(GPM_PR_OOPS,GPM_MESS_NO_MEM);
+
+      /* FIXME: remove hardcoded device names */
       strcpy(option.consolename,GPM_SYS_CONSOLE);
 
       if ((fd=open(option.consolename, O_WRONLY)) < 0) gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
