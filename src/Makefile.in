@@ -14,6 +14,7 @@ include $(top_builddir)/Makefile.include
 # Main portion: regular build rules
 
 GSRC = mice.c twiddler.c synaptics.c 														\
+		daemon/add_mouse.c daemon/init_mice.c daemon/reset_mice.c					\
 		daemon/build_argv.c daemon/disable_paste.c daemon/do_client.c				\
 		daemon/do_selection.c daemon/get_console_size.c daemon/get_data.c			\
 		daemon/getmousedata.c daemon/gpm.c daemon/gpm-killed.c						\
@@ -21,8 +22,8 @@ GSRC = mice.c twiddler.c synaptics.c 														\
 		daemon/open_console.c                                            			\
 		daemon/processspecial.c daemon/processconn.c daemon/processmouse.c		\
 		daemon/processrequest.c daemon/selection_copy.c daemon/selection_paste.c\
-		daemon/cmdline.c daemon/loadlut.c daemon/find_mouse_by_name.c			\
-		daemon/usage.c daemon/check_uniqueness.c daemon/.c		\
+		daemon/cmdline.c daemon/loadlut.c daemon/find_mouse_by_name.c				\
+		daemon/usage.c daemon/check_uniqueness.c 											\
 		daemon/startup.c daemon/wait_text.c
 #		daemon/.c daemon/.c daemon/.c		\
 
