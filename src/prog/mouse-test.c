@@ -348,8 +348,8 @@ int main(int argc, char **argv)
 
       /* BUG */ /* Logitech initialization is not performed */
 
-      opt_baud=BAUD(trial);
-      printf("\r\nTrying with %i baud\r\n",opt_baud);
+      (which_mouse->opt_baud)=BAUD(trial);
+      printf("\r\nTrying with %i baud\r\n",(which_mouse->opt_baud));
       trial++;
 
       FD_ZERO(&devSet); FD_ZERO(&gotSet);
@@ -412,7 +412,7 @@ int main(int argc, char **argv)
    printf("\r\nOk, so your mouse device is \"%s\"\r\n",mousename);
 
    /* now close and reopen it, complete with initialization */
-   opt_baud=BAUD(0);
+   (which_mouse->opt_baud)=BAUD(0);
    mousefd=mousereopen(mousefd,mousename,NULL);
   
    FD_ZERO(&checkSet);
@@ -487,8 +487,8 @@ int main(int argc, char **argv)
    while (packetsize==1) {
       int success3=0,success5=0;
 	
-      opt_baud=BAUD(trial);
-      printf("\tBaud rate is %i\r\n",opt_baud);
+      (which_mouse->opt_baud)=BAUD(trial);
+      printf("\tBaud rate is %i\r\n",(which_mouse->opt_baud));
       mousefd=mousereopen(mousefd,mousename,NULL);
 	
       printf("\r\n==> Detecting the packet size\r\n");
