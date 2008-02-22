@@ -19,14 +19,12 @@ GSRC = mice.c twiddler.c synaptics.c 														\
 		daemon/do_selection.c daemon/get_console_size.c daemon/get_data.c			\
 		daemon/getmousedata.c daemon/gpm.c daemon/gpm-killed.c						\
 		daemon/header.c daemon/main.c daemon/old_main.c									\
-		daemon/open_console.c                                            			\
+		daemon/open_console.c daemon/check_kill.c daemon/getsym.c      			\
 		daemon/processspecial.c daemon/processconn.c daemon/processmouse.c		\
 		daemon/processrequest.c daemon/selection_copy.c daemon/selection_paste.c\
 		daemon/cmdline.c daemon/loadlut.c daemon/find_mouse_by_name.c				\
 		daemon/usage.c daemon/check_uniqueness.c 											\
 		daemon/startup.c daemon/wait_text.c
-#		daemon/.c daemon/.c daemon/.c		\
-
 
 GOBJ = $(GSRC:.c=.o) report.o tools.o
 
