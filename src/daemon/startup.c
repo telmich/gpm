@@ -3,9 +3,7 @@
  *
  * *Startup and Daemon functions*
  *
- * Copyright (c) 2002         Nico Schottelius <nico@schottelius.org>
- *
- * 
+ * Copyright (c) 2002-2008    Nico Schottelius <nico@schottelius.org>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -29,20 +27,11 @@
 #include <sys/types.h>  /* geteuid, mknod */
 #include <sys/stat.h>   /* mknod */
 #include <fcntl.h>      /* mknod */
-#include <unistd.h>     /* mknod */
 
 
 #include "headers/gpmInt.h"
 #include "headers/message.h"
 #include "headers/daemon.h"
-
-/* what todo atexit */
-void gpm_exited(void)
-{
-   gpm_report(GPM_PR_DEBUG,GPM_MESS_REMOVE_FILES, GPM_NODE_PID, GPM_NODE_CTL);
-   unlink(GPM_NODE_PID);
-   unlink(GPM_NODE_CTL);
-}
 
 void startup(int argc, char **argv)
 {
@@ -158,5 +147,4 @@ void startup(int argc, char **argv)
 
    init_mice(option.micelist);                  /* reads option.micelist */
    atexit(gpm_exited);                          /* call gpm_exited at the end */
-
 }
