@@ -107,13 +107,6 @@ struct mouse_features {
 
 #define MAX_VC    MAX_NR_CONSOLES  /* doesn't work before 1.3.77 */
 
-/*................................... Strange requests (iff conn->pid==0)*/
-
-#define GPM_REQ_SNAPSHOT 0
-#define GPM_REQ_BUTTONS  1
-#define GPM_REQ_CONFIG   2
-#define GPM_REQ_NOPASTE  3
-
 /* for adding a mouse; add_mouse */
 #define GPM_ADD_DEVICE        0
 #define GPM_ADD_TYPE          1

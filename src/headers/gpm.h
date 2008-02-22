@@ -79,6 +79,13 @@ extern "C" {
 #define GPM_B_RIGHT     1
 #define GPM_B_NONE      0
 
+/*................................... Strange requests (iff conn->pid==0)*/
+
+#define GPM_REQ_SNAPSHOT 0
+#define GPM_REQ_BUTTONS  1
+#define GPM_REQ_CONFIG   2
+#define GPM_REQ_NOPASTE  3
+
 /*....................................... The event types */
 
 enum Gpm_Etype {
