@@ -198,8 +198,6 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
    char* sock_name = 0;
    static char *consolename = NULL;
 
-   gpm_report(GPM_PR_DEBUG,"VC: %d",flag);
-
    /*....................................... First of all, check xterm */
 
    if ((term=(char *)getenv("TERM")) && !strncmp(term,"xterm",5)) {

@@ -510,6 +510,16 @@ static int M_sun(Gpm_Event *state,  unsigned char *data)
    return 0;
 }
 
+static int R_sun(Gpm_Event *state, int fd)
+{
+  signed char buffer[3];
+
+  buffer[0]= (state->buttons ^ 0x07) | 0x80;
+  buffer[1]= state->dx;
+  buffer[2]= -(state->dy);
+  return write(fd,buffer,3);
+}
+
 static int M_msc(Gpm_Event *state,  unsigned char *data)
 {
    state->buttons= (~data[0]) & 0x07;
@@ -2441,7 +2451,7 @@ Gpm_Type mice[]={
                                 {0xc0, 0x00, 0x00, 0x00}, 3, 1, 0, 0, R_ps2},
    {"sun",  "'msc' protocol, but only 3 bytes per packet.",
            "", M_sun, I_serial, CS8 | CSTOPB | STD_FLG,
-                                {0xf8, 0x80, 0x00, 0x00}, 3, 1, 0, 0, 0},
+                                {0xf8, 0x80, 0x00, 0x00}, 3, 1, 0, 0, R_sun},
    {"summa",  "Summagraphics or Genius tablet absolute mode(MM-Series)",
            "", M_summa, I_summa, STD_FLG,
                                 {0x80, 0x80, 0x00, 0x00}, 5, 1, 0, 1, R_summa},

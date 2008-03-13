@@ -27,19 +27,30 @@
 void gpm_report(int line, char *file, int stat, char *text, ... )
 {
    char *string = NULL;
+   int log_level;
    va_list ap;
    va_start(ap,text);
 
    switch(stat) {
-      case GPM_STAT_INFO : string = GPM_TEXT_INFO ; break;
-      case GPM_STAT_WARN : string = GPM_TEXT_WARN ; break;
-      case GPM_STAT_ERR  : string = GPM_TEXT_ERR  ; break;
-      case GPM_STAT_DEBUG: string = GPM_TEXT_DEBUG; break;
-      case GPM_STAT_OOPS : string = GPM_TEXT_OOPS; break;
+      case GPM_STAT_INFO : string = GPM_TEXT_INFO ;
+                           log_level = LOG_INFO; break;
+      case GPM_STAT_WARN : string = GPM_TEXT_WARN ;
+                           log_level = LOG_WARNING; break;
+      case GPM_STAT_ERR  : string = GPM_TEXT_ERR  ;
+                           log_level = LOG_ERR; break;
+      case GPM_STAT_DEBUG: string = GPM_TEXT_DEBUG;
+                           log_level = LOG_DEBUG; break;
+      case GPM_STAT_OOPS : string = GPM_TEXT_OOPS;
+                           log_level = LOG_CRIT; break;
    }
+#ifdef HAVE_VSYSLOG
+   syslog(log_level, string);
+   vsyslog(log_level, text, ap);
+#else
    fprintf(stderr,"%s[%s(%d)]:\n",string,file,line);
    vfprintf(stderr,text,ap);
    fprintf(stderr,"\n");
+#endif
 
    if(stat == GPM_STAT_OOPS) exit(1);  /* may a lib function call exit ???? */
 }
