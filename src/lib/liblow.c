@@ -364,11 +364,11 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
   /*....................................... Error: free all memory */
    err:
    gpm_report(GPM_PR_ERR,"Oh, oh, it's an error! possibly I die! ");
-   do {
+   while(gpm_stack) {
       new=gpm_stack->next;
       free(gpm_stack);
       gpm_stack=new;
-   } while(gpm_stack);
+   }
    if (gpm_fd>=0) close(gpm_fd);
    if (sock_name) {
       unlink(sock_name);
