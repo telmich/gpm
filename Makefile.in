@@ -90,7 +90,7 @@ TAGS:	$(SRCS) $(HDRS) src/prog/gpm-root.y do-TAGS
 # 1. Cleanup the tree, remove all generated files and so on
 distclean: barf clean do-clean do-distclean
 	rm -f config.log config.status config.cache Makefile Makefile.include
-	rm -f configure
+	rm -rf configure autom4te.cache 
 	rm -rf gpm-$(release) gpm-$(release).tar.bz2 gpm-$(release).tar.gz
 	rm -f src/$(DEPFILE)
 
