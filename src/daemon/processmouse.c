@@ -159,7 +159,11 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
    /* up and down, up and down, ... who does a do..while(0) loop ???
       and then makes a break into it... argh ! */
 
-   if (!event->dx && !event->dy && (event->buttons==oldB))
+   /* rodney 13/mar/2008 wheel movement similar to mouse movement
+    * must also be excluded from time (click) processing */
+   if (!event->dx && !event->dy
+       && !event->wdx  && !event->wdy
+       && (event->buttons==oldB) )
       do { /* so to break */
          static long awaketime;
          /*

@@ -1,0 +1,138 @@
+diff -aurp gpm-1.99.2.1-orig/src/daemon/processmouse.c gpm-1.99.2.1/src/daemon/processmouse.c
+--- gpm-1.99.2.1-orig/src/daemon/processmouse.c	2008-02-23 06:05:03.000000000 +1100
++++ gpm-1.99.2.1/src/daemon/processmouse.c	2008-03-14 21:30:32.000000000 +1100
+@@ -159,7 +159,11 @@ int processMouse(int fd, Gpm_Event *even
+    /* up and down, up and down, ... who does a do..while(0) loop ???
+       and then makes a break into it... argh ! */
+ 
+-   if (!event->dx && !event->dy && (event->buttons==oldB))
++   /* rodney 13/mar/2008 wheel movement similar to mouse movement
++    * must also be excluded from time (click) processing */
++   if (!event->dx && !event->dy
++       && !event->wdx  && !event->wdy
++       && (event->buttons==oldB) )
+       do { /* so to break */
+          static long awaketime;
+          /*
+diff -aurp gpm-1.99.2.1-orig/src/headers/daemon.h gpm-1.99.2.1/src/headers/daemon.h
+--- gpm-1.99.2.1-orig/src/headers/daemon.h	2008-02-23 06:05:03.000000000 +1100
++++ gpm-1.99.2.1/src/headers/daemon.h	2008-03-14 21:36:17.000000000 +1100
+@@ -60,8 +60,10 @@ typedef struct Gpm_Type {
+    char              *name;
+    char              *desc;      /* a descriptive line */
+    char              *synonyms;  /* extra names (the XFree name etc) as a list */
++   /* mouse specific event handler: */
+    int               (*fun)(Gpm_Event *state, unsigned char *data);
+ 
++   /* mouse specific initialisation function: */
+    struct Gpm_Type   *(*init)(int fd, unsigned short flags,
+                      struct Gpm_Type   *type, int argc, char **argv);
+ 
+diff -aurp gpm-1.99.2.1-orig/src/headers/gpm.h gpm-1.99.2.1/src/headers/gpm.h
+--- gpm-1.99.2.1-orig/src/headers/gpm.h	2008-02-23 06:05:03.000000000 +1100
++++ gpm-1.99.2.1/src/headers/gpm.h	2008-03-14 21:32:49.000000000 +1100
+@@ -70,6 +70,17 @@ extern "C" {
+ #define GPM_NODE_FIFO     _PATH_DEV	"gpmdata"
+ 
+ /*....................................... Cfg buttons */
++/* Each button has one bit in the 16 bit buttons field.
++ * Mouse movement and wheel movement are not associated with a button
++ * i.e. buttons=GPM_B_NONE in these cases
++ * (except for ms3 mouse, for reasons unknown?)
++ * The middle button if pressed down (or clicked) is independent of 
++ *  the wheel "device" which it happens to be associated with
++ * The use of GPM_B_UP/DOWN with ms3 is unclear. Maybe the wheel 
++ * could be rolled forward then backward
++ * and this would generate a 'click' event on 'button 5' GPM_B_UP,
++ * but really the expected behaviour of wheel is movement, typically
++ * used for jump scrolling or for jumping between fields on a form. */
+ 
+ #define GPM_B_DOWN      32
+ #define GPM_B_UP        16
+@@ -124,10 +135,17 @@ enum Gpm_Margin {GPM_TOP=1, GPM_BOT=2, G
+ typedef struct Gpm_Event {
+   unsigned char buttons, modifiers;  /* try to be a multiple of 4 */
+   unsigned short vc;
+-  short dx, dy, x, y;
++  short dx, dy, x, y; /* displacement x,y for this event, and absolute x,y */
+   enum Gpm_Etype type;
++  /* clicks e.g. double click are determined by time-based processing */
+   int clicks;
+   enum Gpm_Margin margin;
++  /* wdx/y: displacement of wheels in this event. Absolute values are not 
++   * required, because wheel movement is typically used for scrolling
++   * or selecting fields, not for cursor positioning. The application
++   * can determine when the end of file or form is reached, and not
++   * go any further. 
++   * A single mouse will use wdy, "vertical scroll" wheel. */
+   short wdx, wdy;
+ }              Gpm_Event;
+ 
+diff -aurp gpm-1.99.2.1-orig/src/lib/liblow.c gpm-1.99.2.1/src/lib/liblow.c
+--- gpm-1.99.2.1-orig/src/lib/liblow.c	2008-02-23 06:05:03.000000000 +1100
++++ gpm-1.99.2.1/src/lib/liblow.c	2008-03-14 21:44:12.000000000 +1100
+@@ -198,7 +198,7 @@ int Gpm_Open(Gpm_Connect *conn, int flag
+    char* sock_name = 0;
+    static char *consolename = NULL;
+ 
+-   gpm_report(GPM_PR_DEBUG,"VC: %d",flag);
++   // gpm_report(GPM_PR_DEBUG,"VC: %d",flag);
+ 
+    /*....................................... First of all, check xterm */
+ 
+diff -aurp gpm-1.99.2.1-orig/src/mice.c gpm-1.99.2.1/src/mice.c
+--- gpm-1.99.2.1-orig/src/mice.c	2008-02-23 06:05:03.000000000 +1100
++++ gpm-1.99.2.1/src/mice.c	2008-03-14 21:39:42.000000000 +1100
+@@ -552,9 +552,10 @@ static int R_imps2(Gpm_Event *state, int
+       (dy > 0 ? 0x20 : 0);
+    buffer[1] = dx & 0xFF;
+    buffer[2] = (-dy) & 0xFF;
+-   buffer[3] = 
+-      (state->buttons & GPM_B_UP ? -1 : 0) + 
+-      (state->buttons & GPM_B_DOWN ? 1 : 0);
++   if (state->wdy > 0) buffer[3] = 0xff;
++   if (state->wdy < 0) buffer[3] = 0x01;
++   if (state->wdx > 0) buffer[3] = 0xfe;
++   if (state->wdx < 0) buffer[3] = 0x02;
+   
+    return write(fd,buffer,4);
+ 
+@@ -651,20 +652,25 @@ static int M_imps2(Gpm_Event *state,  un
+    state->dy = (data[0] & 0x20) ? -(data[2] - 256) : -data[2];
+    
+    /* The wheels.. */
+-   switch (data[3] & 0x0f) {
+-      case 0x0e: state->wdx = +1; break;
+-      case 0x02: state->wdx = -1; break;
+-      case 0x0f: state->wdy = +1; break;
+-      case 0x01: state->wdy = -1; break;
++   unsigned char wheel = data[3] & 0x0f;
++   if (wheel > 0) {
++     // use the event type GPM_MOVE rather than GPM_DOWN for wheel movement
++     // to avoid single/double/triple click processing:
++     switch (wheel) {
++       /* rodney 13/mar/2008
++        * The use of GPM_B_UP / GPM_B_DOWN is very unclear; 
++        *  only mouse type ms3 uses these
++        * For this mouse, we only support the relative movement
++        * i.e. no button is set (same as mouse movement), wdy changes +/-
++        *  according to wheel movement (+ for rolling away from user)
++        * wdx (horizontal scroll) is for a second wheel. They do exist! */
++        case 0x0f: state->wdy = +1; break;
++        case 0x01: state->wdy = -1; break;
++        case 0x0e: state->wdx = +1; break;
++        case 0x02: state->wdx = -1; break;
++     }
+    }
+-   
+-   /* old code:
+-      - did it signed: 
+-   state->buttons |= (data[3]<0) * GPM_B_UP + (data[3]>0) * GPM_B_DOWN;
+-      - and unsigned:
+-   state->buttons |= (data[3]>127) * GPM_B_UP + (data[3]<127) * GPM_B_DOWN;
+-   */
+-    
++
+    return 0;
+ 
+ }

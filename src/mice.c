@@ -562,9 +562,10 @@ static int R_imps2(Gpm_Event *state, int fd)
       (dy > 0 ? 0x20 : 0);
    buffer[1] = dx & 0xFF;
    buffer[2] = (-dy) & 0xFF;
-   buffer[3] = 
-      (state->buttons & GPM_B_UP ? -1 : 0) + 
-      (state->buttons & GPM_B_DOWN ? 1 : 0);
+   if (state->wdy > 0) buffer[3] = 0xff;
+   if (state->wdy < 0) buffer[3] = 0x01;
+   if (state->wdx > 0) buffer[3] = 0xfe;
+   if (state->wdx < 0) buffer[3] = 0x02;
   
    return write(fd,buffer,4);
 
@@ -661,20 +662,25 @@ static int M_imps2(Gpm_Event *state,  unsigned char *data)
    state->dy = (data[0] & 0x20) ? -(data[2] - 256) : -data[2];
    
    /* The wheels.. */
-   switch (data[3] & 0x0f) {
-      case 0x0e: state->wdx = +1; break;
-      case 0x02: state->wdx = -1; break;
-      case 0x0f: state->wdy = +1; break;
-      case 0x01: state->wdy = -1; break;
+   unsigned char wheel = data[3] & 0x0f;
+   if (wheel > 0) {
+     // use the event type GPM_MOVE rather than GPM_DOWN for wheel movement
+     // to avoid single/double/triple click processing:
+     switch (wheel) {
+       /* rodney 13/mar/2008
+        * The use of GPM_B_UP / GPM_B_DOWN is very unclear; 
+        *  only mouse type ms3 uses these
+        * For this mouse, we only support the relative movement
+        * i.e. no button is set (same as mouse movement), wdy changes +/-
+        *  according to wheel movement (+ for rolling away from user)
+        * wdx (horizontal scroll) is for a second wheel. They do exist! */
+        case 0x0f: state->wdy = +1; break;
+        case 0x01: state->wdy = -1; break;
+        case 0x0e: state->wdx = +1; break;
+        case 0x02: state->wdx = -1; break;
+     }
    }
-   
-   /* old code:
-      - did it signed: 
-   state->buttons |= (data[3]<0) * GPM_B_UP + (data[3]>0) * GPM_B_DOWN;
-      - and unsigned:
-   state->buttons |= (data[3]>127) * GPM_B_UP + (data[3]<127) * GPM_B_DOWN;
-   */
-    
+
    return 0;
 
 }
