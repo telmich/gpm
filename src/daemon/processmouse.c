@@ -17,6 +17,10 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
+ * call getMouseData to get hardware device data, call mouse device's fun() 
+ * to retrieve the hardware independent event data, then optionally repeat
+ * the data via repeat_fun() to the repeater device
+ *
  ********/
 
 #include <sys/stat.h>               /* stat              */
@@ -27,42 +31,37 @@
 #include <time.h>                   /* time              */
 #include <sys/time.h>               /* gettimeofday      */
 
-
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 
-
 #define  abs(value)              ((value) < 0 ? -(value) : (value))
+#define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))
+#define DIF_TIME(t1,t2) ((t2.tv_sec -t1.tv_sec) *1000 + \
+                         (t2.tv_usec-t1.tv_usec)/1000)
 
-/*-------------------------------------------------------------------
- * call getMouseData to get hardware device data, call mouse device's fun() 
- * to retrieve the hardware independent event data, then optionally repeat
- * the data via repeat_fun() to the repeater device
- *-------------------------------------------------------------------*/
+
 int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
 {
-   char *data;
-   static int fine_dx, fine_dy;
-   static int i, j, m;
-   static Gpm_Event nEvent;
-   static struct vt_stat stat;
-   static struct timeval tv1={0,0}, tv2; /* tv1==0: first click is single */
-   static struct timeval timeout={0,0};
-   fd_set fdSet;
-   static int newB=0, oldB=0, oldT=0; /* old buttons and Type to chain events */
-   /* static int buttonlock, buttonlockflag; */
+   char        *data;
+   static int  fine_dx,
+               fine_dy,
+               i, j, m,
+               newB=0,  /* old buttons and Type to chain events */
+               oldB=0,
+               oldT=0; 
 
-#define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))
-#define DIF_TIME(t1,t2) ((t2.tv_sec -t1.tv_sec) *1000+ \
-                          (t2.tv_usec-t1.tv_usec)/1000)
+   static Gpm_Event        nEvent;
+   static struct vt_stat   stat;
+   static struct timeval   tv1={0,0}, tv2; /* tv1==0: first click is single */
+   static struct timeval   timeout={0,0};
+   fd_set                  fdSet;
 
+   oldT = event->type;
 
-   oldT=event->type;
-
-   if (eventFlag) {
+   if(eventFlag) {
       eventFlag=0;
 
-      if ((which_mouse->m_type)->absolute) {     /* a pen or other absolute device */
+      if((which_mouse->m_type)->absolute) {     /* a pen or other absolute device */
          event->x=nEvent.x;
          event->y=nEvent.y;
       }
@@ -70,16 +69,23 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
       event->dy=nEvent.dy;
       event->buttons=nEvent.buttons;
    } else {
-      event->dx=event->dy=0;
-      event->wdx=event->wdy=0;
-      nEvent.modifiers = 0; /* some mice set them */
-      FD_ZERO(&fdSet); FD_SET(fd,&fdSet); i=0;
+      event->dx=event->dy   = 0;
+      event->wdx=event->wdy = 0;
+      nEvent.modifiers      = 0; /* some mice set them */
+      i                     = 0;
+
+      FD_ZERO(&fdSet);
+      FD_SET(fd,&fdSet);
 
       do { /* cluster loop */
-         if(((data=getMouseData(fd,(which_mouse->m_type),kd_mode))==NULL)
+         if(((data=getMouseData(fd, (which_mouse->m_type), kd_mode)) == NULL)
             || ((*((which_mouse->m_type)->fun))(&nEvent,data)==-1) ) {
-            if (!i) return 0;
-            else break;
+            
+            if (!i) {
+               return 0;
+            } else {
+               break;
+            }
          }
 
          event->modifiers = nEvent.modifiers; /* propagate modifiers */
@@ -90,7 +96,7 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
          oldB=newB; newB=nEvent.buttons;
          if (!i) event->buttons=nEvent.buttons;
 
-         if (oldB!=newB) {
+         if (oldB != newB) {
             eventFlag = (i!=0)*(which_mouse-mouse_table); /* 1 or 2 */
             break;
          }
@@ -261,14 +267,15 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
 
    event->margin=m;
 
-   gpm_report(GPM_PR_DEBUG,"M: %3i %3i (%3i %3i) - butt=%i vc=%i cl=%i",
+   gpm_report(GPM_PR_DEBUG,"dx: %3i dy: %3i x: %3i y: %3i butt: %i vc: %i clicks: %i",
                                        event->dx,event->dy,
                                        event->x,event->y,
                                        event->buttons, event->vc,
                                        event->clicks);
 
    /* update the global state */
-   statusX=event->x; statusY=event->y;
+   statusX=event->x;
+   statusY=event->y;
 
    if (opt_special && event->type & GPM_DOWN) 
       return processSpecial(event);
