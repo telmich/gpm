@@ -27,7 +27,8 @@ GSRC = mice.c twiddler.c synaptics.c 														\
 		daemon/usage.c daemon/check_uniqueness.c 											\
 		daemon/startup.c daemon/wait_text.c
 
-GDRIVERS = drivers/ms/m_ms.c
+GDRIVERS = 	drivers/ms/m_ms.c	\
+				drivers/geni/m_geni.c
 
 GSRC += $(GDRIVERS)
 

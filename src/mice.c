@@ -338,30 +338,6 @@ static int R_summa(Gpm_Event *state, int fd)
 }
 
 
-
-/* 'Genitizer' (kw@dtek.chalmers.se 11/12/97) */
-static int M_geni(Gpm_Event *state,  unsigned char *data)
-{
-   /* this is a little confusing. If we use the stylus, we
-    * have three buttons (tip, lower, upper), and if
-    * we use the puck we have four buttons. (And the
-    * protocol is a little mangled if several of the buttons
-    * on the puck are pressed simultaneously. 
-    * I don't use the puck, hence I try to decode three buttons
-    * only. tip = left, lower = middle, upper = right
-    */
-   state->buttons = 
-      (data[0] & 0x01)<<2 | 
-      (data[0] & 0x02) |
-      (data[0] & 0x04)>>2;
-
-   state->dx = ((data[1] & 0x3f) ) * ((data[0] & 0x10)?1:-1);   
-   state->dy = ((data[2] & 0x3f) ) * ((data[0] & 0x8)?-1:1);
-
-   return 0;
-}
-
-
 /* m$ 'Intellimouse' (steveb 20/7/97) */
 static int M_ms3(Gpm_Event *state,  unsigned char *data)
 {

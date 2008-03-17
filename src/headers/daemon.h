@@ -266,5 +266,6 @@ int old_main();
  */
 int M_ms(Gpm_Event *state,  unsigned char *data);
 
+int M_geni(Gpm_Event *state,  unsigned char *data);
 
 #endif
