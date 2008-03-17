@@ -217,25 +217,6 @@ static int M_evdev (Gpm_Event * state, unsigned char *data)
 }
 #endif /* HAVE_LINUX_INPUT_H */
 
-static int M_ms(Gpm_Event *state,  unsigned char *data)
-{
-   /*
-    * some devices report a change of middle-button state by
-    * repeating the current button state  (patch by Mark Lord)
-    */
-   static unsigned char prev=0;
-
-   if (data[0] == 0x40 && !(prev|data[1]|data[2]))
-      state->buttons = GPM_B_MIDDLE; /* third button on MS compatible mouse */
-   else
-      state->buttons= ((data[0] & 0x20) >> 3) | ((data[0] & 0x10) >> 4);
-   prev = state->buttons;
-   state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
-   state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
-
-   return 0;
-}
-
 static int M_ms_plus(Gpm_Event *state, unsigned char *data)
 {
    static unsigned char prev=0;

@@ -27,6 +27,10 @@ GSRC = mice.c twiddler.c synaptics.c 														\
 		daemon/usage.c daemon/check_uniqueness.c 											\
 		daemon/startup.c daemon/wait_text.c
 
+GDRIVERS = drivers/ms/m_ms.c
+
+GSRC += $(GDRIVERS)
+
 GOBJ = $(GSRC:.c=.o) report.o tools.o
 
 LSRC = lib/liblow.c lib/libhigh.c lib/libxtra.c lib/report-lib.c
@@ -155,7 +159,8 @@ prog/gpm-root: prog/gpm-root.c lib/libgpm.so
 	$(CC) -I. @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@.o $<
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.so
 
-prog/mouse-test:	prog/mouse-test.o mice.o twiddler.o synaptics.o prog/open_console.o generic/limit_delta.o
+prog/mouse-test:	prog/mouse-test.o mice.o twiddler.o synaptics.o prog/open_console.o generic/limit_delta.o \
+						$(GDRIVERS:.c=.o)
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS) -lm
 
 $(PROG):	lib/libgpm.so

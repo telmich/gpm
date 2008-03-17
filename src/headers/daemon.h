@@ -261,5 +261,10 @@ void check_kill(void);
 /* gpm.c */
 int old_main();
 
+/*************************************************************************
+ * Drivers
+ */
+int M_ms(Gpm_Event *state,  unsigned char *data);
+
 
 #endif
