@@ -98,9 +98,9 @@ struct mouse_features {
    int fd;
 };
 
-/*========================================================================*/
-/* Parsing argv: helper dats struct function
-/*========================================================================*/
+/*========================================================================
+ * Parsing argv: helper dats struct function                               
+ *========================================================================*/
 enum argv_type {
    ARGV_BOOL = 1,
    ARGV_INT, /* "%i" */
@@ -225,6 +225,8 @@ int   getsym(const unsigned char *p0, unsigned char *res);
 
 void  gpm_exited(void);
 void  gpm_killed(int signo);
+
+int limit_delta(int delta, int min, int max);
 
 int   open_console(const int mode);
 int old_main();
