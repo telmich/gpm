@@ -98,6 +98,29 @@ struct mouse_features {
    int fd;
 };
 
+/*========================================================================*/
+/* Parsing argv: helper dats struct function
+/*========================================================================*/
+enum argv_type {
+   ARGV_BOOL = 1,
+   ARGV_INT, /* "%i" */
+   ARGV_DEC, /* "%d" */
+   ARGV_STRING,
+   /* other types must be added */
+   ARGV_END = 0
+};
+
+typedef struct argv_helper {
+   char *name;
+   enum argv_type type;
+   union u {
+      int *iptr;   /* used for int and bool arguments */
+      char **sptr; /* used for string arguments, by strdup()ing the value */
+   } u;
+   int value; /* used for boolean arguments */
+} argv_helper;
+
+
 /*************************************************************************
  * Macros
  */
