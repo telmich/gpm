@@ -19,10 +19,10 @@
 # Written on: 20080314
 #
 
-version=$1
+version="$1"
 me=${0##*/}
 
-if [ "$version" ]; then
+if [ ! "$version" ]; then
    echo "${me}: Version"
    exit 1
 fi
