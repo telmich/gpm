@@ -76,81 +76,6 @@
 #include "headers/synaptics.h"
 #include "headers/message.h"
 
-static int parse_argv(argv_helper *info, int argc, char **argv)
-{
-   int i, j = 0, errors = 0;
-   long l;
-   argv_helper *p;
-   char *s, *t;
-   int base = 0; /* for strtol */
-
-
-   for (i=1; i<argc; i++) {
-      for (p = info; p->type != ARGV_END; p++) {
-         j = strlen(p->name);
-         if (strncmp(p->name, argv[i], j))
-            continue;
-         if (isalnum(argv[i][j]))
-            continue;
-         break;
-      }
-      if (p->type == ARGV_END) { /* not found */
-         fprintf(stderr, "%s: Uknown option \"%s\" for pointer \"%s\"\n",
-                  option.progname, argv[i], argv[0]);
-         errors++;
-         continue;
-      }
-      /* Found. Look for trailing stuff, if any */
-      s = argv[i]+j;
-      while (*s && isspace(*s)) s++; /* skip spaces */
-      if (*s == '=') s++; /* skip equal */
-      while (*s && isspace(*s)) s++; /* skip other spaces */
-
-      /* Now parse what s is */
-      switch(p->type) {
-         case ARGV_BOOL:
-            if (*s) {
-               gpm_report(GPM_PR_ERR,GPM_MESS_OPTION_NO_ARG, option.progname,p->name,s);
-               errors++;
-            }
-            *(p->u.iptr) = p->value;
-            break;
-
-         case ARGV_DEC:
-            base = 10; /* and fall through */
-         case ARGV_INT:
-            l = strtol(s, &t, base);
-            if (*t) {
-               gpm_report(GPM_PR_ERR,GPM_MESS_INVALID_ARG, option.progname, s, p->name);
-               errors++;
-               break;
-            }
-            *(p->u.iptr) = (int)l;
-            break;
-
-         case ARGV_STRING:
-            *(p->u.sptr) = strdup(s);
-            break;
-
-         case ARGV_END: /* let's please "-Wall" */
-            break;
-      }
-   } /* for i in argc */
-   if (errors) gpm_report(GPM_PR_ERR,GPM_MESS_CONT_WITH_ERR, option.progname);
-   return errors;
-}
-
-/*========================================================================*/
-/* Provide a common error engine by parsing with an empty option-set */
-/*========================================================================*/
-static volatile int check_no_argv(int argc, char **argv)
-{
-   static argv_helper optioninfo[] = {
-      {"",       ARGV_END}
-      };
-   return parse_argv(optioninfo, argc, argv);
-}
-
 /*========================================================================*/
 /* Parse the "old" -o options */
 /*========================================================================*/
@@ -1842,23 +1767,6 @@ static Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type,
 
    /* ps2 was not found!!! */
    return(NULL);
-}
-
-/*
- * This works with Dexxa Optical Mouse, but because in X same initstring
- * is named ExplorerPS/2 so I named it in the same way.
- */
-static Gpm_Type *I_exps2(int fd, unsigned short flags,
-          struct Gpm_Type *type, int argc, char **argv)
-{
-   static unsigned char s1[] = { 243, 200, 243, 200, 243, 80, };
-
-   if (check_no_argv(argc, argv)) return NULL;
-
-   write (fd, s1, sizeof (s1));
-   usleep (30000);
-   tcflush (fd, TCIFLUSH);
-   return type;
 }
 
 static Gpm_Type *I_twid(int fd, unsigned short flags,

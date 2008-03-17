@@ -213,6 +213,9 @@ time_t                  last_selection_time;
  */
 
 char **build_argv(char *argv0, char *str, int *argcptr, char sep);
+
+volatile int check_no_argv(int argc, char **argv);
+
 void disable_paste(int vc);
 
 int   do_client(Gpm_Cinfo *cinfo, Gpm_Event *event);
@@ -230,6 +233,8 @@ int limit_delta(int delta, int min, int max);
 
 int   open_console(const int mode);
 int old_main();
+
+int parse_argv(argv_helper *info, int argc, char **argv);
 
 int processConn(int fd);
 int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode);
@@ -265,6 +270,8 @@ int old_main();
  * Drivers
  */
 
+Gpm_Type *I_exps2(int fd, unsigned short flags, struct Gpm_Type *type,
+                  int argc, char **argv); 
 int M_brw(Gpm_Event *state,  unsigned char *data);
 
 
