@@ -29,7 +29,7 @@ GSRC = mice.c twiddler.c synaptics.c 														\
 
 GDRIVERS = 	drivers/ms/m_ms.c																	\
 				drivers/geni/m_geni.c															\
-				drivers/ms3/m_ms3.c
+				drivers/ms3/m_ms3.c drivers/ms3/r_ms3.c
 
 GSRC += $(GDRIVERS)
 
