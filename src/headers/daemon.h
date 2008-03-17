@@ -264,7 +264,10 @@ int old_main();
 /*************************************************************************
  * Drivers
  */
+
 int M_ms(Gpm_Event *state,  unsigned char *data);
+
+int M_ms3(Gpm_Event *state,  unsigned char *data);
 
 int M_geni(Gpm_Event *state,  unsigned char *data);
 

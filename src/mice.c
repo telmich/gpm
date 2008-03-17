@@ -337,29 +337,6 @@ static int R_summa(Gpm_Event *state, int fd)
    return write(fd,buffer,5);
 }
 
-
-/* m$ 'Intellimouse' (steveb 20/7/97) */
-static int M_ms3(Gpm_Event *state,  unsigned char *data)
-{
-   state->wdx = state->wdy = 0;
-   state->buttons= ((data[0] & 0x20) >> 3)   /* left */
-      | ((data[3] & 0x10) >> 3)   /* middle */
-      | ((data[0] & 0x10) >> 4)   /* right */
-      | (((data[3] & 0x0f) == 0x0f) * GPM_B_UP)     /* wheel up */
-      | (((data[3] & 0x0f) == 0x01) * GPM_B_DOWN);  /* wheel down */
-   state->dx = (signed char) (((data[0] & 0x03) << 6) | (data[1] & 0x3F));
-   state->dy = (signed char) (((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
-
-   switch (data[3] & 0x0f) {
-      case 0x0e: state->wdx = +1; break;
-      case 0x02: state->wdx = -1; break;
-      case 0x0f: state->wdy = +1; break;
-      case 0x01: state->wdy = -1; break;
-   }
-
-   return 0;
-}
-
 static int R_ms3(Gpm_Event *state, int fd)
 {
 
