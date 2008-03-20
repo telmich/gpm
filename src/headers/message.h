@@ -45,7 +45,7 @@
 #define GPM_TEXT_WARN   "*** warning "
 #define GPM_TEXT_DEBUG  "*** debug "
 #define GPM_TEXT_ERR    "*** err "
-#define GPM_TEXT_OOPS   "O0o.oops(): "
+#define GPM_TEXT_OOPS   "Ooo.ps(): "
 
 /* strings */
 #define GPM_STRING_INFO   GPM_TEXT_INFO FLP
@@ -62,7 +62,7 @@
 /* messages */
 
 /* info */
-#define GPM_MESS_VERSION            "gpm " GPM_RELEASE " (X-Mas), " GPM_RELEASE_DATE
+#define GPM_MESS_VERSION            "gpm " GPM_RELEASE ", " GPM_RELEASE_DATE
 #define GPM_MESS_STARTED            "Started gpm successfully. Entered daemon mode."
 #define GPM_MESS_KILLED             "Killed gpm(%d)."
 #define GPM_MESS_SKIP_DATA          "Skipping a data packet (?)"
@@ -98,7 +98,6 @@
          "                     Use a non-existent type (e.g. \"help\") to get a list\n" \
          "    -T               test: read mouse, no clients\n" \
          "    -v               print version and exit\n" \
-         "    -V verbosity     increase number of logged messages\n\n\n" \
          "    Examples:\n\n" \
          "    gpm -m /dev/misc/psaux -t ps2    to start with a ps2 mouse\n" \
          "    gpm -m /dev/tts/0 -t mman        to use mouse man on COM1\n\n"

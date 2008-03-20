@@ -85,7 +85,7 @@ char *getMouseData(int fd, Gpm_Type *type, int kd_mode)
       gpm_report(GPM_PR_INFO,GPM_MESS_SKIP_DATA);
       return NULL;
    }
-   gpm_report(GPM_PR_DEBUG,GPM_MESS_DATA_4,data[0],data[1],data[2],data[3]);
+   gpm_report(GPM_PR_DEBUG, GPM_MESS_DATA_4, data[0], data[1], data[2], data[3]);
    return data;
 }
 
