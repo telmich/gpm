@@ -247,7 +247,7 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
             gpm_report(GPM_PR_OOPS,GPM_MESS_NO_MEM);
          memcpy(tty, consolename, strlen(consolename)-1);
          sprintf(&tty[strlen(consolename) - 1], "%i", flag);
-      } else { /* use your current vc */ 
+      } else if (flag==0) { /* use your current vc */ 
          if (isatty(0)) tty = ttyname(0);             /* stdin */
          if (!tty && isatty(1)) tty = ttyname(1);     /* stdout */
          if (!tty && isatty(2)) tty = ttyname(2);     /* stderr */
@@ -257,7 +257,8 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
          }   
           
          conn->vc=atoi(&tty[strlen(consolename)-1]);
-      }
+      } else /* a default handler -- use console */
+        tty=strdup(consolename);
 
       if (gpm_consolefd == -1)
          if ((gpm_consolefd=open(tty,O_WRONLY)) < 0) {
