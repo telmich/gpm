@@ -1,7 +1,23 @@
 * From 1.20.1 to 1.20.3:
-   o many cleanups
-   o etouch support
+   o Applied many cleanups
+   o Added etouch support
+
+   pre5:
+      Fix default handler in liblow.c
+   pre4:
+      gpm.c and gpn.c were split off from each other.
+      Some Debian patches were applied.
+   pre3:
+      Many cleanups based on 1.20.1 were made, which should
+      make it usable for distributors and end-users.
+   pre2:
+      Pre-distributors release
+   pre1:
+      First compiling version made of 1.20.1 and bugfixes.
+
 * From 1.20.1 to 1.20.2:
+   * 1.20.2 does not exist as a real release, it is broken.
+
 * From 1.20.0 to 1.20.1: (bugfixes/code clean)
    o synaptics ps2 touchpad support
    o code cleanup in various main files
