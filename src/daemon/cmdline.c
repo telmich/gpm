@@ -32,7 +32,7 @@
 void cmdline(int argc, char **argv)
 {
    extern struct options option;
-   char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:TuvV::23";
+   char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:Tuv23";
    int  opt;
 
    /* initialize for the dual mouse */ 
