@@ -1,0 +1,60 @@
+#!/bin/sh
+# Nico Schottelius
+# Build release tar
+# Date: Sat Oct 15 21:38:29 CEST 2005
+# Last Changed: ls -l
+
+if [ $# -ne 1 ]; then
+   echo "This is a maintainer-only script to release cinit"
+   echo $(basename $0): version
+   exit 1
+fi
+
+if [ ! -d .git ]; then
+   echo "Missing .git"
+   exit 1
+fi
+
+set -e
+version_1="$1"
+version_conf="$(awk -F= '/^release=/ { print $2 }' configure.in)"
+
+hier=${0%/*}
+
+echo "=> Version you want:    $version_1"
+echo "=> Version conf:        $version_conf"
+
+if [ "$version_1" = "$version_conf" ]; then
+   echo "=> Version confirmed."
+else
+   echo "That is not ok"
+   exit 1
+fi
+
+TAR_NAME="gpm-${version_1}.tar.bz2"
+OUT_NAME="../$TAR_NAME"
+D_HOST=home.schottelius.org
+D_BASE=www/org/schottelius/unix/www/gpm
+D_DIR=${D_BASE}/archives/
+D_SOURCE=${D_BASE}/browse_source/
+LINK=current
+
+echo "Release version $version_1 and copy to ${D_HOST}?"
+echo -n "=> Continue? "
+read yes
+
+echo "Creating bzip2 compressed tar"
+#tar cj -X "$DIR/.exclude" -C "$DDIR" -f "$OUT_NAME" "$RDIR"
+"${hier}/git-archiv-tarbz2.sh" "${version_1}"
+
+chmod 0644 "$OUT_NAME"
+echo "Transfering to $D_HOST"
+scp "$OUT_NAME" "$D_HOST:$D_DIR"
+
+echo "Extracting to $D_SOURCE"
+ssh "$D_HOST" "tar xfj $D_DIR/$TAR_NAME -C $D_SOURCE"
+
+echo "Correcting paranoid permissions"
+ssh "$D_HOST" "find \"$D_SOURCE/$RDIR\" -type f -exec chmod 0644 {} \\;"
+ssh "$D_HOST" "find \"$D_SOURCE/$RDIR\" -type d -exec chmod 0755 {} \\;"
+echo "Please do not forget to update the website..."
