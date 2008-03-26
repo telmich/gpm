@@ -301,7 +301,13 @@ int M_ms(Gpm_Event *state,  unsigned char *data);
 int M_ms3(Gpm_Event *state,  unsigned char *data);
 int R_ms3(Gpm_Event *state, int fd);
 
+int M_ms_plus(Gpm_Event *state, unsigned char *data);
+int M_ms_plus_lr(Gpm_Event *state,  unsigned char *data);
+
+
 
 int M_geni(Gpm_Event *state,  unsigned char *data);
+
+int M_summa(Gpm_Event *state, unsigned char *data);
 
 #endif
