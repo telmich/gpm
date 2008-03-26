@@ -86,6 +86,32 @@ int realposx=-1, realposy=-1;
 
 #define GPM_B_BOTH (GPM_B_LEFT|GPM_B_RIGHT)
 
+/*  Genius Wizardpad tablet  --  Matt Kimball (mkimball@xmission.com)  */
+static int wizardpad_width = -1;
+static int wizardpad_height = -1;
+static int M_wp(Gpm_Event *state,  unsigned char *data)
+{
+   int x, y, pressure;
+
+   x = ((data[4] & 0x1f) << 12) | ((data[3] & 0x3f) << 6) | (data[2] & 0x3f);
+   state->x = x * win.ws_col / (wizardpad_width * 40);
+   realposx = x * 16383 / (wizardpad_width * 40);
+
+   y = ((data[7] & 0x1f) << 12) | ((data[6] & 0x3f) << 6) | (data[5] & 0x3f);
+   state->y = win.ws_row - y * win.ws_row / (wizardpad_height * 40) - 1;
+   realposy = 16383 - y * 16383 / (wizardpad_height * 40) - 1;  
+
+   pressure = ((data[9] & 0x0f) << 4) | (data[8] & 0x0f);
+
+   state->buttons=
+      (pressure >= 0x20) * GPM_B_LEFT +
+      !!(data[1] & 0x02) * GPM_B_RIGHT +
+      /* the 0x08 bit seems to catch either of the extra buttons... */
+      !!(data[1] & 0x08) * GPM_B_MIDDLE;
+
+   return 0;
+}
+
 /*========================================================================*/
 /* Then, mice should be initialized */
 
