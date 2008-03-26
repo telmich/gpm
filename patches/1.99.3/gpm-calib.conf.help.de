@@ -1,0 +1,23 @@
+From: Michael Beckers <michael-beckers __at__ gmx.net>
+To: spida //at\\ spida.net
+Subject: gpm-calib.conf
+Hi Timo!
+
+Das Dateiformat sieht wie folgt aus:
+
+ex_min ex_max ey_min ey_max sx_min sx_max sy_min sy_max
+
+wobei alle e* die Reichweite der Koordinaten angeben, die aus dem 
+Event-Interface kommen und alle r* die Bilschirmkoordinaten sind, auf 
+die abgebildet wird. Alle Werte werden nur von Leerzeichen getrennt.
+Das eGalax gibt über das Event-Interface ungefähr Werte zwischen 0 und 
+2000 für beide Achsen aus. Die Bildschirmkoordinaten sollten immer auf 0 
+beim Minimum und auf der Bildschirmauflösung minus 1 beim Maximum 
+stehen. Für Textmodi entspricht die Auflösung der Textauflösung. Bei 
+Framebuffer-Konsolen kann ich es nicht mit Sicherheit sagen.
+
+Für 800x600 auf dem eGalax sollte die Datei also ungefähr so aussehen:
+
+50 1950 50 1950 0 799 0 599
+
+Gruß, Micha.

@@ -73,9 +73,11 @@ int statusX,statusY,statusB; /* to return info */
 
 struct mouse_features mouse_table[3] = {
    {
-      DEF_TYPE, DEF_DEV, DEF_SEQUENCE,
+      DEF_TYPE, DEF_DEV, DEF_SEQUENCE, DEF_CALIB,
       DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, 0 /* scaley */,
       DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_GLIDEPOINT_TAP,
+      DEF_DMINX, DEF_DMAXX, DEF_DMINY, DEF_DMAXY,
+      DEF_OMINX, DEF_OMAXX, DEF_OMINY, DEF_OMAXY,
       (char *)NULL /* extra */,
       (Gpm_Type *)NULL,
       -1

@@ -32,7 +32,7 @@
 void cmdline(int argc, char **argv)
 {
    extern struct options option;
-   char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:TuvV::23";
+   char options[]="a:A::b:B:c:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:TuvV::23";
    int  opt;
 
    /* initialize for the dual mouse */ 
@@ -47,6 +47,7 @@ void cmdline(int argc, char **argv)
                      opt_age_limit = atoi(optarg);       break;
          case 'b': (which_mouse->opt_baud) = atoi(optarg);              break;
          case 'B': (which_mouse->opt_sequence) = optarg;                break;
+         case 'c': (which_mouse->opt_calib) = optarg;                     break;
          case 'd': (which_mouse->opt_delta) = atoi(optarg);             break;
          case 'D': option.run_status = GPM_RUN_DEBUG;    break;
          case 'g': (which_mouse->opt_glidepoint_tap)=atoi(optarg);      break;

@@ -36,6 +36,7 @@
 void startup(int argc, char **argv)
 {
    int i, opt;
+   FILE* calib_file;
 
    static struct {
       char *in;
@@ -104,6 +105,21 @@ void startup(int argc, char **argv)
       (which_mouse->m_type) = find_mouse_by_name((which_mouse->opt_type));
       if (!(which_mouse->m_type)) /* not found */
          exit(M_listTypes());
+      if (which_mouse->opt_calib!=NULL) {
+        calib_file = fopen(which_mouse->opt_calib,"r");
+        if (calib_file) {
+          if (fscanf(calib_file, "%i %i %i %i %i %i %i %i",
+                      &which_mouse->opt_dminx, &which_mouse->opt_dmaxx, &which_mouse->opt_dminy, &which_mouse->opt_dmaxy,
+                      &which_mouse->opt_ominx, &which_mouse->opt_omaxx, &which_mouse->opt_ominy, &which_mouse->opt_omaxy)!= 8)
+            which_mouse->opt_calib = NULL;
+          if ((which_mouse->opt_dminx>=which_mouse->opt_dmaxx)||
+              (which_mouse->opt_dminy>=which_mouse->opt_dmaxy)||
+              (which_mouse->opt_ominx>=which_mouse->opt_omaxx)||
+              (which_mouse->opt_ominy>=which_mouse->opt_omaxy))
+            which_mouse->opt_calib = NULL;
+        }
+        fclose(calib_file);
+      }
    }
 
    /* Check repeater status */

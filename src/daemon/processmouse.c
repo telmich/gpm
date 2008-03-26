@@ -55,6 +55,8 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
    static struct timeval   tv1={0,0}, tv2; /* tv1==0: first click is single */
    static struct timeval   timeout={0,0};
    fd_set                  fdSet;
+   int                     tempx, tempy;
+   static int              oldx, oldy;
 
    oldT = event->type;
 
@@ -76,6 +78,12 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
 
       FD_ZERO(&fdSet);
       FD_SET(fd,&fdSet);
+
+      /* use uncalibrated values as base values */
+      if((which_mouse->opt_calib!=NULL)&&(which_mouse->m_type->absolute)){
+        nEvent.x = oldx;
+        nEvent.y = oldy;
+      }
 
       do { /* cluster loop */
          if(((data=getMouseData(fd, (which_mouse->m_type), kd_mode)) == NULL)
@@ -123,6 +131,31 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
 
       } while (i++ <(which_mouse->opt_cluster) && nEvent.buttons==oldB && FD_ISSET(fd,&fdSet));
      
+      /* apply calibration */
+      if((which_mouse->opt_calib!=NULL)&&(which_mouse->m_type->absolute)){
+        /* save uncalibrated values for use next time around */
+        oldx = nEvent.x;
+        oldy = nEvent.y;
+
+        /* do calculations in a larger variable */
+        tempx = nEvent.x;
+        tempy = nEvent.y;
+        tempx -= which_mouse->opt_dminx;
+        tempx *= ( which_mouse->opt_omaxx - which_mouse->opt_ominx );
+        tempx /= ( which_mouse->opt_dmaxx - which_mouse->opt_dminx );
+        tempx += which_mouse->opt_ominx;
+
+        tempy -= which_mouse->opt_dminy;
+        tempy *= ( which_mouse->opt_omaxy - which_mouse->opt_ominy );
+        tempy /= ( which_mouse->opt_dmaxy - which_mouse->opt_dminy );
+        tempy += which_mouse->opt_ominy;
+
+        nEvent.x = tempx;
+        nEvent.y = tempy;
+
+        event->dx = (nEvent.x) - (event->x);
+        event->dy = (nEvent.y) - (event->y);
+      }
    } /* if(eventFlag) */
 
 /*....................................... update the button number */
@@ -144,11 +177,63 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
             }
             rept1=rept2;
               
-            event->dy=event->dy*((win.ws_col/win.ws_row)+1);
+            /* if the values are calibrated, this is not necessary */
+            if(which_mouse->opt_calib==NULL)
+              event->dy=event->dy*((win.ws_col/win.ws_row)+1);
+
             event->x=nEvent.x; 
             event->y=nEvent.y;
          }
-         repeated_type->repeat_fun(event, fifofd); /* itz Jan 11 1999 */
+
+         /* not all relative repeaters can handle big changes,
+            so repackage into several smaller updates */
+         if (!repeated_type->absolute) {
+           int remx, remy;
+           remx = event->dx;
+           remy = event->dy;
+
+           do {
+             if (remx<0) {
+               if (remx>=-127) {
+                 event->dx = remx;
+                 remx = 0;
+               } else {
+                 event->dx = -127;
+                 remx += 127;
+               }
+             }
+             if (remx>0) {
+               if (remx<=127) {
+                 event->dx = remx;
+                 remx = 0;
+               } else {
+                 event->dx = 127;
+                 remx -= 127;
+               }
+             }
+             if (remy<0) {
+               if (remy>=-127) {
+                 event->dy = remy;
+                 remy = 0;
+               } else {
+                 event->dy = -127;
+                 remy += 127;
+               }
+             }
+             if (remy>0) {
+               if (remy<=127) {
+                 event->dy = remy;
+                 remy = 0;
+               } else {
+                 event->dy = 127;
+                 remy -= 127;
+               }
+             }
+             repeated_type->repeat_fun(event, fifofd);
+           } while((remx!= 0)||(remy!=0));
+         }
+         else
+           repeated_type->repeat_fun(event, fifofd); /* itz Jan 11 1999 */
       }
       return 0; /* no events nor information for clients */
    } /* first if of these three */

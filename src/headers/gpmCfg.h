@@ -48,6 +48,7 @@
 #define DEF_DEV           NULL     /* use the type-related one */
 #define DEF_LUT   "-a-zA-Z0-9_./\300-\326\330-\366\370-\377"
 #define DEF_SEQUENCE     "123"     /* how buttons are reordered */
+#define DEF_CALIB         NULL     /* don't load calibration data */
 #define DEF_BAUD          1200
 #define DEF_SAMPLE         100
 #define DEF_DELTA           25
@@ -56,6 +57,16 @@
 #define DEF_TIME           250    /* time interval (ms) for multiple clicks */
 #define DEF_THREE            0    /* have three buttons? */
 #define DEF_KERNEL           0    /* no kernel module, by default */
+
+#define DEF_DMINX	     0
+#define DEF_DMAXX	     1
+#define DEF_DMINY	     0
+#define DEF_DMAXY	     1
+
+#define DEF_OMINX	     0
+#define DEF_OMAXX	     1
+#define DEF_OMINY	     0
+#define DEF_OMAXY	     1
 
 /* 10 on old computers (<=386), 0 on current machines */
 #define DEF_CLUSTER          0    /* maximum number of clustered events */

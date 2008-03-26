@@ -75,6 +75,7 @@
          "    -A [limit]       start with selection disabled (`aged')\n" \
          "    -b baud-rate     sets the baud rate (default %d)\n" \
          "    -B sequence      allows changing the buttons (default '%s')\n" \
+         "    -c calib-file    load calibration data for absolute devices from calib-file\n" \
          "    -d delta         sets the delta value (default %d) (must be 2 or more)\n" \
          "    -D	             debug mode: don't auto-background\n" \
          "    -g tap-button    sets the button (1-3) that is emulated by tapping on\n" \
