@@ -251,8 +251,9 @@ void  gpm_killed(int signo);
 
 int limit_delta(int delta, int min, int max);
 
-int   open_console(const int mode);
+int open_console(const int mode);
 int old_main();
+int option_modem_lines(int fd, int argc, char **argv);
 
 int parse_argv(argv_helper *info, int argc, char **argv);
 
