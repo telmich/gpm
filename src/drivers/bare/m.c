@@ -22,7 +22,7 @@
 #include "types.h"                  /* Gpm_type         */
 
 
-static int M_bare(Gpm_Event *state,  unsigned char *data)
+int M_bare(Gpm_Event *state,  unsigned char *data)
 {
    /* a bare ms protocol */
    state->buttons= ((data[0] & 0x20) >> 3) | ((data[0] & 0x10) >> 4);

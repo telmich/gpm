@@ -33,7 +33,7 @@
 #define NCR_DELTA_X    (NCR_RIGHT_X - NCR_LEFT_X)
 #define NCR_DELTA_Y    (NCR_TOP_Y - NCR_BOTTOM_Y)
 
-static int M_ncr(Gpm_Event *state,  unsigned char *data)
+int M_ncr(Gpm_Event *state,  unsigned char *data)
 {
    int x,y;
 

@@ -111,9 +111,9 @@ int realposx=-1, realposy=-1;
 #define GPM_B_BOTH (GPM_B_LEFT|GPM_B_RIGHT)
 
 /*  Genius Wizardpad tablet  --  Matt Kimball (mkimball@xmission.com)  */
-static int wizardpad_width = -1;
-static int wizardpad_height = -1;
-static int M_wp(Gpm_Event *state,  unsigned char *data)
+int wizardpad_width = -1;
+int wizardpad_height = -1;
+int M_wp(Gpm_Event *state,  unsigned char *data)
 {
    int x, y, pressure;
 
@@ -139,14 +139,14 @@ static int M_wp(Gpm_Event *state,  unsigned char *data)
 /*========================================================================*/
 /* Then, mice should be initialized */
 
-static Gpm_Type* I_empty(int fd, unsigned short flags,
+Gpm_Type* I_empty(int fd, unsigned short flags,
     struct Gpm_Type *type, int argc, char **argv)
 {
     if (check_no_argv(argc, argv)) return NULL;
     return type;
 }
 
-static int setspeed(int fd,int old,int new,int needtowrite,unsigned short flags)
+int setspeed(int fd,int old,int new,int needtowrite,unsigned short flags)
 {
    struct termios tty;
    char *c;
@@ -188,7 +188,7 @@ static int setspeed(int fd,int old,int new,int needtowrite,unsigned short flags)
 
 
 
-static struct {
+struct {
    int sample; char code[2];
 } sampletab[]={
     {  0,"O"},
@@ -200,7 +200,7 @@ static struct {
     {125,"Q"},
     {1E9,"N"}, };
 
-static Gpm_Type* I_serial(int fd, unsigned short flags,
+Gpm_Type* I_serial(int fd, unsigned short flags,
     struct Gpm_Type *type, int argc, char **argv)
 {
    int i; unsigned char c;
@@ -276,7 +276,7 @@ static Gpm_Type* I_serial(int fd, unsigned short flags,
    return type;
 }
 
-static Gpm_Type* I_logi(int fd, unsigned short flags,
+Gpm_Type* I_logi(int fd, unsigned short flags,
        struct Gpm_Type *type, int argc, char **argv)
 {
    int i;
@@ -312,7 +312,7 @@ static Gpm_Type* I_logi(int fd, unsigned short flags,
    return type;
 }
 
-static Gpm_Type *I_wacom(int fd, unsigned short flags,
+Gpm_Type *I_wacom(int fd, unsigned short flags,
                          struct Gpm_Type *type, int argc, char **argv)
 {
 /* wacom graphire tablet */
@@ -436,7 +436,7 @@ static Gpm_Type *I_wacom(int fd, unsigned short flags,
    return type;
 }
 
-static Gpm_Type *I_pnp(int fd, unsigned short flags,
+Gpm_Type *I_pnp(int fd, unsigned short flags,
              struct Gpm_Type *type, int argc, char **argv)
 {  
    struct termios tty;
@@ -471,7 +471,7 @@ static Gpm_Type *I_pnp(int fd, unsigned short flags,
  * Sends the SEND_ID command to the ps2-type mouse.
  * Return one of GPM_AUX_ID_...
  */
-static int read_mouse_id(int fd)
+int read_mouse_id(int fd)
 {
    unsigned char c = GPM_AUX_SEND_ID;
    unsigned char id;
@@ -492,7 +492,7 @@ static int read_mouse_id(int fd)
  * 
  * Returns 0 if OK, or >0 if 1 or more errors occurred.
  */
-static int write_to_mouse(int fd, unsigned char *data, size_t len)
+int write_to_mouse(int fd, unsigned char *data, size_t len)
 {
    int i;
    int error = 0;
@@ -512,7 +512,7 @@ static int write_to_mouse(int fd, unsigned char *data, size_t len)
 
 /* intellimouse, ps2 version: Ben Pfaff and Colin Plumb */
 /* Autodetect: Steve Bennett */
-static Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type,
+Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type,
                                                        int argc, char **argv)
 {
    int id;
@@ -564,7 +564,7 @@ static Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type,
    return(NULL);
 }
 
-static Gpm_Type *I_twid(int fd, unsigned short flags,
+Gpm_Type *I_twid(int fd, unsigned short flags,
          struct Gpm_Type *type, int argc, char **argv)
 {
 
@@ -580,7 +580,7 @@ static Gpm_Type *I_twid(int fd, unsigned short flags,
    return I_serial(fd, flags, type, argc, argv);
 }
 
-static Gpm_Type *I_calus(int fd, unsigned short flags,
+Gpm_Type *I_calus(int fd, unsigned short flags,
           struct Gpm_Type *type, int argc, char **argv)
 {
    if (check_no_argv(argc, argv)) return NULL;
@@ -590,7 +590,7 @@ static Gpm_Type *I_calus(int fd, unsigned short flags,
 }
 
 /* synaptics touchpad, ps2 version: Henry Davies */
-static Gpm_Type *I_synps2(int fd, unsigned short flags,
+Gpm_Type *I_synps2(int fd, unsigned short flags,
            struct Gpm_Type *type, int argc, char **argv)
 {
    syn_ps2_init (fd);
@@ -598,7 +598,7 @@ static Gpm_Type *I_synps2(int fd, unsigned short flags,
 }
 
 
-static Gpm_Type *I_summa(int fd, unsigned short flags,
+Gpm_Type *I_summa(int fd, unsigned short flags,
           struct Gpm_Type *type, int argc, char **argv) 
 {
    void resetsumma()
@@ -688,7 +688,7 @@ static Gpm_Type *I_summa(int fd, unsigned short flags,
    return type;
 }
 
-static Gpm_Type *I_mtouch(int fd, unsigned short flags,
+Gpm_Type *I_mtouch(int fd, unsigned short flags,
            struct Gpm_Type *type, int argc, char **argv)
 {
    struct termios tty;
@@ -712,7 +712,7 @@ static Gpm_Type *I_mtouch(int fd, unsigned short flags,
 }
 
 /* simple initialization for the gunze touchscreen */
-static Gpm_Type *I_gunze(int fd, unsigned short flags,
+Gpm_Type *I_gunze(int fd, unsigned short flags,
            struct Gpm_Type *type, int argc, char **argv)
 {
    struct termios tty;
@@ -772,7 +772,7 @@ static Gpm_Type *I_gunze(int fd, unsigned short flags,
 
 
 /* simple initialization for the elo touchscreen */
-static Gpm_Type *I_etouch(int fd, unsigned short flags,
+Gpm_Type *I_etouch(int fd, unsigned short flags,
 			  struct Gpm_Type *type, int argc, char **argv)
 {
   struct termios tty;
@@ -826,7 +826,7 @@ static Gpm_Type *I_etouch(int fd, unsigned short flags,
 
 
 /*  Genius Wizardpad tablet  --  Matt Kimball (mkimball@xmission.com)  */
-static Gpm_Type *I_wp(int fd, unsigned short flags,
+Gpm_Type *I_wp(int fd, unsigned short flags,
             struct Gpm_Type *type, int argc, char **argv)
 {
    struct termios tty;

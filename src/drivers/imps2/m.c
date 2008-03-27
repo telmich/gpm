@@ -22,7 +22,7 @@
 #include "types.h"                  /* Gpm_type         */
 
 
-static int M_imps2(Gpm_Event *state,  unsigned char *data)
+int M_imps2(Gpm_Event *state,  unsigned char *data)
 {
 
    static int tap_active=0;         /* there exist glidepoint ps2 mice */

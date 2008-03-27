@@ -24,7 +24,7 @@
 
 #ifdef HAVE_LINUX_INPUT_H
 
-static int M_evdev (Gpm_Event * state, unsigned char *data)
+int M_evdev (Gpm_Event * state, unsigned char *data)
 {
    struct input_event thisevent;
    (void) memcpy (&thisevent, data, sizeof (struct input_event));

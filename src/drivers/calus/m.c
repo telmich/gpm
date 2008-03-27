@@ -32,7 +32,7 @@
 #define CAL_Y_MAX 0xF40
 #define CAL_Y_SIZE (CAL_Y_MAX - CAL_Y_MIN)
 
-static int M_calus(Gpm_Event *state, unsigned char *data)
+int M_calus(Gpm_Event *state, unsigned char *data)
 {
    int x, y;
 

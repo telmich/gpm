@@ -22,7 +22,7 @@
 #include "types.h"                  /* Gpm_type         */
 
 
-static int R_msc(Gpm_Event *state, int fd)
+int R_msc(Gpm_Event *state, int fd)
 {
    signed char buffer[5];
    int dx, dy;

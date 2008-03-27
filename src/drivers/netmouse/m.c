@@ -22,7 +22,7 @@
 #include "types.h"                  /* Gpm_type         */
 
 
-static int M_netmouse(Gpm_Event *state,  unsigned char *data)
+int M_netmouse(Gpm_Event *state,  unsigned char *data)
 {
    /* Avoid these beasts if you can.  They connect to normal PS/2 port,
     * but their protocol is one byte longer... So if you have notebook

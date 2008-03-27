@@ -22,7 +22,7 @@
 #include "types.h"                  /* Gpm_type         */
 
 
-static int M_mman(Gpm_Event *state,  unsigned char *data)
+int M_mman(Gpm_Event *state,  unsigned char *data)
 {
    /*
     * the damned MouseMan has 3/4 bytes packets. The extra byte 

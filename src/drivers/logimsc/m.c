@@ -22,7 +22,7 @@
 #include "types.h"                  /* Gpm_type         */
 
 
-static int M_logimsc(Gpm_Event *state,  unsigned char *data) /* same as msc */
+int M_logimsc(Gpm_Event *state,  unsigned char *data) /* same as msc */
 {
    state->buttons= (~data[0]) & 0x07;
    state->dx=      (signed char)(data[1]) + (signed char)(data[3]);

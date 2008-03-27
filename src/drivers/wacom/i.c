@@ -113,7 +113,7 @@ int realposx=-1, realposy=-1;
 /*========================================================================*/
 /* Then, mice should be initialized */
 
-static struct {
+struct {
    int sample; char code[2];
 } sampletab[]={
     {  0,"O"},
@@ -125,7 +125,7 @@ static struct {
     {125,"Q"},
     {1E9,"N"}, };
 
-static Gpm_Type* I_serial(int fd, unsigned short flags,
+Gpm_Type* I_serial(int fd, unsigned short flags,
     struct Gpm_Type *type, int argc, char **argv)
 {
    int i; unsigned char c;
@@ -201,7 +201,7 @@ static Gpm_Type* I_serial(int fd, unsigned short flags,
    return type;
 }
 
-static Gpm_Type* I_logi(int fd, unsigned short flags,
+Gpm_Type* I_logi(int fd, unsigned short flags,
        struct Gpm_Type *type, int argc, char **argv)
 {
    int i;
@@ -237,7 +237,7 @@ static Gpm_Type* I_logi(int fd, unsigned short flags,
    return type;
 }
 
-static Gpm_Type *I_wacom(int fd, unsigned short flags,
+Gpm_Type *I_wacom(int fd, unsigned short flags,
                          struct Gpm_Type *type, int argc, char **argv)
 {
 /* wacom graphire tablet */
@@ -361,7 +361,7 @@ static Gpm_Type *I_wacom(int fd, unsigned short flags,
    return type;
 }
 
-static Gpm_Type *I_pnp(int fd, unsigned short flags,
+Gpm_Type *I_pnp(int fd, unsigned short flags,
              struct Gpm_Type *type, int argc, char **argv)
 {  
    struct termios tty;
@@ -396,7 +396,7 @@ static Gpm_Type *I_pnp(int fd, unsigned short flags,
  * Sends the SEND_ID command to the ps2-type mouse.
  * Return one of GPM_AUX_ID_...
  */
-static int read_mouse_id(int fd)
+int read_mouse_id(int fd)
 {
    unsigned char c = GPM_AUX_SEND_ID;
    unsigned char id;

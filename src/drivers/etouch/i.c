@@ -23,7 +23,7 @@
 
 
 /* simple initialization for the elo touchscreen */
-static Gpm_Type *I_etouch(int fd, unsigned short flags,
+Gpm_Type *I_etouch(int fd, unsigned short flags,
            struct Gpm_Type *type, int argc, char **argv)
 {
   struct termios tty;

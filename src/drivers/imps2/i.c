@@ -25,7 +25,7 @@
 
 /* intellimouse, ps2 version: Ben Pfaff and Colin Plumb */
 /* Autodetect: Steve Bennett */
-static Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type,
+Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type,
                                                        int argc, char **argv)
 {
    int id;

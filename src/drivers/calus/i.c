@@ -22,7 +22,7 @@
 #include "types.h"                  /* Gpm_type         */
 
 
-static Gpm_Type *I_calus(int fd, unsigned short flags,
+Gpm_Type *I_calus(int fd, unsigned short flags,
           struct Gpm_Type *type, int argc, char **argv)
 {
    if (check_no_argv(argc, argv)) return NULL;
