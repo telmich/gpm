@@ -34,6 +34,7 @@ lispdir = @lispdir@
 
 # programs
 CC                = @CC@
+CFLAGS				= -Iheaders @CFLAGS@
 RANLIB            = @RANLIB@
 YACC              = @YACC@
 INSTALL           = @INSTALL@

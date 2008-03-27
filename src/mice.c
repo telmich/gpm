@@ -1,5 +1,5 @@
 /*
- * mice.c - mouse definitions for gpm-Linux
+ * mice.c - table of mice for gpm
  *
  * Copyright (C) 1993        Andrew Haylett <ajh@gec-mrc.co.uk>
  * Copyright (C) 1994-2000   Alessandro Rubini <rubini@linux.it>
@@ -12,64 +12,43 @@
  *   (at your option) any later version.
  *
  *   This program is distributed in the hope that it will be useful,
-#include <sys/time.h> /* select() */
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ *
+ ********/
 
-#include <linux/kdev_t.h> /* MAJOR */
-#include <linux/keyboard.h>
-
-/* JOYSTICK */
-#ifdef HAVE_LINUX_JOYSTICK_H
-#include <linux/joystick.h>
-#endif
-
-/* EV DEVICE */
-#ifdef HAVE_LINUX_INPUT_H
-#include <linux/input.h>
-#endif /* HAVE_LINUX_INPUT_H */
-
-
-#include "headers/daemon.h"
-
-#include "headers/gpmInt.h"
-#include "headers/twiddler.h"
-#include "headers/synaptics.h"
-#include "headers/message.h"
-
-/*========================================================================*/
-/*  real absolute coordinates for absolute devices,  not very clean */
-/*========================================================================*/
-
-#define REALPOS_MAX 16383 /*  min 0 max=16383, but due to change.  */
-int realposx=-1, realposy=-1;
-
-#define GPM_B_BOTH (GPM_B_LEFT|GPM_B_RIGHT)
-
-/*========================================================================*/
-/* Finally, the table */
-#define STD_FLG (CREAD|CLOCAL|HUPCL)
+#include "mice.h"
 
  /*
    * For those who are trying to add a new type, here a brief
-   * description of the structure. Please refer to gpmInt.h and gpm.c
+   * description of the structure. Please refer to mice.h and drivers/*
    * for more information:
    *
    * The first three strings are the name, an help line, a long name (if any)
    * Then come the functions: the decoder and the initializazion function
    *     (called I_* and M_*)
+   *
    * Follows an array of four bytes: it is the protocol-identification, based
    *     on the first two bytes of a packet: if
    *     "((byte0 & proto[0]) == proto[1]) && ((byte1 & proto[2]) == proto[3])"
    *     then we are at the beginning of a packet.
+   *
    * The following numbers are:
    *     bytes-per-packet,
    *     bytes-to-read (use 1, bus mice are pathological)
    *     has-extra-byte (boolean, for mman pathological protocol)
    *     is-absolute-coordinates (boolean)
+   *
    * Finally, a pointer to a repeater function, if any.
+   *
    */
 
 Gpm_Type mice[]={
-
    {"mman", "The \"MouseMan\" and similar devices (3/4 bytes per packet).",
            "Mouseman", M_mman, I_serial, CS7 | STD_FLG, /* first */
                                 {0x40, 0x40, 0x40, 0x00}, 3, 1, 1, 0, 0},
