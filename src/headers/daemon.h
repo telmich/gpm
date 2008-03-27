@@ -25,6 +25,7 @@
  * Includes
  */
 #include "gpm.h"           /* Gpm_Event         */
+#include "types.h"         /* Internal types    */
 #include <sys/select.h>    /* fd_set            */
 
 /*************************************************************************
