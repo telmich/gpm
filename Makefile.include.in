@@ -1,6 +1,6 @@
 #			-*-makefile-*- (gpm/include)
 #
-# Copyright (C) 2001 Nico Schottelius <nico@schottelius.org>
+# Copyright (C) 2001-2008 Nico Schottelius <nico-gpm2008 at schottelius.org>
 #
 
 # set root, if you want to install to a virtual root
@@ -35,6 +35,7 @@ lispdir = @lispdir@
 # programs
 CC                = @CC@
 CFLAGS				= -Iheaders @CFLAGS@
+MAKEDEPEND 			= $(CC) -M $(CPPFLAGS) -o $*.d $<
 RANLIB            = @RANLIB@
 YACC              = @YACC@
 INSTALL           = @INSTALL@
@@ -62,8 +63,6 @@ MKDIR             = mkdir -p # linux specific, but who cares ?
                              # gpm is linux specific, too.
 RM                = rm
 
-
-DEPFILE = .depend
 
 # general
 release = @release@

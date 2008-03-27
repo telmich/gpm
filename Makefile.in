@@ -25,16 +25,9 @@ SUBDIRS = src doc contrib
 
 all: do-all
 
-dep:
-	touch src/$(DEPFILE) # to prevent unecessary warnings
-	./scripts/generate_drivers_makefile.sh > Makefile.drivers.generated
-	make -C src dep
-	./scripts/generate_drivers_header.sh > src/headers/drivers.h
-
 check: all
 
-uninstall:	do-uninstall
-
+uninstall: do-uninstall
 clean: do-clean
 
 Makefile: $(srcdir)/Makefile.in config.status
@@ -60,15 +53,13 @@ installdirs:
 ### GENERIC
 
 # do-all goes to all subdirectories and does all
-do-%: dep
+do-%:
 	@target=`echo $@ | $(SED) -e 's/^do-//'`; \
 	for i in $(SUBDIRS) ; do \
 		if test -f ./$$i/Makefile ; then \
 			$(MAKE) -C ./$$i $${target} || exit 1 ;\
-		else \
-			true; \
 		fi; \
-       done
+	done
 
 
 # Configure & unconfigure
