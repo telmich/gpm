@@ -129,22 +129,6 @@ typedef struct argv_helper {
    int value; /* used for boolean arguments */
 } argv_helper;
 
-/* From mice.c */
-static struct {
-   int sample;
-   char code[2];
-} sampletab[]={
-    {  0,"O"},
-    { 15,"J"},
-    { 27,"K"},
-    { 42,"L"},
-    { 60,"R"},
-    { 85,"M"},
-    {125,"Q"},
-    {1E9,"N"},
-  };
-
-
 
 /*************************************************************************
  * Macros
@@ -242,8 +226,6 @@ extern Gpm_Type         *repeated_type;
 time_t                  last_selection_time;
 
 
-
-
 /*************************************************************************
  * Functions
  */
@@ -302,28 +284,5 @@ void check_kill(void);
 
 /* gpm.c */
 int old_main();
-
-/*************************************************************************
- * Drivers
- */
-
-Gpm_Type *I_exps2(int fd, unsigned short flags, struct Gpm_Type *type,
-                  int argc, char **argv); 
-int M_brw(Gpm_Event *state,  unsigned char *data);
-
-
-int M_ms(Gpm_Event *state,  unsigned char *data);
-
-int M_ms3(Gpm_Event *state,  unsigned char *data);
-int R_ms3(Gpm_Event *state, int fd);
-
-int M_ms_plus(Gpm_Event *state, unsigned char *data);
-int M_ms_plus_lr(Gpm_Event *state,  unsigned char *data);
-
-
-
-int M_geni(Gpm_Event *state,  unsigned char *data);
-
-int M_summa(Gpm_Event *state, unsigned char *data);
 
 #endif
