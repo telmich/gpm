@@ -20,6 +20,9 @@
  ********/
 
 #include "types.h"                  /* Gpm_type         */
+#include "mice.h"                   /* mice stuff       */
+#include "daemon.h"                 /* which_mouse      */
+#include "drivers.h"                /* I_serial         */
 
 
 Gpm_Type *I_calus(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)

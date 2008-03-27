@@ -29,7 +29,7 @@
 
 
 /*************************************************************************
- * Types / structures
+ * Types / structures / variables
  */
 
 static struct {
@@ -65,26 +65,9 @@ int realposx=-1,
 
 
 /*************************************************************************
- * Drivers
+ * Mice functions
  */
 
-Gpm_Type *I_exps2(int fd, unsigned short flags, struct Gpm_Type *type,
-                  int argc, char **argv); 
-int M_brw(Gpm_Event *state,  unsigned char *data);
-
-
-int M_ms(Gpm_Event *state,  unsigned char *data);
-
-int M_ms3(Gpm_Event *state,  unsigned char *data);
-int R_ms3(Gpm_Event *state, int fd);
-
-int M_ms_plus(Gpm_Event *state, unsigned char *data);
-int M_ms_plus_lr(Gpm_Event *state,  unsigned char *data);
-
-
-
-int M_geni(Gpm_Event *state,  unsigned char *data);
-
-int M_summa(Gpm_Event *state, unsigned char *data);
+int check_no_argv(int argc, char **argv);
 
 #endif

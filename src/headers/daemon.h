@@ -204,8 +204,6 @@ time_t                  last_selection_time;
 
 char **build_argv(char *argv0, char *str, int *argcptr, char sep);
 
-volatile int check_no_argv(int argc, char **argv);
-
 void disable_paste(int vc);
 
 int   do_client(Gpm_Cinfo *cinfo, Gpm_Event *event);

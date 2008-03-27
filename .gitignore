@@ -1,5 +1,6 @@
 *.o
 *.a
+*.P
 configure
 Makefile
 Makefile.include
