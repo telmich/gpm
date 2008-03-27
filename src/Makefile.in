@@ -11,6 +11,8 @@ top_builddir = ..
 
 include $(top_builddir)/Makefile.include
 
+include $(top_builddir)/Makefile.drivers.generated
+
 # Main portion: regular build rules
 
 GSRC = mice.c twiddler.c synaptics.c 														\
@@ -27,11 +29,11 @@ GSRC = mice.c twiddler.c synaptics.c 														\
 		daemon/usage.c daemon/check_uniqueness.c 											\
 		daemon/startup.c daemon/wait_text.c
 
-GDRIVERS = 	drivers/ms/m_ms.c																	\
-				drivers/geni/m_geni.c															\
-				drivers/brw/m_brw.c																\
-				drivers/exps2/i_exps2.c															\
-				drivers/ms3/m_ms3.c drivers/ms3/r_ms3.c
+#GDRIVERS = 	drivers/ms/m_ms.c																	\
+#				drivers/geni/m_geni.c															\
+#				drivers/brw/m_brw.c																\
+#				drivers/exps2/i_exps2.c															\
+#				drivers/ms3/m_ms3.c drivers/ms3/r_ms3.c
 
 # mouse-test and gpm
 GCOMMON = 	generic/check_no_argv.c generic/parse_argv.c 							\
