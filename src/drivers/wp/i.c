@@ -23,8 +23,7 @@
 
 
 /*  Genius Wizardpad tablet  --  Matt Kimball (mkimball@xmission.com)  */
-Gpm_Type *I_wp(int fd, unsigned short flags,
-            struct Gpm_Type *type, int argc, char **argv)
+Gpm_Type *I_wp(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
 {
    struct termios tty;
    char tablet_info[256];

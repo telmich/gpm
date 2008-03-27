@@ -22,8 +22,7 @@
 #include "types.h"                  /* Gpm_type         */
 
 
-Gpm_Type* I_serial(int fd, unsigned short flags,
-    struct Gpm_Type *type, int argc, char **argv)
+Gpm_Type* I_serial(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
 {
    int i; unsigned char c;
    fd_set set; struct timeval timeout={0,0}; /* used when not debugging */

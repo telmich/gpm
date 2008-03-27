@@ -21,7 +21,6 @@
 
 #include "types.h"                  /* Gpm_type         */
 
-
 /* ncr pen support (Marc Meis) */
 
 #define NCR_LEFT_X     40

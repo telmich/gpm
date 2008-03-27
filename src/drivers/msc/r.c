@@ -21,7 +21,6 @@
 
 #include "types.h"                  /* Gpm_type         */
 
-
 int R_msc(Gpm_Event *state, int fd)
 {
    signed char buffer[5];
