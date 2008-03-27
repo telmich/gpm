@@ -49,35 +49,6 @@ struct options {
    char           *consolename;        /* /dev/tty0 || /dev/vc/0              */
 };
 
-typedef struct Gpm_Cinfo {
-   Gpm_Connect data;
-   int fd;
-   struct Gpm_Cinfo *next;
-} Gpm_Cinfo;
-
-/* and this is the entry in the mouse-type table */
-typedef struct Gpm_Type {
-   char              *name;
-   char              *desc;      /* a descriptive line */
-   char              *synonyms;  /* extra names (the XFree name etc) as a list */
-   /* mouse specific event handler: */
-   int               (*fun)(Gpm_Event *state, unsigned char *data);
-
-   /* mouse specific initialisation function: */
-   struct Gpm_Type   *(*init)(int fd, unsigned short flags,
-                     struct Gpm_Type   *type, int argc, char **argv);
-
-   unsigned short    flags;
-   unsigned char     proto[4];
-   int               packetlen;
-   int               howmany;    /* how many bytes to read at a time */
-   int               getextra;   /* does it get an extra byte? (only mouseman) */
-   int               absolute;   /* flag indicating absolute pointing device */
-
-                     /* repeat this event into fd */
-   int               (*repeat_fun)(Gpm_Event *state, int fd);
-} Gpm_Type;
-
 /* this structure is used to hide the dual-mouse stuff */
 struct mouse_features {
    char  *opt_type,

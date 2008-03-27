@@ -26,7 +26,7 @@
 
  /*
    * For those who are trying to add a new type, here a brief
-   * description of the structure. Please refer to mice.h and drivers/*
+   * description of the structure. Please refer to mice.h and drivers/
    * for more information:
    *
    * The first three strings are the name, an help line, a long name (if any)
