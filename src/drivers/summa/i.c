@@ -387,6 +387,230 @@ static int read_mouse_id(int fd)
    return(id);
 }
 
+/**
+ * Writes the given data to the ps2-type mouse.
+ * Checks for an ACK from each byte.
+ * 
+ * Returns 0 if OK, or >0 if 1 or more errors occurred.
+ */
+static int write_to_mouse(int fd, unsigned char *data, size_t len)
+{
+   int i;
+   int error = 0;
+   for (i = 0; i < len; i++) {
+      unsigned char c;
+      write(fd, &data[i], 1);
+      read(fd, &c, 1);
+      if (c != GPM_AUX_ACK) error++;
+   }
+
+   /* flush any left-over input */
+   usleep (30000);
+   tcflush (fd, TCIFLUSH);
+   return(error);
+}
+
+
+/* intellimouse, ps2 version: Ben Pfaff and Colin Plumb */
+/* Autodetect: Steve Bennett */
+static Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type,
+                                                       int argc, char **argv)
+{
+   int id;
+   static unsigned char basic_init[] = { GPM_AUX_ENABLE_DEV, GPM_AUX_SET_SAMPLE, 100 };
+   static unsigned char imps2_init[] = { GPM_AUX_SET_SAMPLE, 200, GPM_AUX_SET_SAMPLE, 100, GPM_AUX_SET_SAMPLE, 80, };
+   static unsigned char ps2_init[] = { GPM_AUX_SET_SCALE11, GPM_AUX_ENABLE_DEV, GPM_AUX_SET_SAMPLE, 100, GPM_AUX_SET_RES, 3, };
+
+   /* Do a basic init in case the mouse is confused */
+   write_to_mouse(fd, basic_init, sizeof (basic_init));
+
+   /* Now try again and make sure we have a PS/2 mouse */
+   if (write_to_mouse(fd, basic_init, sizeof (basic_init)) != 0) {
+      gpm_report(GPM_PR_ERR,GPM_MESS_IMPS2_INIT);
+      return(NULL);
+   }
+
+   /* Try to switch to 3 button mode */
+   if (write_to_mouse(fd, imps2_init, sizeof (imps2_init)) != 0) {
+      gpm_report(GPM_PR_ERR,GPM_MESS_IMPS2_FAILED);
+      return(NULL);
+   }
+
+   /* Read the mouse id */
+   id = read_mouse_id(fd);
+   if (id == GPM_AUX_ID_ERROR) {
+      gpm_report(GPM_PR_ERR,GPM_MESS_IMPS2_MID_FAIL);
+      id = GPM_AUX_ID_PS2;
+   }
+
+   /* And do the real initialisation */
+   if (write_to_mouse(fd, ps2_init, sizeof (ps2_init)) != 0) {
+      gpm_report(GPM_PR_ERR,GPM_MESS_IMPS2_SETUP_FAIL);
+   }
+
+   if (id == GPM_AUX_ID_IMPS2) {
+   /* Really an intellipoint, so initialise 3 button mode (4 byte packets) */
+      gpm_report(GPM_PR_INFO,GPM_MESS_IMPS2_AUTO);
+      return type;
+   }
+   if (id != GPM_AUX_ID_PS2) {
+      gpm_report(GPM_PR_ERR,GPM_MESS_IMPS2_BAD_ID, id);
+   }
+   else gpm_report(GPM_PR_INFO,GPM_MESS_IMPS2_PS2);
+
+   for (type=mice; type->fun; type++)
+      if (strcmp(type->name, "ps2") == 0) return(type);
+
+   /* ps2 was not found!!! */
+   return(NULL);
+}
+
+static Gpm_Type *I_twid(int fd, unsigned short flags,
+         struct Gpm_Type *type, int argc, char **argv)
+{
+
+   if (check_no_argv(argc, argv)) return NULL;
+
+   if (twiddler_key_init() != 0) return NULL;
+   /*
+   * the twiddler is a serial mouse: just drop dtr
+   * and run at 2400 (unless specified differently) 
+   */
+   if((which_mouse->opt_baud)==DEF_BAUD) (which_mouse->opt_baud) = 2400;
+   argv[1] = "dtr"; /* argv[1] is guaranteed to be NULL (this is dirty) */
+   return I_serial(fd, flags, type, argc, argv);
+}
+
+static Gpm_Type *I_calus(int fd, unsigned short flags,
+          struct Gpm_Type *type, int argc, char **argv)
+{
+   if (check_no_argv(argc, argv)) return NULL;
+
+   if ((which_mouse->opt_baud) == 1200) (which_mouse->opt_baud)=9600; /* default to 9600 */
+   return I_serial(fd, flags, type, argc, argv);
+}
+
+/* synaptics touchpad, ps2 version: Henry Davies */
+static Gpm_Type *I_synps2(int fd, unsigned short flags,
+           struct Gpm_Type *type, int argc, char **argv)
+{
+   syn_ps2_init (fd);
+   return type;
+}
+
+
+static Gpm_Type *I_summa(int fd, unsigned short flags,
+          struct Gpm_Type *type, int argc, char **argv) 
+{
+   void resetsumma()
+   {
+      write(fd,0,1); /* Reset */
+      usleep(400000); /* wait */
+   }
+   int waitsumma()
+   {
+      struct timeval timeout;
+      fd_set readfds;
+      int err;
+      FD_ZERO(&readfds);  FD_SET(fd, &readfds);
+      timeout.tv_sec = 0; timeout.tv_usec = 200000;
+      err = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+      return(err);
+   }
+   int err;
+   char buffer[255];
+   char config[5];
+   /* Summasketchtablet (from xf86summa.o: thanks to Steven Lang <tiger@tyger.org>)*/
+   #define SS_PROMPT_MODE  "B"     /* Prompt mode */
+   #define SS_FIRMID       "z?"    /* Request firmware ID string */
+   #define SS_500LPI       "h"     /* 500 lines per inch */
+   #define SS_READCONFIG   "a"
+   #define SS_ABSOLUTE     "F"     /* Absolute Mode */
+   #define SS_TABID0       "0"     /* Tablet ID 0 */
+   #define SS_UPPER_ORIGIN "b"     /* Origin upper left */
+   #define SS_BINARY_FMT   "zb"    /* Binary reporting */
+   #define SS_STREAM_MODE  "@"     /* Stream mode */
+   /* Geniustablet (hisketch.txt)*/
+   #define GEN_MMSERIES ":"
+   char GEN_MODELL=0x7f;
+
+   /* Set speed to 9600bps */
+   setspeed (fd, 1200, 9600, 1, B9600|CS8|CREAD|CLOCAL|HUPCL|PARENB|PARODD);  
+   resetsumma(); 
+ 
+   write(fd, SS_PROMPT_MODE, strlen(SS_PROMPT_MODE));
+  
+   if (strstr(type->name,"acecad")!=NULL) summaid=11;
+
+   if (summaid<0) { /* Summagraphics test */
+      /* read the Summa Firm-ID */
+      write(fd, SS_FIRMID, strlen(SS_FIRMID));
+      err=waitsumma();
+      if (!((err == -1) || (!err))) {
+         summaid=10; /* Original Summagraphics */
+         read(fd, buffer, 255); /* Read Firm-ID */
+      }
+   }
+  
+   if (summaid<0) { /* Genius-test */
+      resetsumma();
+      write(fd,GEN_MMSERIES,1); 
+      write(fd,&GEN_MODELL,1); /* Read modell */
+      err=waitsumma();
+      if (!((err == -1) || (!err))) { /* read Genius-ID */
+           err=waitsumma();
+         if (!((err == -1) || (!err))) {
+            err=waitsumma();
+            if (!((err == -1) || (!err))) {
+               read(fd,&config,1);
+               summaid=(config[0] & 224) >> 5; /* genius tablet-id (0-7)*/
+            }
+         } 
+      }
+   } /* end of Geniustablet-test */
+
+   /* unknown tablet ?*/
+   if ((summaid<0) || (summaid==11)) { 
+      resetsumma(); 
+      write(fd, SS_BINARY_FMT SS_PROMPT_MODE, 3);
+   }
+
+   /* read tablet size */
+   err=waitsumma();  
+   if (!((err == -1) || (!err))) read(fd,buffer,sizeof(buffer));
+   write(fd,SS_READCONFIG,1);
+   read(fd,&config,5);
+   summamaxx=(config[2]<<7 | config[1])-(SUMMA_BORDER*2);
+   summamaxy=(config[4]<<7 | config[3])-(SUMMA_BORDER*2);
+  
+   write(fd,SS_ABSOLUTE SS_STREAM_MODE SS_UPPER_ORIGIN,3);
+   if (summaid<0) write(fd,SS_500LPI SS_TABID0 SS_BINARY_FMT,4);
+
+   return type;
+}
+
+static Gpm_Type *I_mtouch(int fd, unsigned short flags,
+           struct Gpm_Type *type, int argc, char **argv)
+{
+   struct termios tty;
+
+   /* Set speed to 9600bps (copied from I_summa, above :) */
+   tcgetattr(fd, &tty);
+   tty.c_iflag = IGNBRK | IGNPAR;
+   tty.c_oflag = 0;
+   tty.c_lflag = 0;
+   tty.c_line = 0;
+   tty.c_cc[VTIME] = 0;
+   tty.c_cc[VMIN] = 1;
+   tty.c_cflag = B9600|CS8|CREAD|CLOCAL|HUPCL;
+   tcsetattr(fd, TCSAFLUSH, &tty);
+
+
+   /* Turn it to "format tablet" and "mode stream" */
+   write(fd,"\001MS\r\n\001FT\r\n",10);
+  
+   return type;
+}
 
 /*========================================================================*/
 /* Finally, the table */
