@@ -129,6 +129,22 @@ typedef struct argv_helper {
    int value; /* used for boolean arguments */
 } argv_helper;
 
+/* From mice.c */
+static struct {
+   int sample;
+   char code[2];
+} sampletab[]={
+    {  0,"O"},
+    { 15,"J"},
+    { 27,"K"},
+    { 42,"L"},
+    { 60,"R"},
+    { 85,"M"},
+    {125,"Q"},
+    {1E9,"N"},
+  };
+
+
 
 /*************************************************************************
  * Macros
