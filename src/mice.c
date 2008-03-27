@@ -22,6 +22,9 @@
  *
  ********/
 
+#include <termios.h>    /* for FLAGS */
+
+
 #include "mice.h"
 #include "drivers.h"
 
