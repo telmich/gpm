@@ -1,0 +1,4 @@
+- mice driver:
+   * load them dynamically
+   * do not require senseless header (all functions have the same type)
+   * add option to include some statically
