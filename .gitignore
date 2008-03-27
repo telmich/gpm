@@ -16,3 +16,4 @@ src/gpm2/tmp
 src/gpm2/out
 .*.swp
 doc/gpm.info
+src/headers/drivers.h

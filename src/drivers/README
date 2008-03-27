@@ -1,3 +1,6 @@
+Write definiton of I_*, M_* and R_* in one line (needed by ./scripts/generate_drivers_header.sh).
+
+
 This could be the home of the new driver structure in gpm2.
 
 Some ideas:

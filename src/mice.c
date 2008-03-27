@@ -23,6 +23,7 @@
  ********/
 
 #include "mice.h"
+#include "drivers.h"
 
  /*
    * For those who are trying to add a new type, here a brief
