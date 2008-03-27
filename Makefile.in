@@ -28,6 +28,7 @@ all: do-all
 dep:
 	touch src/$(DEPFILE) # to prevent unecessary warnings
 	make -C src dep
+	./scripts/generate_drivers_header.sh > src/headers/drivers.h
 
 check: all
 

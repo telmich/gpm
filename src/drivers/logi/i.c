@@ -22,8 +22,7 @@
 #include "types.h"                  /* Gpm_type         */
 
 
-Gpm_Type* I_logi(int fd, unsigned short flags,
-       struct Gpm_Type *type, int argc, char **argv)
+Gpm_Type* I_logi(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
 {
    int i;
    struct stat buf;

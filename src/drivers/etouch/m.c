@@ -22,6 +22,7 @@
 #include "types.h"                  /* Gpm_type         */
 
 int elo_click_ontouch = 0; /* the bigger the smoother */
+
 int M_etouch(Gpm_Event *state,  unsigned char *data)
 { /*
    * This is a simple decoder for the EloTouch touch screen devices. 
