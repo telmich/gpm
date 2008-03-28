@@ -31,9 +31,7 @@ eof
 
 (
    cd src
-   ls drivers/*/i.c
-   ls drivers/*/m.c
-   ls drivers/*/r.c
+   ls drivers/*/*.c
 ) | sed 's/$/ \\/'
 
 # append an empty line
