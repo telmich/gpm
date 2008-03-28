@@ -25,9 +25,12 @@
 /* Summagraphics/Genius/Acecad tablet support absolute mode*/
 /* Summagraphics MM-Series format*/
 /* (Frank Holtz) hof@bigfoot.de Tue Feb 23 21:04:09 MET 1999 */
-int SUMMA_BORDER=100;
-int summamaxx,summamaxy;
+int SUMMA_BORDER=100,
+    summamaxx,
+    summamaxy;
 char summaid=-1;
+
+
 int M_summa(Gpm_Event *state, unsigned char *data)
 {
    int x, y;
