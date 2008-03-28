@@ -19,7 +19,16 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
+#include <sys/stat.h>               /* fstat             */
+#include <termios.h>                /* termios           */
+#include <unistd.h>                 /* usleep, write     */
+#include <linux/kdev_t.h>           /* FIXME: Linux specific: MAJOR */
+
+
+#include "types.h"                  /* Gpm_type          */
+#include "mice.h"                   /* check_no_argv     */
+#include "message.h"                /* gpm_report        */
+#include "daemon.h"                 /* which_mouse       */
 
 struct {
    int sample;
@@ -45,7 +54,7 @@ Gpm_Type* I_logi(int fd, unsigned short flags, struct Gpm_Type *type, int argc, 
    if (check_no_argv(argc, argv)) return NULL;
 
    /* is this a serial- or a bus- mouse? */
-   if(fstat(fd,&buf)==-1) gpm_report(GPM_PR_OOPS,GPM_MESS_FSTAT);
+   if(fstat(fd,&buf)==-1) gpm_report(GPM_PR_OOPS, GPM_MESS_FSTAT);
    i=MAJOR(buf.st_rdev);
 
    /* I don't know why this is herein, but I remove it. I don't think a 
