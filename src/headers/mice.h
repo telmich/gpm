@@ -59,7 +59,7 @@
                                  but then the read function would need
                                  a lock etc - ick */
                                                       
-
+#define  abs(value)              ((value) < 0 ? -(value) : (value))
 
 /*************************************************************************
  * Global variables

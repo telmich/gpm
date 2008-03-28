@@ -19,7 +19,8 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
+#include "types.h"                  /* Gpm_type       */
+#include "mice.h"                   /* abs            */
 
 
 /* Calcomp UltraSlate tablet (John Anderson)
