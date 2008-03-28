@@ -19,6 +19,9 @@
  *
  ********/
 
+#include <unistd.h>                 /* usleep, write     */
+#include <termios.h>                /* termios           */
+
 #include "types.h"                  /* Gpm_type         */
 
 /* standard ps2 */
