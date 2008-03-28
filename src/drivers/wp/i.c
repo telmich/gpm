@@ -19,8 +19,13 @@
  *
  ********/
 
+#include <termios.h>                /* termios           */
+#include <unistd.h>                 /* usleep, write     */
+
 #include "types.h"                  /* Gpm_type         */
 
+extern int wizardpad_width;
+extern int wizardpad_height;
 
 /*  Genius Wizardpad tablet  --  Matt Kimball (mkimball@xmission.com)  */
 Gpm_Type *I_wp(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
