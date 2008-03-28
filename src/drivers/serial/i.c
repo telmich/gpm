@@ -19,13 +19,23 @@
  *
  ********/
 
+#include <sys/select.h>             /* select            */
+#include <unistd.h>                 /* usleep, write     */
+
 #include "types.h"                  /* Gpm_type         */
+#include "mice.h"                   /* check_no_argv     */
+#include "message.h"                /* gpm_report        */
+#include "drivers.h"                /* other drivers     */
+#include "daemon.h"                 /* which_mouse       */
+
 
 
 Gpm_Type* I_serial(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
 {
-   int i; unsigned char c;
-   fd_set set; struct timeval timeout={0,0}; /* used when not debugging */
+   int            i;
+   unsigned char  c;
+   fd_set         set;
+   struct timeval timeout={0,0}; /* used when not debugging */
 
    /* accept "-o dtr", "-o rts" and "-o both" */
    if (option_modem_lines(fd, argc, argv)) return NULL;
