@@ -19,16 +19,23 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
+#include <termios.h>                /* termios           */
 
+#include "types.h"                  /* Gpm_type          */
+#include "etouch.h"                 /* etouch specs      */
+#include "message.h"                /* reporting         */
+#include "daemon.h"                 /* parse_argv        */
+
+extern int gunze_calib[4];          /* FIXME: do not depend on other drivers! */
 
 /* simple initialization for the elo touchscreen */
 Gpm_Type *I_etouch(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
 {
-  struct termios tty;
-  FILE *f;
-  char s[80];
-  int i, calibok = 0;
+  struct termios  tty;
+  FILE            *f;
+  char            s[80];
+  int             i,
+                  calibok = 0;
 
   /* Calibration config file (copied from I_gunze, below :) */
   #define ELO_CALIBRATION_FILE SYSCONFDIR "/gpm-calibration"

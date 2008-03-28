@@ -19,7 +19,9 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
+#include "types.h"                  /* Gpm_type          */
+#include "etouch.h"                 /* etouch specs      */
+
 
 int elo_click_ontouch = 0; /* the bigger the smoother */
 
