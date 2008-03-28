@@ -37,6 +37,9 @@
 #define max(a,b) ((a)>(b) ? (a) : (b))
 #endif
 
+int realposx=-1;
+int realposy=-1;
+
 
 int old_main()
 {
