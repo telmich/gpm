@@ -19,25 +19,27 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
-#include "mice.h"                   /* check_no_argv     */
-#include "daemon.h"                 /* which_mouse       */
-#include "drivers.h"
+#ifndef _GPM_WACOM_H
+#define _GPM_WACOM_H
+
+struct WC_MODELL {
+   char name[15];
+   char magic[3];
+   int  maxX;
+   int  maxY;
+   int  border;
+   int  treshold;
+};
+
+extern int  WacomModell;
+extern int  WacomAbsoluteWanted;
+extern int  wmaxx;
+extern int  wmaxy;
+extern char upmbuf[25];
+
+extern struct WC_MODELL wcmodell[3];
+
+#define IsA(m) ((WacomModell==(-1))? 0:!strcmp(#m,wcmodell[WacomModell].name))
 
 
-
-Gpm_Type *I_twid(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
-{
-
-   if (check_no_argv(argc, argv)) return NULL;
-
-   if (twiddler_key_init() != 0) return NULL;
-   /*
-   * the twiddler is a serial mouse: just drop dtr
-   * and run at 2400 (unless specified differently) 
-   */
-   if((which_mouse->opt_baud)==DEF_BAUD) (which_mouse->opt_baud) = 2400;
-   argv[1] = "dtr"; /* argv[1] is guaranteed to be NULL (this is dirty) */
-   return I_serial(fd, flags, type, argc, argv);
-}
-
+#endif

@@ -19,7 +19,16 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
+#include <termios.h>                /* termios           */
+#include <unistd.h>                 /* usleep, write     */
+#include <string.h>
+#include <sys/select.h>             /* select            */
+
+#include "mice.h"                   /* check_no_argv     */
+#include "types.h"                  /* Gpm_type          */
+#include "message.h"                /* gpm_report        */
+#include "wacom.h"                  /* wacom             */
+
 
 Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
 {

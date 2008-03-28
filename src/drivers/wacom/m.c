@@ -20,6 +20,7 @@
  ********/
 
 #include "types.h"                  /* Gpm_type         */
+#include "wacom.h"                  /* wacom            */
 
 /* 
  *  Wacom Tablets with pen and mouse:
@@ -35,14 +36,7 @@ char upmbuf[25]; /* needed only for macro buttons of ultrapad */
 
 /* Data for Wacom Modell Identification */
 /* (MaxX, MaxY are for Modells which do not answer resolution requests */
-struct WC_MODELL{
-   char name[15];       
-   char magic[3];
-   int  maxX;
-   int  maxY;
-   int  border;
-   int  treshold;
-} wcmodell[] = {
+struct WC_MODELL wcmodell[3] = {
    /* ModellName    Magic     MaxX     MaxY  Border  Tresh */
     { "UltraPad"  , "UD",        0,       0,    250,    20 }, 
  /* { "Intuos"    , "GD",        0,       0,      0,    20 }, not supported */
@@ -50,7 +44,6 @@ struct WC_MODELL{
     { "Graphire"  , "ET",     5103,    3711,      0,    20 }
    };
 
-#define IsA(m) ((WacomModell==(-1))? 0:!strcmp(#m,wcmodell[WacomModell].name))
 
 int M_wacom(Gpm_Event *state, unsigned char *data)
 {
