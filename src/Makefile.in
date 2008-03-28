@@ -19,7 +19,7 @@ GSRC = mice.c twiddler.c synaptics.c 														\
 		daemon/getmousedata.c daemon/gpm.c daemon/gpm-killed.c						\
 		daemon/main.c daemon/old_main.c 														\
 		daemon/open_console.c daemon/check_kill.c daemon/gpm_exited.c   			\
-		generic/isodigit.c generic/getsym.c                         				\
+		generic/isodigit.c generic/getsym.c generic/write_to_mouse.c				\
 		daemon/processspecial.c daemon/processconn.c daemon/processmouse.c		\
 		daemon/processrequest.c daemon/selection_copy.c daemon/selection_paste.c\
 		daemon/cmdline.c daemon/loadlut.c daemon/find_mouse_by_name.c				\

@@ -19,8 +19,9 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
-
+#include "types.h"                  /* Gpm_type             */
+#include "mice.h"                   /* GPM_AUX_ENABLE_DEV   */
+#include "message.h"                /* messaging            */
 
 
 /* intellimouse, ps2 version: Ben Pfaff and Colin Plumb */
