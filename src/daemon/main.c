@@ -25,7 +25,7 @@
  ********/
 
 
-#include "headers/gpmInt.h"
+#include "gpmInt.h"
 
 int main(int argc, char **argv)
 {

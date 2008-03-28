@@ -20,6 +20,8 @@
  ********/
 
 #include "types.h"                  /* Gpm_type         */
+#include "daemon.h"                 /* win              */
+#include "mice.h"                   /* realposy         */
 
 
 #define CAL_LIMIT_BRK 255
