@@ -19,7 +19,13 @@
  *
  ********/
 
+#include <unistd.h>                 /* usleep, write     */
+
 #include "types.h"                  /* Gpm_type         */
+#include "mice.h"                   /* check_no_argv     */
+#include "message.h"                /* gpm_report        */
+
+
 
 Gpm_Type *I_netmouse(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
 {
