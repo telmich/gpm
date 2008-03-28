@@ -74,6 +74,7 @@ int realposx=-1,
 
 int check_no_argv(int argc, char **argv);
 int parse_argv(argv_helper *info, int argc, char **argv);
+int read_mouse_id(int fd);
 int write_to_mouse(int fd, unsigned char *data, size_t len);
 
 #endif
