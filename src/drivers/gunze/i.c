@@ -21,6 +21,14 @@
 
 #include <termios.h>                /* termios           */
 #include "types.h"                  /* Gpm_type          */
+#include "mice.h"                   /* ‘parse_argv’      */
+#include "daemon.h"                 /* ‘which_mouse’     */
+#include "message.h"                /* gpm_report        */
+
+/* from m.c */
+extern int gunze_avg;
+extern int gunze_calib[4];
+extern int gunze_debounce;
 
 
 /* simple initialization for the gunze touchscreen */
