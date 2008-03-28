@@ -21,8 +21,8 @@
 
 #include <errno.h>
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "mice.h"         /* daemon internals */
 
 /*========================================================================*/
 /* Parse the "old" -o options */

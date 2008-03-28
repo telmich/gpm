@@ -24,7 +24,8 @@
 #include "types.h"                  /* Gpm_type          */
 #include "etouch.h"                 /* etouch specs      */
 #include "message.h"                /* reporting         */
-#include "daemon.h"                 /* parse_argv        */
+#include "mice.h"                   /* parse_argv        */
+#include "daemon.h"                 /* options           */
 
 extern int gunze_calib[4];          /* FIXME: do not depend on other drivers! */
 

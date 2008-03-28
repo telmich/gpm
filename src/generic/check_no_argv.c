@@ -19,7 +19,7 @@
  *
  ********/
 
-#include "headers/daemon.h"         /* daemon internals */
+#include "mice.h"         /* daemon internals */
 
 /*========================================================================*/
 /* Provide a common error engine by parsing with an empty option-set */

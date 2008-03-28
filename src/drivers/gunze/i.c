@@ -19,7 +19,8 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
+#include <termios.h>                /* termios           */
+#include "types.h"                  /* Gpm_type          */
 
 
 /* simple initialization for the gunze touchscreen */
