@@ -149,8 +149,6 @@ int open_console(const int mode);
 int old_main();
 int option_modem_lines(int fd, int argc, char **argv);
 
-int parse_argv(argv_helper *info, int argc, char **argv);
-
 int processConn(int fd);
 int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode);
 int processRequest(Gpm_Cinfo *ci, int vc);
