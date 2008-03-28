@@ -24,8 +24,9 @@
 #include <termios.h>                /* tcflush       */
 
 #include "types.h"                  /* Gpm_type         */
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "mice.h"                   /* check_no_argv    */
+#include "message.h"                /* messaging in gpm */
+#include "daemon.h"                 /* daemon internals */
 
 /*
  * This works with Dexxa Optical Mouse, but because in X same initstring

@@ -22,7 +22,6 @@
 #include "types.h"                  /* Gpm_type          */
 #include "etouch.h"                 /* etouch specs      */
 
-
 int elo_click_ontouch = 0; /* the bigger the smoother */
 
 int M_etouch(Gpm_Event *state,  unsigned char *data)
