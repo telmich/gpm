@@ -73,6 +73,7 @@ int realposx=-1,
  */
 
 int check_no_argv(int argc, char **argv);
+int option_modem_lines(int fd, int argc, char **argv);
 int parse_argv(argv_helper *info, int argc, char **argv);
 int read_mouse_id(int fd);
 int setspeed(int fd,int old,int new,int needtowrite,unsigned short flags);

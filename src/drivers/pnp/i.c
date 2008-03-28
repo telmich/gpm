@@ -19,6 +19,8 @@
  *
  ********/
 
+#include <termios.h>                /* termios           */
+
 #include "types.h"                  /* Gpm_type         */
 
 

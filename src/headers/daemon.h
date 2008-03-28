@@ -147,7 +147,6 @@ int limit_delta(int delta, int min, int max);
 
 int open_console(const int mode);
 int old_main();
-int option_modem_lines(int fd, int argc, char **argv);
 
 int processConn(int fd);
 int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode);
