@@ -27,7 +27,6 @@
 #include "daemon.h"                 /* which_mouse       */
 
 
-
 int gunze_avg = 9; /* the bigger the smoother */
 int gunze_calib[4]; /* x0,y0 x1,y1 (measured at 1/8 and 7/8) */
 int gunze_debounce = 100; /* milliseconds: ignore shorter taps */
