@@ -21,11 +21,15 @@
 
 #include "types.h"                  /* Gpm_type         */
 
+#include <linux/input.h>           /* FIXME: Linux specific: thisevent */
+#include <string.h>                 /* memcpy */
+
 
 #ifdef HAVE_LINUX_INPUT_H
 int M_evabs (Gpm_Event * state, unsigned char *data)
 {
    struct input_event thisevent;
+
    (void) memcpy (&thisevent, data, sizeof (struct input_event));
    if (thisevent.type == EV_ABS) {
       if (thisevent.code == ABS_X)
