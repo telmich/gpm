@@ -19,7 +19,13 @@
  *
  ********/
 
+#include <sys/time.h>      /* gettimeofday      */
+
 #include "types.h"                  /* Gpm_type         */
+#include "message.h"                /* gpm_report       */
+#include "mice.h"                   /* REALPOS           */
+#include "daemon.h"                 /* which_mouse       */
+
 
 
 int gunze_avg = 9; /* the bigger the smoother */
