@@ -19,10 +19,17 @@
  *
  ********/
 
+#include <sys/time.h>      /* gettimeofday      */
+
 #include "types.h"                  /* Gpm_type          */
 #include "etouch.h"                 /* etouch specs      */
+#include "mice.h"                   /* REALPOS           */
+#include "daemon.h"                 /* which_mouse       */
+
 
 int elo_click_ontouch = 0; /* the bigger the smoother */
+
+extern int gunze_calib[4];          /* FIXME: do not depend on other drivers! */
 
 int M_etouch(Gpm_Event *state,  unsigned char *data)
 { /*
