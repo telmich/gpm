@@ -19,6 +19,8 @@
  *
  ********/
 
+#include <linux/joystick.h>
+
 #include "types.h"                  /* Gpm_type         */
 
 #ifdef HAVE_LINUX_JOYSTICK_H
