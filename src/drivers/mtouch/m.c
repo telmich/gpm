@@ -19,7 +19,11 @@
  *
  ********/
 
+#include <sys/time.h>      /* gettimeofday      */
+
 #include "types.h"                  /* Gpm_type         */
+#include "mice.h"                   /* mice             */
+#include "daemon.h"                 /* which_mouse       */
 
 int M_mtouch(Gpm_Event *state,  unsigned char *data)
 {
