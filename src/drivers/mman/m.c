@@ -20,6 +20,8 @@
  ********/
 
 #include "types.h"                  /* Gpm_type         */
+#include "mice.h"                   /* mice             */
+#include "daemon.h"                 /* which_mouse       */
 
 
 int M_mman(Gpm_Event *state,  unsigned char *data)

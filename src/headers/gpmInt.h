@@ -50,9 +50,6 @@
 
 /*....................................... Structures */
 
-#define GPM_EXTRA_MAGIC_1 0xAA
-#define GPM_EXTRA_MAGIC_2 0x55
-
 // looks unused; delete
 //typedef struct Opt_struct_type {int a,B,d,i,p,r,V,A;} Opt_struct_type;
 

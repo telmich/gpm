@@ -28,6 +28,7 @@
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 #include "headers/gpmInt.h"         /* daemon internals */
+#include "mice.h"                   /* GPM MAGIC        */
 
 /*-------------------------------------------------------------------
  * fetch the actual device data from the mouse device, dependent on

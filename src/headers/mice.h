@@ -59,6 +59,9 @@
                                  but then the read function would need
                                  a lock etc - ick */
                                                       
+#define GPM_EXTRA_MAGIC_1 0xAA
+#define GPM_EXTRA_MAGIC_2 0x55
+
 #define  abs(value)              ((value) < 0 ? -(value) : (value))
 
 /*************************************************************************
