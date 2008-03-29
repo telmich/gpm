@@ -19,6 +19,9 @@
  *
  ********/
 
+#include <linux/input.h>           /* FIXME: Linux specific: thisevent */
+#include <string.h>                 /* memcpy */
+
 #include "types.h"                  /* Gpm_type         */
 
 
