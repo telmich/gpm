@@ -20,6 +20,7 @@
  ********/
 
 #include "types.h"                  /* Gpm_type         */
+#include "mice.h"                   /* REALPOS           */
 
 
 /* Thu Jan 28 20:54:47 MET 1999 hof@hof-berlin.de SummaSketch reportformat */

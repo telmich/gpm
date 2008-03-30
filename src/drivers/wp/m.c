@@ -20,6 +20,8 @@
  ********/
 
 #include "types.h"                  /* Gpm_type         */
+#include "daemon.h"                 /* which_mouse       */
+#include "mice.h"                   /* REALPOS           */
 
 
 /*  Genius Wizardpad tablet  --  Matt Kimball (mkimball@xmission.com)  */
