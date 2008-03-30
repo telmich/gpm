@@ -19,8 +19,13 @@
  *
  ********/
 
+#include <string.h>              /* strcmp      */
+
 #include "types.h"                  /* Gpm_type         */
 #include "wacom.h"                  /* wacom            */
+#include "daemon.h"                 /* which_mouse       */
+#include "mice.h"                   /* REALPOS           */
+
 
 /* 
  *  Wacom Tablets with pen and mouse:
