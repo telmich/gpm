@@ -52,6 +52,12 @@
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif
 
+Gpm_Type *(*mt_I_serial)(int fd, unsigned short flags, struct Gpm_Type *type,
+                     int argc, char **argv);
+
+int realposx=-1;
+int realposy=-1;
+
 
 /* this material is needed to pass options to mice.c */
 struct mouse_features mymouse = {
@@ -188,7 +194,7 @@ int mousereopen(int oldfd, char *name, Gpm_Type *type)
    usleep(100000);
    fd=open(name,O_RDWR);
    if (fd < 0) gpm_report(GPM_PR_OOPS,name);
-   (*I_serial)(fd,type->flags,type,1,&type->name); /* ms initialization */
+   (*mt_I_serial)(fd,type->flags,type,1,&type->name); /* ms initialization */
    return fd;
 }
 
@@ -331,7 +337,7 @@ int main(int argc, char **argv)
       exit(1);
    }
 
-   I_serial=mice->init; /* the first one has I_serial */
+   mt_I_serial=mice->init; /* the first one has I_serial */
 
    signal(SIGINT,killed);   /* control-C kills us */
    raw();
@@ -357,7 +363,7 @@ int main(int argc, char **argv)
          printf("\t%s\r\n", (*nextdev)->name);
          FD_SET((*nextdev)->fd,&devSet);
          maxfd=max((*nextdev)->fd,maxfd);
-         (*I_serial)((*nextdev)->fd,(mice+1)->flags,mice+1,
+         (*mt_I_serial)((*nextdev)->fd,(mice+1)->flags,mice+1,
 		  1, &(mice+1)->name); /* try ms mode */
       }
 
