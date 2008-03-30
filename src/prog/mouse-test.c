@@ -45,6 +45,7 @@
 #include "headers/message.h" /* to print */
 #include "headers/gpmInt.h" /* to get mouse types */
 #include "headers/daemon.h" /* FIXME: do not use that..rewrite mouse-test, anyway */
+#include "drivers.h"
 
 #ifndef min
 #define min(a,b) ((a)>(b)?(b):(a))
@@ -174,9 +175,6 @@ struct device **gpm_makedev(struct device **current, char *name)
    devcount++;
    return &((*current)->next);
 }
-
-Gpm_Type *(*I_serial)(int fd, unsigned short flags, struct Gpm_Type *type,
-		      int argc, char **argv);
 
 
 /*----------------------------------------------------------------------------- 

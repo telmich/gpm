@@ -29,7 +29,8 @@ GSRC = mice.c twiddler.c synaptics.c 														\
 # mouse-test and gpm
 GCOMMON = 	generic/check_no_argv.c generic/parse_argv.c 							\
 				generic/limit_delta.c generic/option_modem_lines.c						\
-				generic/setspeed.c
+				generic/setspeed.c generic/read_mouse_id.c								\
+				generic/m_listtypes.c
 
 
 GSRC += $(GDRIVERS)
