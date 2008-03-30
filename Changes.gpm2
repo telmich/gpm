@@ -1,4 +1,4 @@
-1.99.4:
+1.99.4: Nico Schottelius, 20080330
    * Complete splitoff of mice.c!
    * Renamed conf/ to example-configurations
 1.99.3: Nico Schottelius, 20080326
