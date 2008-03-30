@@ -34,7 +34,7 @@ lispdir = @lispdir@
 
 # programs
 CC                = @CC@
-CFLAGS				= -Iheaders @CFLAGS@
+CFLAGS				= -Wall -Wextra -Werror @CFLAGS@
 MAKEDEPEND 			= $(CC) -M $(CPPFLAGS) -o $*.d $<
 RANLIB            = @RANLIB@
 YACC              = @YACC@
