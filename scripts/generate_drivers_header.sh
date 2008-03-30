@@ -26,6 +26,9 @@ cat << eof
  *
  */
 
+#ifndef __GPM__DRIVER_H
+#define __GPM__DRIVER_H
+
 eof
 
 (
@@ -34,3 +37,4 @@ eof
    grep -h "^int R_" src/drivers/*/r.c
 ) | sed 's/$/;/'
 
+echo "#endif"
