@@ -1,3 +1,5 @@
+1.99.5:
+   * Removed all compiling warnings
 1.99.4: Nico Schottelius, 20080330
    * Complete splitoff of mice.c!
    * Renamed conf/ to example-configurations
