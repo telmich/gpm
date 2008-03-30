@@ -20,6 +20,7 @@
  ********/
 
 #include "types.h"                  /* Gpm_type         */
+#include "daemon.h"                 /* which_mouse       */
 
 
 int M_ps2(Gpm_Event *state,  unsigned char *data)
