@@ -19,7 +19,10 @@
  *
  ********/
 
+#include <linux/keyboard.h>         /* KG_SHIFT          */
+
 #include "types.h"                  /* Gpm_type         */
+#include "twiddler.h"               /* twiddler         */
 
 int M_twid(Gpm_Event *state,  unsigned char *data)
 {
