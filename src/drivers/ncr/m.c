@@ -19,7 +19,12 @@
  *
  ********/
 
+
+
 #include "types.h"                  /* Gpm_type         */
+#include "mice.h"                   /* REALPOS           */
+#include "daemon.h"                 /* win               */
+
 
 /* ncr pen support (Marc Meis) */
 
