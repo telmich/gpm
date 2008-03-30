@@ -19,7 +19,9 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
+#include "types.h"                  /* Gpm_type          */
+#include "mice.h"                   /* REALPOS           */
+#include "daemon.h"                 /* which_mouse / win */
 
 
 /* Summagraphics/Genius/Acecad tablet support absolute mode*/
