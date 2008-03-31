@@ -41,6 +41,9 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
 #define UD_COORD         "~C\r"     /* Request max coordinates              */
 #define UD_STOP          "\nSP\r"   /* stop sending coordinates             */
 
+   flags = 0; /* FIXME: 1.99.13 */
+
+
    void reset_wacom()
    { 
       /* Init Wacom communication; this is modified from xf86Wacom.so module */
@@ -90,7 +93,9 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
       if (cmd) write(fd,cmd,strlen(cmd));
       memset(buffer,0,sizeof(buffer)); p=buffer;
       err=wait_wacom();
-      while (err != -1 && err && (p-buffer)<(sizeof(buffer)-1)) {
+      while (err != -1
+            && err
+            && (p-buffer)<(sizeof(buffer)-1)) {
          p+= read(fd,p,(sizeof(buffer)-1)-(p-buffer));
          err=wait_wacom();
       }
@@ -112,7 +117,7 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
    static argv_helper optioninfo[] = {
          {"absolute",  ARGV_BOOL, u: {iptr: &WacomAbsoluteWanted}, value: !0},
          {"relative",  ARGV_BOOL, u: {iptr: &WacomAbsoluteWanted}, value:  0},
-         {"",       ARGV_END} 
+         {"",          ARGV_END,  u: {iptr: &WacomAbsoluteWanted}, value:  0} 
    };
    parse_argv(optioninfo, argc, argv); 
    type->absolute = WacomAbsoluteWanted;

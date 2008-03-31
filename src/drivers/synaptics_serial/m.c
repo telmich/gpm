@@ -20,6 +20,7 @@
  ********/
 
 #include "types.h"                  /* Gpm_type         */
+#include "synaptics.h"              /* synaptics support */
 
 
 /* Synaptics TouchPad mouse emulation (Henry Davies) */

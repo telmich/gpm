@@ -19,7 +19,9 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
+#include <unistd.h>                 /* write             */
+
+#include "types.h"                  /* Gpm_type          */
 #include "mice.h"                   /* REALPOS           */
 
 

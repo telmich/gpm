@@ -27,6 +27,7 @@
 #include "message.h"                /* gpm_report        */
 #include "drivers.h"                /* other drivers     */
 #include "daemon.h"                 /* which_mouse       */
+#include "synaptics.h"              /* synaptics support */
 
 
 

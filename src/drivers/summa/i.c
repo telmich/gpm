@@ -35,6 +35,10 @@ extern char summaid;
 
 Gpm_Type *I_summa(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv) 
 {
+
+   flags = argc = 0; /* FIXME: 1.99.13 */
+   argv = NULL; 
+
    void resetsumma()
    {
       write(fd,0,1); /* Reset */

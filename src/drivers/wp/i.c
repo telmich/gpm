@@ -34,6 +34,10 @@ Gpm_Type *I_wp(int fd, unsigned short flags, struct Gpm_Type *type, int argc, ch
    char tablet_info[256];
    int count, pos, size;
 
+   flags = argc = 0; /* FIXME: 1.99.13 */
+   argv = NULL; 
+
+
    /* Set speed to 9600bps (copied from I_summa, above :) */
    tcgetattr(fd, &tty);
    tty.c_iflag = IGNBRK | IGNPAR;

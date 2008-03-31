@@ -19,6 +19,8 @@
  *
  ********/
 
+#include <unistd.h>                 /* write             */
+
 #include "types.h"                  /* Gpm_type         */
 
 
