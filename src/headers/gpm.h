@@ -133,13 +133,21 @@ enum Gpm_Margin {GPM_TOP=1, GPM_BOT=2, GPM_LFT=4, GPM_RGT=8};
 /*....................................... The reported event */
 
 typedef struct Gpm_Event {
+
   unsigned char buttons, modifiers;  /* try to be a multiple of 4 */
   unsigned short vc;
-  short dx, dy, x, y; /* displacement x,y for this event, and absolute x,y */
+
+  /* displacement x,y for this event, and absolute x,y */
+  short dx, dy, x, y;
   enum Gpm_Etype type;
+
   /* clicks e.g. double click are determined by time-based processing */
   int clicks;
+  
+
+   /* FIXME: this seems to be unused. if so, remove it */
   enum Gpm_Margin margin;
+
   /* wdx/y: displacement of wheels in this event. Absolute values are not 
    * required, because wheel movement is typically used for scrolling
    * or selecting fields, not for cursor positioning. The application
@@ -147,7 +155,8 @@ typedef struct Gpm_Event {
    * go any further. 
    * A single mouse will use wdy, "vertical scroll" wheel. */
   short wdx, wdy;
-}              Gpm_Event;
+
+} Gpm_Event;
 
 /*....................................... The handling function */
 

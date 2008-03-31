@@ -148,7 +148,22 @@ int processConn(int fd) /* returns newfd or -1 */
 
    /* if the client gets motions, give it the current position */
    if(request->eventMask & GPM_MOVE) {
-      Gpm_Event event={0,0,vc,0,0,statusX,statusY,GPM_MOVE,0,0};
+      //Gpm_Event event={0, 0, vc, 0, 0, statusX, statusY, GPM_MOVE, 0, 0};
+      
+      Gpm_Event event;
+      event.buttons     = 0;
+      event.modifiers   = 0;
+      event.vc          = vc;
+      event.dx          = 0;
+      event.dy          = 0;
+      event.x           = statusX;
+      event.y           = statusY;
+      event.type        = GPM_MOVE;
+      event.clicks      = 0;
+      event.margin      = 0;
+      event.wdx         = 0;
+      event.wdy         = 0;
+
       do_client(info, &event);
    }
 
