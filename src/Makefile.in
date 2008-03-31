@@ -8,9 +8,13 @@
 
 srcdir = @srcdir@
 top_builddir = ..
+
+## INCLUDES
+-include Makefile.drivers.generated
 include $(top_builddir)/Makefile.include
 
-# Main portion: regular build rules
+
+## SOURCE FILES
 
 GSRC = mice.c \
 		daemon/add_mouse.c daemon/init_mice.c daemon/reset_mice.c					\
@@ -64,6 +68,7 @@ STRIP = -s
 all:	gpm lib/@SHLIB@ lib/libgpm.a $(PROG)
 
 gpm:	$(GOBJ)
+	echo go: $(GOBJ)
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $(GOBJ) @LIBS@ $(LIBS) -lm
 
 ### BUILD PROCESS
@@ -96,12 +101,12 @@ prog/%:	prog/%.o
 ### GENERATED INCLUDES
 
 # FIXME: add absolute path of source files below
--include Makefile.drivers.generated
 $(OBJECTS): headers/drivers.h
+
 headers/drivers.h: $(GDRIVERS)
 	../scripts/generate_drivers_header.sh . > $@
 
--include $(SRCSP)
+#-include $(SRCSP)
 
 Makefile.drivers.generated:
 	../scripts/generate_drivers_makefile.sh . > $@

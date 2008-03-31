@@ -38,12 +38,14 @@ Gpm_Type *I_etouch(int fd, unsigned short flags, struct Gpm_Type *type, int argc
   int             i,
                   calibok = 0;
 
+   flags = 0; /* FIXME: unused */
+
   /* Calibration config file (copied from I_gunze, below :) */
   #define ELO_CALIBRATION_FILE SYSCONFDIR "/gpm-calibration"
    /* accept a few options */
    static argv_helper optioninfo[] = {
          {"clickontouch",  ARGV_BOOL, u: {iptr: &elo_click_ontouch}, value: !0},
-         {"",       ARGV_END}
+         {"",              ARGV_END, u: {iptr: &elo_click_ontouch}, value:0   }
    };
    parse_argv(optioninfo, argc, argv);
 

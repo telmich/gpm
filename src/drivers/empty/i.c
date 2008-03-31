@@ -25,6 +25,9 @@
 
 Gpm_Type* I_empty(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
 {
-    if (check_no_argv(argc, argv)) return NULL;
-    return type;
+   /* FIXME: remove unecessary init, but make gcc happy: warning: unused parameter ‘fd’ */
+   fd = 0;
+   flags = 0;
+   if(check_no_argv(argc, argv)) return NULL;
+   return type;
 }

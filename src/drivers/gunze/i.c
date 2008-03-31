@@ -39,13 +39,16 @@ Gpm_Type *I_gunze(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
    char s[80];
    int i, calibok = 0;
 
+   flags = 0; /* FIXME: 1.99.13 */
+
+
    #define GUNZE_CALIBRATION_FILE SYSCONFDIR "/gpm-calibration"
    /* accept a few options */
    static argv_helper optioninfo[] = {
       {"smooth",   ARGV_INT, u: {iptr: &gunze_avg}},
       {"debounce", ARGV_INT, u: {iptr: &gunze_debounce}},
       /* FIXME: add corner tapping */
-      {"",       ARGV_END}
+      {"",        ARGV_END, u: {iptr: &gunze_avg}}
    };
    parse_argv(optioninfo, argc, argv);
 

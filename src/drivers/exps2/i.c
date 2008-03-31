@@ -36,6 +36,8 @@ Gpm_Type *I_exps2(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
 {
    static unsigned char s1[] = { 243, 200, 243, 200, 243, 80, };
 
+   flags = 0; /* FIXME: 1.99.13 */
+
    if (check_no_argv(argc, argv)) return NULL;
 
    write(fd, s1, sizeof (s1));
