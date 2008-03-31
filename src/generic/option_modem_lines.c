@@ -30,13 +30,13 @@
 /*========================================================================*/
 int option_modem_lines(int fd, int argc, char **argv)
 {
-   static unsigned int err, lines, reallines;
+   static int err, lines, reallines;
 
    static argv_helper optioninfo[] = {
-      {"dtr",  ARGV_BOOL, u: {iptr: &lines}, value: TIOCM_DTR},
+      {"dtr", ARGV_BOOL,  u: {iptr: &lines}, value: TIOCM_DTR},
       {"rts",  ARGV_BOOL, u: {iptr: &lines}, value: TIOCM_RTS},
       {"both", ARGV_BOOL, u: {iptr: &lines}, value: TIOCM_DTR | TIOCM_RTS},
-      {"",       ARGV_END}
+      {"",     ARGV_END,  u: {iptr: &lines}, 0}
       };
 
    if (argc<2) return 0;
