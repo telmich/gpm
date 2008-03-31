@@ -19,16 +19,17 @@
  *
  ********/
 
+#include <stdio.h>         /* NULL */
 #include "mice.h"         /* daemon internals */
 
 /*========================================================================*/
 /* Provide a common error engine by parsing with an empty option-set */
 /*========================================================================*/
-volatile int check_no_argv(int argc, char **argv)
+int check_no_argv(int argc, char **argv)
 {
    static argv_helper optioninfo[] = {
-      {"",       ARGV_END}
-      };
+      {"", ARGV_END, {NULL}, 0}
+   };
    return parse_argv(optioninfo, argc, argv);
 }
 
