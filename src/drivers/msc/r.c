@@ -19,7 +19,10 @@
  *
  ********/
 
+#include <unistd.h>                 /* write             */
+
 #include "types.h"                  /* Gpm_type         */
+#include "daemon.h"                 /* limit_delta       */
 
 int R_msc(Gpm_Event *state, int fd)
 {
