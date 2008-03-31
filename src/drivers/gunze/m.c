@@ -64,7 +64,7 @@ int M_gunze(Gpm_Event *state,  unsigned char *data)
       return 0;
    }
 
-   if(sscanf(data+1, "%d,%d", &x, &y)!= 2) {
+   if(sscanf((char *)data+1, "%d, %d", &x, &y) != 2) {
       gpm_report(GPM_PR_INFO,GPM_MESS_GUNZE_INV_PACK,data);
       return 10; /* eat one byte only, leave ten of them */
    }
