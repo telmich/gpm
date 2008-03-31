@@ -21,9 +21,9 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
-#include "headers/gpmInt.h"
-#include "headers/message.h"
-#include "headers/daemon.h"
+#include "gpmInt.h"
+#include "message.h"
+#include "daemon.h"
 
 #include <stdlib.h> /* malloc() */
 

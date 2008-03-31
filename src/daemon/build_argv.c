@@ -22,7 +22,7 @@
 #include <string.h>        /* str*     */
 #include <stdlib.h>        /* calloc   */
 
-#include "headers/message.h"        /* messaging in gpm */
+#include "message.h"        /* messaging in gpm */
 
 /* build_argv is used for mouse initialization routines */
 char **build_argv(char *argv0, char *str, int *argcptr, char sep)
