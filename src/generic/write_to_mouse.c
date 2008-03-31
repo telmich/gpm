@@ -32,7 +32,7 @@
  */
 int write_to_mouse(int fd, unsigned char *data, size_t len)
 {
-   int i;
+   unsigned int i;
    int error = 0;
    for (i = 0; i < len; i++) {
       unsigned char c;
