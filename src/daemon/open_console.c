@@ -36,7 +36,7 @@ int open_console(const int mode)
    int                  fd;
    int                  maj;
    int                  twelve = 12;
-   struct serial_struct si;
+//   struct serial_struct si;
    struct stat          sb;
 
    fd = open(option.consolename, mode);
@@ -45,12 +45,15 @@ int open_console(const int mode)
       maj = major(sb.st_rdev);
       if (maj != 4 && (maj < 136 || maj > 143)) {
           if (ioctl(fd, TIOCLINUX, &twelve) < 0) {
-              if (si.line > 0) {
-                  gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_SERIALCON);
-               }
+              /* FIXME: si.line is not initialized, but used! */
+              //if (si.line > 0) {
+              //    gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_SERIALCON);
+              // }
           }
       }
+   } else {
+      gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
+   }
+
    return fd;
-   } else
-   gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
 }
