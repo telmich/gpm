@@ -882,6 +882,7 @@ static int           scrolling_amount_left = 0;   /* Tells how much to scroll up
 ** which makes reading the debug data harder, only dump the report if it is different 
 ** than the previously dumped.
 */
+#if DEBUG_REPORTS
 static void tp_dump_report_data (report_type report,
 				 int edges,
 				 Gpm_Event* state) 
@@ -934,6 +935,7 @@ static void tp_dump_report_data (report_type report,
 	      (multi_finger_pressure>4500 && multi_finger_xy>50000? 'f':' '));
 
 }
+#endif
 
 
 /* syn_dump_info
@@ -1503,6 +1505,8 @@ static int tp_find_fingers ( report_type *report,
 
   static int fake_extra_finger;
   static int was_fake_pressure;
+
+  state = NULL; /* FIXME: gpm 1.99.13 */
 
   /* Check whether there is a palm on the pad */
   if (palm_detect_enabled &&  
@@ -2233,7 +2237,7 @@ static unsigned char tp_hextoint (unsigned char byte1,
   bytes [0] = byte1;
   bytes [1] = byte2;
   bytes [2] = '\0';
-  sscanf (bytes, "%x", &result);
+  sscanf ((char *) bytes, "%x", &result);
   return result;
 }
 
@@ -2280,7 +2284,7 @@ static void tp_serial_read (int fd,
   tv.tv_usec = 0;
 
   while ((select (fd+1, &rfds, NULL, NULL, &tv) == 1) &&
-	 (num_read < count)) {
+	 (num_read < (int) count)) {
     read_count = read (fd, &bytes [num_read], count - num_read);
     num_read += read_count;
 
@@ -2288,7 +2292,7 @@ static void tp_serial_read (int fd,
     FD_SET (fd, &rfds);
   }
 
-  for (; num_read < count; num_read++) {
+  for (; num_read < (int) count; num_read++) {
      bytes [num_read] = '\0';
   }
 }
@@ -2300,8 +2304,8 @@ static void tp_serial_send_cmd(int fd,
   unsigned char junk [15];
 
   tp_serial_flush_input (fd);
-  write (fd, cmd, strlen (cmd));
-  tp_serial_read (fd, junk, strlen (cmd));
+  write (fd, cmd, strlen ((char *) cmd));
+  tp_serial_read (fd, junk, strlen ((char *) cmd));
 #if DEBUG_FLUSH
   junk [strlen (cmd)] = '\0';
   gpm_report (GPM_PR_DEBUG,"serial tossing: %s", junk);
@@ -2314,7 +2318,7 @@ static void syn_serial_set_mode (int fd,
 {
   unsigned char bytes [15];
 
-  sprintf (bytes, "%%C3B%02X5555", mode);
+  sprintf ((char *) bytes, "%%C3B%02X5555", mode);
 #if DEBUG_SENT_DATA
   gpm_report (GPM_PR_DEBUG,"modes: %s", bytes);
 #endif
@@ -2327,7 +2331,7 @@ static void syn_serial_read_ident (int fd,
 {
   unsigned char bytes [5];
 
-  tp_serial_send_cmd (fd, "%A");
+  tp_serial_send_cmd (fd, (unsigned char *) "%A");
   tp_serial_read (fd, bytes, 4);
 
 #if DEBUG_SENT_DATA
@@ -2368,7 +2372,7 @@ static void syn_serial_read_model_id (int fd,
    */
   if ( (ident[0].info_major >= 4) ||
        (ident[0].info_major == 3 && ident[0].info_minor >= 2)){
-    tp_serial_send_cmd (fd, "%D");
+    tp_serial_send_cmd (fd, (unsigned char *) "%D");
     tp_serial_read (fd, bytes, 6);
 
     /* reformat the data */
@@ -2396,7 +2400,7 @@ static void syn_serial_read_cap (int fd,
   unsigned char bytes [8];
   int cap_int = 0;
 
-  tp_serial_send_cmd (fd, "%B");
+  tp_serial_send_cmd (fd, (unsigned char *) "%B");
   tp_serial_read (fd, bytes, 8);
 
 #if DEBUG_SENT_DATA
