@@ -61,7 +61,7 @@ Gpm_Type* I_logi(int fd, unsigned short flags, struct Gpm_Type *type, int argc, 
     * hardcoded ttyname in a C file is senseful. I think if the device 
     * exists must be clear before. Not here. */
    /********* if (stat("/dev/ttyS0",&buf)==-1) gpm_oops("stat()"); *****/
-   busmouse=(i != MAJOR(buf.st_rdev));
+   busmouse = (i != (int) MAJOR(buf.st_rdev));
 
    /* fix the howmany field, so that serial mice have 1, while busmice have 3 */
    type->howmany = busmouse ? 3 : 1;
