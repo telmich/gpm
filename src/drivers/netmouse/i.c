@@ -31,6 +31,8 @@ Gpm_Type *I_netmouse(int fd, unsigned short flags, struct Gpm_Type *type, int ar
    unsigned char magic[6] = { 0xe8, 0x03, 0xe6, 0xe6, 0xe6, 0xe9 };
    int i;
 
+   flags = 0; /* FIXME: 1.99.13 */
+
    if (check_no_argv(argc, argv)) return NULL;
    for (i=0; i<6; i++) {
       unsigned char c = 0;
