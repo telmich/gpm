@@ -27,7 +27,7 @@
 #include <sys/time.h>      /* timeval */
 #include <sys/types.h>     /* socket() */
 
-#include "headers/gpmInt.h"
+#include "gpmInt.h"
 
 #ifdef HAVE_NCURSES_H
 #include <ncurses.h>

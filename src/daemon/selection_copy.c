@@ -24,8 +24,8 @@
 #include <time.h>                   /* time              */
 
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
 
 void selection_copy(int x1, int y1, int x2, int y2, int mode)
 {
@@ -47,7 +47,7 @@ void selection_copy(int x1, int y1, int x2, int y2, int mode)
 
    if ((fd=open_console(O_WRONLY))<0)
       gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
-   /* FIXME: should be replaced with string constant (headers/message.h) */
+   /* FIXME: should be replaced with string constant (message.h) */
    gpm_report(GPM_PR_DEBUG,"ctl %i, mode %i",(int)*buf, arg[4]);
    if (ioctl(fd, TIOCLINUX, buf+sizeof(short)-1) < 0)
      gpm_report(GPM_PR_OOPS,GPM_MESS_IOCTL_TIOCLINUX);

@@ -29,9 +29,9 @@
 #include <fcntl.h>      /* mknod */
 
 
-#include "headers/gpmInt.h"
-#include "headers/message.h"
-#include "headers/daemon.h"
+#include "gpmInt.h"
+#include "message.h"
+#include "daemon.h"
 
 void startup(int argc, char **argv)
 {

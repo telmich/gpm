@@ -42,9 +42,9 @@
 #include <signal.h>
 #include <termios.h>
 
-#include "headers/message.h" /* to print */
-#include "headers/gpmInt.h" /* to get mouse types */
-#include "headers/daemon.h" /* FIXME: do not use that..rewrite mouse-test, anyway */
+#include "message.h" /* to print */
+#include "gpmInt.h" /* to get mouse types */
+#include "daemon.h" /* FIXME: do not use that..rewrite mouse-test, anyway */
 #include "drivers.h"
 
 #ifndef min

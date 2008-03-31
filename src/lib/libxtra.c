@@ -28,8 +28,8 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "headers/gpmInt.h"
-#include "headers/message.h"
+#include "gpmInt.h"
+#include "message.h"
 
 
 /*-------------------------------------------------------------------*/

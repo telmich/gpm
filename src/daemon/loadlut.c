@@ -26,9 +26,9 @@
 #include <errno.h>                  /* errno.h           */
 #include <unistd.h>                 /* getuid            */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
-#include "headers/gpmInt.h"         /* GPM_SYS_CONSOLE  */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
+#include "gpmInt.h"         /* GPM_SYS_CONSOLE  */
 
 int loadlut(char *charset)
 {

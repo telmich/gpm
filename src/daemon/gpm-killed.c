@@ -25,8 +25,8 @@
 #include <stdlib.h>                 /* exit()            */
 #include <unistd.h>                 /* getpid()          */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
 
 void gpm_killed(int signo)
 {

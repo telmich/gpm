@@ -25,8 +25,8 @@
 #include <sys/stat.h>   /* needed for      */
 #include <unistd.h>     /* stat() */
 
-#include "headers/gpmInt.h"   /* only used for some defines */
-#include "headers/message.h"
+#include "gpmInt.h"   /* only used for some defines */
+#include "message.h"
 
 /*****************************************************************************
  * check, whether devfs is used or not.

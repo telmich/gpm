@@ -22,7 +22,7 @@
 #include <unistd.h>                 /* write             */
 
 #include "types.h"                  /* Gpm_type         */
-#include "headers/daemon.h"         /* daemon internals */
+#include "daemon.h"         /* daemon internals */
 
 int R_ms3(Gpm_Event *state, int fd)
 {

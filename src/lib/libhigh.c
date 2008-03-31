@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "headers/gpmInt.h"
+#include "gpmInt.h"
 
 Gpm_Roi *gpm_roi=NULL;
 Gpm_Roi *gpm_current_roi=NULL;

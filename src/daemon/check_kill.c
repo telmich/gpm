@@ -23,8 +23,8 @@
 #include <unistd.h>                 /* unlink            */
 #include <stdlib.h>                 /* exit              */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
 
 /* itz Sat Sep 12 10:55:51 PDT 1998 Added this as replacement for the
    unwanted functionality in check_uniqueness. */

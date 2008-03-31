@@ -25,9 +25,9 @@
 #include <string.h>                 /* strerror          */
 #include <linux/kd.h>               /* KD*               */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
-#include "headers/gpmInt.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
+#include "gpmInt.h"         /* daemon internals */
 #include "mice.h"                   /* GPM MAGIC        */
 
 /*-------------------------------------------------------------------

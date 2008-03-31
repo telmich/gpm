@@ -42,10 +42,10 @@
 #include <sys/kd.h>        /* KDGETMODE */
 #include <termios.h>       /* winsize */
 
-#include "headers/gpmInt.h"   /* old daemon header */
-#include "headers/message.h"
+#include "gpmInt.h"   /* old daemon header */
+#include "message.h"
 
-#include "headers/daemon.h"   /* clean daemon header */
+#include "daemon.h"   /* clean daemon header */
 
 /* who the f*** runs gpm without glibc? doesn't have dietlibc __socklent_t? */
 #if !defined(__GLIBC__)

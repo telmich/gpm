@@ -22,8 +22,8 @@
 #include <stdlib.h>                 /* atoi              */
 #include <unistd.h>                 /* getopt            */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
 
 /*****************************************************************************
  * Check the command line and / or set the appropriate variables

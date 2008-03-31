@@ -22,7 +22,7 @@
 #include <stdarg.h>     /* va_arg/start/... */
 #include <stdlib.h>     /* exit() */
 
-#include "headers/message.h"
+#include "message.h"
 
 void gpm_report(int line, char *file, int stat, char *text, ... )
 {

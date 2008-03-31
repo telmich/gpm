@@ -29,9 +29,9 @@
 
 #include <linux/kd.h>               /* linux hd*         */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
-#include "headers/gpmInt.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
+#include "gpmInt.h"         /* daemon internals */
 
 #ifndef max
 #define max(a,b) ((a)>(b) ? (a) : (b))

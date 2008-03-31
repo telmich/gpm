@@ -27,8 +27,8 @@
 #include <string.h>                 /* str*              */
 #include <errno.h>                  /* errno.h           */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
 
 
 int processConn(int fd) /* returns newfd or -1 */

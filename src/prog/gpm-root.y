@@ -68,8 +68,8 @@
 
 #define MAX_NR_USER_CONSOLES 63 /* <linux/tty.h> needs __KERNEL__ */
 
-#include "headers/message.h"
-#include "headers/gpm.h"
+#include "message.h"
+#include "gpm.h"
 
 #ifdef DEBUG
 #define YYDEBUG 1

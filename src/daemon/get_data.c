@@ -21,9 +21,9 @@
 
 #include <unistd.h>                 /* read             */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
-#include "headers/gpmInt.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
+#include "gpmInt.h"         /* daemon internals */
 
 /*-------------------------------------------------------------------*
  * This  was inline, and incurred in a compiler bug (2.7.0)

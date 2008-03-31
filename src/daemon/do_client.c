@@ -21,9 +21,9 @@
 
 #include <unistd.h>                 /* write             */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
-#include "headers/gpmInt.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
+#include "gpmInt.h"         /* daemon internals */
 
 /*-------------------------------------------------------------------*/
 /* returns 0 if the event has not been processed, and 1 if it has */

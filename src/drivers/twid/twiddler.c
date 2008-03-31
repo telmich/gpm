@@ -51,12 +51,12 @@
 #include <sys/time.h>
 #include <linux/vt.h>
 
-#include "headers/gpm.h"
-#include "headers/gpmInt.h"
-#include "headers/message.h"
-#include "headers/twiddler.h"
+#include "gpm.h"
+#include "gpmInt.h"
+#include "message.h"
+#include "twiddler.h"
 
-#include "headers/daemon.h"
+#include "daemon.h"
 
 /* 
  * Each table is made up of 256 entries, as these are the possible chords

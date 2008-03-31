@@ -217,10 +217,10 @@
 #include <sys/time.h>
 #include <sys/ioctl.h>
 
-#include "headers/gpm.h"
-#include "headers/daemon.h"       /* which_mouse */
-#include "headers/synaptics.h"
-#include "headers/message.h"
+#include "gpm.h"
+#include "daemon.h"       /* which_mouse */
+#include "synaptics.h"
+#include "message.h"
 
 #define DEBUG                     1
 #undef DEBUG

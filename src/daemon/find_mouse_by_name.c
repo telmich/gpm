@@ -22,8 +22,8 @@
 #include <string.h>                 /* str*              */
 #include <ctype.h>                  /* isspace           */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
 
 /*****************************************************************************
  * the function returns a valid type pointer or NULL if not found

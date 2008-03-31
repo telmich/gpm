@@ -36,8 +36,8 @@
 #include <errno.h>
 #include <sys/param.h>
 
-#include "headers/gpmInt.h"
-#include "headers/daemon.h"         /* daemon internals */
+#include "gpmInt.h"
+#include "daemon.h"         /* daemon internals */
 
 
 /*

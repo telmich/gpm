@@ -21,7 +21,7 @@
 
 #include "types.h"                  /* Gpm_type         */
 
-#include "headers/daemon.h"         /* daemon internals */
+#include "daemon.h"         /* daemon internals */
 
 /* 'Genitizer' (kw@dtek.chalmers.se 11/12/97) */
 int M_geni(Gpm_Event *state,  unsigned char *data)

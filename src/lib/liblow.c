@@ -46,8 +46,8 @@
 #include <sys/kd.h>        /* KDGETMODE */
 #include <termios.h>       /* winsize */
 
-#include "headers/gpmInt.h"
-#include "headers/message.h"
+#include "gpmInt.h"
+#include "message.h"
 
 #ifndef min
 #define min(a,b) ((a)<(b) ? (a) : (b))

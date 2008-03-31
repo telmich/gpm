@@ -22,8 +22,8 @@
 #include <signal.h>                 /* kill              */
 #include <unistd.h>                 /* kill, getpid      */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
 
 /* itz Sat Sep 12 10:30:05 PDT 1998 this function used to mix two
    completely different things; opening a socket to a running daemon

@@ -29,9 +29,9 @@
 #include <sys/stat.h>   /* needed for      */
 #include <unistd.h>     /* stat() */
 
-#include "headers/gpmInt.h"
-#include "headers/message.h"
-#include "headers/daemon.h"   /* FIXME: this is wrong; we need report fpr lib und daemon */
+#include "gpmInt.h"
+#include "message.h"
+#include "daemon.h"   /* FIXME: this is wrong; we need report fpr lib und daemon */
 
 /*
  * gpm_report

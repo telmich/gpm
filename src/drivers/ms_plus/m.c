@@ -20,7 +20,7 @@
  ********/
 
 #include "types.h"                  /* Gpm_type         */
-#include "headers/daemon.h"         /* daemon internals */
+#include "daemon.h"         /* daemon internals */
 
 int M_ms_plus(Gpm_Event *state, unsigned char *data)
 {

@@ -44,8 +44,8 @@
 
 #define ALL_KEY_MODS ((1<<KG_SHIFT)|(1<<KG_ALT)|(1<<KG_ALTGR)|(1<<KG_CTRL))
 
-#include "headers/message.h"  /* messages */
-#include "headers/gpm.h"
+#include "message.h"  /* messages */
+#include "gpm.h"
 
 #define GPM_NAME "gpm"
 #define GPM_DATE "X-Mas 2002"

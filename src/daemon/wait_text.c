@@ -23,9 +23,9 @@
 #include <fcntl.h>                  /* open              */ 
 #include <linux/kd.h>               /* KDGETMODE         */
 
-#include "headers/message.h"        /* messaging in gpm  */
-#include "headers/daemon.h"         /* daemon internals  */
-#include "headers/gpmInt.h"         /* evil old headers  */
+#include "message.h"        /* messaging in gpm  */
+#include "daemon.h"         /* daemon internals  */
+#include "gpmInt.h"         /* evil old headers  */
 
 int wait_text(int *fdptr)
 {

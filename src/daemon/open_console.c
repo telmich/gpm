@@ -28,8 +28,8 @@
 #include <asm/ioctls.h>            /* for serial console check */
 
 
-#include "headers/message.h"        /* messaging in gpm  */
-#include "headers/daemon.h"         /* daemon internals  */
+#include "message.h"        /* messaging in gpm  */
+#include "daemon.h"         /* daemon internals  */
 
 int open_console(const int mode)
 {

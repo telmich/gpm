@@ -23,8 +23,8 @@
 #include <ctype.h>                  /* isalnum           */
 #include <stdio.h>                  /* fprintf           */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
 
 int parse_argv(argv_helper *info, int argc, char **argv)
 {

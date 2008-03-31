@@ -30,7 +30,7 @@
 #include <signal.h>
 #include <termios.h>
 
-#include "headers/gpm.h"
+#include "gpm.h"
 
 #ifndef min
 #define min(a,b) ((a)>(b)?(b):(a))

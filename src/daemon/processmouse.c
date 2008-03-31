@@ -31,8 +31,8 @@
 #include <time.h>                   /* time              */
 #include <sys/time.h>               /* gettimeofday      */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
 
 #define  abs(value)              ((value) < 0 ? -(value) : (value))
 #define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))

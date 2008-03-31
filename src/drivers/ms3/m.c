@@ -20,7 +20,7 @@
  ********/
 
 #include "types.h"                  /* Gpm_type         */
-#include "headers/daemon.h"         /* daemon internals */
+#include "daemon.h"         /* daemon internals */
 
 /* m$ 'Intellimouse' (steveb 20/7/97) */
 int M_ms3(Gpm_Event *state,  unsigned char *data)

@@ -31,8 +31,8 @@
 #include <unistd.h>
 #include <termios.h>
 #include <errno.h>
-#include "headers/gpm.h"
-#include "headers/gpmInt.h"
+#include "gpm.h"
+#include "gpmInt.h"
 
 int 
 main(int argc, char** argv)

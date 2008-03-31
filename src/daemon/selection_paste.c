@@ -23,8 +23,8 @@
 #include <fcntl.h>                  /* open              */
 #include <unistd.h>                 /* close             */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
 
 void selection_paste(void)
 {

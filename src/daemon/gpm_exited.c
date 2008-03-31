@@ -21,8 +21,8 @@
 
 #include <unistd.h>     /* unlink,geteuid */
 
-#include "headers/message.h"        /* messaging in gpm */
-#include "headers/daemon.h"         /* daemon internals */
+#include "message.h"        /* messaging in gpm */
+#include "daemon.h"         /* daemon internals */
 
 /* what todo atexit */
 void gpm_exited(void)
