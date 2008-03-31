@@ -34,10 +34,10 @@
  * fetch the actual device data from the mouse device, dependent on
  * what Gpm_Type is being passed.
  *-------------------------------------------------------------------*/
-char *getMouseData(int fd, Gpm_Type *type, int kd_mode)
+unsigned char *getMouseData(int fd, Gpm_Type *type, int kd_mode)
 {
    static unsigned char data[32]; /* quite a big margin :) */
-   char *edata=data+type->packetlen;
+   unsigned char *edata = data + type->packetlen;
    int howmany=type->howmany;
    int i,j;
 

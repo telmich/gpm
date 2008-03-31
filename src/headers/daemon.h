@@ -137,7 +137,7 @@ int   do_selection(Gpm_Event *event);
 
 void  get_console_size(Gpm_Event *ePtr);
 int   get_data(Gpm_Connect *where, int whence);
-char *getMouseData(int fd, Gpm_Type *type, int kd_mode);
+unsigned char *getMouseData(int fd, Gpm_Type *type, int kd_mode);
 int   getsym(const unsigned char *p0, unsigned char *res);
 
 void  gpm_exited(void);
