@@ -22,6 +22,7 @@
 #include <string.h>                 /* str*              */
 #include <ctype.h>                  /* isalnum           */
 #include <stdio.h>                  /* fprintf           */
+#include <stdlib.h>                 /* strtol            */
 
 #include "message.h"        /* messaging in gpm */
 #include "daemon.h"         /* daemon internals */
