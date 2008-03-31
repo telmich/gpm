@@ -19,8 +19,11 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
+#include <unistd.h>                 /* write             */
 
+
+#include "types.h"                  /* Gpm_type          */
+#include "daemon.h"                 /* limit_delta       */
 
 int R_imps2(Gpm_Event *state, int fd)
 {
