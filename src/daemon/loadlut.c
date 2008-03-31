@@ -50,9 +50,9 @@ int loadlut(char *charset)
 #define inwordLut (long_array+1)
 
    for (i=0; charset[i]; ) {
-      i += getsym(charset+i, &this);
+      i += getsym((unsigned char *)charset+i, &this);
       if (charset[i] == '-' && charset[i + 1] != '\0')
-         i += getsym(charset+i+1, &next) + 1;
+         i += getsym((unsigned char *)charset+i+1, &next) + 1;
       else
          next = this;
       for (c = this; c <= next; c++)
