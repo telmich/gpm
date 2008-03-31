@@ -30,7 +30,8 @@ GSRC = mice.c \
 GCOMMON = 	generic/check_no_argv.c generic/parse_argv.c 							\
 				generic/limit_delta.c generic/option_modem_lines.c						\
 				generic/setspeed.c generic/read_mouse_id.c								\
-				generic/m_listtypes.c generic/write_to_mouse.c
+				generic/m_listtypes.c generic/write_to_mouse.c							\
+				generic/isodigit.c
 
 GSRC += $(GDRIVERS)
 GSRC += $(GCOMMON)

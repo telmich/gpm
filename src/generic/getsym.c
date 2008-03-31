@@ -19,6 +19,8 @@
  *
  ********/
 
+#include "daemon.h"
+
 /* routine to convert digits from octal notation (Andries Brouwer) */
 int getsym(const unsigned char *p0, unsigned char *res)
 {

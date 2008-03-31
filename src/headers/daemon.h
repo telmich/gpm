@@ -130,7 +130,7 @@ time_t                  last_selection_time;
 
 char **build_argv(char *argv0, char *str, int *argcptr, char sep);
 
-void disable_paste(int vc);
+void  disable_paste(int vc);
 
 int   do_client(Gpm_Cinfo *cinfo, Gpm_Event *event);
 int   do_selection(Gpm_Event *event);
@@ -143,23 +143,25 @@ int   getsym(const unsigned char *p0, unsigned char *res);
 void  gpm_exited(void);
 void  gpm_killed(int signo);
 
-int limit_delta(int delta, int min, int max);
+int   isodigit(const unsigned char c);
 
-int open_console(const int mode);
-int old_main();
+int   limit_delta(int delta, int min, int max);
 
-int processConn(int fd);
-int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode);
-int processRequest(Gpm_Cinfo *ci, int vc);
-int processSpecial(Gpm_Event *event);
+int   open_console(const int mode);
+int   old_main();
 
-void selection_copy(int x1, int y1, int x2, int y2, int mode);
-void selection_paste(void);
+int   processConn(int fd);
+int   processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode);
+int   processRequest(Gpm_Cinfo *ci, int vc);
+int   processSpecial(Gpm_Event *event);
 
-void startup(int argc, char **argv);
+void  selection_copy(int x1, int y1, int x2, int y2, int mode);
+void  selection_paste(void);
+
+void  startup(int argc, char **argv);
 
 
-int wait_text(int *fdptr);
+int   wait_text(int *fdptr);
 
 /* meta-mouse functions */
 void add_mouse (int type, char *value);
