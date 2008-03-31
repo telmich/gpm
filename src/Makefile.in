@@ -53,11 +53,17 @@ PROG = $(POBJ:.o=)
 
 SRCS = $(GSRC) $(LSRC) $(PSRC) report.c
 SRCSP= $(SRCS:.c=.P)
+OBJECTS = $(SRCS:.c=.o)
 
 DEFS  = @DEFS@
 
 STRIP = -s
 
+### REAL TARGETS
+all:	gpm lib/@SHLIB@ lib/libgpm.a $(PROG)
+
+gpm:	$(GOBJ)
+	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $(GOBJ) @LIBS@ $(LIBS) -lm
 
 ### BUILD PROCESS
 
@@ -86,18 +92,13 @@ prog/%:	prog/%.o
 %:	%.o
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS)
 
-### REAL TARGETS
-all:	gpm lib/@SHLIB@ lib/libgpm.a $(PROG)
-
-gpm:	$(GOBJ)
-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $(GOBJ) @LIBS@ $(LIBS) -lm
-
 ### GENERATED INCLUDES
 
+# FIXME: add absolute path of source files below
 -include Makefile.drivers.generated
-$(GDRIVERS): headers/drivers.h
-headers/drivers.h:
-	../scripts/generate_drivers_header.sh > $@
+$(OBJECTS): headers/drivers.h
+headers/drivers.h: $(GDRIVERS)
+	../scripts/generate_drivers_header.sh . > $@
 
 -include $(SRCSP)
 
