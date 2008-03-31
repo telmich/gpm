@@ -34,15 +34,15 @@
 #include "message.h"        /* messaging in gpm */
 #include "daemon.h"         /* daemon internals */
 
-#define  abs(value)              ((value) < 0 ? -(value) : (value))
+#define abs(value)              ((value) < 0 ? -(value) : (value))
 #define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))
 #define DIF_TIME(t1,t2) ((t2.tv_sec -t1.tv_sec) *1000 + \
                          (t2.tv_usec-t1.tv_usec)/1000)
 
 
-int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
+int processMouse(int fd, Gpm_Event *event, int kd_mode)
 {
-   char        *data;
+   unsigned char *data;
    static int  fine_dx,
                fine_dy,
                i, j, m,

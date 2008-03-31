@@ -83,8 +83,10 @@ struct mouse_features {
    char  *opt_type,
          *opt_dev,
          *opt_sequence,
-         *opt_calib;
-   int   opt_baud,
+         *opt_calib,
+         *opt_options;           /* extra textual configuration */
+   int   fd,
+         opt_baud,
          opt_sample,
          opt_delta,
          opt_accel,
@@ -95,16 +97,14 @@ struct mouse_features {
          opt_three,
          opt_glidepoint_tap,
          opt_dminx,
-	 opt_dmaxx,
-	 opt_dminy,
-	 opt_dmaxy,
+         opt_dmaxx,
+         opt_dminy,
+         opt_dmaxy,
          opt_ominx,
-	 opt_omaxx,
-	 opt_ominy,
-	 opt_omaxy;
-   char  *opt_options;           /* extra textual configuration */
+         opt_omaxx,
+	      opt_ominy,
+	      opt_omaxy;
    Gpm_Type *m_type;
-   int fd;
 };
 
 /*========================================================================

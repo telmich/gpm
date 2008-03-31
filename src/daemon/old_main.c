@@ -190,7 +190,7 @@ int old_main()
          which_mouse=mouse_table+i; /* used to access options */
          if (FD_ISSET(which_mouse->fd,&selSet)) {
             FD_CLR(which_mouse->fd,&selSet); pending--;
-            if (processMouse(which_mouse->fd, &event, (which_mouse->m_type), kd_mode))
+            if (processMouse(which_mouse->fd, &event, kd_mode))
 
                /* pass it to the client, if any
                 * or to the default handler, if any

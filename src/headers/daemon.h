@@ -151,7 +151,7 @@ int   open_console(const int mode);
 int   old_main();
 
 int   processConn(int fd);
-int   processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode);
+int   processMouse(int fd, Gpm_Event *event, int kd_mode);
 int   processRequest(Gpm_Cinfo *ci, int vc);
 int   processSpecial(Gpm_Event *event);
 
