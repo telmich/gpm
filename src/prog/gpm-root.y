@@ -3,6 +3,7 @@
  *
  * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
  * Copyright (C) 1998    Ian Zimmerman <itz@rahul.net>
+ * Copyright (C) 2008    Nico Schottelius <nico-gpm2008 at schottelius.org>
  *
  * Tue,  5 Jan 1999 23:16:45 +0000, modified by James Troup <james@nocrew.org>:
  * (get_winsize): use /dev/tty0 not /dev/console.
@@ -469,6 +470,8 @@ static int f_debug_one(FILE *f, Draw *draw)
 
 int f_debug(int mode, DrawItem *self, int uid)
 {
+
+   mode = 0; self = NULL; uid = 0; /* FIXME: gpm 1.99.13 */
 #if 0 /* Disabled on account of security concerns; the way 
        * "/tmp/root-debug" is used is gratuitously
        * open to symlink abuse */
@@ -496,6 +499,7 @@ int f_debug(int mode, DrawItem *self, int uid)
 /*---------------------------------------------------------------------*/
 int f_fgcmd(int mode, DrawItem *self, int uid)
 {
+   self = NULL; uid = 0; /* FIXME: gpm 1.99.13 */
    switch (mode) {
       case F_CREATE:
       case F_POST: break;
@@ -541,6 +545,8 @@ int f_bgcmd(int mode, DrawItem *self, int uid)
 int f_jptty(int mode, DrawItem *self, int uid)
 {
    int i,fd;
+
+   uid = 0; /* FIXME: gpm 1.99.13 */
 
    switch (mode) {
       case F_CREATE:
@@ -610,12 +616,14 @@ int f_mktty(int mode, DrawItem *self, int uid)
 /*---------------------------------------------------------------------*/
 int f_menu(int mode, DrawItem *self, int uid)
 {
+   mode = 0; self = NULL; uid = 0; /* FIXME: gpm 1.99.13 */
    return 0; /* just a placeholder, recursion is performed in main() */  
 }
 
 /*---------------------------------------------------------------------*/
 int f_lock(int mode, DrawItem *self, int uid)
 {
+   mode = 0; self = NULL; uid = 0; /* FIXME: gpm 1.99.13 */
 #if 0 /* some kind of interesting ...: if never */
    int all;
    static DrawItem msg = {
@@ -641,6 +649,7 @@ int f_lock(int mode, DrawItem *self, int uid)
 /*---------------------------------------------------------------------*/
 int f_load(int mode, DrawItem *self, int uid)
 {
+   uid = 0; /* FIXME: gpm 1.99.13 */
    FILE *f;
    double l1,l2,l3;
 
@@ -673,6 +682,8 @@ int f_free(int mode, DrawItem *self, int uid)
    long l1,l2;
    char s[80];
 
+   uid = 0; /* FIXME: gpm 1.99.13 */
+
    l1=l2=0;
    switch (mode) {
       case F_CREATE: /* modify name, just to fake its length */
@@ -702,6 +713,8 @@ int f_time(int mode, DrawItem *self, int uid) {
    char s[128];
    struct tm *broken;
    time_t t;
+   
+   uid = 0; /* FIXME: gpm 1.99.13 */
 
    time(&t); broken=localtime(&t);
    switch (mode) {
@@ -723,6 +736,7 @@ int f_time(int mode, DrawItem *self, int uid) {
 /*---------------------------------------------------------------------*/
 int f_pipe(int mode, DrawItem *self, int uid)
 {
+   mode = 0; self = NULL; uid = 0; /* FIXME: gpm 1.99.13 */
    return 0;
 }
 
@@ -738,7 +752,7 @@ int fixone(Draw *ptr, int uid)
    /* calculate width and height */
    for (item=ptr->menu; item; item=item->next) {
       hei++;
-      wid= wid > strlen(item->name) ? wid : strlen(item->name);
+      wid= wid > (int) strlen(item->name) ? wid : (int) strlen(item->name);
    }
    ptr->height=hei+2;
    ptr->width=wid+2;
@@ -945,6 +959,8 @@ static inline void scr_dump(int fd, FILE *f, unsigned char *buffer, int vc)
    int dumpfd;
    char dumpname[20];
 
+   f = NULL;
+
    sprintf(dumpname,"/dev/vcsa%i",vc);
    dumpfd=open(dumpname,O_RDONLY);
    if (dumpfd<0) {
@@ -963,6 +979,8 @@ static inline void scr_restore(int fd, FILE *f, unsigned char *buffer, int vc)
 {
    int x,y, dumpfd;
    char dumpname[20];
+
+   f = NULL; 
 
    x=buffer[2]; y=buffer[3];
    
@@ -1043,7 +1061,7 @@ Posted *postmenu(int fd, FILE *f, Draw *draw, int x, int y, int console)
    if (draw->title) {
          GOTO(x+(draw->width-strlen(draw->title))/2,y);
          PUTC(' ',draw->head,draw->back);
-         PUTS(draw->title,draw->head,draw->back);
+         PUTS((unsigned char *)draw->title,draw->head,draw->back);
          PUTC(' ',draw->head,draw->back);
    }
    /* sides and items */
@@ -1051,7 +1069,7 @@ Posted *postmenu(int fd, FILE *f, Draw *draw, int x, int y, int console)
          if (item->fun) (*(item->fun))(F_POST,item);
          GOTO(x,y); PUTC(VERLINE,draw->bord,draw->back);
          for (i=0;i<item->pad;i++) PUTC(' ',draw->fore,draw->back);
-         PUTS(item->name,draw->fore,draw->back); i+=strlen(item->name);
+         PUTS((unsigned char *)item->name,draw->fore,draw->back); i+=strlen(item->name);
          while (i++<draw->width) PUTC(' ',draw->fore,draw->back);
          PUTC(VERLINE,draw->bord,draw->back);
    }
@@ -1091,6 +1109,7 @@ Posted *unpostmenu(int fd, FILE *f, Posted *which, int vc)
 void reap_children(int signo)
 {
    int i, pid;
+   signo = 0; /* FIXME in 1.99.13 */
    pid=wait(&i);
    gpm_report(GPM_PR_INFO,"pid %i exited %i",pid,i);
 
