@@ -7,8 +7,8 @@ AC_INIT(src/daemon/main.c)
 AC_PREREQ(2.12)
 AC_CONFIG_HEADER(src/headers/config.h)
 
-release=1.99.4
-release_date="The summertime day, 30. March 2008"
+release=1.99.5
+release_date="First of April, 1. April 2008"
 AC_DEFINE_UNQUOTED(GPM_RELEASE,"$release")
 AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date")
 
