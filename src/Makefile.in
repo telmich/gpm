@@ -168,7 +168,7 @@ prog/gpm-root: prog/gpm-root.c lib/libgpm.so
 	$(CC) -I. @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@.o $<
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.so
 
-prog/mouse-test:	prog/mouse-test.o mice.o twiddler.o synaptics.o prog/open_console.o  \
+prog/mouse-test:	prog/mouse-test.o mice.o prog/open_console.o  \
 						$(GCOMMON:.c=.o) $(GDRIVERS:.c=.o)
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS) -lm
 

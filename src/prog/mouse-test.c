@@ -61,12 +61,14 @@ int realposy=-1;
 
 /* this material is needed to pass options to mice.c */
 struct mouse_features mymouse = {
-   DEF_TYPE, DEF_DEV, DEF_SEQUENCE,
+   DEF_TYPE, DEF_DEV, DEF_SEQUENCE, DEF_CALIB,
+   (char *)NULL /* extra */,
+   -1 /* fd */,
    DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, DEF_SCALE /*scaley*/,
    DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_GLIDEPOINT_TAP,
-   (char *)NULL /* extra */,
-   (Gpm_Type *)NULL,
-   -1 /* fd */
+   DEF_DMINX, DEF_DMAXX, DEF_DMINY, DEF_DMAXY,
+   DEF_OMINX, DEF_OMAXX, DEF_OMINY, DEF_OMAXY,
+   (Gpm_Type *)NULL
 };
 
 /* and this is a workaroud */
@@ -206,8 +208,6 @@ int noneofthem(void)
    exit(1);
 }
 
-#define CHECKFAIL(count)   ((count)==0 && noneofthem())
-
 /***************************************
  * This is the most useful function in
  * the program: it build an array
@@ -216,7 +216,7 @@ int noneofthem(void)
  * data.
  */
 
-int eventlist(int fd, char *buff, int buflen, int test, int readstep)
+int eventlist(int fd, unsigned char *buff, int buflen, int test, int readstep)
 {
    fd_set selSet, readySet;
    struct timeval to;
@@ -294,7 +294,7 @@ int main(int argc, char **argv)
    int i, mousefd;
    char *mousename;
 #define BUFLEN 512
-   char buf[BUFLEN];
+   unsigned char buf[BUFLEN];
    struct timeval timeout;
    fd_set checkSet;
    int pending, maxfd;
@@ -570,7 +570,7 @@ int main(int argc, char **argv)
  */
   
    /* why checking and not using return value ??? */
-   CHECKFAIL(typecount);
+   if(typecount == 0) noneofthem();
    if (typecount==1) {
       noraw();
       printf("\n\n\nWell, it seems like your mouse is already detected:\n"
@@ -623,7 +623,7 @@ int main(int argc, char **argv)
       printf("** type '%s' still possible\r\n",cur->this->name);
       nextitem=&(cur->next);
    }
-   CHECKFAIL(typecount);
+   if(typecount == 0) noneofthem();
 
 /*
  * Second trial: look if it is one of the two mman ways (In the second
@@ -672,7 +672,7 @@ int main(int argc, char **argv)
 	   printf("** type '%s' still possible\r\n",cur->this->name);
       nextitem=&(cur->next);
    }
-   CHECKFAIL(typecount);
+   if(typecount == 0) noneofthem();
   
 /*
  * Then, try to toggle dtr and rts

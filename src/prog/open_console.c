@@ -19,6 +19,8 @@
  *
  ********/
 
+#include <fcntl.h>
+
 #include "message.h"        /* messaging in gpm */
 #include "daemon.h"         /* daemon internals */
 
