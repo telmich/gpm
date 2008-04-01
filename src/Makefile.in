@@ -184,9 +184,9 @@ clean:
 	$(PROG)		\
 	$(RDEPS) 	\
 	$(SRCSP)		\
-	core *~  prog/gpm-root.c 
+	core *~ prog/gpm-root.c Makefile.drivers.generated
 	find . -name \*.d -exec rm {} \;
 
 distclean: clean
-	rm -f headers/config.h headers/config.h.in Makefile $(DEPFILE)
+	rm -f headers/config.h headers/config.h.in Makefile
 
