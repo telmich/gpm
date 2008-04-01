@@ -134,8 +134,10 @@ Gpm_Roi *Gpm_LowerRoi(Gpm_Roi *which, Gpm_Roi *after)
 
 int Gpm_HandleRoi(Gpm_Event *ePtr, void *clientdata)
 {
-static Gpm_Event backEvent;
-Gpm_Roi *roi=gpm_current_roi;
+   static Gpm_Event backEvent;
+   Gpm_Roi *roi=gpm_current_roi;
+
+   clientdata = NULL; /* FIXME: gpm 1.99.13 */
 
 /*
  * If motion or press, look for the interested roi.

@@ -143,13 +143,13 @@ static struct sigaction gpm_saved_suspend_hook;
 /*----------------------------------------------------------------------------*
  * nice description
  *----------------------------------------------------------------------------*/
-static void gpm_suspend_hook (int signum)
+static void gpm_suspend_hook (int success) /* misuse the parameter */
 {
   Gpm_Connect gpm_connect;
   sigset_t old_sigset;
   sigset_t new_sigset;
   struct sigaction sa;
-  int success;
+
 
   sigemptyset (&new_sigset);
   sigaddset (&new_sigset, SIGTSTP);

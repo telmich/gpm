@@ -94,7 +94,7 @@ static Gpm_Event ev;
 /* JD patch 11/08/1998 */
 #define MAXNBPREVCHAR 4         /* I don't think more is usefull, JD */
     static int nbprevchar=0, prevchar[MAXNBPREVCHAR];
-    extern int gpm_convert_event(char *data, Gpm_Event *event);
+    extern int gpm_convert_event(unsigned char *data, Gpm_Event *event);
     int c; unsigned char mdata[4];
 
 /* JD patch 11/08/1998 */

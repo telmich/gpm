@@ -93,6 +93,8 @@ int opt_pointer =  0;
 /*===================================================================*/
 int user_handler(Gpm_Event *event, void *data)
 {
+   data = NULL; /* FIXME: unused */
+
    if (opt_fit) Gpm_FitEvent(event);
 
    printf("mouse: event 0x%02X, at %2i,%2i (delta %2i,%2i), "
@@ -116,6 +118,8 @@ int emacs_handler(Gpm_Event *event, void *data)
    int i,j;
    static int dragX, dragY;
    static char buffer[64];
+
+   data = NULL; /* FIXME: unused */
 
    /* itz Mon Mar 23 20:54:54 PST 1998 emacs likes the modifier bits in
    alphabetical order, so I'll use a lookup table instead of a loop; it

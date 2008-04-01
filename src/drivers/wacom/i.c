@@ -95,7 +95,7 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
       err=wait_wacom();
       while (err != -1
             && err
-            && (p-buffer)<(sizeof(buffer)-1)) {
+            && (p-buffer) < (int) (sizeof(buffer)-1)) {
          p+= read(fd,p,(sizeof(buffer)-1)-(p-buffer));
          err=wait_wacom();
       }
@@ -131,7 +131,7 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
 
    /* Search for matching modell */
    for(WacomModell=0;
-      WacomModell< (sizeof(wcmodell) / sizeof(struct WC_MODELL));
+      WacomModell < (int) (sizeof(wcmodell) / sizeof(struct WC_MODELL));
       WacomModell++ ) {
       if (!strncmp(buffer+2,wcmodell[WacomModell].magic, 2)) {
          /* Magic matches, modell found */
@@ -140,7 +140,7 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
          break;
       }
    }
-   if(WacomModell >= (sizeof(wcmodell) / sizeof(struct WC_MODELL))) 
+   if(WacomModell >= (int) (sizeof(wcmodell) / sizeof(struct WC_MODELL))) 
       WacomModell=-1;
    gpm_report(GPM_PR_INFO,GPM_MESS_WACOM_MOD, type->absolute? 'A':'R',
                 (WacomModell==(-1))? "Unknown" : wcmodell[WacomModell].name,
