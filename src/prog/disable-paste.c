@@ -34,8 +34,7 @@
 #include "gpm.h"
 #include "gpmInt.h"
 
-int 
-main(int argc, char** argv)
+int main()
 {
   Gpm_Connect conn;
   const int len = sizeof(Gpm_Connect);
