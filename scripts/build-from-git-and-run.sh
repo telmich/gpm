@@ -7,5 +7,5 @@ ich="${0##*/}"
 hier="${0%/*}"
 
 
-"${hier}/build-from-git.sh" && sudo ./src/gpm
+"${hier}/../build-from-git.sh" && sudo ../src/gpm
 
