@@ -66,8 +66,6 @@ extern time_t opt_age_limit;
 extern int M_listTypes(void);
        /* special.c */
 int processSpecial(Gpm_Event *event);
-int twiddler_key(unsigned long message);
-int twiddler_key_init(void);
 
 /*....................................... Dirty hacks */
 

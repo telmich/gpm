@@ -35,7 +35,7 @@ int M_twid(Gpm_Event *state,  unsigned char *data)
    key = message & TW_ANY_KEY;
 
    if ((message & TW_MOD_M) == 0) { /* manage keyboard */
-      if (((message & TW_ANY_KEY) != lastkey) || autorepeat)
+      if (((message & TW_ANY_KEY) != (unsigned long ) lastkey) || autorepeat)
          autorepeat = twiddler_key(message);
       lastkey = key;
       lock = 0; return -1; /* no useful mouse data */

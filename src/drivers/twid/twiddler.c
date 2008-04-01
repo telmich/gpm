@@ -256,13 +256,13 @@ int twiddler_key(unsigned long message)
    * chords. When the number of keys being held down decreases, data
    * is transmitted; but as soon as it increases the cycle is restarted.
    */
-   static int last_message;
+   static unsigned long last_message;
    static int marked;
   /*
    * The time values are needed to implement repetition of keys
    */
    static struct timeval tv1, tv2;
-   static int nclick, last_pressed;
+   static unsigned int nclick, last_pressed;
 #define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))
 #define DIF_TIME(t1,t2) ((t2.tv_sec -t1.tv_sec) *1000+ \
                         (t2.tv_usec-t1.tv_usec)/1000)
@@ -320,9 +320,10 @@ char **twiddler_mod_to_table(char *mod)
 {
    struct twiddler_map_struct *ptr;
    int len = strlen(mod);
+
    if (len == 0) return twiddler_map->table;
 
-   for (ptr = twiddler_map; ptr->table; ptr = ptr++) {
+   for (ptr = twiddler_map; ptr->table; ptr++) {
       if (!strncasecmp(mod,ptr->keyword,len))
       return ptr->table;
    }
@@ -515,7 +516,7 @@ int twiddler_key_init(void)
 
          if (table[index]) {
 	         gpm_report(GPM_PR_ERR,GPM_MESS_REDEF_COORDS,option.progname,TW_SYSTEM_FILE,
-                                          lineno, mod, mod ? " " : "", chord);
+                                          lineno, mod, " ", chord);
 	      }
          /* all done */
          if (value)

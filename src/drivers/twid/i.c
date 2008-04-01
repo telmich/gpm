@@ -24,7 +24,7 @@
 #include "daemon.h"                 /* which_mouse       */
 #include "drivers.h"
 
-
+int twiddler_key_init(void); /* FIXME: from twiddler */
 
 Gpm_Type *I_twid(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
 {
