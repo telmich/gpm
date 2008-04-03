@@ -1,3 +1,5 @@
+1.99.6:
+   * Make it compile again on Linux/ppc
 1.99.5: Nico Schottelius, 20080401
    * Removed all compiling warnings: -Werror, -Wall, -Wextra are on!
 1.99.4: Nico Schottelius, 20080330
