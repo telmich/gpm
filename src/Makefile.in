@@ -176,3 +176,5 @@ distclean: clean
 	rm -f headers/config.h headers/config.h.in headers/drivers.h \
 		Makefile $(DEPFILE)
 
+allclean: clean
+	rm -f headers/config.h.in

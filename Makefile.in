@@ -85,23 +85,7 @@ barf:
 TAGS:	$(SRCS) $(HDRS) src/prog/gpm-root.y do-TAGS
 	cd $(srcdir) && $(ETAGS) -o TAGS $(SRCS) $(HDRS) src/prog/gpm-root.y
 
-## RELEASE STUFF
-
-# 1. Cleanup the tree, remove all generated files and so on
-distclean: clean do-clean do-distclean
-	rm -f config.log config.status config.cache Makefile Makefile.include
-	rm -rf configure autom4te.cache 
-	rm -rf gpm-$(release) gpm-$(release).tar.bz2 gpm-$(release).tar.gz
-	rm -f src/$(DEPFILE)
-
-# STOPPPED HERE
-gpm-$(release): distclean do-distclean
-	mkdir -p gpm-$(release)
-	for  file in $(srcdir)/*; do \
-		if [ "`basename $$file`" != "$@" ]; then \
-			cp $$file gpm-$(release) -r; \
-		fi; \
-	done
+### RELEASE STUFF
 
 # 2. configure headers, produce new configure script
 distconf: configure.in aclocal.m4
@@ -133,3 +117,13 @@ dist: disttest distclean distconf tars
 disttest: distconf clean
 	./configure
 	make all
+
+### CLEANUP
+distclean: clean do-clean do-distclean
+	rm -f config.log config.status config.cache Makefile Makefile.include
+	rm -rf autom4te.cache 
+	rm -rf gpm-$(release) gpm-$(release).tar.bz2 gpm-$(release).tar.gz
+	rm -f src/$(DEPFILE)
+
+allclean: do-allclean distclean
+	rm -f configure
