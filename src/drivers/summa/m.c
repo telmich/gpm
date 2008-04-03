@@ -30,7 +30,7 @@
 int SUMMA_BORDER=100,
     summamaxx,
     summamaxy;
-char summaid=-1;
+signed char summaid=-1;
 
 
 int M_summa(Gpm_Event *state, unsigned char *data)

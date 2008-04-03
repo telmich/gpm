@@ -30,7 +30,7 @@
 extern int  SUMMA_BORDER;
 extern int  summamaxx;
 extern int  summamaxy;
-extern char summaid;
+extern signed char summaid;
 
 
 Gpm_Type *I_summa(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv) 
