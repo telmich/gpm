@@ -17,11 +17,14 @@ DDIR="$(cd $(dirname $0)/../../; pwd -P)"
 DIR="$(cd $(dirname $0)/../; pwd -P)"
 RDIR="$(basename "$DIR")"
 
-VERSION="$(cd "$DIR"; pwd -P | sed 's;.*/gpm-;;')"
+VERSION="$(awk -F= '/^release=/ { print $2 }' configure.in )"
+#VERSION="$(cd "$DIR"; pwd -P | sed 's;.*/gpm-;;')"
 #VERSION_CONF="$(head -n1 $(dirname $0)/../../conf/version | sed 's/^"\(.*\)"$/\1/')"
 #VERSION_CHANGES="$(head -n1 "$(dirname $0)/../../CHANGES" | sed 's/cinit-\(.*\):$/\1/')"
 
-echo "=> Version directory:    $VERSION"
+echo -n "=> Version:    $VERSION; ok?"
+read ok
+#echo "=> Version directory:    $VERSION"
 #echo "=> Version conf/version: $VERSION_CONF"
 #echo "=> Version CHANGES:      $VERSION_CHANGES"
 
