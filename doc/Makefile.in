@@ -107,11 +107,6 @@ all: $(srcdir)/gpm.info $(MANPAGES)
 gpmdoc.ps:	gpm.ps
 	-$(CP) $< $@
 
-clean:
-	rm -f gpmdoc.ps gpmdoc.txt $(MANPAGES) *~ 
-	rm -f gpm.?? gpm.???
-	rm -f gpm.texinfo
-
 # install & uninstall
 
 installdirs:	
@@ -158,17 +153,31 @@ uninstall:
 Makefile:	$(top_builddir)/config.status $(srcdir)/Makefile.in
 	cd $(top_builddir) && $(SHELL) config.status
 
+## CLEANUP section
+# normal cleanup
+clean:
+	rm -f gpmdoc.ps gpmdoc.txt $(MANPAGES) *~ 
+	rm -f gpm.?? gpm.???
+	rm -f gpm.texinfo
+
+# for creating distribution
 distclean:	clean
 	rm -f Makefile doc.gpm
+
+# to even remove things we leave for end-users
+allclean:	distclean
+	rm -f gpm.info
 
 # Maintainer portion, use at your own risk
 
 # ignore this:
 TAGS:
 
+## DIST section
 # when we cleaned it, we can securely copy us.
 dist: distclean
-	$(CP) -r $(srcdir) $(top_builddir)/gpm-$(release)/
+	# unneeded now: using pax + -s option and create tars in ..
+	#$(CP) -r $(srcdir) $(top_builddir)/gpm-$(release)/
 
 .INTERMEDIATE:	gpm.ps
 .SECONDARY:	%.ps %.texinfo %.dvi
