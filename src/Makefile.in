@@ -134,16 +134,6 @@ uninstall:
 		rm -f $(bindir)/$$i ;\
 	done
 
-# cleaning up section
-
-clean:
-	rm -f gpm lib/libgpm.a lib/libgpm.so lib/libgpm.so.@abi_full@ $(RDEPS)
-	rm -f core *~ $(GOBJ) $(LOBJ) $(POBJ) $(PICS) gpm-root.c $(DEPFILE)
-	rm -f $(PROG) $(POBJ) prog/gpm-root.c
-
-distclean: clean
-	rm -f headers/config.h headers/config.h.in Makefile $(DEPFILE)
-
 # Configure & unconfigure
 
 # Subdirectory prog/
@@ -172,3 +162,16 @@ lib/libgpm.so:	lib/libgpm.so.@abi_full@
 	$(LN_S) -f libgpm.so.@abi_full@ lib/libgpm.so
 
 include $(DEPFILE)
+
+## Release / Dist
+
+
+## Cleanup
+clean:
+	rm -f gpm lib/libgpm.a lib/libgpm.so lib/libgpm.so.@abi_full@ $(RDEPS)
+	rm -f core *~ $(GOBJ) $(LOBJ) $(POBJ) $(PICS) gpm-root.c $(DEPFILE)
+	rm -f $(PROG) $(POBJ) prog/gpm-root.c
+
+distclean: clean
+	rm -f headers/config.h headers/config.h.in Makefile $(DEPFILE)
+

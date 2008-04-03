@@ -85,10 +85,10 @@ barf:
 TAGS:	$(SRCS) $(HDRS) src/prog/gpm-root.y do-TAGS
 	cd $(srcdir) && $(ETAGS) -o TAGS $(SRCS) $(HDRS) src/prog/gpm-root.y
 
-# Do the the next release
+## RELEASE STUFF
 
 # 1. Cleanup the tree, remove all generated files and so on
-distclean: barf clean do-clean do-distclean
+distclean: clean do-clean do-distclean
 	rm -f config.log config.status config.cache Makefile Makefile.include
 	rm -rf configure autom4te.cache 
 	rm -rf gpm-$(release) gpm-$(release).tar.bz2 gpm-$(release).tar.gz
@@ -108,16 +108,30 @@ distconf: configure.in aclocal.m4
 	autoheader && autoconf
 
 # make this clean...
-gpm-$(release).tar: gpm-$(release)
-	$(TAR) cf - gpm-$(release) > $@
+tars: ../gpm-$(release).tar ../gpm-$(release).tar.gz  \
+		../gpm-$(release).tar.bz2 ../gpm-$(release).tar.lzma
 
-gpm-$(release).tar.gz:  gpm-$(release).tar
-	gzip -9 -c gpm-$(release).tar > $@
+../gpm-$(release).tar:
+	# no exclude possible of .git with pax it seems
+	#pax -w -x ustar -s '/^\./gpm-$(release)/' -w . -f $@
+	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w *
 
-gpm-$(release).tar.bz2:  gpm-$(release).tar
-	bzip2 -k gpm-$(release).tar
+../gpm-$(release).tar.gz:  ../gpm-$(release).tar
+	gzip -9 -c $^ > $@
+
+../gpm-$(release).tar.bz2:  ../gpm-$(release).tar
+	bzip2 -9 -c $^ > $@
+
+../gpm-$(release).tar.lzma:  ../gpm-$(release).tar
+	lzma -9 -c $^ > $@
 
 # 3. Put package together into .tar.gz and .tar.bz2
-dist: distclean distconf gpm-$(release).tar.bz2 gpm-$(release).tar.gz
+#dist: distclean distconf gpm-$(release).tar.bz2 gpm-$(release).tar.gz
+dist: disttest distclean distconf tars
 	rm gpm-$(release).tar
 	rm -r gpm-$(release)
+
+# create / update configure, delete other parts from earlier build
+disttest: distconf clean
+	./configure
+	make all
