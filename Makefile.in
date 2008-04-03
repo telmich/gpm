@@ -111,7 +111,7 @@ distconf: configure.in aclocal.m4
 tars: ../gpm-$(release).tar ../gpm-$(release).tar.gz  \
 		../gpm-$(release).tar.bz2 ../gpm-$(release).tar.lzma
 
-../gpm-$(release).tar:
+../gpm-$(release).tar: $(srcdir)
 	# no exclude possible of .git with pax it seems
 	#pax -w -x ustar -s '/^\./gpm-$(release)/' -w . -f $@
 	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w *
@@ -128,8 +128,6 @@ tars: ../gpm-$(release).tar ../gpm-$(release).tar.gz  \
 # 3. Put package together into .tar.gz and .tar.bz2
 #dist: distclean distconf gpm-$(release).tar.bz2 gpm-$(release).tar.gz
 dist: disttest distclean distconf tars
-	rm gpm-$(release).tar
-	rm -r gpm-$(release)
 
 # create / update configure, delete other parts from earlier build
 disttest: distconf clean
