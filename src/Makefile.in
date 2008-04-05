@@ -174,7 +174,6 @@ lib/libgpm.so.@abi_full@:	$(PICS)
 lib/libgpm.so:	lib/libgpm.so.@abi_full@
 	$(LN_S) -f libgpm.so.@abi_full@ lib/libgpm.so
 
-## CLEANUP
 clean:
 	rm -f gpm lib/libgpm.a lib/libgpm.so lib/libgpm.so.@abi_full@ \
 	$(GOBJ) 		\
@@ -188,5 +187,7 @@ clean:
 	find . -name \*.d -exec rm {} \;
 
 distclean: clean
-	rm -f headers/config.h headers/config.h.in Makefile
+	rm -f headers/config.h headers/drivers.h Makefile
 
+allclean: clean
+	rm -f headers/config.h.in

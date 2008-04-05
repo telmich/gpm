@@ -56,7 +56,6 @@ STRIP             = -s
 
 AR                = ar
 ETAGS             = etags
-TAR               = tar
 AWK               = awk
 CP                = cp -a
 MKDIR             = mkdir -p # linux specific, but who cares ?

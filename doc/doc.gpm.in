@@ -4,7 +4,7 @@
 %
 % Copyright 1994,1995,1998   rubini@linux.it (Alessandro Rubini)
 % Copyright (C) 1998 Ian Zimmerman <itz@speakeasy.org>
-% Copyright (C) 2001,2002 Nico Schottelius <Nico@Schottelius.org>
+% Copyright (C) 2001-2008 Nico Schottelius <nico-gpm2008 at schottelius.org>
 %
 %%%%
 
@@ -57,7 +57,7 @@
 This file is a user's and programmer's manual for gpm @value{version}.
 
 Copyright (C) 1994,1995,1998 Alessandro Rubini
-Copyright (C) 2001,2002 Nico Schottelius
+Copyright (C) 2001-2008 Nico Schottelius
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -450,16 +450,6 @@ Available command line options are the following:
 @item -v
         Print version information and exit.
 
-@item -V[@var{verbosity increment}]
-        Raise or decrease the maximum level of messages that will be
-        logged.  Thus a positive argument has the effect of making the
-        program more verbose.  One can also give a negative argument to
-        hush the program; due to @b{getopt(3)} rules, any optional
-        argument needs to be passed without a space in between!
-        When omitting the argument, the increment defaults to 1.
-        Default verbosity level is 5 (@code{LOG_NOTICE}). 
-        @xref{Program Arguments,,,libc}.
-
 @item -2
         Force two buttons. This means that the middle button, if any,
         will be taken as it was the right one.
@@ -543,7 +533,7 @@ Many many contributors, to both selection and gpm.
 .SH MAINTAINERS
 
 The current maintainer is Nico Schottelius. But without the help of
-Alessandro Rubini and the mailing list it would be impossible for him to
+Alessandro Rubini and the mailing list it would be impossible for me to
 maintain gpm. The development mailing list can be reached under
 gpm@lists.linux.it. More information on the list is in the README file part of
 the source distribution of gpm.
