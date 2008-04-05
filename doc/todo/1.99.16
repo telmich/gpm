@@ -1,0 +1,6 @@
+- Begin to design gpm2-client library
+
+- change Events for clients for gpm2:
+
+   * allow 32 buttons (unsigned long int)
+
