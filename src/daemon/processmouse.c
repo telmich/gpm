@@ -101,8 +101,10 @@ int processMouse(int fd, Gpm_Event *event, int kd_mode)
          /* propagate buttons */
          nEvent.buttons = ((which_mouse->opt_sequence)[nEvent.buttons&7]&7) |
             (nEvent.buttons & ~7); /* change the order */
-         oldB=newB; newB=nEvent.buttons;
-         if (!i) event->buttons=nEvent.buttons;
+         oldB = newB;
+         newB = nEvent.buttons;
+
+         if (!i) event->buttons = nEvent.buttons;
 
          if (oldB != newB) {
             eventFlag = (i!=0)*(which_mouse-mouse_table); /* 1 or 2 */
@@ -132,7 +134,9 @@ int processMouse(int fd, Gpm_Event *event, int kd_mode)
       } while (i++ <(which_mouse->opt_cluster) && nEvent.buttons==oldB && FD_ISSET(fd,&fdSet));
      
       /* apply calibration */
-      if((which_mouse->opt_calib!=NULL)&&(which_mouse->m_type->absolute)){
+      if((which_mouse->opt_calib != NULL) &&
+         (which_mouse->m_type->absolute)) {
+
         /* save uncalibrated values for use next time around */
         oldx = nEvent.x;
         oldy = nEvent.y;
@@ -160,7 +164,8 @@ int processMouse(int fd, Gpm_Event *event, int kd_mode)
 
 /*....................................... update the button number */
 
-   if ((event->buttons&GPM_B_MIDDLE) && !(which_mouse->opt_three)) (which_mouse->opt_three)++;
+   if ((event->buttons & GPM_B_MIDDLE) && !(which_mouse->opt_three))
+      (which_mouse->opt_three)++;
 
 /*....................................... we're a repeater, aren't we? */
 
@@ -301,8 +306,12 @@ int processMouse(int fd, Gpm_Event *event, int kd_mode)
    switch(event->type) {                /* now provide the cooked bits */
       case GPM_DOWN:
          GET_TIME(tv2);
-         if (tv1.tv_sec && (DIF_TIME(tv1,tv2)<(which_mouse->opt_time))) /* check first click */
-            statusC++, statusC%=3; /* 0, 1 or 2 */
+
+         /* check first click */
+         if (tv1.tv_sec && (DIF_TIME(tv1,tv2)<(which_mouse->opt_time))) {
+            statusC++;
+            statusC%=3; /* 0, 1 or 2 */
+         }
          else
             statusC=0;
          event->type|=(GPM_SINGLE<<statusC);
