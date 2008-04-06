@@ -50,6 +50,9 @@ void startup(int argc, char **argv)
       {NULL,NULL}
    };
    
+   /* log to debug, who we are */
+   gpm_report(GPM_PR_DEBUG, GPM_MESS_VERSION);
+
    /* basic settings */
    option.run_status    = GPM_RUN_STARTUP;      /* 10,9,8,... let's go */
    option.autodetect    = 0;                    /* no mouse autodection */
