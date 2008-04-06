@@ -49,7 +49,7 @@ int processRequest(Gpm_Cinfo *ci, int vc)
    i=get_data(&conn,ci->fd);
 
    if (!i) { /* no data */
-      gpm_report(GPM_PR_INFO, GPM_MESS_CLOSE);
+      gpm_report(GPM_PR_DEBUG, GPM_MESS_CLOSE);
       close(ci->fd);
       FD_CLR(ci->fd,&connSet);
       FD_CLR(ci->fd,&readySet);

@@ -58,7 +58,7 @@ int processConn(int fd) /* returns newfd or -1 */
       return -1;
    }
 
-   gpm_report(GPM_PR_INFO,GPM_MESS_CONECT_AT,newfd);
+   gpm_report(GPM_PR_DEBUG, GPM_MESS_CONECT_AT,newfd);
 
    info=malloc(sizeof(Gpm_Cinfo));
    if (!info) gpm_report(GPM_PR_OOPS,GPM_MESS_NO_MEM);
@@ -71,7 +71,7 @@ int processConn(int fd) /* returns newfd or -1 */
    }
 
    if ((vc=request->vc)>MAX_VC) {
-      gpm_report(GPM_PR_WARN,GPM_MESS_REQUEST_ON, vc, MAX_VC);
+      gpm_report(GPM_PR_DEBUG, GPM_MESS_REQUEST_ON, vc, MAX_VC);
       free(info);
       close(newfd);
       return -1;
