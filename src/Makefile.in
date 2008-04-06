@@ -37,7 +37,8 @@ PICS = $(LOBJ:.o=.lo)
 
 HDRS = gpm.h gpmInt.h twiddler.h synaptics.h message.h
 
-PSRC = prog/mev.c prog/hltest.c prog/mouse-test.c prog/disable-paste.c
+PSRC = prog/mev.c prog/hltest.c prog/mouse-test.c prog/disable-paste.c			\
+		 prog/display-buttons.c  prog/display-coords.c
 
 POBJ = $(PSRC:.c=.o) prog/gpm-root.o
 
@@ -58,7 +59,7 @@ STRIP = -s
 
 # the prog rules are not very clean...
 prog/%.o: prog/%.c
-	$(CC) @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@ $<
+	$(CC) -Iheaders @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@ $<
 
 prog/%:	prog/%.o
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS)

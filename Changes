@@ -1,7 +1,12 @@
 * From 1.20.1 to 1.20.3:
    o Applied many cleanups
    o Added etouch support
-   o Cleaned up "make dist" target
+
+   pre6:
+      Cleaned up "make dist" target
+      Added two debbugging programs:
+         src/prog/display-buttons.c: display pressed buttons
+         src/prog/display-coords.c: display mouse coordinates
 
    pre5:
       Fix default handler in liblow.c
