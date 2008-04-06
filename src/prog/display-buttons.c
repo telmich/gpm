@@ -39,7 +39,7 @@
 #include <gpm.h>              /* gpm information      */
 
 /* display resulting data */
-int display_data(Gpm_Event *event, void *data)
+int display_data(Gpm_Event *event)
 {
    static time_t  last  = 0;
    time_t         now   = time(NULL);
@@ -49,7 +49,7 @@ int display_data(Gpm_Event *event, void *data)
    last  = now;
 
    /* display time, delta time */
-   printf("[%d] delta: %ds",now,delta);
+   printf("[%ld] delta: %ds",now,delta);
    
    /* display mouse information */
    printf(": p=%d, l=%1d, m=%1d, r=%1d, clicks=%d\n", 
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
       if (FD_ISSET(gpm_fd, &fds)) {
          Gpm_Event evt;
          if (Gpm_GetEvent(&evt) > 0) {
-            display_data(&evt, NULL);
+            display_data(&evt);
          } else {
             printf("Gpm_GetEvent failed\n");
          }
