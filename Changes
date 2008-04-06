@@ -7,6 +7,7 @@
       Added two debbugging programs:
          src/prog/display-buttons.c: display pressed buttons
          src/prog/display-coords.c: display mouse coordinates
+      Fixed Bug#474516: gpm: debug messages in syslog (Debian)
 
    pre5:
       Fix default handler in liblow.c
