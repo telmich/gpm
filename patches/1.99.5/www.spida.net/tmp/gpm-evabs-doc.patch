@@ -1,0 +1,101 @@
+diff -urN gpm-1.99.5/doc/README.1.20.2 gpm-1.99.5-patched/doc/README.1.20.2
+--- gpm-1.99.5/doc/README.1.20.2	2008-04-01 23:43:48.000000000 +0200
++++ gpm-1.99.5-patched/doc/README.1.20.2	1970-01-01 01:00:00.000000000 +0100
+@@ -1,54 +0,0 @@
+-
+-
+-   Dear reader,
+-
+-
+-      you are reading this document, because you saw that there is a new
+-      release of gpm available, gpm 1.20.2.
+-
+-      Unfortunately this release is broken, but that's not a big problem.
+-
+-      gpm is broken for some time and I did not spent any time to the project
+-      for about two years.
+-
+-      Some weeks ago, I was contacted by someone asking me to write a very
+-      small feature for gpm (a small client program, included in this
+-      release). I answered the person that I do not have the time to code
+-      that part, but if he really insists that I should write that code,
+-      he should think about sponsoring me [0].
+-
+-      Some days later I recieved an email that he wanted to sponsor me.
+-      I was a little bit surprised, because it was the first person really
+-      considering my sponsoring plans.
+-      
+-      So I coded that small program and had some views in the old code of
+-      gpm. There's so much information in it, so many hacks, so many dirty
+-      tricks and there are still many people using it.
+-
+-      So I considered to try to spent more time to gpm, perhaps even creating
+-      a more clean (and better maintainable) version of it.
+-
+-      But I _am_ actually a pretty busy person, working almost all time, if not
+-      doing sports (just about 6 hours a week) or sleeping.
+-
+-      So I thought, perhaps you can help me to get more time for coding FOSS [1]
+-      in general or gpm in specific:
+-
+-      My idea is, that if you consider sponsoring my work, I can begin to work less
+-      "traditionally" and also finance my second study in computer science, which
+-      I will begin in autumn 2008, if I have the money to do it (living in
+-      Switzerland is not that cheap).
+-
+-      I am looking forward to get any feedback from you about this idea
+-      at nico-gpm-sponsoring (at) schottelius.org.
+-
+-      Thanks for reading,
+-
+-
+-            Nico Schottelius, 12. May 2007
+-
+-
+-      P.S.: GPM is alive!
+-   
+-   [0]: Sponsoring information: http://nico.schottelius.org/about/support
+-   [1]: FOSS: http://nico.schottelius.org/documentations/foss/the-term-foss/
+diff -urN gpm-1.99.5/doc/README.evabs gpm-1.99.5-patched/doc/README.evabs
+--- gpm-1.99.5/doc/README.evabs	1970-01-01 01:00:00.000000000 +0100
++++ gpm-1.99.5-patched/doc/README.evabs	2008-04-06 16:11:30.000000000 +0200
+@@ -0,0 +1,39 @@
++
++This file tells how to use gpm with the driver for event-devices
++that use absolut coordiantes (evabs) like touchscreens. It was
++desigened and tested for eGalax controllers, but should work with
++others as well.
++
++
++		CALIBRATION
++		-----------
++
++Calibration is done with a configfile. It consists of a single
++line of 8 integers:
++
++ex_min ex_max ey_min ey_max sx_min sx_max sy_min sy_max
++
++The first four values (prefixed withe here) show the minimum and 
++maximum values of coordinates the event-device delivers for 
++x- and y-axis, respectivly. The last four values show range of 
++coordinates to which the input should be scaled, for example your
++screen resolution. This works for text-mode, too.
++
++An example for an 800x600 screen would look like this:
++
++50 1950 50 1950 0 799 0 599 
++
++
++		GPM OPERATION
++		-------------
++
++You need to use the evabs devicetype to use this feature, a 
++device that delivers the absolute coordinates a config-file
++that describes how to scale these coordinates, and a repeater-
++device used for output.
++The pseudo-file /proc/bus/input/devices should tell you which 
++event-device to use.
++
++Usage example:
++
++gpm -t evabs  -m /dev/input/event2 -c /etc/gpm-calib.conf -R ps2

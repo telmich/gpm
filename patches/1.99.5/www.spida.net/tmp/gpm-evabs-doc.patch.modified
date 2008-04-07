@@ -1,0 +1,43 @@
+diff -urN gpm-1.99.5/doc/README.evabs gpm-1.99.5-patched/doc/README.evabs
+--- gpm-1.99.5/doc/README.evabs	1970-01-01 01:00:00.000000000 +0100
++++ gpm-1.99.5-patched/doc/README.evabs	2008-04-06 16:11:30.000000000 +0200
+@@ -0,0 +1,39 @@
++
++This file tells how to use gpm with the driver for event-devices
++that use absolut coordiantes (evabs) like touchscreens. It was
++desigened and tested for eGalax controllers, but should work with
++others as well.
++
++
++		CALIBRATION
++		-----------
++
++Calibration is done with a configfile. It consists of a single
++line of 8 integers:
++
++ex_min ex_max ey_min ey_max sx_min sx_max sy_min sy_max
++
++The first four values (prefixed withe here) show the minimum and 
++maximum values of coordinates the event-device delivers for 
++x- and y-axis, respectivly. The last four values show range of 
++coordinates to which the input should be scaled, for example your
++screen resolution. This works for text-mode, too.
++
++An example for an 800x600 screen would look like this:
++
++50 1950 50 1950 0 799 0 599 
++
++
++		GPM OPERATION
++		-------------
++
++You need to use the evabs devicetype to use this feature, a 
++device that delivers the absolute coordinates a config-file
++that describes how to scale these coordinates, and a repeater-
++device used for output.
++The pseudo-file /proc/bus/input/devices should tell you which 
++event-device to use.
++
++Usage example:
++
++gpm -t evabs  -m /dev/input/event2 -c /etc/gpm-calib.conf -R ps2
