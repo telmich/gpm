@@ -2,7 +2,7 @@
  * README -- gpm 1.xx
  *
  * Copyright 1995-2000   rubini@linux.it (Alessandro Rubini)
- * Copyright 2001,2002   nico-gpm@schottelius.org (Nico Schottelius)
+ * Copyright 2001-2008   nico-gpm2008 at schottelius.org (Nico Schottelius)
  *
  *******/
 
@@ -33,6 +33,7 @@ For additionally documentation and other READMEs have a look into doc/.
 As of 1.19.4, gpm is officially maintained again. Most of the README is written
 by Alessandro Rubine, only minor changes are made by me.
 
+
 =========== MAILING LIST
 
 The mailing list devoted to gpm is "gpm@lists.linux.it"
@@ -40,27 +41,39 @@ The list is managed by Mailman and is currently open,
 so non-subscribers are allowed to post.
 
 In order to subscribe to the mailing list, visit
-http://www.linux.it/mailman/listinfo/gpm or send a message
-with "subscribe" in its body to gpm-request@lists.linux.it . For example:
+   http://lists.linux.it/listinfo/gpm
 
+or send a message with "subscribe" in its body to
+   gpm-request@lists.linux.it.
+
+For example:
 	echo subscribe | mail gpm-request@lists.linux.it
+
 
 =========== DOWNLOAD / HOMEPAGE
 
-The latest releases can always be found in one of the following places:
+The latest releases can always be found in one of the following place:
 
-  ftp://arcana.linux.it/pub/gpm
-  ftp://ftp.linux.it/pub/People/rubini/gpm/
-  http:// or ftp://ftp.schottelius.org/pub/linux/gpm
+   http://unix.schottelius.org/gpm/archives/
+   http://unix.schottelius.org/gpm/browse_source/
 
-Currently there is no homepage for gpm available. 
+The homepage of gpm can be found at
 
-You can get the latest cvs tree of gpm:
+   http://unix.schottelius.org/gpm/
 
-$ cvs -d :pserver:cvs@ar.linux.it:/data/cvs login
-(Logging in to cvs@ar.linux.it)
-CVS password: (type "cvs" here)
-$ cvs -d :pserver:cvs@ar.linux.it:/data/cvs checkout gpm
+You can get the latest development tree of gpm via git:
+
+   git-clone http://unix.schottelius.org/git/gpm 
+
+There are three branches available:
+
+   master: Contains the latest gpm1 code, may be broken.
+   gpm-1-stable: Contains the latest stable source code.
+   gpm-2-dev: Contains work that heads to gpm2.
+
+You can browse the git-tree via gitweb:
+
+   http://unix.schottelius.org/cgi-bin/gitweb.cgi?p=gpm;a=summary
 
 
 =========== COMPILING AND INSTALLING
@@ -87,6 +100,7 @@ could be an easy (though brutal) way to do it:
  make clean;(uname -a; make) | mail -s "gpm compile err." nicos-gpm@pcsystems.de
 
 What remains to do after installation is a little configuration
+
 
 =========== CONFIGURING
 
@@ -131,6 +145,7 @@ Configuration is optional...
 	it is run with debuging enabled (see the -D option in the
         documentation).
 
+
 ========== DOCS
 
 The directory "./doc" holds the documentation. The release embeds a
@@ -138,6 +153,7 @@ postscript file, slightly reduced to save paper (doc/gpm2.ps), an info
 one (doc/gpm.info) and a text-only version (doc/gpmdoc.txt -- but
 without table of contents, for now).  Man pages are automatically
 extracted from the info file, and are installed with "make install"
+
 
 =========== BUG REPORTS
 
@@ -165,6 +181,7 @@ to the strace version), and a description of how you reproduce the problem.
 
 The last resort is a core dump, but I'll ask it personally if I have real
 difficulties in tracing out your problem.
+
 
 =========== CREDITS
 
