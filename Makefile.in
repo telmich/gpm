@@ -44,6 +44,9 @@ install:	check installdirs do-install
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) $(STRIP)' install
 
+install-exec: installdirs
+	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) $(STRIP)' -C src install
+
 installdirs:
 	$(MKDIR) $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
 	if test "x@ELISP@" != "x" ; then \

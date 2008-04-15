@@ -1,0 +1,13 @@
+diff -rdup gpm-1.99.5.old7/Makefile.in gpm-1.99.5/Makefile.in
+--- gpm-1.99.5.old7/Makefile.in	2008-04-01 23:43:48.000000000 +0200
++++ gpm-1.99.5/Makefile.in	2008-04-15 13:46:27.000000000 +0200
+@@ -44,6 +44,9 @@ install:	check installdirs do-install
+ install-strip:
+ 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) $(STRIP)' install
+ 
++install-exec: installdirs
++	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) $(STRIP)' -C src install
++
+ installdirs:
+ 	$(MKDIR) $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
+ 	if test "x@ELISP@" != "x" ; then \
