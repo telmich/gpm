@@ -22,13 +22,13 @@
 # Adapted for gpm
 #
 
-subject="==> success: cconf"
+software="gpm"
+author="Nico Schottelius"
+subject="==> success: $software"
 to="nico-gpm-success"
 host="schottelius.org"
 fullto="${to}@${host}"
 
-software="gpm"
-author="Nico Schottelius"
 info="$(awk -F= '/^release=/ { print $2 }' configure.in; uname -s -v -r -m)"
 
 

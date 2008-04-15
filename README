@@ -28,6 +28,13 @@ If you want to make a patch to gpm, please read doc/HACK_GPM.
 
 For additionally documentation and other READMEs have a look into doc/.
 
+=========== REPORT SUCCESS
+
+As it is always nice to see as an author of FOSS that the software is
+used and alive und which options are used, you can send a success
+report to me via ./scripts/report_success.sh.
+
+
 =========== MAINTENANCE
 
 As of 1.19.4, gpm is officially maintained again. Most of the README is written
