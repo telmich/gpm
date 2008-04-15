@@ -21,7 +21,7 @@
 
 #include <fcntl.h>                  /* open and co.      */
 #include <sys/stat.h>               /* stat()            */
-#include <stropts.h>                /* ioctl             */
+#include <sys/ioctl.h>              /* ioctl()           */
 
 /* Linux specific (to be outsourced in gpm2 */
 #include <linux/serial.h>           /* for serial console check */
