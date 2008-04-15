@@ -289,7 +289,7 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
       }
 
 #ifndef SO_PEERCRED
-      bzero((char *)&addr,sizeof(addr));
+      memset((char *)&addr, 0, sizeof(addr));
       addr.sun_family=AF_UNIX;
       if (!(sock_name = tempnam (0, "gpm"))) {
          gpm_report(GPM_PR_ERR,GPM_MESS_TEMPNAM,strerror(errno));
@@ -303,7 +303,7 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
       }
 #endif
 
-      bzero((char *)&addr,sizeof(addr));
+      memset((char *)&addr, 0, sizeof(addr));
       addr.sun_family=AF_UNIX;
       strcpy(addr.sun_path, GPM_NODE_CTL);
       i=sizeof(addr.sun_family)+strlen(GPM_NODE_CTL);

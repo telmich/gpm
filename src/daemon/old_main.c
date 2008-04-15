@@ -88,7 +88,7 @@ int old_main()
    /* control node */
 
    if((ctlfd=socket(AF_UNIX,SOCK_STREAM,0))==-1) gpm_report(GPM_PR_OOPS,GPM_MESS_SOCKET_PROB);
-   bzero((char *)&ctladdr,sizeof(ctladdr));
+   memset((char *)&ctladdr, 0, sizeof(ctladdr));
    ctladdr.sun_family=AF_UNIX;
    strcpy(ctladdr.sun_path,GPM_NODE_CTL);
    unlink(GPM_NODE_CTL);

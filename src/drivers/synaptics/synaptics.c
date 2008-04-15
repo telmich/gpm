@@ -2121,9 +2121,9 @@ void tp_read_config_file (char* config_filename)
 	      break;
 
 	    case Flag_Param:
-	      if (index ("YyTt1", token [0])) {
+	      if (strchr ("YyTt1", token [0])) {
 		*(param_data [param].addr.flag_p) = 1;
-	      } else if (index ("NnFf0", token [0])) {
+	      } else if (strchr ("NnFf0", token [0])) {
 		*(param_data [param].addr.flag_p) = 0;
 	      } else {
 		gpm_report (GPM_PR_WARN,"Flag value (%s) for parameter %s is invalid",

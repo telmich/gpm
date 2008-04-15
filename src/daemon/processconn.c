@@ -49,7 +49,7 @@ int processConn(int fd) /* returns newfd or -1 */
 
 /*....................................... Accept */
 
-   bzero((char *)&addr,sizeof(addr));
+   memset((char *)&addr, 0, sizeof(addr));
    addr.sun_family=AF_UNIX;
 
    len=sizeof(addr);
