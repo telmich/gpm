@@ -3,14 +3,16 @@ AC_REVISION(configure.in,v 1.7 2008/02/16 nico)
 dnl Process this file with autoconf to produce a configure script.
 dnl written jan/1997 - T.E.Dickey <dickey@clark.net>
 
-AC_INIT(src/daemon/main.c)
 AC_PREREQ(2.12)
+AC_INIT(src/daemon/main.c)
 AC_CONFIG_HEADER(src/headers/config.h)
 
 release=1.99.6
 release_date="no date yet"
+revgit=`git-rev-parse --short HEAD`
 AC_DEFINE_UNQUOTED(GPM_RELEASE,"$release")
 AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date")
+AC_DEFINE_UNQUOTED(GPM_RELEASE_GIT,"$revgit")
 
 dnl These are chosen so that we can switch to the libtool scheme
 dnl transparently.
@@ -116,6 +118,7 @@ GPMXTERM=
 AC_SUBST(GPMXTERM)
 AC_SUBST(release)
 AC_SUBST(release_date)
+AC_SUBST(revgit)
 AC_SUBST(abi_lev)
 AC_SUBST(abi_full)
 AC_SUBST(EMACS)
