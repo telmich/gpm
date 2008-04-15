@@ -178,13 +178,11 @@ Draw *cfg_alloc(void);
 /* prototypes for predefined functions */
 
 enum F_call {F_CREATE, F_POST, F_INVOKE, F_DONE};
-int f_debug(int mode, DrawItem *self, int uid);
 int f_bgcmd(int mode, DrawItem *self, int uid);
 int f_fgcmd(int mode, DrawItem *self, int uid);
 int f_jptty(int mode, DrawItem *self, int uid);
 int f_mktty(int mode, DrawItem *self, int uid);
 int f_menu(int mode, DrawItem *self, int uid);
-int f_lock(int mode, DrawItem *self, int uid);
 int f_load(int mode, DrawItem *self, int uid);
 int f_free(int mode, DrawItem *self, int uid);
 int f_time(int mode, DrawItem *self, int uid);
@@ -289,13 +287,11 @@ struct funcName {
    int (*fun)();
    };
 struct funcName funcList[] = {
-   {"f.debug",T_FUNC,f_debug},
    {"f.fgcmd",T_FUN2,f_fgcmd},
    {"f.bgcmd",T_FUN2,f_bgcmd},
    {"f.jptty",T_FUN2,f_jptty},
    {"f.mktty",T_FUNC,f_mktty},
    {"f.menu",T_FUNC,f_menu},
-   {"f.lock",T_FUN2,f_lock}, /* "lock one", "lock all" */
    {"f.load",T_FUNC,f_load},
    {"f.free",T_FUNC,f_free},
    {"f.time",T_FUNC,f_time},
@@ -445,58 +441,6 @@ void f__fix(struct passwd *pass)
 }
 
 /*---------------------------------------------------------------------*/
-static int f_debug_one(FILE *f, Draw *draw)
-{
-   DrawItem *ip;
-   static int tc=0;
-   int i;
-
-#define LINE(args) for(i=0;i<tc;i++) putc('\t',f); fprintf args
-
-   LINE((f,"BUTT %i - %ix%i\n",draw->buttons,draw->width,draw->height));
-   LINE((f,"UID %i\n",draw->uid));
-   LINE((f,"fore %i - back %i\n",draw->fore,draw->back));
-   LINE((f,"bord %i - head %i\n",draw->bord,draw->head));
-   LINE((f,"---> \"%s\" %li\n",draw->title,(long)(draw->mtime)));
-   for (ip=draw->menu; ip; ip=ip->next) {
-      LINE((f,"    %i \"%s\" (%p)\n",ip->type,ip->name,ip->fun));
-      if (ip->fun == f_menu) {
-         tc++; f_debug_one(f,(Draw *)ip->clientdata); tc--;
-      }
-   }
-#undef LINE
-   return 0;
-}
-
-int f_debug(int mode, DrawItem *self, int uid)
-{
-
-   mode = 0; self = NULL; uid = 0; /* FIXME: gpm 1.99.13 */
-#if 0 /* Disabled on account of security concerns; the way 
-       * "/tmp/root-debug" is used is gratuitously
-       * open to symlink abuse */
-
-   FILE *f;
-   Draw *dp;
-
-   switch (mode) {
-      case F_POST:
-         if (!(f=fopen("/tmp/root-debug","a"))) return 1;
-         for(dp=drawList; dp; dp=dp->next)
-	         f_debug_one(f,dp);
-         fprintf(f,"\n\n");
-         fclose(f);
-
-      case F_CREATE:
-      case F_INVOKE:
-         break;
-      }
-#endif /* 0 */
-   return 0;
-}
-
-
-/*---------------------------------------------------------------------*/
 int f_fgcmd(int mode, DrawItem *self, int uid)
 {
    self = NULL; uid = 0; /* FIXME: gpm 1.99.13 */
@@ -620,31 +564,6 @@ int f_menu(int mode, DrawItem *self, int uid)
    return 0; /* just a placeholder, recursion is performed in main() */  
 }
 
-/*---------------------------------------------------------------------*/
-int f_lock(int mode, DrawItem *self, int uid)
-{
-   mode = 0; self = NULL; uid = 0; /* FIXME: gpm 1.99.13 */
-#if 0 /* some kind of interesting ...: if never */
-   int all;
-   static DrawItem msg = {
-      0,
-      10,
-      "Enter your password to unlock",
-      NULL, NULL, NULL, NULL
-   };
-   static Draw
-
-
-   switch (mode) {
-      case F_CREATE: /* either "one" or anything else */
-         if (strcmp(self->arg,"one")) self->arg[0]='a';
-      case F_POST: break;
-      case F_INVOKE: /* the biggest of all... */
-   }
-
-#endif
-   return 0;
-}
 
 /*---------------------------------------------------------------------*/
 int f_load(int mode, DrawItem *self, int uid)
