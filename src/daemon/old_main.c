@@ -261,4 +261,5 @@ int old_main()
      
      if(pending) gpm_report(GPM_PR_OOPS,GPM_MESS_SELECT_PROB);
    } /* while(1) */
+   return 0;
 }

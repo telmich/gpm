@@ -1,0 +1,9 @@
+diff -rdup gpm-1.99.5.old/src/daemon/old_main.c gpm-1.99.5/src/daemon/old_main.c
+--- gpm-1.99.5.old/src/daemon/old_main.c	2008-04-01 23:43:48.000000000 +0200
++++ gpm-1.99.5/src/daemon/old_main.c	2008-04-15 13:25:49.000000000 +0200
+@@ -261,4 +261,5 @@ int old_main()
+      
+      if(pending) gpm_report(GPM_PR_OOPS,GPM_MESS_SELECT_PROB);
+    } /* while(1) */
++   return 0;
+ }
