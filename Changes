@@ -1,6 +1,8 @@
 * From 1.20.1 to 1.20.3: (bugfix/code cleanup)
    o Applied many cleanups
    o Added etouch support
+   o Added scripts/report_success.sh
+   o Updated README
 
    pre6:
       Cleaned up "make dist" target
