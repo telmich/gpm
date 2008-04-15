@@ -179,7 +179,6 @@ Draw *cfg_alloc(void);
 
 enum F_call {F_CREATE, F_POST, F_INVOKE, F_DONE};
 int f_bgcmd(int mode, DrawItem *self, int uid);
-int f_fgcmd(int mode, DrawItem *self, int uid);
 int f_jptty(int mode, DrawItem *self, int uid);
 int f_mktty(int mode, DrawItem *self, int uid);
 int f_menu(int mode, DrawItem *self, int uid);
@@ -287,7 +286,6 @@ struct funcName {
    int (*fun)();
    };
 struct funcName funcList[] = {
-   {"f.fgcmd",T_FUN2,f_fgcmd},
    {"f.bgcmd",T_FUN2,f_bgcmd},
    {"f.jptty",T_FUN2,f_jptty},
    {"f.mktty",T_FUNC,f_mktty},
@@ -438,18 +436,6 @@ void f__fix(struct passwd *pass)
    setenv("HOME",    pass->pw_dir, 1);
    setenv("LOGNAME", pass->pw_name,1);
    setenv("USER",    pass->pw_name,1);
-}
-
-/*---------------------------------------------------------------------*/
-int f_fgcmd(int mode, DrawItem *self, int uid)
-{
-   self = NULL; uid = 0; /* FIXME: gpm 1.99.13 */
-   switch (mode) {
-      case F_CREATE:
-      case F_POST: break;
-      case F_INVOKE: ; /* MISS */
-   }
-   return 0;
 }
 
 /*---------------------------------------------------------------------*/
