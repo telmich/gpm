@@ -71,7 +71,7 @@ Gpm_Type *I_etouch(int fd, unsigned short flags, struct Gpm_Type *type, int argc
    for (i=0; i<4; i++)
        if ((gunze_calib[i] & 0xfff) != gunze_calib[i]) calibok = 0;
    if (gunze_calib[0] == gunze_calib[2]) calibok = 0;
-   if (gunze_calib[1] == gunze_calib[4]) calibok = 0;
+   if (gunze_calib[1] == gunze_calib[3]) calibok = 0;
    fclose(f);
   }
   if (!calibok) {

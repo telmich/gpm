@@ -1,0 +1,15 @@
+\\\\
+\\ drivers/etouch/i.c: In function 'I_etouch':
+\\ drivers/etouch/i.c:74: error: array subscript is above array bounds
+diff -rdup gpm-1.99.5.old4/src/drivers/etouch/i.c gpm-1.99.5/src/drivers/etouch/i.c
+--- gpm-1.99.5.old4/src/drivers/etouch/i.c	2008-04-01 23:43:48.000000000 +0200
++++ gpm-1.99.5/src/drivers/etouch/i.c	2008-04-15 13:32:22.000000000 +0200
+@@ -71,7 +71,7 @@ Gpm_Type *I_etouch(int fd, unsigned shor
+    for (i=0; i<4; i++)
+        if ((gunze_calib[i] & 0xfff) != gunze_calib[i]) calibok = 0;
+    if (gunze_calib[0] == gunze_calib[2]) calibok = 0;
+-   if (gunze_calib[1] == gunze_calib[4]) calibok = 0;
++   if (gunze_calib[1] == gunze_calib[3]) calibok = 0;
+    fclose(f);
+   }
+   if (!calibok) {
