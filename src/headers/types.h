@@ -108,7 +108,7 @@ struct mouse_features {
 };
 
 /*========================================================================
- * Parsing argv: helper dats struct function                               
+ * Parsing argv: helper dats struct function
  *========================================================================*/
 enum argv_type {
    ARGV_BOOL = 1,

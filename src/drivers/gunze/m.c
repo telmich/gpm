@@ -43,10 +43,10 @@ int M_gunze(Gpm_Event *state,  unsigned char *data)
    static int released = 0, dragging = 0;
    static struct timeval uptv, tv; /* time of last up, and down events */
    int timediff;
-    
+
    #define REAL_TO_XCELL(x) (x * win.ws_col / 0x3FFF)
    #define REAL_TO_YCELL(y) (y * win.ws_row / 0x3FFF)
-    
+
    #define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))
    #define DIF_TIME(t1,t2) ((t2.tv_sec -t1.tv_sec) *1000+ \
                            (t2.tv_usec-t1.tv_usec)/1000)

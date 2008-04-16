@@ -127,7 +127,7 @@ int processSpecial(Gpm_Event *event)
     case GPM_B_LEFT:   command=commandL; break;
     case GPM_B_MIDDLE: command=commandM; break;
     case GPM_B_RIGHT:  command=commandR; break;
-    default:           
+    default:
         fprintf(consolef,"\n%s: more than one button: "
 		"special command discarded\n",option.progname);
         if (consolef!=stderr) fclose(consolef);
@@ -151,7 +151,7 @@ int processSpecial(Gpm_Event *event)
     case -1: /* error */
       fprintf(stderr,"%s: fork(): %s\n", option.progname, strerror(errno));
       return 0; /* Hmmm.... error */
-    
+
     case 0: /* child */
       close(0); close(1); close(2);
       open(GPM_NULL_DEV,O_RDONLY); /* stdin  */
@@ -162,8 +162,8 @@ int processSpecial(Gpm_Event *event)
       for (i=3;i<open_max; i++) close(i);
       execl("/bin/sh","sh","-c",command,(char *)NULL);
       exit(1); /* shouldn't happen */
-      
+
     default: /* parent */
-      return 0;	
+      return 0;
     }
 }

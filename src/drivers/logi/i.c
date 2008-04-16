@@ -57,8 +57,8 @@ Gpm_Type* I_logi(int fd, unsigned short flags, struct Gpm_Type *type, int argc, 
    if(fstat(fd,&buf)==-1) gpm_report(GPM_PR_OOPS, GPM_MESS_FSTAT);
    i=MAJOR(buf.st_rdev);
 
-   /* I don't know why this is herein, but I remove it. I don't think a 
-    * hardcoded ttyname in a C file is senseful. I think if the device 
+   /* I don't know why this is herein, but I remove it. I don't think a
+    * hardcoded ttyname in a C file is senseful. I think if the device
     * exists must be clear before. Not here. */
    /********* if (stat("/dev/ttyS0",&buf)==-1) gpm_oops("stat()"); *****/
    busmouse = (i != (int) MAJOR(buf.st_rdev));

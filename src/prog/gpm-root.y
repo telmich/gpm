@@ -48,7 +48,7 @@
 #include <linux/limits.h>   /* OPEN_MAX */
 #include <linux/vt.h>       /* VT_ACTIVATE */
 #include <linux/keyboard.h> /* K_SHIFT */
-#include <utmp.h>         
+#include <utmp.h>
 #include <endian.h>
 
 #ifdef HAVE_SYS_SYSMACROS_H
@@ -88,13 +88,13 @@
 
 /* These macros are useful to avoid curses. The program is unportable anyway */
 #define GOTOXY(f,x,y)   fprintf(f,"\x1B[%03i;%03iH",y,x)
-#define FORECOLOR(f,c)  fprintf(f,"\x1B[%i;3%cm",(c)&8?1:22,colLut[(c)&7]+'0') 
-#define BACKCOLOR(f,c)  fprintf(f,"\x1B[4%cm",colLut[(c)&7]+'0') 
+#define FORECOLOR(f,c)  fprintf(f,"\x1B[%i;3%cm",(c)&8?1:22,colLut[(c)&7]+'0')
+#define BACKCOLOR(f,c)  fprintf(f,"\x1B[4%cm",colLut[(c)&7]+'0')
 
 /* These defines are ugly hacks but work */
 #define ULCORNER 0xc9
 #define URCORNER 0xbb
-#define LLCORNER 0xc8 
+#define LLCORNER 0xc8
 #define LRCORNER 0xbc
 #define HORLINE  0xcd
 #define VERLINE  0xba
@@ -236,7 +236,7 @@ itemlist: item items  {$$=cfg_cat($1,$2);}  ;
 
 items: /* empty */ {$$=NULL;}
      | items item  {$$= $1 ? cfg_cat($1,$2) : $2;}
-     ; 
+     ;
 
 item: T_STRING T_FUNC             {$$=cfg_makeitem('F',$1,$2, NULL);}
       | T_STRING T_FUN2 T_STRING    {$$=cfg_makeitem('2',$1,$2, $3);}
@@ -337,17 +337,17 @@ int yylex(void)
       s[i]=0;
       for (tn=tokenList; tn->name; tn++)
          if (tn->name[0]==s[0] && !strcmp(tn->name,s)) {
-            yylval.silly=tn->value; 
+            yylval.silly=tn->value;
             return tn->token;
          }
       for (fn=funcList; fn->name; fn++)
          if (fn->name[0]==s[0] && !strcmp(fn->name,s)) {
-            yylval.fun=fn->fun; 
+            yylval.fun=fn->fun;
             return fn->token;
          }
       yylval.string=(char *)strdup(s); return T_STRING;
    }
-} 
+}
 
 /*---------------------------------------------------------------------*/
 void cfg_free(Draw *what)
@@ -459,7 +459,7 @@ int f_bgcmd(int mode, DrawItem *self, int uid)
 	            close(0); close(1); close(2);
 	            open("/dev/null",O_RDONLY); /* stdin  */
 	            open(consolename,O_WRONLY); /* stdout */
-	            dup(1);                     /* stderr */  
+	            dup(1);                     /* stderr */
 		    int open_max = sysconf(_SC_OPEN_MAX);
 		    if (open_max == -1) open_max = 1024;
 	            for (i=3;i<open_max; i++) close(i);
@@ -547,7 +547,7 @@ int f_mktty(int mode, DrawItem *self, int uid)
 int f_menu(int mode, DrawItem *self, int uid)
 {
    mode = 0; self = NULL; uid = 0; /* FIXME: gpm 1.99.13 */
-   return 0; /* just a placeholder, recursion is performed in main() */  
+   return 0; /* just a placeholder, recursion is performed in main() */
 }
 
 
@@ -618,7 +618,7 @@ int f_time(int mode, DrawItem *self, int uid) {
    char s[128];
    struct tm *broken;
    time_t t;
-   
+
    uid = 0; /* FIXME: gpm 1.99.13 */
 
    time(&t); broken=localtime(&t);
@@ -626,7 +626,7 @@ int f_time(int mode, DrawItem *self, int uid) {
       case F_CREATE: /* modify name, just to fake its length */
          self->clientdata=self->name;
          strftime(s,110,self->clientdata,broken);
-         strcat(s,"1234567890"); /* names can change length */       
+         strcat(s,"1234567890"); /* names can change length */
          self->name=(char *)strdup(s);
          /* rewrite the right string */
          strftime(self->name,110,self->clientdata,broken);
@@ -732,7 +732,7 @@ int getdraw(int uid, int buttons, time_t mtime1, time_t mtime2)
    }
 
    if (buf.st_mtime <= mtime) return 0;
-  
+
    /* else, read the new drawing tree */
    new=cfg_read(uid);
    if (!new) return 0;
@@ -829,7 +829,7 @@ int getmask(char *arg, struct node *table)
 int cmdline(int argc, char **argv)
 {
    int opt;
-  
+
    run_status = GPM_RUN_STARTUP;
    while ((opt = getopt(argc, argv,"m:uDV::")) != -1) {
          switch (opt) {
@@ -885,10 +885,10 @@ static inline void scr_restore(int fd, FILE *f, unsigned char *buffer, int vc)
    int x,y, dumpfd;
    char dumpname[20];
 
-   f = NULL; 
+   f = NULL;
 
    x=buffer[2]; y=buffer[3];
-   
+
    /* WILL NOT WORK WITH DEVFS! FIXME! */
    sprintf(dumpname,"/dev/vcsa%i",vc);
    dumpfd=open(dumpname,O_WRONLY);
@@ -1002,7 +1002,7 @@ Posted *unpostmenu(int fd, FILE *f, Posted *which, int vc)
    Posted *prev=which->prev;
 
    scr_restore(fd,f,which->dump, vc);
-   ioctl(fd,TCXONC,TCOON); /* activate the console */  
+   ioctl(fd,TCXONC,TCOON); /* activate the console */
    free(which->dump);
    free(which);
    activemenu=prev;
@@ -1098,7 +1098,7 @@ int main(int argc, char **argv)
          fprintf(stderr,"%s: can't run with linux < 1.1.82\n",prgname);
          exit(1);
       }
-      
+
       /* problems with devfs! FIXME! */
       if (stat("/dev/vcs0",&sbuf)<0 && stat("/dev/vcs",&sbuf)<0) {
          fprintf(stderr,"%s: /dev/vcs0: %s\n",prgname,strerror(errno));
@@ -1170,7 +1170,7 @@ int main(int argc, char **argv)
          default: _exit(0);                           /* parent */
       }
 
-      /* redirect stderr to /dev/console -- avoided now. 
+      /* redirect stderr to /dev/console -- avoided now.
          we should really cleans this more up! */
       fclose(stdin); fclose(stdout);
       if (!freopen(GPM_NULL_DEV,"w",stderr)) {
@@ -1193,10 +1193,10 @@ int main(int argc, char **argv)
           struct utmp u;
           char s[8];
           int i=0;
-          
+
           gpm_report(GPM_PR_INFO,"Disallocating %i",disallocFlag);
           ioctl(fileno(stdin),VT_DISALLOCATE,&i); /* all of them */
-          
+
           sprintf(s,"tty%i",disallocFlag);
           setutent();
           strncpy(u.ut_line, s, sizeof(u.ut_line));
@@ -1211,7 +1211,7 @@ int main(int argc, char **argv)
          if (evflag==-1) continue; /* no real event */
 
          /* get rid of spurious events */
-         if (ev.type&GPM_MOVE) continue; 
+         if (ev.type&GPM_MOVE) continue;
 
          vc=ev.vc;
          gpm_report(GPM_PR_DEBUG,"%s: event on console %i at %i, %i",
@@ -1232,7 +1232,7 @@ int main(int argc, char **argv)
               gpm_report(GPM_PR_ERR, "%s: %s", s, strerror(errno));
               continue;
             }
-          
+
           if ((fd=open(s,O_RDWR))<0) /* will O_RDONLY be enough? */
             {
               gpm_report(GPM_PR_ERR, "%s: %s", s, strerror(errno));
@@ -1298,7 +1298,7 @@ int main(int argc, char **argv)
 
    /*....................................... Done */
 
-   while (Gpm_Close()) ; /* close all the stack */ 
+   while (Gpm_Close()) ; /* close all the stack */
    exit(0);
 }
 
@@ -1309,11 +1309,11 @@ int main(int argc, char **argv)
   * ian zimmermann (alias itz) on Wed Jul  1 23:28:13 PDT 1998:
    "I don't mind what anybody's physical tab size is, but when I load it into
    the editor I don't want any wrapping lines."
-  * nico schottelius (january 2002): 
+  * nico schottelius (january 2002):
    "Although Linux document /usr/src/linux/Documentation/CodingStyle is mostly
    correct, I agree with itz to avoid wrapping lines. Merging 4(alessandro)
    /2(itz) spaces makes 3 which is the current standard."
-  */ 
+  */
 
 /* Local Variables: */
 /* tab-width:3      */

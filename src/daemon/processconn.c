@@ -84,7 +84,7 @@ int processConn(int fd) /* returns newfd or -1 */
       close(newfd);
       return -1;         /* to read requested tty */
    }
-   
+
    unlink(addr.sun_path);   /* delete socket */
 
    staletime = time(0) - 30;
@@ -96,7 +96,7 @@ int processConn(int fd) /* returns newfd or -1 */
       close(newfd);
       return -1;         /* socket is ancient */
    }
-   
+
    uid = statbuf.st_uid;      /* owner of socket */
 #else
    {
@@ -117,7 +117,7 @@ int processConn(int fd) /* returns newfd or -1 */
       if(( tty =
          malloc(strlen(option.consolename)+Gpm_cnt_digits(vc) + sizeof(char))) == NULL)
             gpm_report(GPM_PR_OOPS,GPM_MESS_NO_MEM);
-      
+
       strncpy(tty,option.consolename,strlen(option.consolename)-1);
       sprintf(&tty[strlen(option.consolename)-1],"%d",vc);
 
@@ -149,7 +149,7 @@ int processConn(int fd) /* returns newfd or -1 */
    /* if the client gets motions, give it the current position */
    if(request->eventMask & GPM_MOVE) {
       //Gpm_Event event={0, 0, vc, 0, 0, statusX, statusY, GPM_MOVE, 0, 0};
-      
+
       Gpm_Event event;
       event.buttons     = 0;
       event.modifiers   = 0;

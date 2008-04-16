@@ -38,7 +38,7 @@ Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
    static unsigned char ps2_init[] = { GPM_AUX_SET_SCALE11, GPM_AUX_ENABLE_DEV, GPM_AUX_SET_SAMPLE, 100, GPM_AUX_SET_RES, 3, };
 
    flags = argc = 0; /* FIXME: 1.99.13 */
-   argv = NULL; 
+   argv = NULL;
 
 
    /* Do a basic init in case the mouse is confused */

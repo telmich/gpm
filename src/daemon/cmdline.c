@@ -35,7 +35,7 @@ void cmdline(int argc, char **argv)
    char options[]="a:A::b:B:c:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:Tuv23";
    int  opt;
 
-   /* initialize for the dual mouse */ 
+   /* initialize for the dual mouse */
    mouse_table[2]=mouse_table[1]=mouse_table[0]; /* copy defaults */
    which_mouse = mouse_table+1; /* use the first */
 
@@ -55,7 +55,7 @@ void cmdline(int argc, char **argv)
          case 'i': (which_mouse->opt_time)=atoi(optarg);                break;
          case 'k': check_kill();                         break;
          case 'l': opt_lut = optarg;                     break;
-         case 'm': add_mouse(GPM_ADD_DEVICE,optarg);     
+         case 'm': add_mouse(GPM_ADD_DEVICE,optarg);
                    (which_mouse->opt_dev) = optarg;                     break; /* GO AWAY!*/
          case 'M': opt_double++; option.repeater++;
             if (option.repeater_type == 0)

@@ -75,11 +75,11 @@ Gpm_Roi *Gpm_PopRoi(Gpm_Roi *which)
   if (which->prev) which->prev->next = which->next;
   if (which->next) which->next->prev = which->prev;
   if (gpm_roi==which) gpm_roi=which->next;
-  
+
   if (which->owned==0) free(which);
   if (gpm_current_roi==which)
 	gpm_current_roi=NULL;
-  
+
   return gpm_roi; /* return the new top-of-stack */
 }
 
@@ -179,7 +179,7 @@ int Gpm_HandleRoi(Gpm_Event *ePtr, void *clientdata)
    * events not requested are discarded
    */
   if (roi && (GPM_BARE_EVENTS(ePtr->type) & roi->eventMask) == 0)
-	return 0; 
+	return 0;
 
   backEvent=*ePtr; /* copy it, so the main one is unchanged */
   if (!roi)

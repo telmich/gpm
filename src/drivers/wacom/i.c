@@ -34,7 +34,7 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
 {
 /* wacom graphire tablet */
 #define UD_RESETBAUD     "\r$"      /* reset baud rate to default (wacom V) */
-                                    /* or switch to wacom IIs (wacomIV)     */ 
+                                    /* or switch to wacom IIs (wacomIV)     */
 #define UD_RESET         "#\r"      /* Reset tablet and enable WACOM IV     */
 #define UD_SENDCOORDS    "ST\r"     /* Start sending coordinates            */
 #define UD_FIRMID        "~#\r"     /* Request firmware ID string           */
@@ -45,13 +45,13 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
 
 
    void reset_wacom()
-   { 
+   {
       /* Init Wacom communication; this is modified from xf86Wacom.so module */
       /* Set speed to 19200 */
       setspeed (fd, 1200, 19200, 0, B19200|CS8|CREAD|CLOCAL|HUPCL);
-      /* Send Reset Baudrate Command */ 
+      /* Send Reset Baudrate Command */
       write(fd, UD_RESETBAUD, strlen(UD_RESETBAUD));
-      usleep(250000);   
+      usleep(250000);
       /* Send Reset Command */
       write(fd, UD_RESET,     strlen(UD_RESET));
       usleep(75000);
@@ -59,15 +59,15 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
       setspeed (fd, 1200, 9600, 0, B9600|CS8|CREAD|CLOCAL|HUPCL);
       /* Send Reset Command */
       write(fd, UD_RESET, strlen(UD_RESET));
-      usleep(250000);  
+      usleep(250000);
       write(fd, UD_STOP, strlen(UD_STOP));
       usleep(100000);
    }
 
    int wait_wacom()
    {
-      /* 
-       *  Wait up to 200 ms for Data from Tablet. 
+      /*
+       *  Wait up to 200 ms for Data from Tablet.
        *  Do not read that data.
        *  Give back 0 on timeout condition, -1 on error and 1 for DataPresent
        */
@@ -85,8 +85,8 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
    int RequestData(char *cmd)
    {
       int err;
-      /* 
-       * Send cmd if not null, and get back answer from tablet. 
+      /*
+       * Send cmd if not null, and get back answer from tablet.
        * Get Data to buffer until full or timeout.
        * Give back 0 for timeout and !0 for buffer full
        */
@@ -117,9 +117,9 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
    static argv_helper optioninfo[] = {
          {"absolute",  ARGV_BOOL, u: {iptr: &WacomAbsoluteWanted}, value: !0},
          {"relative",  ARGV_BOOL, u: {iptr: &WacomAbsoluteWanted}, value:  0},
-         {"",          ARGV_END,  u: {iptr: &WacomAbsoluteWanted}, value:  0} 
+         {"",          ARGV_END,  u: {iptr: &WacomAbsoluteWanted}, value:  0}
    };
-   parse_argv(optioninfo, argc, argv); 
+   parse_argv(optioninfo, argc, argv);
    type->absolute = WacomAbsoluteWanted;
    reset_wacom();
 
@@ -127,7 +127,7 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
    while(RequestData(NULL)) ;
 
    /* read WACOM-ID */
-   RequestData(UD_FIRMID); 
+   RequestData(UD_FIRMID);
 
    /* Search for matching modell */
    for(WacomModell=0;
@@ -140,12 +140,12 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
          break;
       }
    }
-   if(WacomModell >= (int) (sizeof(wcmodell) / sizeof(struct WC_MODELL))) 
+   if(WacomModell >= (int) (sizeof(wcmodell) / sizeof(struct WC_MODELL)))
       WacomModell=-1;
    gpm_report(GPM_PR_INFO,GPM_MESS_WACOM_MOD, type->absolute? 'A':'R',
                 (WacomModell==(-1))? "Unknown" : wcmodell[WacomModell].name,
                 buffer+2);
-   
+
    /* read Wacom max size */
    if(WacomModell!=(-1) && (!wcmodell[WacomModell].maxX)) {
       RequestData(UD_COORD);

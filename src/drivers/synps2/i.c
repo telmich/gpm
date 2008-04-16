@@ -27,7 +27,7 @@ Gpm_Type *I_synps2(int fd, unsigned short flags, struct Gpm_Type *type, int argc
 {
 
    flags = argc = 0; /* FIXME: 1.99.13 */
-   argv = NULL; 
+   argv = NULL;
 
    syn_ps2_init (fd);
    return type;

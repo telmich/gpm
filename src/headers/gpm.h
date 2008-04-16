@@ -74,9 +74,9 @@ extern "C" {
  * Mouse movement and wheel movement are not associated with a button
  * i.e. buttons=GPM_B_NONE in these cases
  * (except for ms3 mouse, for reasons unknown?)
- * The middle button if pressed down (or clicked) is independent of 
+ * The middle button if pressed down (or clicked) is independent of
  *  the wheel "device" which it happens to be associated with
- * The use of GPM_B_UP/DOWN with ms3 is unclear. Maybe the wheel 
+ * The use of GPM_B_UP/DOWN with ms3 is unclear. Maybe the wheel
  * could be rolled forward then backward
  * and this would generate a 'click' event on 'button 5' GPM_B_UP,
  * but really the expected behaviour of wheel is movement, typically
@@ -143,16 +143,16 @@ typedef struct Gpm_Event {
 
   /* clicks e.g. double click are determined by time-based processing */
   int clicks;
-  
+
 
    /* FIXME: this seems to be unused. if so, remove it */
   enum Gpm_Margin margin;
 
-  /* wdx/y: displacement of wheels in this event. Absolute values are not 
+  /* wdx/y: displacement of wheels in this event. Absolute values are not
    * required, because wheel movement is typically used for scrolling
    * or selecting fields, not for cursor positioning. The application
    * can determine when the end of file or form is reached, and not
-   * go any further. 
+   * go any further.
    * A single mouse will use wdy, "vertical scroll" wheel. */
   short wdx, wdy;
 
@@ -185,7 +185,7 @@ typedef struct Gpm_Roi {
   struct Gpm_Roi *prev;
   struct Gpm_Roi *next;
 }              Gpm_Roi;
-  
+
 
 /*....................................... Global variables for the client */
 
@@ -207,7 +207,7 @@ extern void *gpm_roi_data;
 
 extern Gpm_Roi *gpm_roi;
 extern Gpm_Roi *gpm_current_roi;
- 
+
 
 /*....................................... Prototypes for the client       */
 /*                                          all of them return 0 or errno */

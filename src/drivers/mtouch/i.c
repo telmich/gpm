@@ -32,7 +32,7 @@ Gpm_Type *I_mtouch(int fd, unsigned short flags, struct Gpm_Type *type, int argc
    struct termios tty;
 
    flags = argc = 0; /* FIXME: 1.99.13 */
-   argv = NULL; 
+   argv = NULL;
 
 
    /* Set speed to 9600bps (copied from I_summa, above :) */

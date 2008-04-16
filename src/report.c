@@ -42,7 +42,7 @@
  * - system console (/dev/console)
  * - stdout
  * - stderr
- * 
+ *
  *
  * Items in [] are alternatives, if first destination is not present.
  *
@@ -124,7 +124,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
 #ifdef HAVE_VSYSLOG
                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_OOPS);
                vsyslog(LOG_DAEMON | LOG_ERR, text, ap2);
-#endif               
+#endif
                fprintf(stderr,GPM_STRING_OOPS);
                vfprintf(stderr,text,ap);
                fprintf(stderr,"\n");
@@ -132,7 +132,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
                exit(1); /* we should have a oops()-function,but this works,too*/
                break;
          }
-         break; /* startup sequence */   
+         break; /* startup sequence */
 
       /******************** RUNNING *****************/
       case GPM_RUN_DAEMON:
@@ -154,10 +154,10 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
                   vfprintf(console,text,ap);
                   fprintf(console,"\n");
                   fclose(console);
-               }   
+               }
 #endif
                break;
- 
+
             case GPM_STAT_ERR:
 #ifdef HAVE_VSYSLOG
                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_ERR);
@@ -183,7 +183,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
 #ifdef HAVE_VSYSLOG
                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_OOPS);
                vsyslog(LOG_DAEMON | LOG_ERR, text, ap2);
-#endif               
+#endif
                fprintf(stderr,GPM_STRING_OOPS);
                vfprintf(stderr,text,ap);
                fprintf(stderr,"\n");
@@ -215,7 +215,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
 
          vfprintf(console,text,ap);
          fprintf(console,"\n");
-         
+
          if(stat == GPM_STAT_OOPS) exit(1);
 
          break;
@@ -226,13 +226,13 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
 #ifdef HAVE_VSYSLOG
    va_end(ap2);
 #endif
-} /* gpm_report */   
+} /* gpm_report */
 
 
 /* old interesting part from debuglog.c.
  * interesting, if you want to include ERRNO into syslog message
  * should possibly included again later...when sources are clean and
- * there is no doubled strrer(errno) 
+ * there is no doubled strrer(errno)
 
 #if(defined(HAVE_VSYSLOG) && defined(HAVE_SYSLOG))
     static char fmt[] = ": %m";

@@ -30,7 +30,7 @@ int M_geni(Gpm_Event *state,  unsigned char *data)
     * have three buttons (tip, lower, upper), and if
     * we use the puck we have four buttons. (And the
     * protocol is a little mangled if several of the buttons
-    * on the puck are pressed simultaneously. 
+    * on the puck are pressed simultaneously.
     * I don't use the puck, hence I try to decode three buttons
     * only. tip = left, lower = middle, upper = right
     */

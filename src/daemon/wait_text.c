@@ -20,7 +20,7 @@
  ********/
 
 #include <unistd.h>                 /* sleep()           */
-#include <fcntl.h>                  /* open              */ 
+#include <fcntl.h>                  /* open              */
 #include <linux/kd.h>               /* KDGETMODE         */
 
 #include "message.h"        /* messaging in gpm  */

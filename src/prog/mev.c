@@ -161,7 +161,7 @@ int emacs_handler(Gpm_Event *event, void *data)
    if the final coordinates of a drag are identical to the initial
    ones, it is still a drag if there was any movement in between.  Sigh. */
    static int dragFlag = 0;
-  
+
    gettimeofday(&tv_cur, 0);
    timestamp = ((short)tv_cur.tv_sec) * 1000 + (tv_cur.tv_usec / 1000);
    if (opt_fit) Gpm_FitEvent(event);
@@ -201,7 +201,7 @@ int emacs_handler(Gpm_Event *event, void *data)
       for (i=0, j=GPM_B_RIGHT; s_button[i]; i++, j<<=1)
          if (event->buttons & j)
             strcat(buffer,s_button[i]);
-  
+
    if ((event->type & GPM_UP) && dragFlag) {
       printf("(%s ((%i . %i) %ld) %c ((%i . %i) %ld))\n",
            buffer,
@@ -308,12 +308,12 @@ void getmask(char *arg, int which, int* where)
    case 2: *where &= ~value; break;
    } /*switch*/
 }
-  
+
 /*===================================================================*/
 int cmdline(int argc, char **argv, char *options)
 {
    int opt;
-  
+
    while ((opt = getopt(argc, argv, options)) != -1)
       {
          switch (opt)
@@ -337,7 +337,7 @@ int cmdline(int argc, char **argv, char *options)
    return 0;
 }
 
-void 
+void
 do_snapshot()
 {
    Gpm_Event event;
@@ -448,9 +448,9 @@ int main(int argc, char **argv)
       gpm_report(GPM_PR_ERR,"%s: Can't open mouse connection\n",prgname);
       exit(1);
    } else if (gpm_fd == -2) {
-      gpm_report(GPM_PR_OOPS,"%s: use rmev to see gpm events in xterm or rxvt\n",prgname); 
-   }   
-   
+      gpm_report(GPM_PR_OOPS,"%s: use rmev to see gpm events in xterm or rxvt\n",prgname);
+   }
+
    gpm_report(GPM_PR_DEBUG,"STILL RUNNING_1");
 
    my_handler= opt_emacs ? emacs_handler : user_handler;

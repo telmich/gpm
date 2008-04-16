@@ -29,7 +29,7 @@
 
 #if !defined(__GNUC__)
 #  define inline
-#endif 
+#endif
 
 /*....................................... old gpmCfg.h */
 /* timeout for the select() syscall */
@@ -76,7 +76,7 @@ int processSpecial(Gpm_Event *event);
 #ifdef GPM_USE_MAGIC
 #define MAGIC_P(code) code
 #else
-#define MAGIC_P(code) 
+#define MAGIC_P(code)
 #endif
 
 #endif /* _GPMINT_INCLUDED */

@@ -1,5 +1,5 @@
 /*
- * mouse-test.c 
+ * mouse-test.c
  *
  * Copyright 1995   rubini@linux.it (Alessandro Rubini)
  * Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
@@ -92,7 +92,7 @@ struct device {
    char *name;
    int fd;
    struct device *next;
-};  
+};
 
 static int message(void)
 {
@@ -112,7 +112,7 @@ return 0;
 
 #define GOTOXY(f,x,y)   fprintf(f,"\x1B[%03i;%03iH",y,x)
 
-/*----------------------------------------------------------------------------- 
+/*-----------------------------------------------------------------------------
    Place the description here.
  -----------------------------------------------------------------------------*/
 static void raw(void)
@@ -131,7 +131,7 @@ static void raw(void)
 
 }
 
-/*----------------------------------------------------------------------------- 
+/*-----------------------------------------------------------------------------
    Place the description here.
  -----------------------------------------------------------------------------*/
 static void noraw(void)
@@ -147,7 +147,7 @@ static void noraw(void)
    tcsetattr(fileno(stdin),TCSANOW,&it);
 }
 
-/*----------------------------------------------------------------------------- 
+/*-----------------------------------------------------------------------------
    Place the description here.
  -----------------------------------------------------------------------------*/
 void killed(int signo)
@@ -157,7 +157,7 @@ void killed(int signo)
    exit(0);
 }
 
-/*----------------------------------------------------------------------------- 
+/*-----------------------------------------------------------------------------
    Place the description here.
  -----------------------------------------------------------------------------*/
 struct device **gpm_makedev(struct device **current, char *name)
@@ -185,7 +185,7 @@ struct device **gpm_makedev(struct device **current, char *name)
 }
 
 
-/*----------------------------------------------------------------------------- 
+/*-----------------------------------------------------------------------------
    Place the description here.
  -----------------------------------------------------------------------------*/
 int mousereopen(int oldfd, char *name, Gpm_Type *type)
@@ -235,7 +235,7 @@ int eventlist(int fd, unsigned char *buff, int buflen, int test, int readstep)
 	         "the left button of your mouse,"
 	         " *** trying not to move it ***\r\n\r\n");
          break;
-    
+
       case GPM_B_MIDDLE:
          printf("\r\nNow please press and release several times\r\n"
 	         "the middle button of your mouse,"
@@ -251,13 +251,13 @@ int eventlist(int fd, unsigned char *buff, int buflen, int test, int readstep)
          printf("Unknown test to perform\r\n");
          return -1;
    }
-  
+
    printf("Press any key when you've done enough\r\n");
 
    while(1) {
       selSet=readySet;
       if ((pending=select(fd+1,&selSet,NULL,NULL,&to)) < 0) continue;
-      if (pending==0 && !active) { 
+      if (pending==0 && !active) {
          active++;
          to.tv_sec=10;
          continue;
@@ -268,7 +268,7 @@ int eventlist(int fd, unsigned char *buff, int buflen, int test, int readstep)
          getchar();
          if (active) return got;
       }
-      if (FD_ISSET(fd,&selSet)) { 
+      if (FD_ISSET(fd,&selSet)) {
          if (active) got+=read(fd,buff+got,readstep);
          else read(fd,buff,buflen);
       }
@@ -281,7 +281,7 @@ int eventlist(int fd, unsigned char *buff, int buflen, int test, int readstep)
    }
 }
 
-/*----------------------------------------------------------------------------- 
+/*-----------------------------------------------------------------------------
    Place the description here.
  -----------------------------------------------------------------------------*/
 int main(int argc, char **argv)
@@ -368,21 +368,21 @@ int main(int argc, char **argv)
       }
 
       savSet=devSet;
- 
+
       printf("\r\n\r\nI've still %i devices which may be your mouse,\r\n",
 	   devcount);
       printf("Please move the mouse. Press any key when done\r\n"
 	         " (You can specify your device name on cmdline, in order to\r\n"
 	         "  avoid this step\r\n. Different baud rates are tried at "
 	         "different times\r\n");
-    
+
       timeout.tv_sec=10; /* max test time */
       gotthem=0;
       while (1) { /* extract files from the list */
          devSet=savSet;
          if ((pending=select(maxfd+1,&devSet,NULL,NULL,&timeout)) < 0)
 	         continue;
-         if (pending==0 || FD_ISSET(fileno(stdin),&devSet)) { 
+         if (pending==0 || FD_ISSET(fileno(stdin),&devSet)) {
             getchar();
             break;
          }
@@ -407,7 +407,7 @@ int main(int argc, char **argv)
 	         nextdev=&(cur->next); /* follow list */
 	      }
 	   }
-    
+
    } /* devcount>1 */
 
    mousefd=devlist->fd;
@@ -418,14 +418,14 @@ int main(int argc, char **argv)
    /* now close and reopen it, complete with initialization */
    (which_mouse->opt_baud)=BAUD(0);
    mousefd=mousereopen(mousefd,mousename,NULL);
-  
+
    FD_ZERO(&checkSet);
    FD_SET(mousefd,&checkSet);
    FD_SET(fileno(stdin),&checkSet);
    maxfd=max(mousefd,fileno(stdin));
 
 /*====================================== Identify mouse type */
-  
+
    /* init the list of possible types */
 
    printf("\r\n\r\nThe possible mouse types are:\r\n");
@@ -467,7 +467,7 @@ int main(int argc, char **argv)
 
    for (nextitem=&list; *nextitem; /* nothing */) {
       struct item *cur=*nextitem;
-    
+
       if (readamount!=cur->this->howmany)
          REMOVETYPE(cur,"different read() semantics");
       else
@@ -490,28 +490,28 @@ int main(int argc, char **argv)
    trial=0;
    while (packetsize==1) {
       int success3=0,success5=0;
-	
+
       (which_mouse->opt_baud)=BAUD(trial);
       printf("\tBaud rate is %i\r\n",(which_mouse->opt_baud));
       mousefd=mousereopen(mousefd,mousename,NULL);
-	
+
       printf("\r\n==> Detecting the packet size\r\n");
       got=eventlist(mousefd,buf,BUFLEN,GPM_B_LEFT,readamount);
-	
+
       /* try three -- look at repeating arrays of 6 bytes */
       for (i=0;i<got-12;i++)
          if(!memcmp(buf+i,buf+i+6,6))
 	   success3++;
-	
+
       /* try five -- look at repeating arrays of 10 bytes */
       for (i=0;i<got-20;i++)
          if(!memcmp(buf+i,buf+i+10,10))
 	   success5++;
-	
+
       printf("matches for 3 bytes: %i   -- matches for 5 bytes: %i\r\n",
 	   success3,success5);
       if (success3>5 && success5==0)
-         packetsize=3; 
+         packetsize=3;
       if (success5>5 && success3==0)
          packetsize=5;
       if (packetsize==1)
@@ -520,7 +520,7 @@ int main(int argc, char **argv)
    }
 
 /*====================================== Use that info to discard protocols */
-  
+
    for (nextitem=&list; *nextitem; /* nothing */) {
       struct item *cur=*nextitem;
       int packetheads=0;
@@ -568,7 +568,7 @@ int main(int argc, char **argv)
  * packet size; sun,mm and ps2 would be unique due to the different
  * representation of buttons (and they usually are not dual mode).
  */
-  
+
    /* why checking and not using return value ??? */
    if(typecount == 0) noneofthem();
    if (typecount==1) {
@@ -673,7 +673,7 @@ int main(int argc, char **argv)
       nextitem=&(cur->next);
    }
    if(typecount == 0) noneofthem();
-  
+
 /*
  * Then, try to toggle dtr and rts
  */
@@ -681,7 +681,7 @@ int main(int argc, char **argv)
    {
       int toggle[3]={TIOCM_DTR|TIOCM_RTS, TIOCM_DTR,TIOCM_RTS};
       char *tognames[3]={"both","dtr","rts"};
-      char *Xtognames[3]={"'ClearDTR' and 'ClearRTS'","'ClearDTR'","'ClearRTS'"}; 
+      char *Xtognames[3]={"'ClearDTR' and 'ClearRTS'","'ClearDTR'","'ClearRTS'"};
       int alllines,lines, index;
 
       ioctl(mousefd, TIOCMGET, &alllines);
@@ -694,7 +694,7 @@ int main(int argc, char **argv)
          ioctl(mousefd, TIOCMSET, &lines);
          printf("\r\n==> Trying with '-o %s'\r\n",tognames[index]);
          got=eventlist(mousefd,buf,BUFLEN,GPM_B_MIDDLE,readamount);
-    
+
          /* if it uses the 5-byte protocol, find it in a rude way */
          for (pending=0,i=0;i<got-20;i++)
             if(!memcmp(buf+i,buf+i+10,10)) pending++;
@@ -721,7 +721,7 @@ int main(int argc, char **argv)
    printf("\r\nNow please press the middle button, and then press any key\r\n"
 	 "while keeping the button down. Wait to release it until the\r\n"
 	 "next message.\r\n");
-	
+
    getchar();
 
    got=eventlist(mousefd,buf,BUFLEN,GPM_B_MIDDLE,readamount);

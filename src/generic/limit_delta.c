@@ -20,7 +20,7 @@
  ********/
 
 /*========================================================================*/
-/* 
+/*
  * When repeating, it is important not to try to repeat more bits of dx and
  * dy than the protocol can handle.  Otherwise, you may end up repeating the
  * low bits of a large value, which causes erratic motion.

@@ -50,7 +50,7 @@ void startup(int argc, char **argv)
       {"321","04261537"},
       {NULL,NULL}
    };
-   
+
    /* log to debug, who we are */
    gpm_report(GPM_PR_DEBUG, GPM_MESS_VERSION);
 
@@ -74,9 +74,9 @@ void startup(int argc, char **argv)
    /* Planned for gpm-1.30, but only with devfs */
    /* if(option.autodetect) autodetect(); */
 
-   
+
    /****************** OLD CODE from gpn.c ***********************/
-   
+
    openlog(option.progname, LOG_PID,
                   option.run_status != GPM_RUN_DEBUG ? LOG_DAEMON : LOG_USER);
    loadlut(opt_lut);
@@ -141,7 +141,7 @@ void startup(int argc, char **argv)
    }
 
    if(option.run_status == GPM_RUN_STARTUP ) { /* else is debugging */
-      /* goto background and become a session leader (Stefan Giessler) */  
+      /* goto background and become a session leader (Stefan Giessler) */
       switch(fork()) {
          case -1: gpm_report(GPM_PR_OOPS,GPM_MESS_FORK_FAILED);   /* error  */
          case  0: option.run_status = GPM_RUN_DAEMON; break;      /* child  */
@@ -159,7 +159,7 @@ void startup(int argc, char **argv)
     * remove and ignore it ?? FIXME */
    if (chdir("/") < 0) gpm_report(GPM_PR_OOPS,GPM_MESS_CHDIR_FAILED);
 
-   
+
    //return mouse_table[1].fd; /* the second is handled in the main() */
 
    /****************** OLD CODE from gpn.c  END ***********************/

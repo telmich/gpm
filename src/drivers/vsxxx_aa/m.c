@@ -67,7 +67,7 @@ int M_vsxxx_aa(Gpm_Event *state, unsigned char *data)
  *            0x00-0x1f: no error (fourth byte is button state),
  *            0x3d:      button error (fourth byte specifies which),
  *            else:      other error.
- * 
+ *
  * The mouse powers up in the prompt mode but we use the stream mode.
  */
 

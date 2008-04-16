@@ -41,15 +41,15 @@ char *Gpm_get_console( void )
 
    /* first try the devfs device, because in the next time this will be
     * the preferred one. If that fails, take the old console */
-   
+
    /* Check for open new console */
    if (stat(GPM_DEVFS_CONSOLE,&buf) == 0)
       tmp = GPM_DEVFS_CONSOLE;
-  
+
    /* Failed, try OLD console */
    else if(stat(GPM_OLD_CONSOLE,&buf) == 0)
       tmp = GPM_OLD_CONSOLE;
-  
+
    if(tmp != NULL)
       if((back = malloc(strlen(tmp) + sizeof(char)) ) != NULL)
          strcpy(back,tmp);
@@ -61,16 +61,16 @@ char *Gpm_get_console( void )
 int Gpm_x_high_y(int base, int pot_y)
 {
    int val = 1;
-   
+
    if(pot_y == 0) val = 1;
    else if(pot_y  < 0) val = 0;     /* ugly hack ;) */
    else while(pot_y > 0) {
       val = val * base;
       pot_y--;
-   }   
+   }
    return val;
-}   
-      
+}
+
 /* return characters needed to display int */
 int Gpm_cnt_digits(int number)
 {
@@ -78,7 +78,7 @@ int Gpm_cnt_digits(int number)
     * 10 - 99 = 2    10^1 <-> (10^2)-1
     * 100 - 999 = 3  10^2 <-> (10^3)-1
     * 1000 - 9999 = 4 ...  */
-   
+
    int ret = 0, num = 0;
 
    /* non negative, please */
@@ -87,7 +87,7 @@ int Gpm_cnt_digits(int number)
    else while(number > num) {
       ret++;
       num = (Gpm_x_high_y(10,ret) - 1);
-   }   
+   }
 
    return(ret);
-}      
+}

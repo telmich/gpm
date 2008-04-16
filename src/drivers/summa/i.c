@@ -33,11 +33,11 @@ extern int  summamaxy;
 extern signed char summaid;
 
 
-Gpm_Type *I_summa(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv) 
+Gpm_Type *I_summa(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
 {
 
    flags = argc = 0; /* FIXME: 1.99.13 */
-   argv = NULL; 
+   argv = NULL;
 
    void resetsumma()
    {
@@ -72,11 +72,11 @@ Gpm_Type *I_summa(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
    char GEN_MODELL=0x7f;
 
    /* Set speed to 9600bps */
-   setspeed (fd, 1200, 9600, 1, B9600|CS8|CREAD|CLOCAL|HUPCL|PARENB|PARODD);  
-   resetsumma(); 
- 
+   setspeed (fd, 1200, 9600, 1, B9600|CS8|CREAD|CLOCAL|HUPCL|PARENB|PARODD);
+   resetsumma();
+
    write(fd, SS_PROMPT_MODE, strlen(SS_PROMPT_MODE));
-  
+
    if (strstr(type->name,"acecad")!=NULL) summaid=11;
 
    if (summaid<0) { /* Summagraphics test */
@@ -88,10 +88,10 @@ Gpm_Type *I_summa(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
          read(fd, buffer, 255); /* Read Firm-ID */
       }
    }
-  
+
    if (summaid<0) { /* Genius-test */
       resetsumma();
-      write(fd,GEN_MMSERIES,1); 
+      write(fd,GEN_MMSERIES,1);
       write(fd,&GEN_MODELL,1); /* Read modell */
       err=waitsumma();
       if (!((err == -1) || (!err))) { /* read Genius-ID */
@@ -102,24 +102,24 @@ Gpm_Type *I_summa(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
                read(fd,&config,1);
                summaid=(config[0] & 224) >> 5; /* genius tablet-id (0-7)*/
             }
-         } 
+         }
       }
    } /* end of Geniustablet-test */
 
    /* unknown tablet ?*/
-   if ((summaid<0) || (summaid==11)) { 
-      resetsumma(); 
+   if ((summaid<0) || (summaid==11)) {
+      resetsumma();
       write(fd, SS_BINARY_FMT SS_PROMPT_MODE, 3);
    }
 
    /* read tablet size */
-   err=waitsumma();  
+   err=waitsumma();
    if (!((err == -1) || (!err))) read(fd,buffer,sizeof(buffer));
    write(fd,SS_READCONFIG,1);
    read(fd,&config,5);
    summamaxx=(config[2]<<7 | config[1])-(SUMMA_BORDER*2);
    summamaxy=(config[4]<<7 | config[3])-(SUMMA_BORDER*2);
-  
+
    write(fd,SS_ABSOLUTE SS_STREAM_MODE SS_UPPER_ORIGIN,3);
    if (summaid<0) write(fd,SS_500LPI SS_TABID0 SS_BINARY_FMT,4);
 

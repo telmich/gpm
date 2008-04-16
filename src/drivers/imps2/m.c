@@ -52,7 +52,7 @@ int M_imps2(Gpm_Event *state,  unsigned char *data)
      // to avoid single/double/triple click processing:
      switch (wheel) {
        /* rodney 13/mar/2008
-        * The use of GPM_B_UP / GPM_B_DOWN is very unclear; 
+        * The use of GPM_B_UP / GPM_B_DOWN is very unclear;
         *  only mouse type ms3 uses these
         * For this mouse, we only support the relative movement
         * i.e. no button is set (same as mouse movement), wdy changes +/-

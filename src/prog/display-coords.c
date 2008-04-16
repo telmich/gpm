@@ -51,7 +51,7 @@ int display_data(Gpm_Event *event)
 
    /* display time, delta time */
    printf("[%ld] delta: %ds",now,delta);
-   
+
    /* display mouse information */
    printf(": x=%2i, y=%2i, dx=%2i, dy=%2i\n", event->x, event->y, event->dx, event->dy);
 
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
       printf("I must be run on the console\n");
       return 1;
    }
-   
+
 
    while(1) { /* read data */
       FD_ZERO(&fds);

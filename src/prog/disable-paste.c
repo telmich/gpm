@@ -41,7 +41,7 @@ int main()
   int exit_status = 0;
   conn.eventMask = (unsigned short)(-1); conn.defaultMask = 0;
   conn.minMod = 0; conn.maxMod = (unsigned short)(-1);
-  
+
   if (0 > Gpm_Open(&conn,0)) {
     fprintf(stderr,"disable-paste: cannot open mouse connection\n");
     exit(1);

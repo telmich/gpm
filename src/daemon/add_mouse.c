@@ -4,7 +4,7 @@
  * *several tools only needed by the server*
  *
  * Copyright (c) 2002-2008    Nico Schottelius <nico-gpm2008 at schottelius.org>
- * 
+ *
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ void add_mouse(int type, char *value)
             option.micelist->options   = NULL;
             return;
          }
-         
+
          /* find actual mouse */
          while(tmp->device != NULL && tmp->protocol != NULL && tmp->next !=NULL)
             tmp = tmp->next;
@@ -74,11 +74,11 @@ void add_mouse(int type, char *value)
             tmp->options   = NULL;
             return;
          } else gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
-         
+
          //} else if(tmp->device != NULL && tmp->protocol == NULL)
          // gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV); /* -m -m */
 
-         
+
          break;
 
       /*---------------------------------------------------------------------*/
@@ -87,11 +87,11 @@ void add_mouse(int type, char *value)
 
       case GPM_ADD_TYPE:
          if(option.micelist == NULL) gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
-         
+
          /* skip to next mouse, where either device or protocol is missing */
          while(tmp->device != NULL && tmp->protocol != NULL && tmp->next !=NULL)
             tmp = tmp->next;
-         
+
          /* check whether device (-m) is there, if so, write protocol */
          if(tmp->device == NULL) gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
          else {
@@ -119,7 +119,7 @@ void add_mouse(int type, char *value)
          else {
             gpm_report(GPM_PR_DEBUG,"adding mouse options: %s",value);
             tmp->options = value;
-         }   
+         }
          break;
    }
 }

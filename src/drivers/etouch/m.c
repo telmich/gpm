@@ -32,12 +32,12 @@ extern int gunze_calib[4];          /* FIXME: do not depend on other drivers! */
 
 int M_etouch(Gpm_Event *state,  unsigned char *data)
 { /*
-   * This is a simple decoder for the EloTouch touch screen devices. 
+   * This is a simple decoder for the EloTouch touch screen devices.
    * ELO format SmartSet UTsXXYYZZc 9600,N,8,1
    * c=checksum = 0xAA+'T'+'U'+s+X+X+Y+Y+Z+Z (XXmax=YYmax=0x0FFF=4095)
    * s=status   bit 0=init touch  1=stream touch  2=release
    */
-#define ELO_CLICK_ONTOUCH	/* ifdef then ButtonPress on first Touch 
+#define ELO_CLICK_ONTOUCH	/* ifdef then ButtonPress on first Touch
 				         else first Move then Touch*/
   int x, y;
   static int avgx=-1, avgy;       /* average over time, for smooth feeling */
@@ -74,7 +74,7 @@ int M_etouch(Gpm_Event *state,  unsigned char *data)
     state->buttons = 0;
     if (DIF_TIME(uptv, tv) < (which_mouse->opt_time))
     {	/* if Initial Touch immediate after finger UP then start DRAG */
-	x=upx; y=upy;  /* A:start DRAG at finger-UP position */ 
+	x=upx; y=upy;  /* A:start DRAG at finger-UP position */
 	if (elo_click_ontouch==0)	state->buttons = GPM_B_LEFT;
     }
     else /*  1:MOVE to Initial Touch position */
@@ -90,7 +90,7 @@ int M_etouch(Gpm_Event *state,  unsigned char *data)
   state->buttons = 0; /* Motion event */
   if (tv.tv_sec)	/* draging or elo_click_ontouch */
   { state->buttons = GPM_B_LEFT;
-    if (elo_click_ontouch) 
+    if (elo_click_ontouch)
     {	x=avgx=upx;	/* 2:BUTTON PRESS at Initial Touch position */
 	y=avgy=upy;
 	tv.tv_sec=0;   /* so next time 3:MOVE again until Finger UP*/

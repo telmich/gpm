@@ -17,7 +17,7 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * call getMouseData to get hardware device data, call mouse device's fun() 
+ * call getMouseData to get hardware device data, call mouse device's fun()
  * to retrieve the hardware independent event data, then optionally repeat
  * the data via repeat_fun() to the repeater device
  *
@@ -48,7 +48,7 @@ int processMouse(int fd, Gpm_Event *event, int kd_mode)
                i, j, m,
                newB=0,  /* old buttons and Type to chain events */
                oldB=0,
-               oldT=0; 
+               oldT=0;
 
    static Gpm_Event        nEvent;
    static struct vt_stat   stat;
@@ -88,7 +88,7 @@ int processMouse(int fd, Gpm_Event *event, int kd_mode)
       do { /* cluster loop */
          if(((data=getMouseData(fd, (which_mouse->m_type), kd_mode)) == NULL)
             || ((*((which_mouse->m_type)->fun))(&nEvent,data)==-1) ) {
-            
+
             if (!i) {
                return 0;
             } else {
@@ -132,7 +132,7 @@ int processMouse(int fd, Gpm_Event *event, int kd_mode)
          select(fd+1,&fdSet,(fd_set *)NULL,(fd_set *)NULL,&timeout/* zero */);
 
       } while (i++ <(which_mouse->opt_cluster) && nEvent.buttons==oldB && FD_ISSET(fd,&fdSet));
-     
+
       /* apply calibration */
       if((which_mouse->opt_calib != NULL) &&
          (which_mouse->m_type->absolute)) {
@@ -171,7 +171,7 @@ int processMouse(int fd, Gpm_Event *event, int kd_mode)
 
    if (kd_mode!=KD_TEXT) {
       if (fifofd != -1 && ! opt_rawrep) {
-         if ((which_mouse->m_type)->absolute) { /* hof Wed Feb  3 21:43:28 MET 1999 */ 
+         if ((which_mouse->m_type)->absolute) { /* hof Wed Feb  3 21:43:28 MET 1999 */
             /* prepare the values from a absolute device for repeater mode */
             static struct timeval rept1,rept2;
             gettimeofday(&rept2, (struct timezone *)NULL);
@@ -181,12 +181,12 @@ int processMouse(int fd, Gpm_Event *event, int kd_mode)
                event->dy=0;
             }
             rept1=rept2;
-              
+
             /* if the values are calibrated, this is not necessary */
             if(which_mouse->opt_calib==NULL)
               event->dy=event->dy*((win.ws_col/win.ws_row)+1);
 
-            event->x=nEvent.x; 
+            event->x=nEvent.x;
             event->y=nEvent.y;
          }
 
@@ -335,7 +335,7 @@ int processMouse(int fd, Gpm_Event *event, int kd_mode)
          break;
    }
    event->clicks=statusC;
-   
+
 /* UGLY - FIXME! */
 /* The current policy is to force the following behaviour:
  * - At buttons up, must fit inside the screen, though flags are set.
@@ -371,7 +371,7 @@ int processMouse(int fd, Gpm_Event *event, int kd_mode)
    statusX=event->x;
    statusY=event->y;
 
-   if (opt_special && event->type & GPM_DOWN) 
+   if (opt_special && event->type & GPM_DOWN)
       return processSpecial(event);
 
    return 1;

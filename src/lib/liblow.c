@@ -1,11 +1,11 @@
-/* 
+/*
  *
  * liblow.c - client library - low level (gpm)
  *
  * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
  * Copyright (C) 1998    Ian Zimmerman <itz@rahul.net>
  * Copyright 2001-2008   Nico Schottelius (nico-gpm2008 at schottelius.org)
- * 
+ *
  * xterm management is mostly by jtklehto@stekt.oulu.fi (Janne Kukonlehto)
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -41,7 +41,7 @@
 #include <sys/ioctl.h>
 #endif
 
-#include <signal.h> 
+#include <signal.h>
 #include <linux/vt.h>      /* VT_GETSTATE */
 #include <sys/kd.h>        /* KDGETMODE */
 #include <termios.h>       /* winsize */
@@ -133,7 +133,7 @@ static void gpm_winch_hook (int signum)
 
 #endif /* SIGWINCH */
 
-#if (defined(SIGTSTP)) 
+#if (defined(SIGTSTP))
 /* itz: support for SIGTSTP */
 
 /* Old SIGTSTP handler. */
@@ -216,7 +216,7 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
 		   gpm_report(GPM_PR_ERR,"unable to open gpm console, check your /dev filesystem!\n");
 		   goto err;
 	   }
-   }   
+   }
 
    /*
     * So I chose to use the current tty, instead of /dev/console, which
@@ -247,15 +247,15 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
             gpm_report(GPM_PR_OOPS,GPM_MESS_NO_MEM);
          memcpy(tty, consolename, strlen(consolename)-1);
          sprintf(&tty[strlen(consolename) - 1], "%i", flag);
-      } else if (flag==0) { /* use your current vc */ 
+      } else if (flag==0) { /* use your current vc */
          if (isatty(0)) tty = ttyname(0);             /* stdin */
          if (!tty && isatty(1)) tty = ttyname(1);     /* stdout */
          if (!tty && isatty(2)) tty = ttyname(2);     /* stderr */
          if (tty == NULL) {
             gpm_report(GPM_PR_ERR,"checking tty name failed");
             goto err;
-         }   
-          
+         }
+
          conn->vc=atoi(&tty[strlen(consolename)-1]);
       } else /* a default handler -- use console */
         tty=strdup(consolename);
@@ -324,7 +324,7 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
           }
          if (fstat(gpm_fd,&stbuf)==-1 || (stbuf.st_mode&S_IFMT)!=S_IFCHR) {
             goto err;
-         }   
+         }
       }
    }
    /*....................................... Put your data */
@@ -510,11 +510,11 @@ int Gpm_Getc(FILE *f)
 
         if (flag==-1)
           continue;
-        
+
         if (FD_ISSET(fd,&selSet))
           return fgetc(f);
-        
-        if (Gpm_GetEvent(&ev) && gpm_handler 
+
+        if (Gpm_GetEvent(&ev) && gpm_handler
             && (result=(*gpm_handler)(&ev,gpm_data)))
           {
             gpm_hflag=1;
@@ -545,7 +545,7 @@ int Gpm_Getc(FILE *f)
             while (!flag);
 
             if ((c=fgetc(f))!=0x1b) return c;
-            
+
             /* escape: go on */
             FD_ZERO(&selSet); FD_SET(fd,&selSet); to.tv_usec=DELAY_MS*1000;
             if ((flag=select(fd+1,&selSet,(fd_set *)NULL,(fd_set *)NULL,&to))==0)
@@ -560,7 +560,7 @@ int Gpm_Getc(FILE *f)
             if ((c=fgetc(f))!='M')
               /* patche par JD 11/08/1998 NOTICE: prevchar is a lifo !*/
               {prevchar[nbprevchar++]=c; prevchar[nbprevchar++]='['; return 0x1B;}
-            
+
             /* now, it surely is a mouse event */
 
             for (c=0;c<3;c++) mdata[c]=fgetc(f);
@@ -640,7 +640,7 @@ int gpm_convert_event(unsigned char *mdata, Gpm_Event *ePtr)
       if (tv1.tv_sec && (DIF_TIME(tv1,tv2)<250)) /* 250ms for double click */
         {clicks++; clicks%=3;}
       else clicks = 0;
-      
+
       switch (c)
         {
         case 0: ePtr->buttons=GPM_B_LEFT;   break;

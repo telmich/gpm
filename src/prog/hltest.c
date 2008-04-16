@@ -61,7 +61,7 @@ typedef struct WinInfo {
    } WinInfo;
 
 WinInfo left_cldata; /* for the msg bar */
-  
+
 int colors[]={0x40,0x60,0x20,0x30,0x47,0x67,0x27,0x37};
 #define NR_COLORS 8
 #define LEFTWID 22
@@ -162,7 +162,7 @@ char name[5];
 #define LRCORNER 0xbc
 #define HORLINE  0xcd
 #define VERLINE  0xba
- 
+
 int attrib=((WinInfo *)which->clientdata)->color;
 int i,j;
 
@@ -206,7 +206,7 @@ int drawthemall(Gpm_Roi *this)
    drawthemall(this->next);
    else
    memcpy(dumpbuf,dumpbuf_clean,vcsize);
-   
+
    return drawwin(this);
 }
 
@@ -233,7 +233,7 @@ int newmsg(int window, char *msg)
      strings[i]=data+(LEFTWID-2)*i, strings[i][19]='\0';
    current=0;
    }
-  
+
    if (msg) /* if sth new */
    {
    time(&t);
@@ -279,7 +279,7 @@ static unsigned char *clear_sel_arg= (unsigned char *)clear_sel_args+1;
  * screen any event it gets. The clientdata received is the one I pass to
  * Gpm_PushRoi on creation, and is used to differentiate them
  */
- 
+
 int handler(Gpm_Event *ePtr, void *clientdata)
 {
 WinInfo *info=clientdata;
@@ -449,13 +449,13 @@ int main(int argc, char **argv)
    conn.defaultMask=GPM_MOVE|GPM_HARD;
    conn.maxMod=~0;
    conn.minMod=0;
- 
+
    if (sscanf(s,"/dev/tty%d%s",&vc,t)!=1) {
       if (sscanf(s,"/dev/vc/%d%s",&vc,t)!=1) {
          fprintf(stderr,"stdin: not a system console\n");
          exit(1);
       }
-   }   
+   }
 
    /* open your dump/restore buffers */
 
@@ -480,7 +480,7 @@ int main(int argc, char **argv)
    signal(SIGINT,killed);   /* control-C kills us */
 
    CLEAR;
- 
+
    printf("\t\t\t  This program is a demonstration of the use of the\n"
        "\t\t\t  high level gpm library. It is a tiny application\n"
        "\t\t\t  not really useful, but you may be interested in\n"

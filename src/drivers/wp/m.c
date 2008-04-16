@@ -37,7 +37,7 @@ int M_wp(Gpm_Event *state,  unsigned char *data)
 
    y = ((data[7] & 0x1f) << 12) | ((data[6] & 0x3f) << 6) | (data[5] & 0x3f);
    state->y = win.ws_row - y * win.ws_row / (wizardpad_height * 40) - 1;
-   realposy = 16383 - y * 16383 / (wizardpad_height * 40) - 1;  
+   realposy = 16383 - y * 16383 / (wizardpad_height * 40) - 1;
 
    pressure = ((data[9] & 0x0f) << 4) | (data[8] & 0x0f);
 

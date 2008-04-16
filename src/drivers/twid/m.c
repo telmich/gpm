@@ -39,7 +39,7 @@ int M_twid(Gpm_Event *state,  unsigned char *data)
          autorepeat = twiddler_key(message);
       lastkey = key;
       lock = 0; return -1; /* no useful mouse data */
-   } 
+   }
 
    switch (message & TW_ANY1) {
       case TW_L1: state->buttons = GPM_B_RIGHT;  break;
@@ -69,16 +69,16 @@ int M_twid(Gpm_Event *state,  unsigned char *data)
    v = (message >> TW_V_SHIFT) & TW_M_MASK;
    if (h & TW_M_BIT) h = -(TW_M_MASK + 1 - h);
    if (v & TW_M_BIT) v = -(TW_M_MASK + 1 - v);
-  
+
 #ifdef TWIDDLER_STATIC
    /* static implementation: return movement */
    if (!lock) {
       lasth = h;
       lastv = v;
       lock = 1;
-   } 
+   }
    state->dx = -(h-lasth); lasth = h;
-   state->dy = -(v-lastv); lastv = v; 
+   state->dy = -(v-lastv); lastv = v;
 
 #elif defined(TWIDDLER_BALLISTIC)
    {
@@ -112,7 +112,7 @@ int M_twid(Gpm_Event *state,  unsigned char *data)
          lasth = h; lasthrest = 0;
          lastv = v; lastvrest = 0;
          lock = 1;
-      } 
+      }
 
       if (h > -tw_threshold && h < tw_threshold) {
          state->dx = -(h-lasth+lasthrest)/tw_static_scale;

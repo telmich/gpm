@@ -50,9 +50,9 @@ int display_data(Gpm_Event *event)
 
    /* display time, delta time */
    printf("[%ld] delta: %ds",now,delta);
-   
+
    /* display mouse information */
-   printf(": p=%d, l=%1d, m=%1d, r=%1d, clicks=%d\n", 
+   printf(": p=%d, l=%1d, m=%1d, r=%1d, clicks=%d\n",
                                                 event->type & GPM_DOWN,
                                                 event->buttons & GPM_B_LEFT,
                                                 event->buttons & GPM_B_MIDDLE,
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
    }
 
    printf("\tp=pressed (0=release)\n\tl=left\n\tm=middle\n\tr=right\n");
-   
+
 
    while(1) { /* read data */
       FD_ZERO(&fds);

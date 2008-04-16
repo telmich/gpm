@@ -3,7 +3,7 @@
  *
  * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
  * Copyright 2002        nico@schottelius.org (Nico Schottelius)
- * 
+ *
  * xterm management is mostly by Miguel de Icaza
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -73,10 +73,10 @@ static Gpm_Event ev;
 
       if (FD_ISSET(fd,&selSet))
 	return GET(win);
-      
+
       if (flag==-1)
 	continue;
-      
+
       if (Gpm_GetEvent(&ev) && gpm_handler
 	  && (result=(*gpm_handler)(&ev,gpm_data)))
 	{
@@ -110,7 +110,7 @@ static Gpm_Event ev;
 
     while(1)
       {
-      do 
+      do
 	{
 	FD_ZERO(&selSet); FD_SET(fd,&selSet);
 	gpm_timeout.tv_sec=SELECT_TIME;

@@ -30,7 +30,7 @@
 #include "daemon.h"         /* daemon internals */
 
 
-int processRequest(Gpm_Cinfo *ci, int vc) 
+int processRequest(Gpm_Cinfo *ci, int vc)
 {
    int                     i;
    Gpm_Cinfo              *cinfoPtr;
@@ -72,7 +72,7 @@ int processRequest(Gpm_Cinfo *ci, int vc)
       }
       return -1;
    } /* not data */
- 
+
    if (i == -1) return -1; /* too few bytes */
 
    if (conn.pid!=0) {

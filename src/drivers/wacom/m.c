@@ -27,25 +27,25 @@
 #include "mice.h"                   /* REALPOS           */
 
 
-/* 
+/*
  *  Wacom Tablets with pen and mouse:
- *  Relative-Mode And Absolute-Mode; 
+ *  Relative-Mode And Absolute-Mode;
  *  Stefan Runkel  01/2000 <runkel@runkeledv.de>,
  *  Mike Pioskowik 01/2000 <pio.d1mp@nbnet.de>
 */
 /* for relative and absolute : */
 int WacomModell =-1;          /* -1 means "dont know" */
 int WacomAbsoluteWanted=0;    /* Tell Driver if Relative or Absolute */
-int wmaxx, wmaxy;         
+int wmaxx, wmaxy;
 char upmbuf[25]; /* needed only for macro buttons of ultrapad */
 
 /* Data for Wacom Modell Identification */
 /* (MaxX, MaxY are for Modells which do not answer resolution requests */
 struct WC_MODELL wcmodell[3] = {
    /* ModellName    Magic     MaxX     MaxY  Border  Tresh */
-    { "UltraPad"  , "UD",        0,       0,    250,    20 }, 
+    { "UltraPad"  , "UD",        0,       0,    250,    20 },
  /* { "Intuos"    , "GD",        0,       0,      0,    20 }, not supported */
-    { "PenPartner", "CT",        0,       0,      0,    20 }, 
+    { "PenPartner", "CT",        0,       0,      0,    20 },
     { "Graphire"  , "ET",     5103,    3711,      0,    20 }
    };
 
@@ -71,7 +71,7 @@ int M_wacom(Gpm_Event *state, unsigned char *data)
     * a macro event */
       if (IsA(UltraPad)) {
          if (data[0]&8) { /* here: macro button has been pressed */
-            if (data[3]&8)  macro=(data[6]); 
+            if (data[3]&8)  macro=(data[6]);
             if (data[3]&16) macro=(data[6])+12;
             if (data[3]&32) macro=(data[6])+24;  /* rom-version >= 1.3 */
 
@@ -79,44 +79,44 @@ int M_wacom(Gpm_Event *state, unsigned char *data)
             /* Here we simulate the middle mousebutton */
             /* with ultrapad Eprom Version 1.2 */
             /* WHY IS THE FOLLOWING CODE DISABLE ? FIXME
-            gpm_report(GPM_PR_INFO,GPM_MESS_WACOM_MACRO, macro); 
+            gpm_report(GPM_PR_INFO,GPM_MESS_WACOM_MACRO, macro);
             if (macro==12) state->buttons =  GPM_B_MIDDLE;
             */
          } /* end if macrobutton pressed */
       } /* end if ultrapad */
-          
-      if (!IsA(UltraPad)){ /* Tool out of active area */ 
-         ox=-1; 
-         state->buttons=0; 
-         state->dx=state->dy=0; 
+
+      if (!IsA(UltraPad)){ /* Tool out of active area */
+         ox=-1;
+         state->buttons=0;
+         state->dx=state->dy=0;
       }
 
       return 0; /* nothing more to do so leave */
-   } /* end if Tool out of active area*/ 
+   } /* end if Tool out of active area*/
 
-   x = (((data[0] & 0x3) << 14) +  (data[1] << 7) + data[2]); 
+   x = (((data[0] & 0x3) << 14) +  (data[1] << 7) + data[2]);
    y = (((data[3] & 0x3) << 14) + (data[4] << 7) + data[5]);
-   
+
    if (WacomAbsoluteWanted) { /* Absolute Mode */
       if (x>wmaxx) x=wmaxx; if (x<0) x=0;
       if (y>wmaxy) y=wmaxy; if (y<0) y=0;
       state->x  = (x * win.ws_col / wmaxx);
       state->y  = (y * win.ws_row / wmaxy);
-       
+
       realposx = (x / wmaxx); /* this two lines come from the summa driver. */
       realposy = (y / wmaxy); /* they seem to be buggy (always give zero).  */
 
    } else {                                               /* Relative Mode */
       /* Treshold; if greather then treat tool as first time in proximity */
-      if( abs(x-ox)>(wmaxx/wcmodell[WacomModell].treshold) 
+      if( abs(x-ox)>(wmaxx/wcmodell[WacomModell].treshold)
        || abs(y-oy)>(wmaxy/wcmodell[WacomModell].treshold) ) ox=x; oy=y;
 
       state->dx= (x-ox) / (wmaxx / win.ws_col / wcmodell[WacomModell].treshold);
       state->dy= (y-oy) / (wmaxy / win.ws_row / wcmodell[WacomModell].treshold);
    }
 
-   ox=x; oy=y;    
-   
+   ox=x; oy=y;
+
    state->buttons=                      /* for Ultra-Pad and graphire */
       !!(data[3]&8)  * GPM_B_LEFT  +
       !!(data[3]&16) * GPM_B_RIGHT +

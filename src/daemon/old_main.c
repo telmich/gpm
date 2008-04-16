@@ -58,8 +58,8 @@ int old_main()
 
       if(!strcmp((which_mouse->opt_dev),"-")) fd=0; /* use stdin */
       else if( (fd=open((which_mouse->opt_dev),O_RDWR | O_NDELAY)) < 0)
-         gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN,(which_mouse->opt_dev)); 
-             
+         gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN,(which_mouse->opt_dev));
+
       /* and then reset the flag */
       fcntl(fd,F_SETFL,fcntl(fd,F_GETFL) & ~O_NDELAY);
 
@@ -162,7 +162,7 @@ int old_main()
 
 /*....................................... manage graphic mode */
 
-     /* 
+     /*
       * Be sure to be in text mode. This used to be before select,
       * but actually it only matters if you have events.
       */
@@ -203,7 +203,7 @@ int old_main()
                            do_selection(&event);
 
 
-               /* Same idea as above, just here for documentation 
+               /* Same idea as above, just here for documentation
                (cinfo[event.vc] && do_client(cinfo[event.vc], &event))
                || (cinfo[0]        && do_client(cinfo[0],        &event))
                ||  do_selection(&event);
@@ -256,9 +256,9 @@ int old_main()
             gpm_report(GPM_PR_WARN,GPM_MESS_STRANGE_DATA,i);
          }
       }
-        
+
       /*................... all done. */
-     
+
      if(pending) gpm_report(GPM_PR_OOPS,GPM_MESS_SELECT_PROB);
    } /* while(1) */
    return 0;

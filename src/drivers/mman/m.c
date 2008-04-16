@@ -27,7 +27,7 @@
 int M_mman(Gpm_Event *state,  unsigned char *data)
 {
    /*
-    * the damned MouseMan has 3/4 bytes packets. The extra byte 
+    * the damned MouseMan has 3/4 bytes packets. The extra byte
     * is only there if the middle button is active.
     * I get the extra byte as a packet with magic numbers in it.
     * and then switch to 4-byte mode.

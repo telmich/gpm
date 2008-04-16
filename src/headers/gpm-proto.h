@@ -116,6 +116,6 @@ enum gpm_protocol_item {
 	      data item can host a single keysym as they span 24 bits
 
 */
-    
-    
+
+
 #endif /* __GPM_PROTO_H__ */

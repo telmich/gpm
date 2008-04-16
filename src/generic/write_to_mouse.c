@@ -27,7 +27,7 @@
 /**
  * Writes the given data to the ps2-type mouse.
  * Checks for an ACK from each byte.
- * 
+ *
  * Returns 0 if OK, or >0 if 1 or more errors occurred.
  */
 int write_to_mouse(int fd, unsigned char *data, size_t len)

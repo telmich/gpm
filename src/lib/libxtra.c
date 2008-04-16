@@ -3,7 +3,7 @@
  *
  * Copyright 1994,1995   rubini@linux.it (Alessandro Rubini)
  * Copyright (C) 1998    Ian Zimmerman <itz@rahul.net>
- * 
+ *
  * xterm management is mostly by Miguel de Icaza
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@
 /*-------------------------------------------------------------------*/
 
 /*
- * these two functions return version information 
+ * these two functions return version information
  */
 
 static char *gpml_ver_s=GPM_RELEASE;
@@ -75,7 +75,7 @@ char *Gpm_GetServerVersion(int *where)
       sscanf(gpm_ver_s,"%d.%d.%d",&i,&j,&k);
       gpm_ver_i=i*10000+j*100+k;
     }
-  
+
   if (where) *where=gpm_ver_i;
   return gpm_ver_s;
 }
@@ -132,8 +132,8 @@ int Gpm_GetSnapshot(Gpm_Event *ePtr)
   i=ePtr->type; ePtr->type=0;
   return i; /* number of buttons */
 }
-  
-
+
+
 /* Local Variables: */
 /* c-indent-level: 2 */
 /* End: */

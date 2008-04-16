@@ -37,7 +37,7 @@
       auto-repeat: double press plus hold...
       README
 */
-      
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,7 +58,7 @@
 
 #include "daemon.h"
 
-/* 
+/*
  * Each table is made up of 256 entries, as these are the possible chords
  * Then, there is one table for each modifier (two of them are not allowed).
  * Each entry is a pointer: a "low" pointer represents a single byte, true
@@ -79,11 +79,11 @@ struct twiddler_map_struct {
    { TW_MOD_F, "Function", twiddler_table[3]},
    { TW_MOD_C, "Control",  twiddler_table[4]},
    { TW_MOD_C, "Ctrl",    twiddler_table[4]},
-   { TW_MOD_A, "Alt",     twiddler_table[5]}, 
-   { TW_MOD_A, "Meta",    twiddler_table[5]}, 
+   { TW_MOD_A, "Alt",     twiddler_table[5]},
+   { TW_MOD_A, "Meta",    twiddler_table[5]},
 /* This is different!! */
-   { TW_MOD_C | TW_MOD_S, "Ctrl+Shift",    twiddler_table[6]}, 
-   { TW_MOD_C | TW_MOD_S, "Shift+Ctrl",    twiddler_table[6]}, 
+   { TW_MOD_C | TW_MOD_S, "Ctrl+Shift",    twiddler_table[6]},
+   { TW_MOD_C | TW_MOD_S, "Shift+Ctrl",    twiddler_table[6]},
    { 0,       NULL,      NULL}
 };
 
@@ -125,7 +125,7 @@ struct twiddler_f_struct {
    {"Down",   "\033[B" },
    {"Left",   "\033[D" },
    {"Right",  "\033[C" },
-       
+
    {NULL, NULL }
 };
 
@@ -173,7 +173,7 @@ int twiddler_exec(char *s)
          close(0);
          close(1);
          close(2); /* very rude! */
-      
+
          open(GPM_NULL_DEV,O_RDONLY);
          open(option.consolename,O_WRONLY);
          dup(1);
@@ -228,7 +228,7 @@ static inline int twiddler_use_item(char *item)
    int i, retval = 0;
    unsigned char pushthis, unblank=4; /* 4 == TIOCLINUX unblank */
 
- /* a special function */ 
+ /* a special function */
    /* a single byte */
    if (((unsigned long)item & 0xff) == (unsigned long)item) {
       pushthis = (unsigned long)item & 0xff;
@@ -389,7 +389,7 @@ int twiddler_escape_sequence(char *s, int *len)
          }
          return res;
    }
-} 
+}
 
 /*
  * Convert the rest to a string or a byte

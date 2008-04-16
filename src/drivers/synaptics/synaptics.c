@@ -7,7 +7,7 @@
  *
  *   Synpatics Passthrough Support Copyright (C) 2002 Linuxcare Inc.
  *   dkennedy@linuxcare.com (David Kennedy)
- * 
+ *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation; either version 2 of the License, or
@@ -28,33 +28,33 @@
 ** Design/Goals
 **     I want to use the Synaptics Serial touchpad as a cursor device under
 **     Linux (gpm).  With this device I want to support operations similar
-**     to those supported by the Synaptics WinDOS driver, and some others 
+**     to those supported by the Synaptics WinDOS driver, and some others
 **     of my own devising.
 **
 ** Features:
 **     Corner Clicks
 **         This recognizes taps on the touchpad in the corner(s) and
 **         translates them into specific actions.  Initially I am looking
-**         at actions on the order of alternate button clicks.  Other 
+**         at actions on the order of alternate button clicks.  Other
 **         alternatives include drags and whatnot.
 **     Edge Extensions
 **         This recognizes that the finger has moved from the center region
 **         of the touchpad and dragged to the edge area.  At which point
-**         I want to be able to extend the motion by automatically moving 
+**         I want to be able to extend the motion by automatically moving
 **         in the direction of the edge.
 **     Toss n Catch
 **         This recognizes a quick motion of the finger on the touchpad and
 **         uses that to define a velocity vector for the cursor.  A tap
 **         on the touchpad at a later time catches (stops) the cursor.
 **     Tap n Drag
-**         A quick tap of the touchpad followed by finger motion on the 
+**         A quick tap of the touchpad followed by finger motion on the
 **         touchpad initiates what would be a drag with a normal mouse
 **         type device.
 **     Pressure Sensitive Velocity
 **         The Synaptics touchpad indicates the touch pressure of the finger
 **         (really an interface area) this is used to accelerate the cursor
 **         motion.  This can be used in the normal motion, Tap n Drag, or
-**         Edge Extension modes.  In normal motion and Tap n Drag this may 
+**         Edge Extension modes.  In normal motion and Tap n Drag this may
 **         be awkward due to increased friction caused by the pressure.
 **
 ** Parameters:
@@ -95,7 +95,7 @@
 **        touchpads corners.
 **
 **  Four buttons to work
-**        Some touchpads have 4 buttons. Only 3 was read and the last was set to 
+**        Some touchpads have 4 buttons. Only 3 was read and the last was set to
 **        up or down "button". They can be configured just as the
 **        touchpads corners.
 **
@@ -107,7 +107,7 @@
 **        detection is bad. This is/was a problem as my wrist lays on the
 **        laptop which gives a 45 deg to horizontal for my fingers. Now I try
 **        to add further detections, which works for me in 95% of the
-**        time. 
+**        time.
 **
 **  Multi finger tap
 **        Using 1,2 or 3 fingers to make a tap translates into left, right or
@@ -136,17 +136,17 @@
 **        by tapping the same corner. This is useful if I know I am going
 **        to write a lot. The stick still works.
 **
-**  Debugging corner action  
-**        A corner action now allows toggling the debug information. 
+**  Debugging corner action
+**        A corner action now allows toggling the debug information.
 **
 **
 ** The structure has changed to handle both serial and ps2 touchpads. Many
-** variable names have changed.                  
+** variable names have changed.
 **
 ** The documentation referred to is from
-**  "Synaptics TouchPad Interfacing Guide" revision 2.5 
+**  "Synaptics TouchPad Interfacing Guide" revision 2.5
 ** or just STIG
-**                                                                                 
+**
 **/
 
 
@@ -162,7 +162,7 @@
 ** TODO (pebl)
 **   - Two pads can not be used at the same time (internal/external)
 **   - Move a lot of the comments to a readme file.
-**   - Allow normal taps in unused corners. 
+**   - Allow normal taps in unused corners.
 **   - Better detection of spontaneous reseting touchpad.
 **   - Implement resend command for serial connection.
 **   - Only start scrolling if mostly vertical movement.
@@ -177,7 +177,7 @@
 /**
 ** Notation:
 ** A gesture means a motion or action that is not a regular mouse movement.
-** 
+**
 ** Wmode is an absolute mode where no gesture is signaled by the touchpad, only
 ** supported on newer versions.
 **
@@ -199,11 +199,11 @@
 **                                (handles also wmode)       |                         |                            |
 **                                                           |                         |                            V
 **                                                           |- syn_preprocess_report --- syn_process_wmode_report --- syn_process_report
-**                                                           |                          
-** syn_process_serial_data --- syn_translate_ps2_wmode_data --                                                       
-**                          |                                |                          
-**                          |                                |                          
-**                          -- syn_translate_ps2_data     ----                          
+**                                                           |
+** syn_process_serial_data --- syn_translate_ps2_wmode_data --
+**                          |                                |
+**                          |                                |
+**                          -- syn_translate_ps2_data     ----
 **
 **
 */
@@ -226,7 +226,7 @@
 #undef DEBUG
 
 #ifdef DEBUG
-#  define DEBUG_SYNAPTIC          
+#  define DEBUG_SYNAPTIC
 #  define DEBUG_PARAMS            1
 #  define DEBUG_FLUSH             1
 #  define DEBUG_RESET             1
@@ -255,7 +255,7 @@
    corneraction.
 */
 
-/* BAD CODE BEGIN 
+/* BAD CODE BEGIN
 #ifdef DEBUG_SYNAPTIC
 #  include <stdarg.h>
    static int debug_syn_to_stderr = 1;
@@ -283,7 +283,7 @@ typedef unsigned char byte;
 
 static void syn_ps2_absolute_mode(int fd);
 static char *syn_model_name (int sensor);
-static void syn_ps2_send_cmd(int fd, int stick, byte cmd); 
+static void syn_ps2_send_cmd(int fd, int stick, byte cmd);
 
 
 /* Defines */
@@ -416,7 +416,7 @@ static int   scrolling_speed         = 10;/* less is faster, 1 fastest  */
 static float scrolling_button_factor = 0.5; /* How fast should a button/corner tap scroll, higher faster C*/
 static int   auto_scrolling_enabled  = 1; /* Moving to the upper/lower edge keeps scrolling up/downC*/
 static int   auto_scrolling_factor   = 2.0; /* How fast should autoscrolling be                   C*/
-static int   reset_on_error_enabled  = 0; /* If a packet does not conform to any absolute protocol 
+static int   reset_on_error_enabled  = 0; /* If a packet does not conform to any absolute protocol
 					   * should we reset the touchpad? This is wrong, because we
 					   * should rather find out why it does that in first place.
 					   * Do not turn it on per default.                         */
@@ -522,26 +522,26 @@ static param_data_type param_data [] = {
   { "tossing_enabled",            Flag_Param,    {&tossing_enabled            }},
   { "does_toss_use_static_speed", Flag_Param,    {&does_toss_use_static_speed }},
   { "tap_hold_edge_motion_enabled",Flag_Param,   {&tap_hold_edge_motion_enabled}},
-  
-  /* pressure induced speed related configuration parameters */		     
+
+  /* pressure induced speed related configuration parameters */
   { "low_pressure",               Integer_Param, {&low_speed_pressure         }},
   { "speed_up_pressure",          Integer_Param, {&speed_up_pressure          }},
   { "pressure_factor",            Float_Param,   {&speed_pressure_factor      }},
   { "standard_speed_factor",      Float_Param,   {&standard_speed_factor      }},
-  /* toss/catch related parameters */		 			     
+  /* toss/catch related parameters */
   { "min_toss_time",              Integer_Param, {&min_toss_time              }},
   { "max_toss_time",              Integer_Param, {&max_toss_time              }},
   { "prevent_toss_time",          Integer_Param, {&prevent_toss_time          }},
   { "min_toss_dist",              Integer_Param, {&min_toss_dist              }},
   { "static_toss_speed",          Integer_Param, {&static_toss_speed          }},
   { "toss_speed_factor",          Float_Param,   {&toss_speed_factor          }},
-  /* edge motion related configuration parameters */			     
+  /* edge motion related configuration parameters */
   { "x_min_center",               Integer_Param, {&x_min_center               }},
   { "x_max_center",               Integer_Param, {&x_max_center               }},
   { "y_min_center",               Integer_Param, {&y_min_center               }},
   { "y_max_center",               Integer_Param, {&y_max_center               }},
   { "edge_speed",                 Integer_Param, {&edge_speed                 }},
-  /* use wmode */				 			     
+  /* use wmode */
   { "wmode_enabled",		  Flag_Param,	 {&wmode_enabled	      }},
   { "drag_lock_enabled",	  Flag_Param,	 {&drag_lock_enabled	      }},
   { "finger_threshold",		  Integer_Param, {&finger_threshold	      }},
@@ -551,7 +551,7 @@ static param_data_type param_data [] = {
   { "tap_interval",		  Integer_Param, {&tap_interval		      }},
   { "multiple_tap_delay",	  Integer_Param, {&multiple_tap_delay	      }},
   { "pads_tap_interval",	  Integer_Param, {&pads_tap_interval	      }},
-  /* Additional wmode parameters */ 
+  /* Additional wmode parameters */
   { "palm_detect_enabled",	  Flag_Param,	 {&palm_detect_enabled	      }},
   { "palm_detect_level",	  Integer_Param, {&palm_detect_level	      }},
   { "multi_finger_tap_enable",    Flag_Param,    {&multi_finger_tap_enabled   }},
@@ -570,7 +570,7 @@ static param_data_type param_data [] = {
   { "scrolling_speed",	          Integer_Param, {&scrolling_speed	      }},
   { "scrolling_button_factor",    Float_Param,   {&scrolling_button_factor    }},
   { "auto_scrolling_factor",      Float_Param,   {&auto_scrolling_factor      }},
-  /* corner tap actions */			 			     
+  /* corner tap actions */
   { "upper_left_action",          Action_Param,  {&corner_actions [0]         }},
   { "lower_left_action",          Action_Param,  {&corner_actions [1]         }},
   { "upper_right_action",         Action_Param,  {&corner_actions [2]         }},
@@ -595,7 +595,7 @@ static param_data_type param_data [] = {
   { "stick_left_button_action",    Action_Param,  {&stick_actions [0]         }},
   { "stick_middle_button_action",  Action_Param,  {&stick_actions [1]         }},
   { "stick_right_button_action",   Action_Param,  {&stick_actions [2]         }},
-  /* end of list */				 			     
+  /* end of list */
   { NULL,                         Flag_Param,    {NULL                        }}
 };
 
@@ -628,15 +628,15 @@ static info_type ident[2];
 
 
 typedef struct {
-  int info_rot180; 
-  int info_portrait; 
-  int info_sensor; 
-  int info_hardware; 
-  int info_new_abs; 
-  int info_cap_pen; 
-  int info_simple_cmd; 
-  int info_geometry; 
-} model_id_type; 
+  int info_rot180;
+  int info_portrait;
+  int info_sensor;
+  int info_hardware;
+  int info_new_abs;
+  int info_cap_pen;
+  int info_simple_cmd;
+  int info_geometry;
+} model_id_type;
 
 static model_id_type model[2];
 
@@ -664,7 +664,7 @@ static char *model_names [] = {
   "Ultra-thin Module, connector reversed",
   "Low Power Module",
   "Thin Module, ATP",
-  "Snap dome Module, ATP", 
+  "Snap dome Module, ATP",
   "FlexArm Module",                         /* 20 */
   "TWIII Module (TouchWriter 3)",
   "TWIII Module (P64)",
@@ -672,9 +672,9 @@ static char *model_names [] = {
   "Squish Module",
   "Thin TTL Serial module",
   "TWIII Ultra Thin Module",
-  "PS/2 Passthrough", 
+  "PS/2 Passthrough",
   "4 Button On Board Module",
-  "6 Buttons Off Board Module",             
+  "6 Buttons Off Board Module",
   "6 Buttons On Board Module",              /* 30 */
   "Ultrathin TTL serial Module",
   "ClearPad Module",
@@ -685,7 +685,7 @@ static char *model_names [] = {
   "SubMini w/6 buttons",
   "Standard USB Module",
   "cPad Dropin Plain USB Module",
-  "cPad",                                   /* 40 */ 
+  "cPad",                                   /* 40 */
   "",
   "",
   "",
@@ -742,12 +742,12 @@ static sensor_info_type *sensor[2] = {
 #define EXT_CAP_PALM_DETECT  0X0001     /* Bit 0   */
 
 typedef struct {
-  int cap_ext; 
+  int cap_ext;
   int cap_stick;
-  int cap_sleep; 
-  int cap_four_button; 
-  int cap_multi_finger; 
-  int cap_palm_detect; 
+  int cap_sleep;
+  int cap_four_button;
+  int cap_multi_finger;
+  int cap_palm_detect;
 } ext_cap_type;
 
 static ext_cap_type capabilities[2];
@@ -765,7 +765,7 @@ static ext_cap_type capabilities[2];
 #define PS2_SLEEP          0x08	     /* Bit 3 for ps2 protocol */
 #define PS2_NO_SLEEP       0x00	     /* Bit   (only  button press activates touchpad again)*/
 #define NO_TAPDRAG_GESTURE 0x04      /* Bit 2 for model version >= 4 */
-#define TAPDRAG_GESTURE    0x00      /* Bit   */     
+#define TAPDRAG_GESTURE    0x00      /* Bit   */
 #define EXTENDED_REPORT    0x02	     /* Bit 1 for serial protocol absolute mode only */
 #define NORMAL_REPORT      0x00	     /* Bit   */
 #define STICK_DISABLE      0x02	     /* Bit 1 for ps2 protocol this disables any stick attached */
@@ -798,7 +798,7 @@ static report_type last_report,cur_report;
 
 /*
 ** A location record.
-** This is needed to make an average over several packages, 
+** This is needed to make an average over several packages,
 ** because the reported x,y might not be that accurate.
 */
 typedef struct {
@@ -824,13 +824,13 @@ static int           was_edges = 0;
 static int           was_non_edge = 0;
 static location_type last_locs [4];
 static Gpm_Event     last_state;
-static int           tap_lower_limit_packet;    
+static int           tap_lower_limit_packet;
 static int           tap_upper_limit_packet;
 static int           last_corner_action = GPM_B_NOT_SET;
 static int           last_finger_action = GPM_B_NOT_SET;
-static int           last_normal_button_actions[6] = 
+static int           last_normal_button_actions[6] =
   {GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET};
-static int           last_stick_button_actions[3]  = 
+static int           last_stick_button_actions[3]  =
   {GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET};
 static int           last_4_way_button_actions[4] =
   {GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET};
@@ -849,7 +849,7 @@ static location_type touch_loc;
 /* Multi tap information */
 static int           gesture_delay = 0;
 static int           fake_forget_tap_interval = 0;  /* if hardware sends tap-hold, we need to keep track */
-static int           fake_time_to_forget_tap = 0;   /* not to lose user defined actions in the hold periode. 
+static int           fake_time_to_forget_tap = 0;   /* not to lose user defined actions in the hold periode.
 						     * (action like: Multifingers, non-repeating actions etc.*/
 
 /* Multi finger information */
@@ -879,13 +879,13 @@ static int           scrolling_amount_left = 0;   /* Tells how much to scroll up
 ** Dump the report data for debugging.
 **
 ** Because the synaptics sends (trivial) data in one second after last touch,
-** which makes reading the debug data harder, only dump the report if it is different 
+** which makes reading the debug data harder, only dump the report if it is different
 ** than the previously dumped.
 */
 #if DEBUG_REPORTS
 static void tp_dump_report_data (report_type report,
 				 int edges,
-				 Gpm_Event* state) 
+				 Gpm_Event* state)
 {
   static report_type  last_report_reported;
   static unsigned int times_report_repeated = 0;
@@ -902,7 +902,7 @@ static void tp_dump_report_data (report_type report,
 
   /* Was the last report repeated ? */
   if(times_report_repeated > 0){
-    gpm_report (GPM_PR_DEBUG,"\rSynps2: Last report reported %d times\n",times_report_repeated); 
+    gpm_report (GPM_PR_DEBUG,"\rSynps2: Last report reported %d times\n",times_report_repeated);
     times_report_repeated = 0;
   }
 
@@ -910,24 +910,24 @@ static void tp_dump_report_data (report_type report,
 
   gpm_report (GPM_PR_DEBUG,
 	      "\rSynps2: %c%c%c%c%c  %4dx%-4d %3d %2d %d  %c%c%c%c  %c%c    %3d%3d %d    %8d %8d %c",
-	      report.fingers ? 'f' : '-',  
+	      report.fingers ? 'f' : '-',
 	      report.gesture ? 'g' : '-',
-	      
+
 	      report.left    ? 'l' : '-',
-	      report.middle  ? 'm' : '-',  
+	      report.middle  ? 'm' : '-',
 	      report.right   ? 'r' : '-',
-	      
+
 	      report.x, report.y, report.pressure,
-	      report.w,was_fingers, 
-	      
+	      report.w,was_fingers,
+
 	      edges & LEFT_EDGE   ? 'l' : '-',
 	      edges & RIGHT_EDGE  ? 'r' : '-',
 	      edges & BOTTOM_EDGE ? 'b' : '-',
 	      edges & TOP_EDGE    ? 't' : '-',
-	      
+
 	      report.gesture && !report.fingers ? 't' : '-',
 	      report.gesture && report.fingers  ? 'd' : '-',
-	      
+
 	      state->dx,state->dy,state->buttons,
 
 
@@ -947,7 +947,7 @@ static void syn_dump_info(int stick)
 {
 
   gpm_report (GPM_PR_INFO,"Synaptic %s Device:",(stick?"Stick":"Touchpad"));
-    
+
   gpm_report (GPM_PR_INFO,"Synaptics Ident:  model_code=%d   Firmware version %d.%d",
 	      ident[stick].info_model_code, ident[stick].info_major, ident[stick].info_minor);
   gpm_report (GPM_PR_INFO,"Synaptics model:");
@@ -979,7 +979,7 @@ static void syn_dump_info(int stick)
 
 
 /* Get model name, STIG page 11 */
-static char *syn_model_name (int sensor) 
+static char *syn_model_name (int sensor)
 {
   if (sensor < 0 || 44 < sensor ) {
     return "Reserved";
@@ -988,10 +988,10 @@ static char *syn_model_name (int sensor)
   }
 }
 
-/* convert the model id from bits to values 
-*  STIG page 11 
+/* convert the model id from bits to values
+*  STIG page 11
 */
-static void syn_extract_model_id_info (int model_int, model_id_type *model) 
+static void syn_extract_model_id_info (int model_int, model_id_type *model)
 {
   model->info_rot180     = check_bits (model_int,  INFO_ROT180_BITS);
   model->info_portrait   = check_bits (model_int,  INFO_PORTRAIT_BITS);
@@ -1004,9 +1004,9 @@ static void syn_extract_model_id_info (int model_int, model_id_type *model)
 }
 
 
-/* Translate the reported data into a record for processing 
+/* Translate the reported data into a record for processing
  *  STIG page 14*/
-static sensor_info_type *syn_get_sensor_info (int sensor_id) 
+static sensor_info_type *syn_get_sensor_info (int sensor_id)
 {
   if (sensor_id < 0 || 12 < sensor_id ) {
     return &sensor_info [0];
@@ -1023,9 +1023,9 @@ static sensor_info_type *syn_get_sensor_info (int sensor_id)
 static void syn_extract_extended_capabilities(int ext_cap_int, ext_cap_type *cap)
 {
 
-# ifdef DEBUG  
+# ifdef DEBUG
   gpm_report(GPM_PR_INFO,"Synaptics Device Capabilities: %02X",ext_cap_int);
-# endif 
+# endif
 
   cap->cap_ext            = check_bits (ext_cap_int, EXT_CAP_EXTENDED);
 
@@ -1050,10 +1050,10 @@ static void syn_extract_extended_capabilities(int ext_cap_int, ext_cap_type *cap
 /*
 ** Check for edges.
 */
-static int tp_edges (location_type loc) 
+static int tp_edges (location_type loc)
 {
   int edges = 0;
- 
+
   if (loc.x <= x_min_center)
     edges |= LEFT_EDGE;
 
@@ -1086,14 +1086,14 @@ static void tp_handle_scrolling(Gpm_Event *state)
     scrolling_amount_left = -256*20;
 
   state->buttons &= ~(GPM_B_DOWN | GPM_B_UP);
-  
+
   if (scrolling_amount_left > scrolling_speed){
     scrolling_amount_left -= scrolling_speed;
     state->buttons |= GPM_B_UP;
   }else if (scrolling_amount_left < -scrolling_speed){
     scrolling_amount_left += scrolling_speed;
     state->buttons |= GPM_B_DOWN;
-  } 
+  }
 }
 
 
@@ -1115,7 +1115,7 @@ static int tp_process_action(touchpad_action_type *action_list, int mask)
     gpm_report (GPM_PR_WARN,"Action Mask is 0");
     return GPM_B_NOT_SET;
   }
-  
+
   while (action_list [i].action_mask) {
     if (check_bits (mask, action_list [i].action_mask)) {
       switch (action_list [i].action) {
@@ -1141,11 +1141,11 @@ static int tp_process_action(touchpad_action_type *action_list, int mask)
 	break;
       case Left_Double_Click_Action:
 	Left_Double_Click++;
-	status = GPM_B_LEFT; 
+	status = GPM_B_LEFT;
 	if(Left_Double_Click == 2)
-	  status = GPM_B_NONE; 
+	  status = GPM_B_NONE;
 	if(Left_Double_Click == 4) {
-	  status = GPM_B_NOT_SET; 
+	  status = GPM_B_NOT_SET;
 	  Left_Double_Click = 0;
 	}
 	break;
@@ -1181,23 +1181,23 @@ static int tp_process_action(touchpad_action_type *action_list, int mask)
 	break;
       default:
 	gpm_report (GPM_PR_WARN,"Default Action: Action no. %X not defined",
-		    action_list [i].action); 
+		    action_list [i].action);
 	status = GPM_B_NOT_SET;
 	break;
       }
 
       return status;
     }
-    
+
     i++;
   }
-  
+
   return status;
 }
 
 
 /*
-** tp_process_corner_taps. 
+** tp_process_corner_taps.
 **
 ** last_*_action is an easy way of remember which taps/buttons should call/repeat
 ** the action when the tap/button is held pressed. It could just as well  have
@@ -1213,12 +1213,12 @@ static int tp_process_action(touchpad_action_type *action_list, int mask)
 ** could take place at non edge. 2) A normal tap-and-hold can be moved to a
 ** corner.
 */
-static void tp_process_corner_taps (Gpm_Event *state, report_type *report) 
+static void tp_process_corner_taps (Gpm_Event *state, report_type *report)
 {
   static int edges_at_cornertap_time;
 
-  if (report->gesture && 
-      ((is_corner (was_edges) && !last_report.gesture) || 
+  if (report->gesture &&
+      ((is_corner (was_edges) && !last_report.gesture) ||
        (last_corner_action != GPM_B_NOT_SET))) {
 
     if(!last_report.gesture && last_corner_action == GPM_B_NOT_SET)
@@ -1228,19 +1228,19 @@ static void tp_process_corner_taps (Gpm_Event *state, report_type *report)
 
     if (last_corner_action != GPM_B_NOT_SET)
       state->buttons |= last_corner_action;
-  } 
+  }
 }
 
 /* tp_process_button_press
 **
 ** Handles finger taps. Same way as tp_process_corner_taps.
 **
-** Should only calculate a tap if 
+** Should only calculate a tap if
 ** 1) There is a gesture (tap)
 ** 2) The tap did not start at a corner with a corneraction
 ** 3) If it is calculated before it should have returned a repeating action.
 */
-static void tp_process_finger_taps (Gpm_Event *state, report_type *report) 
+static void tp_process_finger_taps (Gpm_Event *state, report_type *report)
 {
 
 
@@ -1251,14 +1251,14 @@ static void tp_process_finger_taps (Gpm_Event *state, report_type *report)
     if( ( multi_finger_tap_enabled && (was_fingers == 0 || was_fingers == 1)) ||
  	(!multi_finger_tap_enabled && was_fingers > 0))
       last_finger_action = tp_process_action(multi_finger_actions, ONE_FINGER);
-    
+
     if (multi_finger_tap_enabled && was_fingers == 2)
       last_finger_action = tp_process_action(multi_finger_actions, TWO_FINGERS);
-    
+
     if (multi_finger_tap_enabled && was_fingers == 3)
       last_finger_action = tp_process_action(multi_finger_actions, THREE_FINGERS);
-    
-    if (last_finger_action != GPM_B_NOT_SET) 
+
+    if (last_finger_action != GPM_B_NOT_SET)
       state->buttons |= last_finger_action;
   }
 }
@@ -1271,8 +1271,8 @@ static void tp_process_finger_taps (Gpm_Event *state, report_type *report)
 ** time, then it should be a repeating action.
 */
 
-static inline void 
-tp_process_repeating_action(Gpm_Event *state, int feature, int last_feature, int *last_action, 
+static inline void
+tp_process_repeating_action(Gpm_Event *state, int feature, int last_feature, int *last_action,
 			    touchpad_action_type *action_list,int feature_mask)
 {
   if (feature) {
@@ -1292,8 +1292,8 @@ tp_process_repeating_action(Gpm_Event *state, int feature, int last_feature, int
 ** Call tp_process_do_repeating_action foreach possible action (right now only buttons.)
 */
 
-static inline void 
-tp_process_repeating_actions(Gpm_Event *state, int features, int last_features, int last_actions[], 
+static inline void
+tp_process_repeating_actions(Gpm_Event *state, int features, int last_features, int last_actions[],
 			     touchpad_action_type *action_list)
 {
   int feature_no, feature_mask;
@@ -1310,7 +1310,7 @@ tp_process_repeating_actions(Gpm_Event *state, int features, int last_features, 
 ** Handles normal button presse explicitly because of the report
 ** layout (instead of using tp_process_do_repeating_actions).
 */
-static void tp_process_button_press (Gpm_Event *state, report_type *report) 
+static void tp_process_button_press (Gpm_Event *state, report_type *report)
 {
 
   tp_process_repeating_action(state, report->left, last_report.left,
@@ -1345,15 +1345,15 @@ static void syn_process_wmode_report( report_type *report )
   /* STIG page 9: Values of w, vary from pad to pad. It is not precise when pressure is small < 25.
    * 4-7  finger of normal width
    * 8-14 very wide finger or palm
-   * 15   maximum reportable width     
+   * 15   maximum reportable width
    */
   report->fingerwidth = max(0,report->w - 4);
 
   /* Check whether there is one finger on the pad */
   report->fingers  = (report->pressure > finger_threshold);
-  
+
   /* use w values. w = 0: 2 fingers, w = 1: 3 fingers, (if there is pressure) */
-  if (capabilities[0].cap_multi_finger){      
+  if (capabilities[0].cap_multi_finger){
     if (report->pressure != 0 && (report->w == 0 || report->w == 1)){
       report->fingers = 2+report->w;
     }
@@ -1371,13 +1371,13 @@ static void syn_process_wmode_report( report_type *report )
 **
 ** The function returns 1 if it does not make sense to continue normal touchpad
 ** processing, 0 otherwise.
-**            
+**
 ** I dont think that the external touchpads (serial) can have the same devices
 ** attached.  This code should be moved to ps2 specific part, but it is easy to
 ** have it here.
 */
 
-static int syn_ps2_process_extended_packets( unsigned char *data, 
+static int syn_ps2_process_extended_packets( unsigned char *data,
 					     report_type *report,
 					     Gpm_Event *state)
 {
@@ -1391,7 +1391,7 @@ static int syn_ps2_process_extended_packets( unsigned char *data,
 
      /* Something is wrong, should we assume it is an extended packet?  It
      *  cannot be processed further than here as the pressure is 0, which would
-     *  break things, if the user uses it simultaneously with the touchpad. 
+     *  break things, if the user uses it simultaneously with the touchpad.
      */
     /* Allow some simultaneously usage: tap-hold on touchpad, with extended movement.
      * Do not do buttons, as they are not always correctly defined yet. */
@@ -1407,7 +1407,7 @@ static int syn_ps2_process_extended_packets( unsigned char *data,
      * problem, as it is hard not to move the stick a little between pressing,
      * thereby returning a non-clicked state between the packets. Maybe
      * press-lock mechanism is useful. Forget it, the styk supports it! */
-    if((data[0] & 0xFC) == 0x84 && 
+    if((data[0] & 0xFC) == 0x84 &&
        (data[1] & 0xC8) == 0x08 &&
        (data[3] & 0xFC) == 0xC4){
 
@@ -1424,11 +1424,11 @@ static int syn_ps2_process_extended_packets( unsigned char *data,
   	tmp_buttons |= ((data[1] & 0x02) ? STICK_RIGHT_BUTTON  : 0);
 	tp_process_repeating_actions(state,tmp_buttons,last_stick_buttons,
 				     &last_stick_button_actions[0],stick_actions);
-      } 
+      }
 
       last_stick_buttons = tmp_buttons;
-            
-#     ifdef DEBUG_STICK      
+
+#     ifdef DEBUG_STICK
       gpm_report (GPM_PR_DEBUG,"StickData? %02x %02x %02x %02x %02x %02x :dx:%d dy:%d b:%d",
 		  data[0],data[1],data[2],data[3],data[4],data[5],
 		  state->dx,state->dy,state->buttons);
@@ -1457,14 +1457,14 @@ static int syn_ps2_process_extended_packets( unsigned char *data,
 	    state->dx = -1;
 	  if (report->y & 2) /* RIGHT */
 	    state->dx = 1;
-	}else{ 
+	}else{
 	  /* Report buttons */
 	  tmp_buttons  = ((report->x & 1) ? FOUR_UP_BUTTON   : 0); /* UP */
 	  tmp_buttons |= ((report->y & 1) ? FOUR_DOWN_BUTTON : 0); /* DOWN */
 	  tmp_buttons |= ((report->x & 2) ? FOUR_LEFT_BUTTON : 0); /* LEFT */
 	  tmp_buttons |= ((report->y & 2) ? FOUR_RIGHT_BUTTON: 0); /* RIGHT */
 	  tp_process_repeating_actions(state,tmp_buttons,last_4_way_buttons,
-				       &last_4_way_button_actions[0],four_button_actions);	  
+				       &last_4_way_button_actions[0],four_button_actions);
 	}
       }
 
@@ -1475,7 +1475,7 @@ static int syn_ps2_process_extended_packets( unsigned char *data,
       }
 
       return 1;
-    } 
+    }
 
     /* This is unknown packet. */
     gpm_report (GPM_PR_ERR,"\rSynps2: Pressure is 0, but x or y is not 0. "
@@ -1496,7 +1496,7 @@ static int syn_ps2_process_extended_packets( unsigned char *data,
 ** return 0 if it is reasonable, 1 if there is something wrong.
 **
 ** Checks for correct data package, palm on the pad, number of fingers.
-**            
+**
 */
 
 static int tp_find_fingers ( report_type *report,
@@ -1509,10 +1509,10 @@ static int tp_find_fingers ( report_type *report,
   state = NULL; /* FIXME: gpm 1.99.13 */
 
   /* Check whether there is a palm on the pad */
-  if (palm_detect_enabled &&  
+  if (palm_detect_enabled &&
       report->fingers && (report->fingerwidth >= palm_detect_level)){
 #   ifdef DEBUG_PALM
-    gpm_report (GPM_PR_DEBUG,"\rTouchpad: palm detected. finger width: %d",report->fingerwidth); 
+    gpm_report (GPM_PR_DEBUG,"\rTouchpad: palm detected. finger width: %d",report->fingerwidth);
 #   endif
     /* BUG should not return 1, as this drops packets. Return a repeated report ? */
     /*       last_locs [mod4 (packet_num - 1)].x = report->x; */
@@ -1526,14 +1526,14 @@ static int tp_find_fingers ( report_type *report,
   /* Extra check for vertical multi fingers which my pad is very bad to detect.
   ** Only check for extra fingers if no of fingers has not changed.  Faking
   ** fingers may go wrong so sanity check needed.  This is not an attempt to
-  ** know the number of fingers all the time, as this is not needed. 
+  ** know the number of fingers all the time, as this is not needed.
   */
   if (fake_finger_layer_enabled){
-    
+
     if (report->fingers > 1){
       fake_extra_finger = 0;
     }
-        
+
     if(report->fingers == 0){
       fake_extra_finger = 0;
 #     ifdef DEBUG_REPORTS
@@ -1548,11 +1548,11 @@ static int tp_find_fingers ( report_type *report,
 			   sqr(last_locs [mod4 (packet_num - 1)].y - report->y) );
 
 	/* Check for a second finger. If the move is larger than tap range,
-	* then it is not a tap, and adding the finger does not change reported        
+	* then it is not a tap, and adding the finger does not change reported
 	* buttons, but it will still stop the moving if
 	* multi_finger_stop_enabled is on. These tests are complete base on my
 	* imagination and experience, so any better idea are welcome. */
-	if(report->fingers == 1 && 
+	if(report->fingers == 1 &&
 	   multi_finger_pressure > 4500 && multi_finger_xy > 2*sqr((double)tap_range)){
 	    fake_extra_finger = 1;
 	    was_fake_pressure =  report->pressure;
@@ -1572,9 +1572,9 @@ static int tp_find_fingers ( report_type *report,
 	  last_report.fingers ++;
 	}
       }
-    
+
     report->fingers += fake_extra_finger;
-    
+
   }
 
 
@@ -1595,7 +1595,7 @@ static int tp_find_fingers ( report_type *report,
 		  report->fingers > last_report.fingers ? "Add":"Remove",
 		  last_report.fingers,report->fingers,fake_extra_finger);
 #     endif
-      
+
     } /* Should be tested last, because of undo moving when removing fingers. */
     else if(report->fingers == 0){
 	multi_finger_stop_timer = 0;
@@ -1611,7 +1611,7 @@ static int tp_find_fingers ( report_type *report,
       /* Undo the previous move (before detecting of the adding/removing). */
       if (multi_finger_stop_timer == multi_finger_stop_delay){
 	last_locs [mod4 (packet_num - 2)].x += last_state.dx * 2 / standard_speed_factor;
-	last_locs [mod4 (packet_num - 2)].y -= last_state.dy * 2 / standard_speed_factor;	
+	last_locs [mod4 (packet_num - 2)].y -= last_state.dy * 2 / standard_speed_factor;
       }
 
       multi_finger_stop_timer --;
@@ -1641,18 +1641,18 @@ static int tp_find_fingers ( report_type *report,
 }
 
 
-/** 
+/**
 ** tp_find_gestures
 ** Process the report from a wmode enabled device.  No gesture calculation is
 ** done by the device in wmode, so the find tap and drag hold and tap hold gestures.
 **
 ** Tap mechanism: High when touched. (=: assigned, -: decreased, +: increased)
 **
-**                         _________________________  
-**                         | tap_lower/upper_limit |tap_interval|  
+**                         _________________________
+**                         | tap_lower/upper_limit |tap_interval|
 **         -----------------                       -----------------
-** 
-** stroke_x/y         :    =                         
+**
+** stroke_x/y         :    =
 ** finger_on_pad_timer: 0000123        +++++++++++++0000000000000000
 ** time_to_forget_tap : 0000000        000000000000=---------3210000
 ** gesture_delay      : 0000000  ...   00000000000000000000000000000
@@ -1664,7 +1664,7 @@ static int tp_find_fingers ( report_type *report,
 **  1) finger_on_pad_timer is increased at most to 1 larger than tap_upper_limit,
 **     but then it is not a tap any longer.
 **  2) If tap_interval is larger than 1s (80 packets) then time_to_forget_tap never reaches 0,
-**     before the touchpads stop sending packets, so gesture is reported until touched again.  
+**     before the touchpads stop sending packets, so gesture is reported until touched again.
 **
 **
 ** Tap hold mechanism: High when touched. (=: assigned, -: decreased, +: increased)
@@ -1672,9 +1672,9 @@ static int tp_find_fingers ( report_type *report,
 **                                       tap_interval
 **                         ________________  v ___   ___
 **                         |tap_l/u_limit |    |not tap|
-**         -----------------              ------       --------    
-** 
-** stroke_x/y         :    =                   =      
+**         -----------------              ------       --------
+**
+** stroke_x/y         :    =                   =
 ** finger_on_pad_timer: 0000123+       +++00000123++  +++0000
 ** time_to_forget_tap : 00000000       000=----11111  1110000
 ** gesture_delay      : 00000000 ...   0000000000000  0000000
@@ -1682,7 +1682,7 @@ static int tp_find_fingers ( report_type *report,
 ** gesture            : 00000000       0001111111111  1110000
 **
 ** Note:
-**  0) time_to_forget_tap is set to 1 when touching the pad 2 time, so the gesture is stop when released. 
+**  0) time_to_forget_tap is set to 1 when touching the pad 2 time, so the gesture is stop when released.
 **     (two fast taps would be a problem).
 **
 **
@@ -1690,10 +1690,10 @@ static int tp_find_fingers ( report_type *report,
 **
 **                                       tap_interval  multiple_tap_delay
 **                         ________________  v _______________  v   |
-**                         |tap_l/u_limit |    |tap_l/u_limit|  
-**         -----------------              ------             --------    
-** 
-** stroke_x/y         :    =                   =      
+**                         |tap_l/u_limit |    |tap_l/u_limit|
+**         -----------------              ------             --------
+**
+** stroke_x/y         :    =                   =
 ** finger_on_pad_timer: 0000123+       +++00000123++       ++00000000000000000
 ** time_to_forget_tap : 00000000       000=----11111       11=---------32100000
 ** gesture_delay      : 00000000 ...   0000000000000 ...   00=----3210000000000
@@ -1704,7 +1704,7 @@ static int tp_find_fingers ( report_type *report,
 **  0) There is no gesture if gesture_delay is non zero.
 **  1) multiple_tap_delay (gesture_delay) should be less than tap_interval (time_to_forget_tap),
 **     or else no second tap is reported.
-**  2) Three fast taps (shorter than multiple_tap_delay) would reset gesture_delay the second time 
+**  2) Three fast taps (shorter than multiple_tap_delay) would reset gesture_delay the second time
 **     and only report 2 taps (the first and last). (likewise with more fast taps). BUG ?
 **
 **
@@ -1713,7 +1713,7 @@ static int tp_find_fingers ( report_type *report,
 */
 
 
-static void tp_find_gestures (report_type *report) 
+static void tp_find_gestures (report_type *report)
 {
   static int finger_on_pad_timer = 0;
   static int time_to_forget_tap = 0;
@@ -1723,24 +1723,24 @@ static void tp_find_gestures (report_type *report)
 
 
   if (report->fingers > 0) {
-	    
+
     /* finger down for the first time */
-    if (finger_on_pad_timer == 0) { 
+    if (finger_on_pad_timer == 0) {
       stroke_x = report->x;
       stroke_y = report->y;
     }
-    
+
     /* don't want timer to overflow */
-    if (finger_on_pad_timer < (tap_upper_limit_packet)) 
-      finger_on_pad_timer ++; 
-    
-    /* dragging and consecutive tap gestures is to end with finger up 
+    if (finger_on_pad_timer < (tap_upper_limit_packet))
+      finger_on_pad_timer ++;
+
+    /* dragging and consecutive tap gestures is to end with finger up
      *  forget fast that there was a tap if this is not a part of a tap.*/
-    if (time_to_forget_tap > 0) 
+    if (time_to_forget_tap > 0)
       time_to_forget_tap = 1;
-    
+
   } else { /* interesting things happen when finger is up */
-      
+
     /* tap determination: Was the finger long enough on the pad and not too
      * long, while staying at the same place.
      */
@@ -1750,35 +1750,35 @@ static void tp_find_gestures (report_type *report)
 		   (double)(stroke_y - last_report.y))
 	 < sqr((double)tap_range)) ||
 	 (multi_finger_tap_enabled && was_fingers > 1))) {
-      
+
       /* not a consecutive tap? */
-      if (time_to_forget_tap == 0) 
+      if (time_to_forget_tap == 0)
 	gesture_delay = 0; /* right -> don't delay gesture */
       else { /* a consecutive tap! */
 	gesture_delay = multiple_tap_delay * 80 / 1000; /* delay gesture to create multiple click */
       }
-      
+
       /* is drag locked */
       if (drag_locked) {
 	drag_locked = 0; /* unlock it and don't gesture. */
 	time_to_forget_tap = 0;
-      } else 
+      } else
 	time_to_forget_tap = tap_interval * 80 / 1000; /* setup gesture time to count down */
-      
+
     } else { /* It was not a tap */
-      
+
       /* a drag to lock?  If user did a tap and quickly hold the finger longer than a tap.
        */
-      if (drag_lock_enabled && 
+      if (drag_lock_enabled &&
 	  (time_to_forget_tap > 0) && (finger_on_pad_timer >= (tap_upper_limit_packet)))
 	drag_locked = 1;
-      
+
       if (time_to_forget_tap  > 0) time_to_forget_tap --;
       if (time_to_forget_tap == 0) was_fingers=0;
       if (gesture_delay > 0) gesture_delay --;
-      
+
     }
-    
+
 #   ifdef DEBUG_TAPS
     if (finger_on_pad_timer)
       gpm_report (GPM_PR_DEBUG,"A tap? %d < %d < %d && (%d)^2 + (%d)^2 < %d",
@@ -1787,9 +1787,9 @@ static void tp_find_gestures (report_type *report)
 #   endif
 
     finger_on_pad_timer = 0;
-    
+
   }
-  
+
   report->gesture  = ((time_to_forget_tap > 0) && (gesture_delay == 0)) || drag_locked;
 }
 
@@ -1803,23 +1803,23 @@ static void tp_find_gestures (report_type *report)
 ** Tossing mechanism: High when touched.  (=: assigned, -: decreased)
 **                                                                         (Pause)
 **                 ________________________        _____         ______ prevent_toss ___
-**                 | min/max_toss_packets |  < 1s  |      ....        |      ...     |  
-** -----------------                      ----------                  -----       ----  
-** 
-** is_tossing : 000000000000000000000000001111111111000000000000000000000000000000000000 
+**                 | min/max_toss_packets |  < 1s  |      ....        |      ...     |
+** -----------------                      ----------                  -----       ----
+**
+** is_tossing : 000000000000000000000000001111111111000000000000000000000000000000000000
 ** was_tossing: 000000000000000000000000000000000001111111111111111111111111111111100000
-** toss_timer :    =======================         ====================---- ... 321000==  
-**                           
-** Note 
+** toss_timer :    =======================         ====================---- ... 321000==
+**
+** Note
 ** 0) When is_tossing is high a motion is reported/calculated.
 ** 1) if prevent_toss delay is 0 then toss to toss is allowed without pause.
 ** 2) if the pause is to short (< prevent_toss), the timers start over!
 ** 3) The 1 second limit is due to the touchpad only sends packets one second after a release.
-** 
+**
 **
 */
 static void tp_process_report (Gpm_Event *state,
-			       report_type *report) 
+			       report_type *report)
 {
   location_type loc;
   int           edges;
@@ -1842,7 +1842,7 @@ static void tp_process_report (Gpm_Event *state,
       was_tossing = (was_tossing || is_tossing);
       toss_timer  = prevent_toss_packets;
       is_tossing  = 0;
-      
+
       /* if we start tossing then this is from where */
       if (last_report.fingers == 0) {
 	touch_loc = loc;
@@ -1866,7 +1866,7 @@ static void tp_process_report (Gpm_Event *state,
 			  !is_corner (edges)));   /* no corner          */
 
 
-      /* 
+      /*
       ** 1) if edge motion is enabled, only activate if we moved into the edge or
       ** if not using the corners taps.  Dont activate right away after a gesture
       ** from a corner tap. 2) No harm is done if activated when scrolling (as
@@ -1875,11 +1875,11 @@ static void tp_process_report (Gpm_Event *state,
       */
 
       edge_motion_on  = (edges && edge_motion_enabled &&
-			  (was_non_edge         || 
+			  (was_non_edge         ||
 			   !corner_taps_enabled ||
 			  (!is_corner(edges) && !last_report.gesture)));
       edge_motion_on |= (edges && auto_scrolling_enabled && is_scrolling);
-      edge_motion_on |= (edges && tap_hold_edge_motion_enabled && last_report.gesture && 
+      edge_motion_on |= (edges && tap_hold_edge_motion_enabled && last_report.gesture &&
 			 was_non_edge);
 
 
@@ -1895,13 +1895,13 @@ static void tp_process_report (Gpm_Event *state,
       edge_speed_factor = (edge_motion_speed_enabled ?
 			   pressure_speed_factor :
 			   standard_speed_factor);
-      
+
       pressure_speed_factor = (pressure_speed_enabled ?
 			       pressure_speed_factor :
 			       standard_speed_factor);
-      
+
       if ( auto_scrolling_enabled && is_scrolling ){
-	edge_speed_factor *= 1.0 + auto_scrolling_factor; 
+	edge_speed_factor *= 1.0 + auto_scrolling_factor;
       }
 
 
@@ -1914,10 +1914,10 @@ static void tp_process_report (Gpm_Event *state,
       else
 	 state->dy = (pressure_speed_factor *
 		      (((last_locs [mod4 (packet_num - 1)].y +
-			 last_locs [mod4 (packet_num - 2)].y) / 2) - 
+			 last_locs [mod4 (packet_num - 2)].y) / 2) -
 		       ((loc.y +
 			 last_locs [mod4 (packet_num - 1)].y) / 2)));
-      
+
       if (edge_motion_on && (edges & LEFT_EDGE))
 	 state->dx = -edge_speed * edge_speed_factor;
       else if (edge_motion_on && (edges & RIGHT_EDGE))
@@ -1925,7 +1925,7 @@ static void tp_process_report (Gpm_Event *state,
       else
 	 state->dx = (pressure_speed_factor *
 		      (((loc.x +
-			 last_locs [mod4 (packet_num - 1)].x) / 2) - 
+			 last_locs [mod4 (packet_num - 1)].x) / 2) -
 		       ((last_locs [mod4 (packet_num - 1)].x +
 			 last_locs [mod4 (packet_num - 2)].x) / 2)));
     } /* If (packet_num > 3)*/
@@ -1987,7 +1987,7 @@ static void tp_process_report (Gpm_Event *state,
 
   /* if we are scrolling then stop moving and report wheel amount.  The reason
   ** for having this above buttons actions is buttons can then move the
-  ** mouse while scrolling. 
+  ** mouse while scrolling.
   */
   if ((scrolling_enabled && is_scrolling) ||
       is_always_scrolling){
@@ -2003,7 +2003,7 @@ static void tp_process_report (Gpm_Event *state,
     ** If there is no gesture then there are no buttons, but dont clear if we
     ** are about to make a double tap.  Otherwise compute new buttons.
     */
-    if (!report->gesture && 
+    if (!report->gesture &&
 	!report->left && !report->right && !report->middle && !report->fourth ) {
       if (!gesture_delay && !fake_time_to_forget_tap) {
 	last_corner_action = GPM_B_NOT_SET;
@@ -2053,7 +2053,7 @@ static void tp_process_report (Gpm_Event *state,
 ** Read the configuration data from the global config file
 ** SYSCONFDIR "/gpm-syn.conf".
 */
-void tp_read_config_file (char* config_filename) 
+void tp_read_config_file (char* config_filename)
 {
   char line [80];
   char *token;
@@ -2066,13 +2066,13 @@ void tp_read_config_file (char* config_filename)
 
   status = snprintf(full_filename,100,SYSCONFDIR "/%s",config_filename);
   if (status < 0) {
-    gpm_report (GPM_PR_WARN,"Too long path for configure file: %s", config_filename); 
+    gpm_report (GPM_PR_WARN,"Too long path for configure file: %s", config_filename);
     return;
   }
 
 
   if ( !(config = fopen (full_filename, "r")) ) {
-    gpm_report (GPM_PR_WARN,"Failed to open configfile: %s", full_filename);    
+    gpm_report (GPM_PR_WARN,"Failed to open configfile: %s", full_filename);
   }else{
     while (fgets (line, 80, config)) {
       if (line [0] == '[') {
@@ -2169,7 +2169,7 @@ void tp_read_config_file (char* config_filename)
 ** Extract important information and report (as desired) to the user.
 */
 static void syn_process_config (info_type ident,
-				model_id_type model) 
+				model_id_type model)
 {
   sensor[0] = syn_get_sensor_info (model.info_sensor);
   gpm_report (GPM_PR_INFO, "     Firmware version %d.%d\n",
@@ -2177,7 +2177,7 @@ static void syn_process_config (info_type ident,
 
   tp_read_config_file ("gpm-syn.conf");
 
-  
+
   /* Limit the options depending on the touchpad capabilities. This should be
      done after reading the configure file so they may be turned off on purpose
      and can'nt be turned on if not supported. */
@@ -2193,7 +2193,7 @@ static void syn_process_config (info_type ident,
     stick_enabled          = 0;
     stick_pressure_enabled = 0;
   }
-  
+
   /* fake_forget_tap_interval must be set if the hardware does the gesture. */
   if(!wmode_enabled)
     fake_forget_tap_interval = 1;
@@ -2229,7 +2229,7 @@ static void syn_process_config (info_type ident,
 
 
 static unsigned char tp_hextoint (unsigned char byte1,
-				  unsigned char byte2) 
+				  unsigned char byte2)
 {
   unsigned char bytes [3];
   int result;
@@ -2241,12 +2241,12 @@ static unsigned char tp_hextoint (unsigned char byte1,
   return result;
 }
 
-static void tp_serial_flush_input (int fd) 
+static void tp_serial_flush_input (int fd)
 {
   struct timeval tv;
   fd_set rfds;
   unsigned char junk;
-  
+
   FD_ZERO(&rfds);
   FD_SET (fd, &rfds);
   tv.tv_sec = 0;
@@ -2271,7 +2271,7 @@ static void tp_serial_flush_input (int fd)
 
 static void tp_serial_read (int fd,
 			    unsigned char *bytes,
-			    size_t count) 
+			    size_t count)
 {
   struct timeval tv;
   fd_set rfds;
@@ -2299,7 +2299,7 @@ static void tp_serial_read (int fd,
 
 /* Write a string of commands */
 static void tp_serial_send_cmd(int fd,
-			       unsigned char *cmd) 
+			       unsigned char *cmd)
 {
   unsigned char junk [15];
 
@@ -2314,7 +2314,7 @@ static void tp_serial_send_cmd(int fd,
 
 /* write 'mode' to a serial touchpad, STIG 58 */
 static void syn_serial_set_mode (int fd,
-				 unsigned char mode) 
+				 unsigned char mode)
 {
   unsigned char bytes [15];
 
@@ -2327,7 +2327,7 @@ static void syn_serial_set_mode (int fd,
 
 /* read the identification from the serial touchpad, STIG 57*/
 static void syn_serial_read_ident (int fd,
-				   info_type *info) 
+				   info_type *info)
 {
   unsigned char bytes [5];
 
@@ -2358,14 +2358,14 @@ static void syn_serial_read_ident (int fd,
 
 /* read the model_id from the serial touchpad (in ps/2 format) */
 static void syn_serial_read_model_id (int fd,
-				      model_id_type *model) 
+				      model_id_type *model)
 {
   unsigned char bytes [7];
   int model_int;
 
-  /* 
+  /*
    * for older touchpads this command is not supported and no response will
-   * come.  We should do non blocking input here to handle that case 
+   * come.  We should do non blocking input here to handle that case
    * and return byte2 as 0x47 ... later.
    *
    * pebl: It is easier just to check version number less than 3.2, STIG page 60.
@@ -2379,7 +2379,7 @@ static void syn_serial_read_model_id (int fd,
     model_int = ((tp_hextoint (bytes [0], bytes [1]) << 16) |
 		 (tp_hextoint (bytes [2], bytes [3]) << 8) |
 		 (tp_hextoint (bytes [4], bytes [5])));
-    
+
 #   if DEBUG_SENT_DATA
       bytes [6] = '\0';
       gpm_report (GPM_PR_DEBUG,"Serial model id: %s", bytes);
@@ -2395,7 +2395,7 @@ static void syn_serial_read_model_id (int fd,
 
 /* read the mode bytes and capabilities from the serial touchpad, STIG 57 */
 static void syn_serial_read_cap (int fd,
-				 ext_cap_type *cap) 
+				 ext_cap_type *cap)
 {
   unsigned char bytes [8];
   int cap_int = 0;
@@ -2414,7 +2414,7 @@ static void syn_serial_read_cap (int fd,
 		 (tp_hextoint (bytes [6], bytes [7])));
     }else{
       gpm_report (GPM_PR_ERR,"PS/2 serial device doesn't appear to be a synaptics touchpad\n");
-    }    
+    }
   }
 
   syn_extract_extended_capabilities(cap_int,cap);
@@ -2427,7 +2427,7 @@ static void syn_serial_read_cap (int fd,
 /*      Adapted from tpconfig.c by C. Scott Ananian                       */
 /*------------------------------------------------------------------------*/
 
-/* PS2 Synaptics is using LSB, STIG page 29. 
+/* PS2 Synaptics is using LSB, STIG page 29.
 **
 ** After power on or reset the touchpads are set to these defaults:
 ** 100 samples per second
@@ -2488,7 +2488,7 @@ static void syn_serial_read_cap (int fd,
 
 
 /* read a byte from the ps/2 port */
-static byte tp_ps2_getbyte(int fd) 
+static byte tp_ps2_getbyte(int fd)
 {
   byte b;
 
@@ -2508,7 +2508,7 @@ static byte tp_ps2_getbyte(int fd)
 
 /* write a byte to the ps/2 port, handling resend.*/
 static byte tp_ps2_putbyte(int fd,
-			   byte b) 
+			   byte b)
 {
   byte ack;
 
@@ -2536,7 +2536,7 @@ static byte tp_ps2_putbyte(int fd,
  * read a byte from the stick device. The variable stick is used to indicate
  * whether it is the touchpad or stick device that is meant.
  */
-static byte syn_ps2_getbyte(int fd, int stick) 
+static byte syn_ps2_getbyte(int fd, int stick)
 {
   byte response[6];
 
@@ -2549,7 +2549,7 @@ static byte syn_ps2_getbyte(int fd, int stick)
     response[3]=tp_ps2_getbyte(fd);
     response[4]=tp_ps2_getbyte(fd);
     response[5]=tp_ps2_getbyte(fd);
-    
+
     /* Do some sanity checking */
     if((response[0] & 0xFC) != 0x84) {
       gpm_report (GPM_PR_ERR,"Byte 0 of stick device responce is not valid");
@@ -2570,7 +2570,7 @@ static byte syn_ps2_getbyte(int fd, int stick)
  * whether it is the touchpad or stick device that is meant.  */
 static void syn_ps2_putbyte(int fd,
 			    int stick,
-			    byte b) 
+			    byte b)
 {
   byte ack;
 
@@ -2597,7 +2597,7 @@ static void syn_ps2_putbyte(int fd,
 }
 
 
-/* use the Synaptics extended ps/2 syntax to write a special command byte 
+/* use the Synaptics extended ps/2 syntax to write a special command byte
 * STIG page 36: Send exactly four PS2_SYN_CMD (which is otherwise ignored)
 * and after each a byte with the 2 first bits being the command (LSB). End it with
 * either  PS2_SAMPLE_RATE or PS2_STATUS_REQ. It is hinted to send an inert command
@@ -2606,7 +2606,7 @@ static void syn_ps2_putbyte(int fd,
 * If data is for the stick device every byte has to be encode by the above method.
 */
 static void syn_ps2_send_cmd(int fd,
-			     int stick, 
+			     int stick,
 			     byte cmd)
 {
   int i;
@@ -2627,14 +2627,14 @@ static void syn_ps2_send_cmd(int fd,
 #if 0
 
 /* write 'cmd' to mode byte 1.
- * This function is not used. 
+ * This function is not used.
  * Code 0x0A is unknown to me, maybe used in older synaptics?
  *
  * This is used for some old 2 byte control synaptics. The function is not
  * used, and is probably leftover from mixing with Van der Plas code.
  */
 static void syn_ps2_set_mode1(int fd,
-			      int stick, 
+			      int stick,
 			      byte cmd)
 {
   syn_ps2_send_cmd(fd, stick, cmd);
@@ -2645,8 +2645,8 @@ static void syn_ps2_set_mode1(int fd,
 #endif
 
 
-/* write 'cmd' to mode byte 2 
- * See ps2_send_cmd. PS2_SR_SET_MODE stores the touchpad mode encoded in the 
+/* write 'cmd' to mode byte 2
+ * See ps2_send_cmd. PS2_SR_SET_MODE stores the touchpad mode encoded in the
  * four PS2_SYN_CMD commands
  */
 static void syn_ps2_set_mode2(int fd,
@@ -2659,7 +2659,7 @@ static void syn_ps2_set_mode2(int fd,
 }
 
 
-/* read three byte status ('a','b','c') corresponding to register 'cmd' 
+/* read three byte status ('a','b','c') corresponding to register 'cmd'
 *  Special status request for synaptics is given after a cmd.
 *  Byte b is PS2_SYN_STATUS_OK to recognize a synaptics
 */
@@ -2683,7 +2683,7 @@ static void syn_ps2_status_rqst(int fd,
 #if 0
 
 /* read the modes from the touchpad (in ps/2 format) */
-static void syn_ps2_read_modes (int fd, int stick) 
+static void syn_ps2_read_modes (int fd, int stick)
 {
   unsigned char bytes [3];
 
@@ -2698,7 +2698,7 @@ static void syn_ps2_read_modes (int fd, int stick)
 
 /* read the identification from the ps2 touchpad */
 static void syn_ps2_read_ident (int fd,
-				int stick, 
+				int stick,
 				info_type *info)
 {
   byte bytes [3];
@@ -2721,7 +2721,7 @@ static void syn_ps2_read_ident (int fd,
 
 /* read the model_id from the ps2 touchpad/stick */
 static void syn_ps2_read_model_id (int fd,
-				   int stick, 
+				   int stick,
 				   model_id_type *model)
 {
   unsigned char bytes [3];
@@ -2770,14 +2770,14 @@ static void syn_ps2_read_cap (int fd,
  * Note that this is a general ps2 command which should not be in this file,
  * but in mice.c.
  */
-static void tp_ps2_disable_data (int fd) 
+static void tp_ps2_disable_data (int fd)
 {
   struct timeval tv;
   fd_set rfds;
   unsigned char status;
   byte cmd = PS2_DISABLE_DATA;
 
-  
+
   FD_ZERO(&rfds);
   FD_SET (fd, &rfds);
   tv.tv_sec = 0;
@@ -2786,7 +2786,7 @@ static void tp_ps2_disable_data (int fd)
   write(fd,&cmd,1);
 
   usleep (50000);
-  
+
   while (select (fd+1, &rfds, NULL, NULL, &tv) == 1) {
     read (fd, &status, 1);
 #if DEBUG_RESET
@@ -2803,7 +2803,7 @@ static void tp_ps2_disable_data (int fd)
 }
 
 
-/* 
+/*
  * syn_ps2_enable_data
  *
  * Enable data after a disable data command. Should have called the disable data
@@ -2811,14 +2811,14 @@ static void tp_ps2_disable_data (int fd)
  */
 
 static void syn_ps2_enable_data(int fd)
-{  
+{
   if (stick_enabled)
     syn_ps2_putbyte(fd,DEVICE_STICK,PS2_ENABLE_DATA);
   syn_ps2_putbyte(fd,DEVICE_TOUCHPAD,PS2_ENABLE_DATA);
 }
 
 
-/* 
+/*
  * syn_ps2_send_reset
  *
  * Send reset command and absorb additional READY, IDCODE from the
@@ -2878,7 +2878,7 @@ static void syn_ps2_absolute_mode(int fd)
 {
 
   /* select 6 byte packet, high packet rate, no-sleep */
-  syn_ps2_set_mode2 (fd, DEVICE_TOUCHPAD, 
+  syn_ps2_set_mode2 (fd, DEVICE_TOUCHPAD,
 		     (ABSOLUTE_MODE    |
 		      HIGH_REPORT_RATE |
 		      PS2_NO_SLEEP     |
@@ -2899,7 +2899,7 @@ static void syn_ps2_absolute_mode(int fd)
 /* SERIAL PACKETS
  * STIG page 63, note 7 bit!
  *
- * byte 0 |    1   | reserved | gesture  | finger |  left   |  middle | right|  
+ * byte 0 |    1   | reserved | gesture  | finger |  left   |  middle | right|
  * byte 1 |    0   |                     x-pos 7-12                          |
  * byte 2 |    0   |                     x-pos 1-6                           |
  * byte 3 |    0   |                     y-pos 7-12                          |
@@ -2911,7 +2911,7 @@ static void syn_ps2_absolute_mode(int fd)
 
 
 static void syn_serial_translate_data (unsigned char *data,
-					 report_type *report) 
+					 report_type *report)
 {
   report->gesture     = check_bits (data [0], 0x10);
   report->fingers     = check_bits (data [0], 0x08);
@@ -2941,7 +2941,7 @@ static void syn_serial_translate_data (unsigned char *data,
 }
 
 
-/* PS2 PACKETS 
+/* PS2 PACKETS
  *
  * Handle error packets. It may be garbage or not, as the synaptics pad keeps sending data 1
  * sec after last touch.
@@ -2959,7 +2959,7 @@ static void syn_ps2_translate_error(unsigned char *data,
     syn_ps2_reset(which_mouse->fd);
     syn_ps2_absolute_mode(which_mouse->fd);
   }
-  
+
   report->left        = 0;
   report->middle      = 0;
   report->right       = 0;
@@ -2973,7 +2973,7 @@ static void syn_ps2_translate_error(unsigned char *data,
   report->fingers     = 0;
   report->fingerwidth = 0;
   report->w           = 0;
-  
+
 }
 
 
@@ -2981,7 +2981,7 @@ static void syn_ps2_translate_error(unsigned char *data,
  * STIG page 42
  * wmode = 0, newer version. Gesture, right and left are repeated.
  *
- * byte 0 |     1   |    0   |  Finger  | Reserved |    0   | Gesture |  Right  | Left |  
+ * byte 0 |     1   |    0   |  Finger  | Reserved |    0   | Gesture |  Right  | Left |
  * byte 1 |         y-pos 11-8                     |         x-pos  11-8               |
  * byte 2 |                           z pressure 0-7                                   |
  * byte 3 |     1   |    1   | y-pos 12 | x-pos 12 |    0   | Gesture |  Right  | Left |
@@ -2992,20 +2992,20 @@ static void syn_ps2_translate_error(unsigned char *data,
  * wmode = 0, old version <  3.2.
  * Second is a second gesture!?
  *
- * byte 0 |     1   |    1   |  z-pres 6-7         | Second | Gesture |  Right  | Left |  
+ * byte 0 |     1   |    1   |  z-pres 6-7         | Second | Gesture |  Right  | Left |
  * byte 1 |  finger |    0   |     0    |                    x-pos  12-8               |
  * byte 2 |                           x-pos  0-7                                       |
  * byte 3 |     1   |    0   |               z-pressure 0-5                            |
  * byte 4 |Reserved |    0   |    0     |              y - pos 8-12                    |
  * byte 5 |                                 y - pos 0-7                                |
- * 
+ *
  */
 
 /* Translate the reported data into a record for processing */
 static void syn_ps2_translate_data (unsigned char *data,
-				    report_type *report) 
+				    report_type *report)
 {
-  
+
   /* Check that this is indeed an absolute 6 byte new version packet*/
   if (((data [0] & 0xc8) == 0x80) &&              /* Check static in byte 0 */
       ((data [3] & 0xc8) == 0xc0) &&              /* Check static in byte 3 */
@@ -3027,7 +3027,7 @@ static void syn_ps2_translate_data (unsigned char *data,
     report->fingers     = check_bits (data [0], 0x20);
     report->fingerwidth = 0;
     report->w           = 0;
-    
+
   } /*th Old style packet maybe */
   else if (((data [0] & 0xC0) == 0xC0) && /* Static in byte 0*/
 	   ((data [1] & 0x60) == 0x00) && /* Static in byte 1*/
@@ -3049,17 +3049,17 @@ static void syn_ps2_translate_data (unsigned char *data,
     report->fingers     = check_bits (data [1], 0x80);
     report->fingerwidth = 0;
     report->w           = 0;
-    
-  } else { 
+
+  } else {
     syn_ps2_translate_error(data,report);
   }
 }
 
 
 /* STIG page 42
- * wmode = 1, 
+ * wmode = 1,
  *
- * byte 0 |     1   |    0   |  W 2-3              |    0   | W 1     |  Right  | Left |  
+ * byte 0 |     1   |    0   |  W 2-3              |    0   | W 1     |  Right  | Left |
  * byte 1 |         y-pos 11-8                     |         x-pos  11-8               |
  * byte 2 |                           z pressure 0-7                                   |
  * byte 3 |     1   |    1   | y-pos 12 | x-pos 12 |    0   | W 0     |  R/D    | L/U  |
@@ -3069,7 +3069,7 @@ static void syn_ps2_translate_data (unsigned char *data,
  */
 
 static void syn_ps2_translate_wmode_data (unsigned char *data,
-					    report_type *report) 
+					    report_type *report)
 {
   /* Check that it is an absolute packet */
   if (((data[0] & 0xc8) == 0x80) && ((data[3] & 0xc8) == 0xc0)) {
@@ -3095,7 +3095,7 @@ static void syn_ps2_translate_wmode_data (unsigned char *data,
 		 ((data[0] & 0x30) >> 2));
 
 
-  } else { 
+  } else {
     syn_ps2_translate_error(data,report);
   }
 }
@@ -3113,7 +3113,7 @@ static void syn_ps2_translate_wmode_data (unsigned char *data,
 ** Process the touchpad 6 byte report.
 */
 void syn_process_serial_data (Gpm_Event *state,
-			      unsigned char *data) 
+			      unsigned char *data)
 {
   /* initialize the state */
   state->buttons = 0;
@@ -3123,11 +3123,11 @@ void syn_process_serial_data (Gpm_Event *state,
   syn_serial_translate_data (data, &cur_report);
   if (wmode_enabled){
     syn_process_wmode_report(&cur_report);
-  }    
+  }
   if (tp_find_fingers(&cur_report,state)) return;
   if (wmode_enabled){
-    tp_find_gestures(&cur_report);    
-  }    
+    tp_find_gestures(&cur_report);
+  }
 
   tp_process_report (state, &cur_report);
 }
@@ -3154,12 +3154,12 @@ void syn_serial_reset(int fd)
 
 /*
 ** syn_serial_init
-** 
+**
 ** Initialize the synaptics touchpad.  Read model and identification.
 ** Determine the size of the touchpad in "pixels".  Select 6/7/8 byte packets,
 ** select 9600 baud, and select high packet rate.
 */
-int syn_serial_init (int fd) 
+int syn_serial_init (int fd)
 {
   int return_packetlength;
 
@@ -3201,7 +3201,7 @@ int syn_serial_init (int fd)
 ** Process the touchpad 6 byte report.
 */
 void syn_process_ps2_data (Gpm_Event *state,
-			   unsigned char *data) 
+			   unsigned char *data)
 {
   /*   gpm_report(GPM_PR_DEBUG,"Data %02x %02x %02x %02x %02x %02x",data[0],data[1],data[2],data[3],data[4],data[5]); */
 
@@ -3213,7 +3213,7 @@ void syn_process_ps2_data (Gpm_Event *state,
 
   if (wmode_enabled) {
     syn_ps2_translate_wmode_data (data, &cur_report);
-    if (syn_ps2_process_extended_packets(data,&cur_report,state)) return;      
+    if (syn_ps2_process_extended_packets(data,&cur_report,state)) return;
     syn_process_wmode_report(&cur_report);
     if (tp_find_fingers(&cur_report,state)) return;
     tp_find_gestures(&cur_report);
@@ -3255,7 +3255,7 @@ void syn_ps2_reset (int fd)
 
 static void syn_ps2_init_stick(int fd)
 {
-  
+
   if (!stick_enabled) return;
 
   gpm_report(GPM_PR_DEBUG,"Initializing Synaptics PS/2 Stick Device");
@@ -3277,12 +3277,12 @@ static void syn_ps2_init_stick(int fd)
 
 /*
 ** syn_ps2_init
-** 
+**
 ** Initialize the synaptics touchpad.  Read model and identification.
 ** Determine the size of the touchpad in "pixels".  Select 6 byte packets,
 ** and select high packet rate.
 */
-void syn_ps2_init (int fd) 
+void syn_ps2_init (int fd)
 {
 
   gpm_report(GPM_PR_DEBUG,"Initializing Synaptics PS/2 TouchPad");
