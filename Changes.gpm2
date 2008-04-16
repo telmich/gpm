@@ -1,5 +1,5 @@
 1.99.6:
-   * Merge changes from 1.20.3pre6
+   * Merge changes from 1.20.3pre6 and 1.20.3
    * Make it compile again on Linux/ppc
    * Add initial evabs documentation
    * Add bugfixes (possible segfault) and cleanups from Bernhard Fischer
