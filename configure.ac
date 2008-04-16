@@ -1,5 +1,3 @@
-AC_REVISION(configure.in,v 1.7 2008/02/16 nico)
-
 dnl Process this file with autoconf to produce a configure script.
 dnl written jan/1997 - T.E.Dickey <dickey@clark.net>
 
