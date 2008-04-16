@@ -3,7 +3,7 @@ AC_REVISION(configure.in,v 1.7 2008/02/16 nico)
 dnl Process this file with autoconf to produce a configure script.
 dnl written jan/1997 - T.E.Dickey <dickey@clark.net>
 
-AC_PREREQ(2.12)
+AC_PREREQ(2.61)
 AC_INIT(src/daemon/main.c)
 AC_CONFIG_HEADER(src/headers/config.h)
 
