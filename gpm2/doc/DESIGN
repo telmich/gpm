@@ -63,3 +63,9 @@ Possible design of gpm2:
       - connects to the gpm2-daemon logging port
       - reads messages
       - relays them to syslog
+
+   gpm2-log: needed?
+      - logging interface for gpm2-daemon
+      - recieves messages
+
+
