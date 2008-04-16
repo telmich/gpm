@@ -1,0 +1,46 @@
+let configure figure out a program to use for recursive mkdir
+
+  It uses either 'mkdir -p' or 'install-sh -d'.
+
+diff --git a/Makefile.in b/Makefile.in
+index 357764b..d22527d 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -48,9 +48,9 @@ install-exec: installdirs
+ 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) $(STRIP)' -C src install
+ 
+ installdirs:
+-	$(MKDIR) $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
++	@MKDIR_P@ $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
+ 	if test "x@ELISP@" != "x" ; then \
+-		$(MKDIR) $(lispdir) ; \
++		@MKDIR_P@ $(lispdir) ; \
+ 	fi
+ 
+ ### GENERIC
+diff --git a/Makefile.include.in b/Makefile.include.in
+index 913172f..b2527c5 100644
+--- a/Makefile.include.in
++++ b/Makefile.include.in
+@@ -58,8 +58,6 @@ AR                = ar
+ ETAGS             = etags
+ AWK               = awk
+ CP                = cp -a
+-MKDIR             = mkdir -p # linux specific, but who cares ?
+-                             # gpm is linux specific, too.
+ RM                = rm
+ 
+ 
+diff --git a/configure.ac b/configure.ac
+index f8bba91..c1d175a 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -31,6 +34,7 @@ fi
+ AC_PROG_CC
+ AC_PROG_RANLIB
+ AC_PROG_INSTALL
++AC_PROG_MKDIR_P
+ AC_PROG_YACC
+ AC_PROG_LN_S
+ 
+
