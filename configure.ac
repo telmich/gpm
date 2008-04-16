@@ -10,9 +10,9 @@ AC_CONFIG_HEADER(src/headers/config.h)
 release=1.99.6
 release_date="no date yet"
 revgit=`git-rev-parse --short HEAD`
-AC_DEFINE_UNQUOTED(GPM_RELEASE,"$release")
-AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date")
-AC_DEFINE_UNQUOTED(GPM_RELEASE_GIT,"$revgit")
+AC_DEFINE_UNQUOTED(GPM_RELEASE,"$release", "Release number")
+AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date", "Release date")
+AC_DEFINE_UNQUOTED(GPM_RELEASE_GIT,"$revgit", "Result from git-rev-parse")
 
 dnl These are chosen so that we can switch to the libtool scheme
 dnl transparently.
@@ -80,7 +80,7 @@ AC_CHECK_HEADERS(sys/sysmacros.h linux/major.h linux/tty.h)
 
 ITZ_CHECK_TYPE(__u32,linux/types.h)
 if test ${itz_cv_type___u32} = yes || test ${ac_cv_type___u32} = yes ; then
-    AC_DEFINE(HAVE___U32)
+    AC_DEFINE(HAVE___U32,[],"have u32")
 fi
 
 ITZ_SYS_ELF
