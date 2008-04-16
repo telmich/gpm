@@ -1,3 +1,8 @@
+* From 1.20.3 to 1.20.4:
+
+   pre1:
+      Possibly merge changes from 1.99.x to get tree up-to-date again
+
 * From 1.20.1 to 1.20.3: (bugfix/code cleanup)
    o Applied many cleanups
    o Added etouch support
