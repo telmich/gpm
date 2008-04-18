@@ -1,0 +1,437 @@
+diff --git a/Makefile.in b/Makefile.in
+index 357764b..d22527d 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -48,9 +48,9 @@ install-exec: installdirs
+ 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) $(STRIP)' -C src install
+ 
+ installdirs:
+-	$(MKDIR) $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
++	@MKDIR_P@ $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
+ 	if test "x@ELISP@" != "x" ; then \
+-		$(MKDIR) $(lispdir) ; \
++		@MKDIR_P@ $(lispdir) ; \
+ 	fi
+ 
+ ### GENERIC
+diff --git a/Makefile.include.in b/Makefile.include.in
+index 913172f..b2527c5 100644
+--- a/Makefile.include.in
++++ b/Makefile.include.in
+@@ -58,8 +58,6 @@ AR                = ar
+ ETAGS             = etags
+ AWK               = awk
+ CP                = cp -a
+-MKDIR             = mkdir -p # linux specific, but who cares ?
+-                             # gpm is linux specific, too.
+ RM                = rm
+ 
+ 
+diff --git a/acinclude.m4 b/acinclude.m4
+new file mode 100644
+index 0000000..c83a5a8
+--- /dev/null
++++ b/acinclude.m4
+@@ -0,0 +1,36 @@
++dnl $Id: aclocal.m4,v 1.2 2002/05/28 19:13:50 nico Exp $
++AC_DEFUN(ITZ_SYS_ELF,
++[AC_CACHE_CHECK([whether system is ELF],itz_cv_sys_elf,
++[AC_EGREP_CPP(win,
++[#ifdef __ELF__
++win
++#else
++lose
++#endif
++],[itz_cv_sys_elf=yes],[itz_cv_sys_elf=no])])
++if test ${itz_cv_sys_elf} = yes && test x${ac_cv_prog_gcc} = xyes ; then
++        PICFLAGS="-DPIC -fPIC"
++        SOLDFLAGS="-fPIC -shared -Wl,-soname,"
++else
++        PICFLAGS=
++        SOLDFLAGS=
++fi
++])
++AC_DEFUN(ITZ_PATH_SITE_LISP,
++[AC_CACHE_CHECK([where to install Emacs Lisp files],itz_cv_path_site_lisp,
++[eval itz_cv_path_site_lisp=`${EMACS} -batch -l ${srcdir}/exec.el -exec "(mapcar 'print load-path)" 2>/dev/null |
++sed -e '/^$/d' | sed -n -e 2p`
++case x${itz_cv_path_site_lisp} in
++x*site-lisp*) ;;
++x*) itz_cv_path_site_lisp='${datadir}/emacs/site-lisp' ;;
++esac])
++])
++AC_DEFUN(ITZ_CHECK_TYPE,
++[AC_CACHE_CHECK([for $1],itz_cv_type_$1,
++AC_TRY_COMPILE([
++#include <$2>
++],[
++$1 dummy;
++return 0;
++],[itz_cv_type_$1=yes],[itz_cv_type_$1=no]))
++])
+diff --git a/aclocal.m4 b/aclocal.m4
+deleted file mode 100644
+index c83a5a8..0000000
+--- a/aclocal.m4
++++ /dev/null
+@@ -1,36 +0,0 @@
+-dnl $Id: aclocal.m4,v 1.2 2002/05/28 19:13:50 nico Exp $
+-AC_DEFUN(ITZ_SYS_ELF,
+-[AC_CACHE_CHECK([whether system is ELF],itz_cv_sys_elf,
+-[AC_EGREP_CPP(win,
+-[#ifdef __ELF__
+-win
+-#else
+-lose
+-#endif
+-],[itz_cv_sys_elf=yes],[itz_cv_sys_elf=no])])
+-if test ${itz_cv_sys_elf} = yes && test x${ac_cv_prog_gcc} = xyes ; then
+-        PICFLAGS="-DPIC -fPIC"
+-        SOLDFLAGS="-fPIC -shared -Wl,-soname,"
+-else
+-        PICFLAGS=
+-        SOLDFLAGS=
+-fi
+-])
+-AC_DEFUN(ITZ_PATH_SITE_LISP,
+-[AC_CACHE_CHECK([where to install Emacs Lisp files],itz_cv_path_site_lisp,
+-[eval itz_cv_path_site_lisp=`${EMACS} -batch -l ${srcdir}/exec.el -exec "(mapcar 'print load-path)" 2>/dev/null |
+-sed -e '/^$/d' | sed -n -e 2p`
+-case x${itz_cv_path_site_lisp} in
+-x*site-lisp*) ;;
+-x*) itz_cv_path_site_lisp='${datadir}/emacs/site-lisp' ;;
+-esac])
+-])
+-AC_DEFUN(ITZ_CHECK_TYPE,
+-[AC_CACHE_CHECK([for $1],itz_cv_type_$1,
+-AC_TRY_COMPILE([
+-#include <$2>
+-],[
+-$1 dummy;
+-return 0;
+-],[itz_cv_type_$1=yes],[itz_cv_type_$1=no]))
+-])
+diff --git a/autogen.sh b/autogen.sh
+new file mode 100755
+index 0000000..12e6747
+--- /dev/null
++++ b/autogen.sh
+@@ -0,0 +1,9 @@
++#!/bin/sh -e
++
++[ -d config ] || mkdir config
++${ACLOCAL-aclocal} -I config
++${LIBTOOLIZE-libtoolize} --force --copy
++${AUTOHEADER-autoheader}
++${AUTOMAKE-automake} --add-missing --copy 2> /dev/null || true
++${AUTOCONF-autoconf}
++
+diff --git a/configure.ac b/configure.ac
+index f8bba91..c1d175a 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -2,15 +2,18 @@ dnl Process this file with autoconf to produce a configure script.
+ dnl written jan/1997 - T.E.Dickey <dickey@clark.net>
+ 
+ AC_PREREQ(2.61)
+-AC_INIT(src/daemon/main.c)
+-AC_CONFIG_HEADER(src/headers/config.h)
+ 
+-release=1.99.6
+-release_date="no date yet"
+-revgit=`git-rev-parse --short HEAD`
+-AC_DEFINE_UNQUOTED(GPM_RELEASE,"$release", "Release number")
+-AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date", "Release date")
+-AC_DEFINE_UNQUOTED(GPM_RELEASE_GIT,"$revgit", "Result from git-rev-parse")
++AC_INIT([gpm],[1.99.6],[http://unix.schottelius.org/gpm/])
++AC_CONFIG_SRCDIR([src/daemon/main.c])
++AC_CONFIG_AUX_DIR([config])
++AC_CONFIG_HEADER([src/headers/config.h])
++
++AC_CANONICAL_HOST
++
++revgit="`git-rev-parse --short HEAD`"
++builddate="`date +%Y%m%d\ %T\ %z`"
++AC_DEFINE_UNQUOTED([GPM_RELEASE_GIT],["$revgit"],[git short revision])
++AC_DEFINE_UNQUOTED([GPM_RELEASE_DATE],["$builddate"],[build date])
+ 
+ dnl These are chosen so that we can switch to the libtool scheme
+ dnl transparently.
+@@ -31,6 +34,7 @@ fi
+ AC_PROG_CC
+ AC_PROG_RANLIB
+ AC_PROG_INSTALL
++AC_PROG_MKDIR_P
+ AC_PROG_YACC
+ AC_PROG_LN_S
+ 
+diff --git a/install-sh b/install-sh
+deleted file mode 100755
+index ab74c88..0000000
+--- a/install-sh
++++ /dev/null
+@@ -1,238 +0,0 @@
+-#!/bin/sh
+-#
+-# install - install a program, script, or datafile
+-# This comes from X11R5.
+-#
+-# Calling this script install-sh is preferred over install.sh, to prevent
+-# `make' implicit rules from creating a file called install from it
+-# when there is no Makefile.
+-#
+-# This script is compatible with the BSD install script, but was written
+-# from scratch.
+-#
+-
+-
+-# set DOITPROG to echo to test this script
+-
+-# Don't use :- since 4.3BSD and earlier shells don't like it.
+-doit="${DOITPROG-}"
+-
+-
+-# put in absolute paths if you don't have them in your path; or use env. vars.
+-
+-mvprog="${MVPROG-mv}"
+-cpprog="${CPPROG-cp}"
+-chmodprog="${CHMODPROG-chmod}"
+-chownprog="${CHOWNPROG-chown}"
+-chgrpprog="${CHGRPPROG-chgrp}"
+-stripprog="${STRIPPROG-strip}"
+-rmprog="${RMPROG-rm}"
+-mkdirprog="${MKDIRPROG-mkdir}"
+-
+-tranformbasename=""
+-transform_arg=""
+-instcmd="$mvprog"
+-chmodcmd="$chmodprog 0755"
+-chowncmd=""
+-chgrpcmd=""
+-stripcmd=""
+-rmcmd="$rmprog -f"
+-mvcmd="$mvprog"
+-src=""
+-dst=""
+-dir_arg=""
+-
+-while [ x"$1" != x ]; do
+-    case $1 in
+-	-c) instcmd="$cpprog"
+-	    shift
+-	    continue;;
+-
+-	-d) dir_arg=true
+-	    shift
+-	    continue;;
+-
+-	-m) chmodcmd="$chmodprog $2"
+-	    shift
+-	    shift
+-	    continue;;
+-
+-	-o) chowncmd="$chownprog $2"
+-	    shift
+-	    shift
+-	    continue;;
+-
+-	-g) chgrpcmd="$chgrpprog $2"
+-	    shift
+-	    shift
+-	    continue;;
+-
+-	-s) stripcmd="$stripprog"
+-	    shift
+-	    continue;;
+-
+-	-t=*) transformarg=`echo $1 | sed 's/-t=//'`
+-	    shift
+-	    continue;;
+-
+-	-b=*) transformbasename=`echo $1 | sed 's/-b=//'`
+-	    shift
+-	    continue;;
+-
+-	*)  if [ x"$src" = x ]
+-	    then
+-		src=$1
+-	    else
+-		# this colon is to work around a 386BSD /bin/sh bug
+-		:
+-		dst=$1
+-	    fi
+-	    shift
+-	    continue;;
+-    esac
+-done
+-
+-if [ x"$src" = x ]
+-then
+-	echo "install:	no input file specified"
+-	exit 1
+-else
+-	true
+-fi
+-
+-if [ x"$dir_arg" != x ]; then
+-	dst=$src
+-	src=""
+-	
+-	if [ -d $dst ]; then
+-		instcmd=:
+-	else
+-		instcmd=mkdir
+-	fi
+-else
+-
+-# Waiting for this to be detected by the "$instcmd $src $dsttmp" command
+-# might cause directories to be created, which would be especially bad 
+-# if $src (and thus $dsttmp) contains '*'.
+-
+-	if [ -f $src -o -d $src ]
+-	then
+-		true
+-	else
+-		echo "install:  $src does not exist"
+-		exit 1
+-	fi
+-	
+-	if [ x"$dst" = x ]
+-	then
+-		echo "install:	no destination specified"
+-		exit 1
+-	else
+-		true
+-	fi
+-
+-# If destination is a directory, append the input filename; if your system
+-# does not like double slashes in filenames, you may need to add some logic
+-
+-	if [ -d $dst ]
+-	then
+-		dst="$dst"/`basename $src`
+-	else
+-		true
+-	fi
+-fi
+-
+-## this sed command emulates the dirname command
+-dstdir=`echo $dst | sed -e 's,[^/]*$,,;s,/$,,;s,^$,.,'`
+-
+-# Make sure that the destination directory exists.
+-#  this part is taken from Noah Friedman's mkinstalldirs script
+-
+-# Skip lots of stat calls in the usual case.
+-if [ ! -d "$dstdir" ]; then
+-defaultIFS='	
+-'
+-IFS="${IFS-${defaultIFS}}"
+-
+-oIFS="${IFS}"
+-# Some sh's can't handle IFS=/ for some reason.
+-IFS='%'
+-set - `echo ${dstdir} | sed -e 's@/@%@g' -e 's@^%@/@'`
+-IFS="${oIFS}"
+-
+-pathcomp=''
+-
+-while [ $# -ne 0 ] ; do
+-	pathcomp="${pathcomp}${1}"
+-	shift
+-
+-	if [ ! -d "${pathcomp}" ] ;
+-        then
+-		$mkdirprog "${pathcomp}"
+-	else
+-		true
+-	fi
+-
+-	pathcomp="${pathcomp}/"
+-done
+-fi
+-
+-if [ x"$dir_arg" != x ]
+-then
+-	$doit $instcmd $dst &&
+-
+-	if [ x"$chowncmd" != x ]; then $doit $chowncmd $dst; else true ; fi &&
+-	if [ x"$chgrpcmd" != x ]; then $doit $chgrpcmd $dst; else true ; fi &&
+-	if [ x"$stripcmd" != x ]; then $doit $stripcmd $dst; else true ; fi &&
+-	if [ x"$chmodcmd" != x ]; then $doit $chmodcmd $dst; else true ; fi
+-else
+-
+-# If we're going to rename the final executable, determine the name now.
+-
+-	if [ x"$transformarg" = x ] 
+-	then
+-		dstfile=`basename $dst`
+-	else
+-		dstfile=`basename $dst $transformbasename | 
+-			sed $transformarg`$transformbasename
+-	fi
+-
+-# don't allow the sed command to completely eliminate the filename
+-
+-	if [ x"$dstfile" = x ] 
+-	then
+-		dstfile=`basename $dst`
+-	else
+-		true
+-	fi
+-
+-# Make a temp file name in the proper directory.
+-
+-	dsttmp=$dstdir/#inst.$$#
+-
+-# Move or copy the file name to the temp name
+-
+-	$doit $instcmd $src $dsttmp &&
+-
+-	trap "rm -f ${dsttmp}" 0 &&
+-
+-# and set any options; do chmod last to preserve setuid bits
+-
+-# If any of these fail, we abort the whole thing.  If we want to
+-# ignore errors from any of these, just make sure not to ignore
+-# errors from the above "$doit $instcmd $src $dsttmp" command.
+-
+-	if [ x"$chowncmd" != x ]; then $doit $chowncmd $dsttmp; else true;fi &&
+-	if [ x"$chgrpcmd" != x ]; then $doit $chgrpcmd $dsttmp; else true;fi &&
+-	if [ x"$stripcmd" != x ]; then $doit $stripcmd $dsttmp; else true;fi &&
+-	if [ x"$chmodcmd" != x ]; then $doit $chmodcmd $dsttmp; else true;fi &&
+-
+-# Now rename the file to the real destination.
+-
+-	$doit $rmcmd -f $dstdir/$dstfile &&
+-	$doit $mvcmd $dsttmp $dstdir/$dstfile 
+-
+-fi &&
+-
+-
+-exit 0
+diff --git a/src/headers/message.h b/src/headers/message.h
+index 9a869a4..8344163 100644
+--- a/src/headers/message.h
++++ b/src/headers/message.h
+@@ -62,7 +62,7 @@
+ /* messages */
+ 
+ /* info */
+-#define GPM_MESS_VERSION            "gpm " GPM_RELEASE " git:" GPM_RELEASE_GIT ", " GPM_RELEASE_DATE
++#define GPM_MESS_VERSION            "gpm " PACKAGE_VERSION " git:" GPM_RELEASE_GIT ", " GPM_RELEASE_DATE
+ #define GPM_MESS_STARTED            "Started gpm successfully. Entered daemon mode."
+ #define GPM_MESS_KILLED             "Killed gpm(%d)."
+ #define GPM_MESS_SKIP_DATA          "Skipping a data packet (?)"
+diff --git a/src/lib/libxtra.c b/src/lib/libxtra.c
+index 8ea119c..fa5471a 100644
+--- a/src/lib/libxtra.c
++++ b/src/lib/libxtra.c
+@@ -38,7 +38,7 @@
+  * these two functions return version information
+  */
+ 
+-static char *gpml_ver_s=GPM_RELEASE;
++static char *gpml_ver_s=PACKAGE_VERSION;
+ static int  gpml_ver_i = 0;
+ 
+ char *Gpm_GetLibVersion(int *where)

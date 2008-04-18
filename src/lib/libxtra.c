@@ -38,7 +38,7 @@
  * these two functions return version information
  */
 
-static char *gpml_ver_s=GPM_RELEASE;
+static char *gpml_ver_s=PACKAGE_VERSION;
 static int  gpml_ver_i = 0;
 
 char *Gpm_GetLibVersion(int *where)
