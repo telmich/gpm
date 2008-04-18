@@ -48,9 +48,9 @@ install-exec: installdirs
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) $(STRIP)' -C src install
 
 installdirs:
-	$(MKDIR) $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
+	@MKDIR_P@ $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
 	if test "x@ELISP@" != "x" ; then \
-		$(MKDIR) $(lispdir) ; \
+		@MKDIR_P@ $(lispdir) ; \
 	fi
 
 ### GENERIC

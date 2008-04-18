@@ -58,8 +58,6 @@ AR                = ar
 ETAGS             = etags
 AWK               = awk
 CP                = cp -a
-MKDIR             = mkdir -p # linux specific, but who cares ?
-                             # gpm is linux specific, too.
 RM                = rm
 
 
