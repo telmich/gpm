@@ -184,7 +184,7 @@ clean:
 	$(PROG)		\
 	$(RDEPS) 	\
 	$(SRCSP)		\
-	core *~ prog/gpm-root.c Makefile.drivers.generated
+	core *~ prog/gpm-root.c Makefile.drivers.generated prog/open_console.o
 	find . -name \*.d -exec rm {} \;
 
 distclean: clean
