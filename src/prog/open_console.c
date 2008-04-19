@@ -21,6 +21,7 @@
 
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
+#include <unistd.h>
 
 int open_console(const int mode)
 {
