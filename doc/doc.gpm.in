@@ -39,7 +39,7 @@
 @format
 @dircategory Miscellaneous
 @direntry
-* Gpm: (gpm).   A server wich hands mouse events to non-X programs.
+* Gpm: (gpm).   Text-mode (non-X) mouse library and server daemon.
 @end direntry
 @end format
 @end ifinfo

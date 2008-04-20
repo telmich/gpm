@@ -57,6 +57,7 @@ all: $(srcdir)/gpm.info gpm.man
 	$(AWK) -f $(srcdir)/mktxt $< > $@
 
 # MAN (-)
+$(MANPAGES): gpm.man
 gpm.man: doc.gpm $(srcdir)/manpager
 	$(AWK) -f $(srcdir)/manpager doc.gpm
 	for i in gpm-root.1 gpm-types.7 gpm.8 mev.1 mouse-test.1; do \

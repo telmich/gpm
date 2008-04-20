@@ -124,7 +124,8 @@ install:	check
 	# headache in cases like this
 	if test "x@SHLIB@" != "x" ; then \
 		$(INSTALL_DATA) -m 644 lib/libgpm.so.@abi_full@ $(libdir)/libgpm.so.@abi_full@ ;\
-		cd $(libdir) && $(LN_S) -f libgpm.so.@abi_full@ libgpm.so ;\
+		cd $(libdir) && $(LN_S) -f libgpm.so.@abi_lev@ libgpm.so \
+		             && $(LN_S) -f libgpm.so.@abi_full@ libgpm.so.@abi_lev@ ;\
       echo "WARNING: We installed a lib, you should now call ldconfig" ; \
       echo "f.i.: ldconfig -n -l $(libdir)/libgpm.so.@abi_full@" ;\
       echo "Or to update everything just type ldconfig"; \
@@ -184,7 +185,7 @@ clean:
 	$(PROG)		\
 	$(RDEPS) 	\
 	$(SRCSP)		\
-	core *~ prog/gpm-root.c Makefile.drivers.generated
+	core *~ prog/gpm-root.c Makefile.drivers.generated prog/open_console.o
 	find . -name \*.d -exec rm {} \;
 
 distclean: clean

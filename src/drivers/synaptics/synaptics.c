@@ -830,9 +830,9 @@ static int           last_corner_action = GPM_B_NOT_SET;
 static int           last_finger_action = GPM_B_NOT_SET;
 static int           last_normal_button_actions[6] =
   {GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET};
-static int           last_stick_button_actions[3]  =
+static int           last_stick_button_actions[8]  =
   {GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET};
-static int           last_4_way_button_actions[4] =
+static int           last_4_way_button_actions[8] =
   {GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET,GPM_B_NOT_SET};
 
 /* toss status information */
@@ -1485,7 +1485,22 @@ static int syn_ps2_process_extended_packets( unsigned char *data,
   }
 
   /* Multiplexing with the stick (guest) device. */
-  state->buttons |= last_4_way_buttons | last_stick_buttons;
+  if (stick_pressure_enabled) {
+    tmp_buttons = report->pressure == 0 ? GPM_B_NONE : last_stick_buttons;
+    if (tmp_buttons || last_stick_buttons) {
+      tp_process_repeating_actions(state,tmp_buttons,last_stick_buttons,
+				   &last_stick_button_actions[0],stick_actions);
+      last_stick_buttons = tmp_buttons;
+    }
+  }
+  if (four_way_button_enabled) {
+    tmp_buttons = report->pressure == 0 ? GPM_B_NONE : last_4_way_buttons;
+    if (tmp_buttons || last_4_way_buttons) {
+      tp_process_repeating_actions(state,tmp_buttons,last_4_way_buttons,
+				   &last_4_way_button_actions[0],four_button_actions);
+      last_4_way_buttons = tmp_buttons;
+    }
+  }
 
   return 0;
 }
