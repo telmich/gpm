@@ -74,9 +74,20 @@ You can get the latest development tree of gpm via git:
 
 There are three branches available:
 
-   master: Contains the latest gpm1 code, may be broken.
-   gpm-1-stable: Contains the latest stable source code.
-   gpm-2-dev: Contains work that heads to gpm2.
+   master:
+      Contains the latest gpm1 code, may be broken.
+      This is were untested code for gpm1 should go to.
+   gpm-1-stable:
+      Contains the latest stable source code of gpm1.
+      Always compiles and runs, code is tested.
+      Contents of this branch should always be merged
+      from the master branch.
+   gpm-2-dev:
+      Contains work that heads to gpm2.
+      It is not stable, does not need to compile.
+   gpm-2-stable:
+      Same as gpm-1-stable for gpm2 and mergebase is
+      gpm-2-dev.
 
 You can browse the git-tree via gitweb:
 
