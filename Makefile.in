@@ -19,7 +19,7 @@ include Makefile.include
 # user-overridable flags, but it's also all the implicit rule looks at.
 # missing ?
 
-SUBDIRS = src doc contrib
+SUBDIRS = src doc contrib gpm2
 
 ### simple, but effective rules
 
@@ -90,7 +90,7 @@ D_DIR=$(D_BASE)/archives/
 D_SOURCE=$(D_BASE)/browse_source/
 
 # configure headers, produce new configure script
-distconf: configure.in aclocal.m4
+distconf: configure.ac aclocal.m4
 	autoheader && autoconf
 
 ../gpm-$(release).tar: $(srcdir)
@@ -108,8 +108,9 @@ distconf: configure.in aclocal.m4
 	lzma -9 -c $^ > $@
 
 # 3. Put package together into .tar.gz and .tar.bz2
-#dist: distclean distconf gpm-$(release).tar.bz2 gpm-$(release).tar.gz
 dist: disttest distclean distconf $(TARS)
+
+distcopy: dist
 	chmod 0644 $(TARS)
 	scp $(TARS) $(D_HOST):$(D_DIR)
 	ssh "$(D_HOST)" "tar xvfz $(D_DIR)/gpm-$(release).tar.gz -C $(D_SOURCE)"
@@ -126,8 +127,6 @@ disttest: distconf clean
 distclean: clean do-clean do-distclean
 	rm -f config.log config.status config.cache Makefile Makefile.include
 	rm -rf autom4te.cache 
-	rm -rf gpm-$(release) gpm-$(release).tar.bz2 gpm-$(release).tar.gz
-	rm -f src/$(DEPFILE)
 
 allclean: do-allclean distclean
 	rm -f configure

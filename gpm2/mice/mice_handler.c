@@ -29,7 +29,7 @@
 
 
 #include "gpm2-daemon.h"
-#include "tmp/protocols.h"
+//#include "tmp/protocols.h"
 
 int mice_handler()
 {
@@ -41,7 +41,7 @@ int mice_handler()
     *    * decoded channel (unidirectional)
     *    * control channel (bidirectional)
     */
-   init_mice_handler();
+ //  init_mice_handler();
 
    /* init_mice:
     *
@@ -56,8 +56,8 @@ int mice_handler()
    /* dirty hack */
    int ps2test = open("/dev/psaux",O_RDWR);
 
-   gpm2_open_ps2(ps2test);
-   gpm2_decode_ps2(ps2test);
+   // gpm2_open_ps2(ps2test);
+   // gpm2_decode_ps2(ps2test);
 
    close(ps2test);
 

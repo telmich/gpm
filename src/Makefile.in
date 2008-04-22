@@ -27,6 +27,7 @@ GSRC = mice.c \
 		daemon/processrequest.c daemon/selection_copy.c daemon/selection_paste.c\
 		daemon/cmdline.c daemon/loadlut.c daemon/find_mouse_by_name.c				\
 		daemon/usage.c daemon/check_uniqueness.c 											\
+		gpm2/become_daemon.c																		\
 		daemon/startup.c daemon/wait_text.c
 
 # mouse-test and gpm

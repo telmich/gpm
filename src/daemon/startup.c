@@ -32,6 +32,7 @@
 #include "gpmInt.h"
 #include "message.h"
 #include "daemon.h"
+#include "gpm2-import.h"
 
 void startup(int argc, char **argv)
 {
@@ -141,24 +142,15 @@ void startup(int argc, char **argv)
    }
 
    if(option.run_status == GPM_RUN_STARTUP ) { /* else is debugging */
-      /* goto background and become a session leader (Stefan Giessler) */
-      switch(fork()) {
-         case -1: gpm_report(GPM_PR_OOPS,GPM_MESS_FORK_FAILED);   /* error  */
-         case  0: option.run_status = GPM_RUN_DAEMON; break;      /* child  */
-         default: _exit(0);                                       /* parent */
+      if(!become_daemon()) {
+         gpm_report(GPM_PR_OOPS, GPM_MESS_FORK_FAILED);
       }
-
-      if (setsid() < 0) gpm_report(GPM_PR_OOPS,GPM_MESS_SETSID_FAILED);
    }
+   option.run_status = GPM_RUN_DAEMON;
 
    /* damon init: check whether we run or not, display message */
    check_uniqueness();
    gpm_report(GPM_PR_INFO,GPM_MESS_STARTED);
-
-   /* is changing to root needed, because of relative paths ? or can we just
-    * remove and ignore it ?? FIXME */
-   if (chdir("/") < 0) gpm_report(GPM_PR_OOPS,GPM_MESS_CHDIR_FAILED);
-
 
    //return mouse_table[1].fd; /* the second is handled in the main() */
 

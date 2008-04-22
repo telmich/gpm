@@ -33,6 +33,7 @@ struct gpm2_options {
 } opts;
 
 /* functions */
+int   become_daemon();
 int   commandline(int argc, char **argv);
 int   mice_handler();
 int   read_config(char *cconfig);
