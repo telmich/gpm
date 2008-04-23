@@ -82,8 +82,9 @@ TAGS:	$(SRCS) $(HDRS) src/prog/gpm-root.y do-TAGS
 	cd $(srcdir) && $(ETAGS) -o TAGS $(SRCS) $(HDRS) src/prog/gpm-root.y
 
 ### RELEASE STUFF
-TARS  =../gpm-$(release).tar.gz
+TARS :=../gpm-$(release).tar.gz
 TARS +=../gpm-$(release).tar.bz2 ../gpm-$(release).tar.lzma
+CHKSUMS := $(TARS:=.sha512sum)
 D_HOST=home.schottelius.org
 D_BASE=www/org/schottelius/unix/www/gpm
 D_DIR=$(D_BASE)/archives/
@@ -107,12 +108,15 @@ distconf: configure.ac aclocal.m4
 ../gpm-$(release).tar.lzma:  ../gpm-$(release).tar
 	lzma -9 -c $^ > $@
 
+$(CHKSUMS): $(TARS)
+	for file in $^; do sha512sum $$file > $${file}.sha512sum; done
+
 # 3. Put package together into .tar.gz and .tar.bz2
-dist: disttest distclean distconf $(TARS)
+dist: disttest distclean distconf $(CHKSUMS)
 
 distcopy: dist
-	chmod 0644 $(TARS)
-	scp $(TARS) $(D_HOST):$(D_DIR)
+	chmod 0644 $(TARS) $(CHKSUMS)
+	scp $(TARS) $(CHKSUMS) $(D_HOST):$(D_DIR)
 	ssh "$(D_HOST)" "tar xvfz $(D_DIR)/gpm-$(release).tar.gz -C $(D_SOURCE)"
 	ssh "$(D_HOST)" "find \"$(D_SOURCE)/\" -type f -exec chmod 0644 {} \\;"
 	ssh "$(D_HOST)" "find \"$(D_SOURCE)/\" -type d -exec chmod 0755 {} \\;"
