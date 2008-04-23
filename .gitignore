@@ -48,4 +48,4 @@ Makefile.include
 /.gitversion
 
 # gpm2
-/gpm2/out/
+/gpm2/out/*
