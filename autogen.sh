@@ -2,7 +2,7 @@
 
 [ -d config ] || mkdir config
 git-rev-parse --short HEAD > .gitversion
-date +%Y%m%d\ %T\ %z > .builddate
+date +%Y%m%d\ %T\ %z > .releasedate
 ${ACLOCAL-aclocal} -I config
 ${LIBTOOLIZE-libtoolize} --force --copy
 ${AUTOHEADER-autoheader}

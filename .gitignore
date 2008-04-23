@@ -43,6 +43,9 @@ Makefile.include
 /doc/gpm.man
 /doc/mev.1
 /doc/mouse-test.1
-.releasedate
-.gitversion
-gpm2/out/
+
+/.releasedate
+/.gitversion
+
+# gpm2
+/gpm2/out/
