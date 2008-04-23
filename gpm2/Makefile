@@ -74,6 +74,7 @@ OBJ=
 Makefile: .configured
 
 .configured: conf/*
+	@mkdir -p tmp
 	@./scripts/generate_cbuiltconfig.sh conf
 
 $(CINIT_OBJ): $(CONFIG_H)
