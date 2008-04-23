@@ -3,7 +3,7 @@
 # Copyright 1994,1997  rubini@linux.it
 # Copyright 1997       dickey@clark.net
 # Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
-# Copyright (C) 2001 Nico Schottelius <nico@schottelius.org>
+# Copyright (C) 2001-2008 Nico Schottelius <nico-gpm2008 schottelius.org>
 #
 
 SHELL = /bin/sh
@@ -96,7 +96,7 @@ distconf: configure.ac aclocal.m4
 ../gpm-$(release).tar: $(srcdir)
 	# no exclude possible of .git with pax it seems
 	#pax -w -x ustar -s '/^\./gpm-$(release)/' -w . -f $@
-	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w *
+	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w .gitignore .gitversion .releasedate *
 
 ../gpm-$(release).tar.gz:  ../gpm-$(release).tar
 	gzip -9 -c $^ > $@

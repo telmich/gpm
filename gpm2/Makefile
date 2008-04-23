@@ -24,7 +24,18 @@ BIN=cinit
 #
 # End user targets
 #
-all: out/gpm2-daemon
+all: $(PROGS)
+
+#
+# Programs
+#
+
+PROGS=out/gpm2-daemon
+
+out/gpm2-daemon: $(GPM2_DAEMON_OBJECTS) $(GPM2_DAEMON_PROTOCOLS)
+	$(LD) -o $@ $^
+
+
 
 
 #
@@ -47,14 +58,6 @@ CLIENT=
 COMMUNICATION=
 
 OBJ=
-
-#
-# Programs
-#
-
-out/gpm2-daemon: $(GPM2_DAEMON_OBJECTS) $(GPM2_DAEMON_PROTOCOLS)
-	$(LD) -o $@ $^
-
 
 #
 # Generic
@@ -131,6 +134,6 @@ distclean: clean
 
 .PHONY: clean
 clean:
-	rm -f ../tmpbin/*.configured
-	rm -f $(BIN) $(CINIT_OBJ)
+	rm -f tmp/*
+	rm -f $(BIN) $(CINIT_OBJ) $(GPM2_DAEMON_OBJECTS)
 	rm -f test/*.o

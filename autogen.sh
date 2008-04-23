@@ -1,6 +1,8 @@
 #!/bin/sh -e
 
 [ -d config ] || mkdir config
+git-rev-parse --short HEAD > .gitversion
+date +%Y%m%d\ %T\ %z > .builddate
 ${ACLOCAL-aclocal} -I config
 ${LIBTOOLIZE-libtoolize} --force --copy
 ${AUTOHEADER-autoheader}

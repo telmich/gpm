@@ -10,10 +10,10 @@ AC_CONFIG_HEADER([src/headers/config.h])
 
 AC_CANONICAL_HOST
 
-revgit="`git-rev-parse --short HEAD`"
-builddate="`date +%Y%m%d\ %T\ %z`"
+revgit="`cat .gitversion`"
+releasedate="`cat .releasedate`"
 AC_DEFINE_UNQUOTED([GPM_RELEASE_GIT],["$revgit"],[git short revision])
-AC_DEFINE_UNQUOTED([GPM_RELEASE_DATE],["$builddate"],[build date])
+AC_DEFINE_UNQUOTED([GPM_RELEASE_DATE],["$releasedate"],[release date])
 
 dnl These are chosen so that we can switch to the libtool scheme
 dnl transparently.
