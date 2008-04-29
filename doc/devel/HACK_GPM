@@ -5,14 +5,14 @@ I assume you have a good idea or you did some good work you want to see in the
 main gpm tree. To make life easy for you and me, please follow the instructions:
 
    * if you send a patch, explain why it's needed
-   * if possible, please patch against latest cvs sources (see README)
+   * if possible, please patch against latest git sources (see README in top level directory)
    * if the patch introduces generally new things, explain how it works
    * use 3 spaces tabs in the source files (if you use tabs, look into
      contrib/scripts/replace_tab_with_3_spaces)
-   * if the patch is not big, use one file
-   * if you have to use more files, tar them
+   * Coding style is defined by this indent_script:
+      http://unix.schottelius.org/cgi-bin/gitweb.cgi?p=misc/nico-bin.git;a=tree
+   * make small patch files
    * include directory structure (src/mice.c and not mice.c)
-   * everything fine ? So send the patch.
 
 Thanks for your help,
 
