@@ -195,3 +195,7 @@ distclean: clean
 
 allclean: clean
 	rm -f headers/config.h.in
+
+### GPM2 integration
+gpm2/become_daemon.c: $(srcdir)/../gpm2/daemon/become_daemon.c
+	cp $^ $@
