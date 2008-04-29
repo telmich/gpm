@@ -38,7 +38,6 @@ int processConn(int fd)
    Gpm_Cinfo *next;
    int vc, newfd;
 
-   int len;
    socklen_t len;
    struct sockaddr_un addr;
    struct stat statbuf;
