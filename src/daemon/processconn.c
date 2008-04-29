@@ -38,13 +38,9 @@ int processConn(int fd)
    Gpm_Cinfo *next;
    int vc, newfd;
 
-#if !defined(__GLIBC__)
    int len;
-#else                           /* __GLIBC__ */
-   size_t len;                  /* isn't that generally defined in C ??? --
-                                 * nico */
-#endif                          /* __GLIBC__ */
-   struct sockaddr_un addr;     /* reuse this each time */
+   socklen_t len;
+   struct sockaddr_un addr;
    struct stat statbuf;
    uid_t uid;
    char *tty = NULL;
