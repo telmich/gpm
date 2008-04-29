@@ -48,11 +48,6 @@
 
 #include "daemon.h"             /* clean daemon header */
 
-/* who the f*** runs gpm without glibc? doesn't have dietlibc __socklent_t? */
-#if !defined(__GLIBC__)
-typedef unsigned int __socklen_t;
-#endif                          /* __GLIBC__ */
-
 /* global variables that are in daemon.h */
 struct options option;          /* one should be enough for us */
 Gpm_Type *repeated_type = 0;
