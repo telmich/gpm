@@ -104,7 +104,7 @@ prog/%:	prog/%.o
 # FIXME: add absolute path of source files below
 $(OBJECTS): headers/drivers.h
 
-headers/drivers.h: $(GDRIVERS)
+headers/drivers.h: $(GDRIVERS) ../scripts/generate_drivers_header.sh
 	../scripts/generate_drivers_header.sh . > $@
 
 #-include $(SRCSP)

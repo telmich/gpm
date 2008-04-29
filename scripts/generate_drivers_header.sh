@@ -35,8 +35,17 @@ eof
 
 (
    grep -h "^int M_"    drivers/*/m.c
-   grep -h "^Gpm_Type"  drivers/*/i.c
+   #grep -h "^Gpm_Type"  drivers/*/i.c
+   # they have line breaks :-(
+   cat drivers/*/i.c |  \
+      awk 'BEGIN { RS="{"; }
+            /Gpm_Type \*I_/ {
+               idx=index($0,"Gpm_Type *I_");
+               func=substr($0, idx);
+               gsub(/\n/, " ", func);
+               print func
+            }'
    grep -h "^int R_"    drivers/*/r.c
-) | sed 's/$/;/'
+) | sed -e '/^$/d' -e 's/$/;/' -e 's/  */ /g'
 
 echo "#endif"
