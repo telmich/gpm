@@ -186,6 +186,7 @@ clean:
 	$(PROG)		\
 	$(RDEPS) 	\
 	$(SRCSP)		\
+	gpm2/*		\
 	core *~ prog/gpm-root.c Makefile.drivers.generated prog/open_console.o \
 	headers/config.h.in~
 	find . -name \*.d -exec rm {} \;

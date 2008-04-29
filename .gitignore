@@ -49,3 +49,4 @@ Makefile.include
 
 # gpm2
 /gpm2/out/*
+src/gpm2/*
