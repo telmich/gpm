@@ -1,3 +1,4 @@
+
 /*
  * disable-paste.c - trivial program to stop gpm from pasting the
  * current selection until the next user action
@@ -36,22 +37,25 @@
 
 int main()
 {
-  Gpm_Connect conn;
-  const int len = sizeof(Gpm_Connect);
-  int exit_status = 0;
-  conn.eventMask = (unsigned short)(-1); conn.defaultMask = 0;
-  conn.minMod = 0; conn.maxMod = (unsigned short)(-1);
+   Gpm_Connect conn;
+   const int len = sizeof(Gpm_Connect);
+   int exit_status = 0;
 
-  if (0 > Gpm_Open(&conn,0)) {
-    fprintf(stderr,"disable-paste: cannot open mouse connection\n");
-    exit(1);
-  }
-  conn.vc = GPM_REQ_NOPASTE;
-  conn.pid = 0;
-  if (len > write(gpm_fd, &conn, len)) {
-    fprintf(stderr,"disable-paste: cannot write request\n");
-    exit_status = 2;
-  }
-  Gpm_Close();
-  exit(exit_status);
+   conn.eventMask = (unsigned short) (-1);
+   conn.defaultMask = 0;
+   conn.minMod = 0;
+   conn.maxMod = (unsigned short) (-1);
+
+   if(0 > Gpm_Open(&conn, 0)) {
+      fprintf(stderr, "disable-paste: cannot open mouse connection\n");
+      exit(1);
+   }
+   conn.vc = GPM_REQ_NOPASTE;
+   conn.pid = 0;
+   if(len > write(gpm_fd, &conn, len)) {
+      fprintf(stderr, "disable-paste: cannot write request\n");
+      exit_status = 2;
+   }
+   Gpm_Close();
+   exit(exit_status);
 }

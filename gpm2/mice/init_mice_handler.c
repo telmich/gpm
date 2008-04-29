@@ -1,3 +1,4 @@
+
 /*
  * gpm2 - mouse driver for the console
  *
@@ -25,15 +26,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>        /* close */
-
+#include <unistd.h>             /* close */
 
 #include "gpm2-daemon.h"
 #include "tmp/protocols.h"
 
 int init_mice_handler()
 {
-   /* open connections: pipes */
+   /*
+    * open connections: pipes 
+    */
 
    return 1;
 }

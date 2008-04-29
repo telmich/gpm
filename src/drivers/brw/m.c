@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,27 +20,33 @@
  *
  ********/
 
-#include "mice.h"                   /* Gpm_type         */
-#include "message.h"                /* messaging         */
+#include "mice.h"               /* Gpm_type */
+#include "message.h"            /* messaging */
 
 /* M_brw is a variant of m$ 'Intellimouse' the middle button is different */
-int M_brw(Gpm_Event *state,  unsigned char *data)
+int M_brw(Gpm_Event * state, unsigned char *data)
 {
-   state->buttons= ((data[0] & 0x20) >> 3)   /* left */
-      | ((data[3] & 0x20) >> 4)   /* middle */
-      | ((data[0] & 0x10) >> 4);   /* right */
-   state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
-   state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
-   if (((data[0]&0xC0) != 0x40)||
-      ((data[1]&0xC0) != 0x00)||
-      ((data[2]&0xC0) != 0x00)||
-      ((data[3]&0xC0) != 0x00)) {
-      gpm_report(GPM_PR_DEBUG,GPM_MESS_SKIP_DATAP,data[0],data[1],data[2],data[3]);
+   state->buttons = ((data[0] & 0x20) >> 3)     /* left */
+      |((data[3] & 0x20) >> 4)  /* middle */
+      |((data[0] & 0x10) >> 4); /* right */
+   state->dx = (signed char) (((data[0] & 0x03) << 6) | (data[1] & 0x3F));
+   state->dy = (signed char) (((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
+   if(((data[0] & 0xC0) != 0x40) ||
+      ((data[1] & 0xC0) != 0x00) ||
+      ((data[2] & 0xC0) != 0x00) || ((data[3] & 0xC0) != 0x00)) {
+      gpm_report(GPM_PR_DEBUG, GPM_MESS_SKIP_DATAP, data[0], data[1], data[2],
+                 data[3]);
       return -1;
    }
-   /* wheel (dz) is (data[3] & 0x0f) */
-   /* where is the side button? I can sort of detect it at 9600 baud */
-   /* Note this mouse is very noisy */
+   /*
+    * wheel (dz) is (data[3] & 0x0f) 
+    */
+   /*
+    * where is the side button? I can sort of detect it at 9600 baud 
+    */
+   /*
+    * Note this mouse is very noisy 
+    */
 
    return 0;
 }

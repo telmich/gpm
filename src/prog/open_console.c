@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -21,13 +22,14 @@
 
 #include <fcntl.h>
 
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
 
 int open_console(const int mode)
 {
    int fd;
-   if ((fd = open(option.consolename, mode)) < 0)
+
+   if((fd = open(option.consolename, mode)) < 0)
       gpm_report(GPM_PR_OOPS, GPM_MESS_OPEN, option.consolename);
    return fd;
 }

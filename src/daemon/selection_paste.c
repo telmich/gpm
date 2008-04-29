@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,31 +20,30 @@
  *
  ********/
 
-#include <time.h>                   /* time              */
-#include <fcntl.h>                  /* open              */
-#include <unistd.h>                 /* close             */
+#include <time.h>               /* time */
+#include <fcntl.h>              /* open */
+#include <unistd.h>             /* close */
 
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
 
 void selection_paste(void)
 {
-   char c=3;
+   char c = 3;
    int fd;
 
-   if (!opt_aged && (0 != opt_age_limit) &&
+   if(!opt_aged && (0 != opt_age_limit) &&
       (last_selection_time + opt_age_limit < time(0))) {
       opt_aged = 1;
    }
 
-   if (opt_aged) {
-      gpm_report(GPM_PR_DEBUG,GPM_MESS_SKIP_PASTE);
+   if(opt_aged) {
+      gpm_report(GPM_PR_DEBUG, GPM_MESS_SKIP_PASTE);
       return;
    }
 
-   fd=open_console(O_WRONLY);
+   fd = open_console(O_WRONLY);
    if(ioctl(fd, TIOCLINUX, &c) < 0)
-      gpm_report(GPM_PR_OOPS,GPM_MESS_IOCTL_TIOCLINUX);
+      gpm_report(GPM_PR_OOPS, GPM_MESS_IOCTL_TIOCLINUX);
    close(fd);
 }
-

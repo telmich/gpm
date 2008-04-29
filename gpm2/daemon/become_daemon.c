@@ -1,3 +1,4 @@
+
 /*
  * gpm2 - mouse driver for the console
  *
@@ -21,11 +22,11 @@
  *    Become a daemon
  ********/
 
-#include <fcntl.h>         /* open        */
-#include <unistd.h>        /* close/dup2  */
-#include <stdio.h>         /* perror      */
+#include <fcntl.h>              /* open */
+#include <unistd.h>             /* close/dup2 */
+#include <stdio.h>              /* perror */
 
-#include "gpm2-messages.h" /* GPM2_MESS_* */
+#include "gpm2-messages.h"      /* GPM2_MESS_* */
 
 #define NULL_DEV "/dev/null"
 
@@ -33,48 +34,54 @@ int become_daemon()
 {
    int fd;
 
-   /* fork */
-   switch(fork()) {
-      case -1:                                  /* error  */
+   /*
+    * fork 
+    */
+   switch (fork()) {
+      case -1:                 /* error */
          perror(GPM2_MESS_FORK);
          return 0;
          break;
-      case  0:                                  /* child  */
+      case 0:                  /* child */
          break;
       default:
-         _exit(0);                              /* parent */
-    }
+         _exit(0);              /* parent */
+   }
 
    /***************** child code ******************/
 
-   /* change fds */
+   /*
+    * change fds 
+    */
    fd = open(NULL_DEV, O_RDWR);
    if(fd == -1) {
       perror(GPM2_MESS_OPEN);
       return 0;
    }
 
-   if (setsid() == -1) {
+   if(setsid() == -1) {
       perror(GPM2_MESS_SETSID);
       return 0;
    }
-   if (chdir("/") == -1) {
+   if(chdir("/") == -1) {
       perror(GPM2_MESS_CHDIR);
       return 0;
    }
 
-
-   /* FIXME perhaps connect to syslog? */
-   if(dup2(fd, STDIN_FILENO)  == -1 ||
-      dup2(fd, STDOUT_FILENO) == -1 ||
-      dup2(fd, STDERR_FILENO) == -1) {
+   /*
+    * FIXME perhaps connect to syslog? 
+    */
+   if(dup2(fd, STDIN_FILENO) == -1 ||
+      dup2(fd, STDOUT_FILENO) == -1 || dup2(fd, STDERR_FILENO) == -1) {
       perror(GPM2_MESS_DUP2);
       return 0;
    }
 
    if(close(fd) == -1) {
-      /* makes no sense, as stderr is dead. use gpm2_report later
-      perror(GPM2_MESS_CLOSE); */
+      /*
+       * makes no sense, as stderr is dead. use gpm2_report later
+       * perror(GPM2_MESS_CLOSE); 
+       */
       return 0;
    }
 

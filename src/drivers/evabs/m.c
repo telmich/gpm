@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,33 +20,41 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
+#include "types.h"              /* Gpm_type */
 
-#include <linux/input.h>           /* FIXME: Linux specific: thisevent */
-#include <string.h>                 /* memcpy */
-
+#include <linux/input.h>        /* FIXME: Linux specific: thisevent */
+#include <string.h>             /* memcpy */
 
 #ifdef HAVE_LINUX_INPUT_H
-int M_evabs (Gpm_Event * state, unsigned char *data)
+int M_evabs(Gpm_Event * state, unsigned char *data)
 {
    struct input_event thisevent;
 
-   (void) memcpy (&thisevent, data, sizeof (struct input_event));
-   if (thisevent.type == EV_ABS) {
-      if (thisevent.code == ABS_X)
+   (void) memcpy(&thisevent, data, sizeof(struct input_event));
+   if(thisevent.type == EV_ABS) {
+      if(thisevent.code == ABS_X)
          state->x = thisevent.value;
-      else if (thisevent.code == ABS_Y)
+      else if(thisevent.code == ABS_Y)
          state->y = thisevent.value;
-   } else if (thisevent.type == EV_KEY) {
-      switch(thisevent.code) {
-         case BTN_LEFT:    state->buttons ^= GPM_B_LEFT;    break;
-         case BTN_MIDDLE:  state->buttons ^= GPM_B_MIDDLE;  break;
-         case BTN_RIGHT:   state->buttons ^= GPM_B_RIGHT;   break;
-         case BTN_SIDE:    state->buttons ^= GPM_B_MIDDLE;  break;
-         case BTN_TOUCH:   state->buttons ^= GPM_B_LEFT;    break;
+   } else if(thisevent.type == EV_KEY) {
+      switch (thisevent.code) {
+         case BTN_LEFT:
+            state->buttons ^= GPM_B_LEFT;
+            break;
+         case BTN_MIDDLE:
+            state->buttons ^= GPM_B_MIDDLE;
+            break;
+         case BTN_RIGHT:
+            state->buttons ^= GPM_B_RIGHT;
+            break;
+         case BTN_SIDE:
+            state->buttons ^= GPM_B_MIDDLE;
+            break;
+         case BTN_TOUCH:
+            state->buttons ^= GPM_B_LEFT;
+            break;
       }
    }
    return 0;
 }
-#endif /* HAVE_LINUX_INPUT_H */
-
+#endif                          /* HAVE_LINUX_INPUT_H */

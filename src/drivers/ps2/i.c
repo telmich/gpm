@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,22 +20,22 @@
  *
  ********/
 
-#include <unistd.h>                 /* usleep, write     */
-#include <termios.h>                /* termios           */
+#include <unistd.h>             /* usleep, write */
+#include <termios.h>            /* termios */
 
-#include "types.h"                  /* Gpm_type         */
+#include "types.h"              /* Gpm_type */
 
 /* standard ps2 */
-Gpm_Type *I_ps2(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
+Gpm_Type *I_ps2(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
+                char **argv)
 {
    static unsigned char s[] = { 246, 230, 244, 243, 100, 232, 3, };
 
-   flags = argc = 0; /* FIXME: 1.99.13 */
+   flags = argc = 0;            /* FIXME: 1.99.13 */
    argv = NULL;
 
-   write (fd, s, sizeof (s));
-   usleep (30000);
-   tcflush (fd, TCIFLUSH);
+   write(fd, s, sizeof(s));
+   usleep(30000);
+   tcflush(fd, TCIFLUSH);
    return type;
 }
-

@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,10 +20,10 @@
  *
  ********/
 
-#include <unistd.h>                 /* usleep            */
-#include <termios.h>                /* tcflush           */
+#include <unistd.h>             /* usleep */
+#include <termios.h>            /* tcflush */
 
-#include "mice.h"                   /* ‘GPM_AUX_ACK’     */
+#include "mice.h"               /* ‘GPM_AUX_ACK’ */
 
 /**
  * Writes the given data to the ps2-type mouse.
@@ -34,16 +35,20 @@ int write_to_mouse(int fd, unsigned char *data, size_t len)
 {
    unsigned int i;
    int error = 0;
-   for (i = 0; i < len; i++) {
+
+   for(i = 0; i < len; i++) {
       unsigned char c;
+
       write(fd, &data[i], 1);
       read(fd, &c, 1);
-      if (c != GPM_AUX_ACK) error++;
+      if(c != GPM_AUX_ACK)
+         error++;
    }
 
-   /* flush any left-over input */
-   usleep (30000);
-   tcflush (fd, TCIFLUSH);
-   return(error);
+   /*
+    * flush any left-over input 
+    */
+   usleep(30000);
+   tcflush(fd, TCIFLUSH);
+   return (error);
 }
-

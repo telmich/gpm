@@ -1,3 +1,4 @@
+
 /*
  * display-coords.c - a very simple gpm client
  *
@@ -31,52 +32,57 @@
  *
  */
 
-#include <unistd.h>           /* write, read, open    */
-#include <stdlib.h>           /* strtol()             */
-#include <stdio.h>            /* printf()             */
-#include <time.h>             /* time()               */
-#include <errno.h>            /* errno                */
-#include <gpm.h>              /* gpm information      */
+#include <unistd.h>             /* write, read, open */
+#include <stdlib.h>             /* strtol() */
+#include <stdio.h>              /* printf() */
+#include <time.h>               /* time() */
+#include <errno.h>              /* errno */
+#include <gpm.h>                /* gpm information */
 
 /* display resulting data */
-int display_data(Gpm_Event *event)
+int display_data(Gpm_Event * event)
 {
-   static time_t  last  = 0;
-   time_t         now   = time(NULL);
-   int            delta;
+   static time_t last = 0;
+   time_t now = time(NULL);
+   int delta;
 
    delta = now - last;
-   last  = now;
+   last = now;
 
-   /* display time, delta time */
-   printf("[%ld] delta: %ds",now,delta);
+   /*
+    * display time, delta time 
+    */
+   printf("[%ld] delta: %ds", now, delta);
 
-   /* display mouse information */
+   /*
+    * display mouse information 
+    */
    printf(": p=%d, l=%1d, m=%1d, r=%1d, clicks=%d\n",
-                                                event->type & GPM_DOWN,
-                                                event->buttons & GPM_B_LEFT,
-                                                event->buttons & GPM_B_MIDDLE,
-                                                event->buttons & GPM_B_RIGHT,
-                                                event->clicks);
+          event->type & GPM_DOWN,
+          event->buttons & GPM_B_LEFT,
+          event->buttons & GPM_B_MIDDLE,
+          event->buttons & GPM_B_RIGHT, event->clicks);
 
    return 0;
 }
 
 int main(int argc, char **argv)
 {
-   int            vc;                              /* argv: console number */
-   Gpm_Connect    conn;                            /* connection to gpm    */
-   fd_set         fds;
+   int vc;                      /* argv: console number */
+   Gpm_Connect conn;            /* connection to gpm */
+   fd_set fds;
 
-   /* select virtual console, 0 if not set */
-   vc = (argc == 2) ? strtol(argv[1],NULL,10) : 0;
+   /*
+    * select virtual console, 0 if not set 
+    */
+   vc = (argc == 2) ? strtol(argv[1], NULL, 10) : 0;
 
-   conn.eventMask    =  GPM_DRAG | GPM_DOWN | GPM_UP;
-   conn.defaultMask  = ~GPM_HARD; /* inverted GPM_HARD mask    */
-   conn.minMod       =  0;
-   conn.maxMod       = ~0;
+   conn.eventMask = GPM_DRAG | GPM_DOWN | GPM_UP;
+   conn.defaultMask = ~GPM_HARD;        /* inverted GPM_HARD mask */
+   conn.minMod = 0;
+   conn.maxMod = ~0;
 
-   if(Gpm_Open(&conn,vc) == -1) {
+   if(Gpm_Open(&conn, vc) == -1) {
       printf("Cannot connect to gpm!\n");
       return 1;
    }
@@ -87,16 +93,16 @@ int main(int argc, char **argv)
 
    printf("\tp=pressed (0=release)\n\tl=left\n\tm=middle\n\tr=right\n");
 
-
-   while(1) { /* read data */
+   while(1) {                   /* read data */
       FD_ZERO(&fds);
       FD_SET(gpm_fd, &fds);
 
-      if (select(gpm_fd+1, &fds, 0, 0, 0) < 0 && errno == EINTR)
+      if(select(gpm_fd + 1, &fds, 0, 0, 0) < 0 && errno == EINTR)
          continue;
-      if (FD_ISSET(gpm_fd, &fds)) {
+      if(FD_ISSET(gpm_fd, &fds)) {
          Gpm_Event evt;
-         if (Gpm_GetEvent(&evt) > 0) {
+
+         if(Gpm_GetEvent(&evt) > 0) {
             display_data(&evt);
          } else {
             printf("Gpm_GetEvent failed\n");
@@ -104,7 +110,7 @@ int main(int argc, char **argv)
       }
    }
 
-   Gpm_Close(); /* close connection */
+   Gpm_Close();                 /* close connection */
 
    return 0;
 }

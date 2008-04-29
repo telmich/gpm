@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,12 +20,12 @@
  *
  ********/
 
-#include <signal.h>                 /* kill              */
-#include <unistd.h>                 /* unlink            */
-#include <stdlib.h>                 /* exit              */
+#include <signal.h>             /* kill */
+#include <unistd.h>             /* unlink */
+#include <stdlib.h>             /* exit */
 
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
 
 /* itz Sat Sep 12 10:55:51 PDT 1998 Added this as replacement for the
    unwanted functionality in check_uniqueness. */
@@ -32,28 +33,36 @@
 void check_kill(void)
 {
    int old_pid;
-   FILE* fp = fopen(GPM_NODE_PID, "r");
+   FILE *fp = fopen(GPM_NODE_PID, "r");
 
-   /* if we cannot find the old pid file, leave */
-   if (fp == NULL) gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN, GPM_NODE_PID);
+   /*
+    * if we cannot find the old pid file, leave 
+    */
+   if(fp == NULL)
+      gpm_report(GPM_PR_OOPS, GPM_MESS_OPEN, GPM_NODE_PID);
 
-   /* else read the pid */
-   if (fscanf(fp,"%d",&old_pid) != 1)
-      gpm_report(GPM_PR_OOPS,GPM_MESS_READ_PROB,GPM_NODE_PID);
+   /*
+    * else read the pid 
+    */
+   if(fscanf(fp, "%d", &old_pid) != 1)
+      gpm_report(GPM_PR_OOPS, GPM_MESS_READ_PROB, GPM_NODE_PID);
    fclose(fp);
 
-   gpm_report(GPM_PR_DEBUG,GPM_MESS_KILLING,old_pid);
+   gpm_report(GPM_PR_DEBUG, GPM_MESS_KILLING, old_pid);
 
-   /* first check if we run */
-   if (kill(old_pid,0) == -1) {
-      gpm_report(GPM_PR_INFO,GPM_MESS_STALE_PID, GPM_NODE_PID);
+   /*
+    * first check if we run 
+    */
+   if(kill(old_pid, 0) == -1) {
+      gpm_report(GPM_PR_INFO, GPM_MESS_STALE_PID, GPM_NODE_PID);
       unlink(GPM_NODE_PID);
    }
-   /* then kill us (not directly, but the other instance ... ) */
-   if (kill(old_pid,SIGTERM) == -1)
-      gpm_report(GPM_PR_OOPS,GPM_MESS_CANT_KILL, old_pid);
+   /*
+    * then kill us (not directly, but the other instance ... ) 
+    */
+   if(kill(old_pid, SIGTERM) == -1)
+      gpm_report(GPM_PR_OOPS, GPM_MESS_CANT_KILL, old_pid);
 
-   gpm_report(GPM_PR_INFO,GPM_MESS_KILLED,old_pid);
+   gpm_report(GPM_PR_INFO, GPM_MESS_KILLED, old_pid);
    exit(0);
 }
-

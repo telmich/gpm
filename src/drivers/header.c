@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,6 +20,4 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
-
-
+#include "types.h"              /* Gpm_type */

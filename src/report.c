@@ -1,3 +1,4 @@
+
 /*
  * selects where we should report to
  * TODO: - possibly include errno (%m) string in syslog
@@ -21,17 +22,18 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>      /* NULL */
-#include <stdarg.h>     /* va_arg/start/... */
-#include <stdlib.h>     /* alloc & co. */
-#include <string.h>     /* strlen/strcpy */
-#include <sys/types.h>  /* these three are */
-#include <sys/stat.h>   /* needed for      */
-#include <unistd.h>     /* stat() */
+#include <stdio.h>              /* NULL */
+#include <stdarg.h>             /* va_arg/start/... */
+#include <stdlib.h>             /* alloc & co. */
+#include <string.h>             /* strlen/strcpy */
+#include <sys/types.h>          /* these three are */
+#include <sys/stat.h>           /* needed for */
+#include <unistd.h>             /* stat() */
 
 #include "gpmInt.h"
 #include "message.h"
-#include "daemon.h"   /* FIXME: this is wrong; we need report fpr lib und daemon */
+#include "daemon.h"             /* FIXME: this is wrong; we need report fpr lib 
+                                 * und daemon */
 
 /*
  * gpm_report
@@ -69,32 +71,34 @@
  *
  */
 
-void gpm_report(int line, char *file, int stat, char *text, ... )
+void gpm_report(int line, char *file, int stat, char *text, ...)
 {
    FILE *console = NULL;
    va_list ap, ap3;
+
 #ifdef HAVE_VSYSLOG
    va_list ap2;
 #endif
 
-   va_start(ap,text);
+   va_start(ap, text);
    va_copy(ap3, ap);
 #ifdef HAVE_VSYSLOG
    va_copy(ap2, ap);
 #endif
 
-   switch(option.run_status) {
+   switch (option.run_status) {
+
       /******************** STARTUP *****************/
       case GPM_RUN_STARTUP:
-         switch(stat) {
+         switch (stat) {
             case GPM_STAT_INFO:
 #ifdef HAVE_VSYSLOG
                syslog(LOG_INFO | LOG_USER, GPM_STRING_INFO);
                vsyslog(LOG_INFO | LOG_USER, text, ap2);
 #else
-               fprintf(stderr,GPM_STRING_INFO);
-               vfprintf(stderr,text,ap);
-               fprintf(stderr,"\n");
+               fprintf(stderr, GPM_STRING_INFO);
+               vfprintf(stderr, text, ap);
+               fprintf(stderr, "\n");
 #endif
                break;
 
@@ -103,9 +107,9 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
                syslog(LOG_DAEMON | LOG_WARNING, GPM_STRING_WARN);
                vsyslog(LOG_DAEMON | LOG_WARNING, text, ap2);
 #else
-               fprintf(stderr,GPM_STRING_WARN);
-               vfprintf(stderr,text,ap);
-               fprintf(stderr,"\n");
+               fprintf(stderr, GPM_STRING_WARN);
+               vfprintf(stderr, text, ap);
+               fprintf(stderr, "\n");
 #endif
                break;
 
@@ -114,9 +118,9 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_ERR);
                vsyslog(LOG_DAEMON | LOG_ERR, text, ap2);
 #else
-               fprintf(stderr,GPM_STRING_ERR);
-               vfprintf(stderr,text,ap);
-               fprintf(stderr,"\n");
+               fprintf(stderr, GPM_STRING_ERR);
+               vfprintf(stderr, text, ap);
+               fprintf(stderr, "\n");
 #endif
                break;
 
@@ -125,18 +129,19 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_OOPS);
                vsyslog(LOG_DAEMON | LOG_ERR, text, ap2);
 #endif
-               fprintf(stderr,GPM_STRING_OOPS);
-               vfprintf(stderr,text,ap);
-               fprintf(stderr,"\n");
+               fprintf(stderr, GPM_STRING_OOPS);
+               vfprintf(stderr, text, ap);
+               fprintf(stderr, "\n");
 
-               exit(1); /* we should have a oops()-function,but this works,too*/
+               exit(1);         /* we should have a oops()-function,but this
+                                 * works,too */
                break;
          }
-         break; /* startup sequence */
+         break;                 /* startup sequence */
 
       /******************** RUNNING *****************/
       case GPM_RUN_DAEMON:
-         switch(stat) {
+         switch (stat) {
             case GPM_STAT_INFO:
 #ifdef HAVE_VSYSLOG
                syslog(LOG_INFO | LOG_USER, GPM_STRING_INFO);
@@ -149,10 +154,10 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
                syslog(LOG_DAEMON | LOG_WARNING, GPM_STRING_WARN);
                vsyslog(LOG_DAEMON | LOG_WARNING, text, ap2);
 #else
-               if((console = fopen(GPM_SYS_CONSOLE,"a")) != NULL) {
-                  fprintf(console,GPM_STRING_WARN);
-                  vfprintf(console,text,ap);
-                  fprintf(console,"\n");
+               if((console = fopen(GPM_SYS_CONSOLE, "a")) != NULL) {
+                  fprintf(console, GPM_STRING_WARN);
+                  vfprintf(console, text, ap);
+                  fprintf(console, "\n");
                   fclose(console);
                }
 #endif
@@ -163,17 +168,17 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_ERR);
                vsyslog(LOG_DAEMON | LOG_ERR, text, ap2);
 #else
-               if((console = fopen(GPM_SYS_CONSOLE,"a")) != NULL) {
-                  fprintf(console,GPM_STRING_ERR);
-                  vfprintf(console,text,ap);
-                  fprintf(console,"\n");
+               if((console = fopen(GPM_SYS_CONSOLE, "a")) != NULL) {
+                  fprintf(console, GPM_STRING_ERR);
+                  vfprintf(console, text, ap);
+                  fprintf(console, "\n");
                   fclose(console);
                }
 
-               if((console = fopen(option.consolename,"a")) != NULL) {
-                  fprintf(console,GPM_STRING_ERR);
-                  vfprintf(console,text,ap3);
-                  fprintf(console,"\n");
+               if((console = fopen(option.consolename, "a")) != NULL) {
+                  fprintf(console, GPM_STRING_ERR);
+                  vfprintf(console, text, ap3);
+                  fprintf(console, "\n");
                   fclose(console);
                }
 #endif
@@ -184,50 +189,55 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_OOPS);
                vsyslog(LOG_DAEMON | LOG_ERR, text, ap2);
 #endif
-               fprintf(stderr,GPM_STRING_OOPS);
-               vfprintf(stderr,text,ap);
-               fprintf(stderr,"\n");
+               fprintf(stderr, GPM_STRING_OOPS);
+               vfprintf(stderr, text, ap);
+               fprintf(stderr, "\n");
 
-               _exit(1); /* we are the fork()-child */
+               _exit(1);        /* we are the fork()-child */
                break;
          }
-         break; /* running gpm */
+         break;                 /* running gpm */
 
       /******************** DEBUGGING and CLIENT *****************/
       case GPM_RUN_DEBUG:
-         switch(stat) {
+         switch (stat) {
             case GPM_STAT_INFO:
                console = stdout;
-               fprintf(console,GPM_STRING_INFO); break;
+               fprintf(console, GPM_STRING_INFO);
+               break;
             case GPM_STAT_WARN:
                console = stderr;
-               fprintf(console,GPM_STRING_WARN); break;
+               fprintf(console, GPM_STRING_WARN);
+               break;
             case GPM_STAT_ERR:
                console = stderr;
-               fprintf(console,GPM_STRING_ERR); break;
+               fprintf(console, GPM_STRING_ERR);
+               break;
             case GPM_STAT_DEBUG:
                console = stderr;
-               fprintf(console,GPM_STRING_DEBUG); break;
+               fprintf(console, GPM_STRING_DEBUG);
+               break;
             case GPM_STAT_OOPS:
                console = stderr;
-               fprintf(console,GPM_STRING_OOPS); break;
+               fprintf(console, GPM_STRING_OOPS);
+               break;
          }
 
-         vfprintf(console,text,ap);
-         fprintf(console,"\n");
+         vfprintf(console, text, ap);
+         fprintf(console, "\n");
 
-         if(stat == GPM_STAT_OOPS) exit(1);
+         if(stat == GPM_STAT_OOPS)
+            exit(1);
 
          break;
-   } /* switch for current modus */
+   }                            /* switch for current modus */
 
    va_end(ap);
    va_end(ap3);
 #ifdef HAVE_VSYSLOG
    va_end(ap2);
 #endif
-} /* gpm_report */
-
+}                               /* gpm_report */
 
 /* old interesting part from debuglog.c.
  * interesting, if you want to include ERRNO into syslog message

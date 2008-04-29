@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,10 +20,10 @@
  *
  ********/
 
-#include <string.h>        /* str*     */
-#include <stdlib.h>        /* calloc   */
+#include <string.h>             /* str* */
+#include <stdlib.h>             /* calloc */
 
-#include "message.h"        /* messaging in gpm */
+#include "message.h"            /* messaging in gpm */
 
 /* build_argv is used for mouse initialization routines */
 char **build_argv(char *argv0, char *str, int *argcptr, char sep)
@@ -31,24 +32,32 @@ char **build_argv(char *argv0, char *str, int *argcptr, char sep)
    char **argv;
    char *s;
 
-   /* argv0 is never NULL, but the extra string may well be */
-   if (str)
-      for (s=str; sep && (s = strchr(s, sep)); argc++) s++;
+   /*
+    * argv0 is never NULL, but the extra string may well be 
+    */
+   if(str)
+      for(s = str; sep && (s = strchr(s, sep)); argc++)
+         s++;
 
-   argv = calloc(argc+2, sizeof(char **));
-   if (!argv) gpm_report(GPM_PR_OOPS,GPM_MESS_ALLOC_FAILED);
+   argv = calloc(argc + 2, sizeof(char **));
+   if(!argv)
+      gpm_report(GPM_PR_OOPS, GPM_MESS_ALLOC_FAILED);
    argv[0] = argv0;
 
-   if (!str) {
-      *argcptr = argc; /* 1 */
+   if(!str) {
+      *argcptr = argc;          /* 1 */
       return argv;
    }
-   /* else, add arguments */
+   /*
+    * else, add arguments 
+    */
    s = argv[1] = strdup(str);
-   argc = 2; /* first to fill */
+   argc = 2;                    /* first to fill */
 
-   /* ok, now split: the first one is in place, and s is the whole string */
-   for ( ; sep && (s = strchr(s, sep)) ; argc++) {
+   /*
+    * ok, now split: the first one is in place, and s is the whole string 
+    */
+   for(; sep && (s = strchr(s, sep)); argc++) {
       *s = '\0';
       s++;
       argv[argc] = s;

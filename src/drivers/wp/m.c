@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,15 +20,14 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
-#include "daemon.h"                 /* which_mouse       */
-#include "mice.h"                   /* REALPOS           */
-
+#include "types.h"              /* Gpm_type */
+#include "daemon.h"             /* which_mouse */
+#include "mice.h"               /* REALPOS */
 
 /*  Genius Wizardpad tablet  --  Matt Kimball (mkimball@xmission.com)  */
 int wizardpad_width = -1;
 int wizardpad_height = -1;
-int M_wp(Gpm_Event *state,  unsigned char *data)
+int M_wp(Gpm_Event * state, unsigned char *data)
 {
    int x, y, pressure;
 
@@ -41,10 +41,11 @@ int M_wp(Gpm_Event *state,  unsigned char *data)
 
    pressure = ((data[9] & 0x0f) << 4) | (data[8] & 0x0f);
 
-   state->buttons=
-      (pressure >= 0x20) * GPM_B_LEFT +
-      !!(data[1] & 0x02) * GPM_B_RIGHT +
-      /* the 0x08 bit seems to catch either of the extra buttons... */
+   state->buttons =
+      (pressure >= 0x20) * GPM_B_LEFT + !!(data[1] & 0x02) * GPM_B_RIGHT +
+      /*
+       * the 0x08 bit seems to catch either of the extra buttons... 
+       */
       !!(data[1] & 0x08) * GPM_B_MIDDLE;
 
    return 0;

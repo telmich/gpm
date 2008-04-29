@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -23,4 +24,3 @@ int isodigit(const unsigned char c)
 {
    return ((c & ~7) == '0');
 }
-

@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,12 +20,11 @@
  *
  ********/
 
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
 
 void disable_paste(int vc)
 {
    opt_aged++;
-   gpm_report(GPM_PR_INFO,GPM_MESS_DISABLE_PASTE,vc);
+   gpm_report(GPM_PR_INFO, GPM_MESS_DISABLE_PASTE, vc);
 }
-

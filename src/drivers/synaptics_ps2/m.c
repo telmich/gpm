@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,14 +20,12 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
-#include "synaptics.h"              /* synaptics support */
-
+#include "types.h"              /* Gpm_type */
+#include "synaptics.h"          /* synaptics support */
 
 /* Synaptics TouchPad mouse emulation (Henry Davies) */
-int M_synaptics_ps2(Gpm_Event *state,  unsigned char *data)
+int M_synaptics_ps2(Gpm_Event * state, unsigned char *data)
 {
    syn_process_ps2_data(state, data);
    return 0;
 }
-

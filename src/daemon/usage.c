@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,17 +20,16 @@
  *
  ********/
 
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
 
 int usage(char *whofailed)
 {
-   if (whofailed) {
-      gpm_report(GPM_PR_ERR,GPM_MESS_SPEC_ERR,whofailed,option.progname);
+   if(whofailed) {
+      gpm_report(GPM_PR_ERR, GPM_MESS_SPEC_ERR, whofailed, option.progname);
       return 1;
    }
-   printf(GPM_MESS_USAGE,option.progname, DEF_ACCEL, DEF_BAUD, DEF_SEQUENCE,
-   DEF_DELTA, DEF_TIME, DEF_LUT,DEF_SCALE, DEF_SAMPLE, DEF_TYPE);
+   printf(GPM_MESS_USAGE, option.progname, DEF_ACCEL, DEF_BAUD, DEF_SEQUENCE,
+          DEF_DELTA, DEF_TIME, DEF_LUT, DEF_SCALE, DEF_SAMPLE, DEF_TYPE);
    return 1;
 }
-

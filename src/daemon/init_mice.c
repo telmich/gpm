@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse support for Linux
  *
@@ -25,24 +26,27 @@
 #include "message.h"
 #include "daemon.h"
 
-#include <stdlib.h> /* malloc() */
+#include <stdlib.h>             /* malloc() */
 
 /* DESCR:   mice initialization. currently print mice. */
+
 /* RETURN:  0 - failed to init one or more devices
             1 - init was fine */
+
 /* COMMENT: does error handling and exiting itself */
 int init_mice(struct micetab *micelist)
 {
    struct micetab *tmp = micelist;
 
-   while(tmp != NULL) {           /* there are still mice to init */
-      gpm_report(GPM_PR_DEBUG,"initialize %s with proto %s",tmp->device,tmp->protocol);
+   while(tmp != NULL) {         /* there are still mice to init */
+      gpm_report(GPM_PR_DEBUG, "initialize %s with proto %s", tmp->device,
+                 tmp->protocol);
       if(tmp->options != NULL) {
-         gpm_report(GPM_PR_DEBUG,"and options %s",tmp->options);
+         gpm_report(GPM_PR_DEBUG, "and options %s", tmp->options);
       }
       tmp = tmp->next;
    }
 
-   gpm_report(GPM_PR_DEBUG,"finished initialization");
+   gpm_report(GPM_PR_DEBUG, "finished initialization");
    return 1;
 }

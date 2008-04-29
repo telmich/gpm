@@ -1,3 +1,4 @@
+
 /*
  * report-lib.c: the exported version of gpm_report. used in Gpm_Open and co.
  *
@@ -18,43 +19,54 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>      /* NULL */
-#include <stdarg.h>     /* va_arg/start/... */
-#include <stdlib.h>     /* exit() */
+#include <stdio.h>              /* NULL */
+#include <stdarg.h>             /* va_arg/start/... */
+#include <stdlib.h>             /* exit() */
 
 #include "message.h"
 
-void gpm_report(int line, char *file, int stat, char *text, ... )
+void gpm_report(int line, char *file, int stat, char *text, ...)
 {
    char *string = NULL;
    int log_level = LOG_DEBUG;
    va_list ap;
 
-   line = 0;      /* FIXME: gpm 1.99.13 */
+   line = 0;                    /* FIXME: gpm 1.99.13 */
    file = NULL;
 
-   va_start(ap,text);
+   va_start(ap, text);
 
-   switch(stat) {
-      case GPM_STAT_INFO : string = GPM_TEXT_INFO ;
-                           log_level = LOG_INFO; break;
-      case GPM_STAT_WARN : string = GPM_TEXT_WARN ;
-                           log_level = LOG_WARNING; break;
-      case GPM_STAT_ERR  : string = GPM_TEXT_ERR  ;
-                           log_level = LOG_ERR; break;
-      case GPM_STAT_DEBUG: string = GPM_TEXT_DEBUG;
-                           log_level = LOG_DEBUG; break;
-      case GPM_STAT_OOPS : string = GPM_TEXT_OOPS;
-                           log_level = LOG_CRIT; break;
+   switch (stat) {
+      case GPM_STAT_INFO:
+         string = GPM_TEXT_INFO;
+         log_level = LOG_INFO;
+         break;
+      case GPM_STAT_WARN:
+         string = GPM_TEXT_WARN;
+         log_level = LOG_WARNING;
+         break;
+      case GPM_STAT_ERR:
+         string = GPM_TEXT_ERR;
+         log_level = LOG_ERR;
+         break;
+      case GPM_STAT_DEBUG:
+         string = GPM_TEXT_DEBUG;
+         log_level = LOG_DEBUG;
+         break;
+      case GPM_STAT_OOPS:
+         string = GPM_TEXT_OOPS;
+         log_level = LOG_CRIT;
+         break;
    }
 #ifdef HAVE_VSYSLOG
    syslog(log_level, string);
    vsyslog(log_level, text, ap);
 #else
-   fprintf(stderr,"%s[%s(%d)]:\n",string,file,line);
-   vfprintf(stderr,text,ap);
-   fprintf(stderr,"\n");
+   fprintf(stderr, "%s[%s(%d)]:\n", string, file, line);
+   vfprintf(stderr, text, ap);
+   fprintf(stderr, "\n");
 #endif
 
-   if(stat == GPM_STAT_OOPS) exit(1);  /* may a lib function call exit ???? */
+   if(stat == GPM_STAT_OOPS)
+      exit(1);                  /* may a lib function call exit ???? */
 }

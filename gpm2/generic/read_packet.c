@@ -1,3 +1,4 @@
+
 /*
  * gpm2 - mouse driver for the console
  *
@@ -21,21 +22,23 @@
  *    read one mouse packet and return it
  ********/
 
-#include <unistd.h>        /* read()      */
-#include <stdio.h>         /* NULL        */
-#include <stdlib.h>        /* malloc()    */
-#include <errno.h>         /* errno       */
+#include <unistd.h>             /* read() */
+#include <stdio.h>              /* NULL */
+#include <stdlib.h>             /* malloc() */
+#include <errno.h>              /* errno */
 
 char *read_packet(int fd, int len)
 {
    char *packet;
-   
-   errno = 0;  /* no library function ever sets errno to 0, so we do */
+
+   errno = 0;                   /* no library function ever sets errno to 0, so 
+                                 * we do */
 
    packet = malloc(len);
-   if(packet == NULL) return NULL;
+   if(packet == NULL)
+      return NULL;
 
-   if(read(fd,&packet,len) == -1) {
+   if(read(fd, &packet, len) == -1) {
       free(packet);
       return NULL;
    }

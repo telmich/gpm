@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,28 +20,29 @@
  *
  ********/
 
+#include <unistd.h>             /* usleep, write */
+#include <termios.h>            /* tcflush */
 
-#include <unistd.h>                 /* usleep, write */
-#include <termios.h>                /* tcflush       */
-
-#include "types.h"                  /* Gpm_type         */
-#include "mice.h"                   /* check_no_argv    */
-#include "message.h"                /* messaging in gpm */
-#include "daemon.h"                 /* daemon internals */
+#include "types.h"              /* Gpm_type */
+#include "mice.h"               /* check_no_argv */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
 
 /*
  * This works with Dexxa Optical Mouse, but because in X same initstring
  * is named ExplorerPS/2 so I named it in the same way.
  */
-Gpm_Type *I_exps2(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
+Gpm_Type *I_exps2(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
+                  char **argv)
 {
    static unsigned char s1[] = { 243, 200, 243, 200, 243, 80, };
 
-   flags = 0; /* FIXME: 1.99.13 */
+   flags = 0;                   /* FIXME: 1.99.13 */
 
-   if (check_no_argv(argc, argv)) return NULL;
+   if(check_no_argv(argc, argv))
+      return NULL;
 
-   write(fd, s1, sizeof (s1));
+   write(fd, s1, sizeof(s1));
    usleep(30000);
    tcflush(fd, TCIFLUSH);
    return type;

@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse support for Linux
  *
@@ -24,12 +25,12 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
-
 #include "daemon.h"
 
 int main(int argc, char **argv)
 {
-   startup(argc,argv);  /* setup configurations */
-   old_main();          /* LATER: exit(daemon()); */
-   return 0;            /* if we didn't exit before, just give back success */
+   startup(argc, argv);         /* setup configurations */
+   old_main();                  /* LATER: exit(daemon()); */
+   return 0;                    /* if we didn't exit before, just give back
+                                 * success */
 }

@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,36 +20,45 @@
  *
  ********/
 
-#include <unistd.h>                 /* write             */
+#include <unistd.h>             /* write */
 
-#include "types.h"                  /* Gpm_type         */
-#include "daemon.h"         /* daemon internals */
+#include "types.h"              /* Gpm_type */
+#include "daemon.h"             /* daemon internals */
 
-int R_ms3(Gpm_Event *state, int fd)
+int R_ms3(Gpm_Event * state, int fd)
 {
 
    int dx, dy;
-   char buf[4] = {0, 0, 0, 0};
+   char buf[4] = { 0, 0, 0, 0 };
 
    buf[0] |= 0x40;
 
-   if (state->buttons & GPM_B_LEFT)     buf[0] |= 0x20;
-   if (state->buttons & GPM_B_MIDDLE)   buf[3] |= 0x10;
-   if (state->buttons & GPM_B_RIGHT)    buf[0] |= 0x10;
-   if (state->buttons & GPM_B_UP)       buf[3] |= 0x0f;
-   if (state->buttons & GPM_B_DOWN)     buf[3] |= 0x01;
+   if(state->buttons & GPM_B_LEFT)
+      buf[0] |= 0x20;
+   if(state->buttons & GPM_B_MIDDLE)
+      buf[3] |= 0x10;
+   if(state->buttons & GPM_B_RIGHT)
+      buf[0] |= 0x10;
+   if(state->buttons & GPM_B_UP)
+      buf[3] |= 0x0f;
+   if(state->buttons & GPM_B_DOWN)
+      buf[3] |= 0x01;
 
    dx = limit_delta(state->dx, -128, 127);
-   buf[1]   = dx & ~0xC0;
-   buf[0]  |= (dx & 0xC0) >> 6;
+   buf[1] = dx & ~0xC0;
+   buf[0] |= (dx & 0xC0) >> 6;
 
    dy = limit_delta(state->dy, -128, 127);
    buf[2] = dy & ~0xC0;
    buf[0] |= (dy & 0xC0) >> 4;
 
-   /* wheel */
-   if       (state->wdy > 0)   buf[3] |= 0x0f;
-   else if  (state->wdy < 0)   buf[3] |= 0x01;
+   /*
+    * wheel 
+    */
+   if(state->wdy > 0)
+      buf[3] |= 0x0f;
+   else if(state->wdy < 0)
+      buf[3] |= 0x01;
 
-   return write(fd,buf,4);
+   return write(fd, buf, 4);
 }

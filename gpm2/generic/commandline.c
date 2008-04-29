@@ -1,3 +1,4 @@
+
 /*
  * gpm2 - mouse driver for the console
  *
@@ -21,7 +22,7 @@
  *    handle command line arguments
  ********/
 
-#include <unistd.h>        /* getopt() */
+#include <unistd.h>             /* getopt() */
 
 #include "gpm2-daemon.h"
 
@@ -29,8 +30,8 @@ int commandline(int argc, char **argv)
 {
    int opt;
 
-   while((opt = getopt(argc,argv,GPM2_ARGS)) != -1) {
-      switch(opt) {
+   while((opt = getopt(argc, argv, GPM2_ARGS)) != -1) {
+      switch (opt) {
          default:
             usage();
             break;

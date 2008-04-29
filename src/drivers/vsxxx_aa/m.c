@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,18 +20,23 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
-
+#include "types.h"              /* Gpm_type */
 
 /* Support for DEC VSXXX-AA and VSXXX-GA serial mice used on   */
+
 /* DECstation 5000/xxx, DEC 3000 AXP and VAXstation 4000       */
+
 /* workstations                                                */
+
 /* written 2001/07/11 by Karsten Merker (merker@linuxtag.org)  */
+
 /* modified (completion of the protocol specification and      */
+
 /* corresponding correction of the protocol identification     */
+
 /* mask) 2001/07/12 by Maciej W. Rozycki (macro@ds2.pg.gda.pl) */
 
-int M_vsxxx_aa(Gpm_Event *state, unsigned char *data)
+int M_vsxxx_aa(Gpm_Event * state, unsigned char *data)
 {
 
 /* The mouse protocol is as follows:
@@ -71,8 +77,8 @@ int M_vsxxx_aa(Gpm_Event *state, unsigned char *data)
  * The mouse powers up in the prompt mode but we use the stream mode.
  */
 
-  state->buttons = data[0]&0x07;
-  state->dx = (data[0]&0x10) ? data[1] : -data[1];
-  state->dy = (data[0]&0x08) ? -data[2] : data[2];
-  return 0;
+   state->buttons = data[0] & 0x07;
+   state->dx = (data[0] & 0x10) ? data[1] : -data[1];
+   state->dy = (data[0] & 0x08) ? -data[2] : data[2];
+   return 0;
 }

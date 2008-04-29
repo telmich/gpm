@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -21,9 +22,9 @@
 
 #include <stdio.h>
 
-#include "types.h"                  /* Gpm_type         */
-#include "message.h"                /* texts            */
-#include "daemon.h"                 /* mice             */
+#include "types.h"              /* Gpm_type */
+#include "message.h"            /* texts */
+#include "daemon.h"             /* mice */
 
 int M_listTypes(void)
 {
@@ -31,12 +32,11 @@ int M_listTypes(void)
 
    printf(GPM_MESS_VERSION "\n");
    printf(GPM_MESS_AVAIL_MYT);
-   for (type=mice; type->fun; type++)
-      printf(GPM_MESS_SYNONYM, type->repeat_fun?'*':' ',
-      type->name, type->desc, type->synonyms);
+   for(type = mice; type->fun; type++)
+      printf(GPM_MESS_SYNONYM, type->repeat_fun ? '*' : ' ',
+             type->name, type->desc, type->synonyms);
 
    putchar('\n');
 
-   return 1; /* to exit() */
+   return 1;                    /* to exit() */
 }
-

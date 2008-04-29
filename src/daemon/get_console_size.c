@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,47 +20,55 @@
  *
  ********/
 
-#include <unistd.h>                 /* close             */
-#include <fcntl.h>                  /* open              */
+#include <unistd.h>             /* close */
+#include <fcntl.h>              /* open */
 
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
-#include "gpmInt.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
+#include "gpmInt.h"             /* daemon internals */
 
-void get_console_size(Gpm_Event *ePtr)
+void get_console_size(Gpm_Event * ePtr)
 {
    int i, prevmaxx, prevmaxy;
-   struct mouse_features *which_mouse; /* local */
+   struct mouse_features *which_mouse;  /* local */
 
-   /* before asking the new console size, save the previous values */
-   prevmaxx = maxx; prevmaxy = maxy;
+   /*
+    * before asking the new console size, save the previous values 
+    */
+   prevmaxx = maxx;
+   prevmaxy = maxy;
 
-   i=open_console(O_RDONLY);
+   i = open_console(O_RDONLY);
    ioctl(i, TIOCGWINSZ, &win);
    close(i);
-   if (!win.ws_col || !win.ws_row) {
-      gpm_report(GPM_PR_DEBUG,GPM_MESS_ZERO_SCREEN_DIM);
-      win.ws_col=80; win.ws_row=25;
+   if(!win.ws_col || !win.ws_row) {
+      gpm_report(GPM_PR_DEBUG, GPM_MESS_ZERO_SCREEN_DIM);
+      win.ws_col = 80;
+      win.ws_row = 25;
    }
-   maxx=win.ws_col; maxy=win.ws_row;
-   gpm_report(GPM_PR_DEBUG,GPM_MESS_SCREEN_SIZE,maxx,maxy);
+   maxx = win.ws_col;
+   maxy = win.ws_row;
+   gpm_report(GPM_PR_DEBUG, GPM_MESS_SCREEN_SIZE, maxx, maxy);
 
-   if (!prevmaxx) { /* first invocation, place the pointer in the middle */
-      statusX = ePtr->x = maxx/2;
-      statusY = ePtr->y = maxy/2;
-   } else { /* keep the pointer in the same position where it was */
+   if(!prevmaxx) {              /* first invocation, place the pointer in the
+                                 * middle */
+      statusX = ePtr->x = maxx / 2;
+      statusY = ePtr->y = maxy / 2;
+   } else {                     /* keep the pointer in the same position where
+                                 * it was */
       statusX = ePtr->x = ePtr->x * maxx / prevmaxx;
       statusY = ePtr->y = ePtr->y * maxy / prevmaxy;
    }
 
-   for (i=1; i <= 1+opt_double; i++) {
-      which_mouse=mouse_table+i; /* used to access options */
-     /*
-      * the following operation is based on the observation that 80x50
-      * has square cells. (An author-centric observation ;-)
-      */
-     (which_mouse->opt_scaley)=(which_mouse->opt_scale)*50*maxx/80/maxy;
-     gpm_report(GPM_PR_DEBUG,GPM_MESS_X_Y_VAL,(which_mouse->opt_scale),(which_mouse->opt_scaley));
+   for(i = 1; i <= 1 + opt_double; i++) {
+      which_mouse = mouse_table + i;    /* used to access options */
+      /*
+       * the following operation is based on the observation that 80x50
+       * has square cells. (An author-centric observation ;-)
+       */
+      (which_mouse->opt_scaley) =
+         (which_mouse->opt_scale) * 50 * maxx / 80 / maxy;
+      gpm_report(GPM_PR_DEBUG, GPM_MESS_X_Y_VAL, (which_mouse->opt_scale),
+                 (which_mouse->opt_scaley));
    }
 }
-

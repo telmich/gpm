@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,26 +20,29 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
-#include "daemon.h"         /* daemon internals */
+#include "types.h"              /* Gpm_type */
+#include "daemon.h"             /* daemon internals */
 
-int M_ms_plus(Gpm_Event *state, unsigned char *data)
+int M_ms_plus(Gpm_Event * state, unsigned char *data)
 {
-   static unsigned char prev=0;
+   static unsigned char prev = 0;
 
-   state->buttons= ((data[0] & 0x20) >> 3) | ((data[0] & 0x10) >> 4);
-   state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
-   state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
+   state->buttons = ((data[0] & 0x20) >> 3) | ((data[0] & 0x10) >> 4);
+   state->dx = (signed char) (((data[0] & 0x03) << 6) | (data[1] & 0x3F));
+   state->dy = (signed char) (((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
 
-   /* Allow motion *and* button change (Michael Plass) */
+   /*
+    * Allow motion *and* button change (Michael Plass) 
+    */
 
-   if((state->dx==0) &&(state->dy==0) && (state->buttons==(prev&~GPM_B_MIDDLE)))
-      state->buttons = prev^GPM_B_MIDDLE;  /* no move or change: toggle middle */
+   if((state->dx == 0) && (state->dy == 0)
+      && (state->buttons == (prev & ~GPM_B_MIDDLE)))
+      state->buttons = prev ^ GPM_B_MIDDLE;     /* no move or change: toggle
+                                                 * middle */
    else
-      state->buttons |= prev&GPM_B_MIDDLE;    /* change: preserve middle */
+      state->buttons |= prev & GPM_B_MIDDLE;    /* change: preserve middle */
 
-   prev=state->buttons;
+   prev = state->buttons;
 
    return 0;
 }
-

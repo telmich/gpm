@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,40 +20,42 @@
  *
  ********/
 
-#include <fcntl.h>                  /* open and co.      */
-#include <sys/stat.h>               /* stat()            */
-#include <sys/ioctl.h>              /* ioctl()           */
+#include <fcntl.h>              /* open and co.  */
+#include <sys/stat.h>           /* stat() */
+#include <sys/ioctl.h>          /* ioctl() */
 
 /* Linux specific (to be outsourced in gpm2 */
-#include <linux/serial.h>           /* for serial console check */
-#include <asm/ioctls.h>            /* for serial console check */
+#include <linux/serial.h>       /* for serial console check */
+#include <asm/ioctls.h>         /* for serial console check */
 
-
-#include "message.h"        /* messaging in gpm  */
-#include "daemon.h"         /* daemon internals  */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
 
 int open_console(const int mode)
 {
-   int                  fd;
-   int                  maj;
-   int                  twelve = 12;
+   int fd;
+   int maj;
+   int twelve = 12;
+
 //   struct serial_struct si;
-   struct stat          sb;
+   struct stat sb;
 
    fd = open(option.consolename, mode);
-   if (fd != -1) {
+   if(fd != -1) {
       fstat(fd, &sb);
       maj = major(sb.st_rdev);
-      if (maj != 4 && (maj < 136 || maj > 143)) {
-          if (ioctl(fd, TIOCLINUX, &twelve) < 0) {
-              /* FIXME: si.line is not initialized, but used! */
-              //if (si.line > 0) {
-              //    gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_SERIALCON);
-              // }
-          }
+      if(maj != 4 && (maj < 136 || maj > 143)) {
+         if(ioctl(fd, TIOCLINUX, &twelve) < 0) {
+            /*
+             * FIXME: si.line is not initialized, but used! 
+             */
+            // if (si.line > 0) {
+            // gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_SERIALCON);
+            // }
+         }
       }
    } else {
-      gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
+      gpm_report(GPM_PR_OOPS, GPM_MESS_OPEN_CON);
    }
 
    return fd;

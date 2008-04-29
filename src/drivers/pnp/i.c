@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,18 +20,21 @@
  *
  ********/
 
-#include <termios.h>                /* termios           */
+#include <termios.h>            /* termios */
 
-#include "types.h"                  /* Gpm_type         */
-#include "mice.h"                   /* option_modem_lines */
+#include "types.h"              /* Gpm_type */
+#include "mice.h"               /* option_modem_lines */
 
-
-Gpm_Type *I_pnp(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
+Gpm_Type *I_pnp(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
+                char **argv)
 {
    struct termios tty;
 
-   /* accept "-o dtr", "-o rts" and "-o both" */
-   if (option_modem_lines(fd, argc, argv)) return NULL;
+   /*
+    * accept "-o dtr", "-o rts" and "-o both" 
+    */
+   if(option_modem_lines(fd, argc, argv))
+      return NULL;
 
    /*
     * Just put the device to 1200 baud. Thanks to Francois Chastrette
@@ -45,7 +49,7 @@ Gpm_Type *I_pnp(int fd, unsigned short flags, struct Gpm_Type *type, int argc, c
    tty.c_cc[VTIME] = 0;
    tty.c_cc[VMIN] = 1;
    tty.c_cflag = flags | B1200;
-   tcsetattr(fd, TCSAFLUSH, &tty); /* set parameters */
+   tcsetattr(fd, TCSAFLUSH, &tty);      /* set parameters */
 
    /*
     * Don't read the silly initialization string. I don't want to see
@@ -54,4 +58,3 @@ Gpm_Type *I_pnp(int fd, unsigned short flags, struct Gpm_Type *type, int argc, c
 
    return type;
 }
-

@@ -1,3 +1,4 @@
+
 /*
  * gpm2 - mouse driver for the console
  *
@@ -21,11 +22,12 @@
  *    set the default options
  ********/
 
-
 #include "gpm2-daemon.h"
 
 void set_defaults()
 {
-   /* options */
+   /*
+    * options 
+    */
    opts.cconfig = GPM2_CCONFIG;
 }

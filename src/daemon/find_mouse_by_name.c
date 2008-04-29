@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,11 +20,11 @@
  *
  ********/
 
-#include <string.h>                 /* str*              */
-#include <ctype.h>                  /* isspace           */
+#include <string.h>             /* str* */
+#include <ctype.h>              /* isspace */
 
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
 
 /*****************************************************************************
  * the function returns a valid type pointer or NULL if not found
@@ -34,16 +35,22 @@ struct Gpm_Type *find_mouse_by_name(char *name)
    char *s;
    int len = strlen(name);
 
-   for (type=mice; type->fun; type++) {
-      if (!strcasecmp(name, type->name)) break;
-      /* otherwise, look in the synonym list */
-      for (s = type->synonyms; s; s = strchr(s, ' ')) {
-         while (*s && isspace(*s)) s++; /* skip spaces */
-         if(!strncasecmp(name, s, len) && !isprint(*(s + len))) break;/*found*/
+   for(type = mice; type->fun; type++) {
+      if(!strcasecmp(name, type->name))
+         break;
+      /*
+       * otherwise, look in the synonym list 
+       */
+      for(s = type->synonyms; s; s = strchr(s, ' ')) {
+         while(*s && isspace(*s))
+            s++;                /* skip spaces */
+         if(!strncasecmp(name, s, len) && !isprint(*(s + len)))
+            break;              /* found */
       }
-      if(s) break; /* found a synonym */
+      if(s)
+         break;                 /* found a synonym */
    }
-   if (!type->fun) return NULL;
+   if(!type->fun)
+      return NULL;
    return type;
 }
-

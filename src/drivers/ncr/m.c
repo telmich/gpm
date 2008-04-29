@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,12 +20,9 @@
  *
  ********/
 
-
-
-#include "types.h"                  /* Gpm_type         */
-#include "mice.h"                   /* REALPOS           */
-#include "daemon.h"                 /* win               */
-
+#include "types.h"              /* Gpm_type */
+#include "mice.h"               /* REALPOS */
+#include "daemon.h"             /* win */
 
 /* ncr pen support (Marc Meis) */
 
@@ -37,45 +35,42 @@
 #define NCR_DELTA_X    (NCR_RIGHT_X - NCR_LEFT_X)
 #define NCR_DELTA_Y    (NCR_TOP_Y - NCR_BOTTOM_Y)
 
-int M_ncr(Gpm_Event *state,  unsigned char *data)
+int M_ncr(Gpm_Event * state, unsigned char *data)
 {
-   int x,y;
+   int x, y;
 
-   state->buttons= (data[0]&1)*GPM_B_LEFT +
-                !!(data[0]&2)*GPM_B_RIGHT;
+   state->buttons = (data[0] & 1) * GPM_B_LEFT + !!(data[0] & 2) * GPM_B_RIGHT;
 
-   state->dx = (signed char)data[1]; /* currently unused */
-   state->dy = (signed char)data[2];
+   state->dx = (signed char) data[1];   /* currently unused */
+   state->dy = (signed char) data[2];
 
-   x = ((int)data[3] << 8) + (int)data[4];
-   y = ((int)data[5] << 8) + (int)data[6];
+   x = ((int) data[3] << 8) + (int) data[4];
+   y = ((int) data[5] << 8) + (int) data[6];
 
-   /* these formulaes may look curious, but this is the way it works!!! */
+   /*
+    * these formulaes may look curious, but this is the way it works!!! 
+    */
 
    state->x = x < NCR_LEFT_X
-             ? 0
-             : x > NCR_RIGHT_X
-               ? win.ws_col+1
-               : (long)(x-NCR_LEFT_X) * (long)(win.ws_col-1) / NCR_DELTA_X+2;
+      ? 0
+      : x > NCR_RIGHT_X
+      ? win.ws_col + 1
+      : (long) (x - NCR_LEFT_X) * (long) (win.ws_col - 1) / NCR_DELTA_X + 2;
 
    state->y = y < NCR_BOTTOM_Y
-             ? win.ws_row + 1
-             : y > NCR_TOP_Y
-          ? 0
-          : (long)(NCR_TOP_Y-y) * (long)win.ws_row / NCR_DELTA_Y + 1;
+      ? win.ws_row + 1
+      : y > NCR_TOP_Y
+      ? 0 : (long) (NCR_TOP_Y - y) * (long) win.ws_row / NCR_DELTA_Y + 1;
 
    realposx = x < NCR_LEFT_X
-             ? 0
-             : x > NCR_RIGHT_X
-               ? 16384
-               : (long)(x-NCR_LEFT_X) * (long)(16382) / NCR_DELTA_X+2;
+      ? 0
+      : x > NCR_RIGHT_X
+      ? 16384 : (long) (x - NCR_LEFT_X) * (long) (16382) / NCR_DELTA_X + 2;
 
    realposy = y < NCR_BOTTOM_Y
-             ? 16384
-             : y > NCR_TOP_Y
-          ? 0
-          : (long)(NCR_TOP_Y-y) * (long)16383 / NCR_DELTA_Y + 1;
+      ? 16384
+      : y > NCR_TOP_Y
+      ? 0 : (long) (NCR_TOP_Y - y) * (long) 16383 / NCR_DELTA_Y + 1;
 
    return 0;
 }
-

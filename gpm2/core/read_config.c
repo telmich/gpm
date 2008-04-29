@@ -1,3 +1,4 @@
+
 /*
  * gpm2 - mouse driver for the console
  *
@@ -25,10 +26,15 @@
 
 int read_config(char *cconfig)
 {
-   /* open cconfig-dir (FIXME: write small framework for reuse) */
-   
-   if(!cconfig) return 0; /* remove, just to make gcc happy */
-   /* set options */
+   /*
+    * open cconfig-dir (FIXME: write small framework for reuse) 
+    */
+
+   if(!cconfig)
+      return 0;                 /* remove, just to make gcc happy */
+   /*
+    * set options 
+    */
 
    return 1;
 }

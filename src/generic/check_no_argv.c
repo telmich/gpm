@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,11 +20,13 @@
  *
  ********/
 
-#include <stdio.h>         /* NULL */
-#include "mice.h"         /* daemon internals */
+#include <stdio.h>              /* NULL */
+#include "mice.h"               /* daemon internals */
 
 /*========================================================================*/
+
 /* Provide a common error engine by parsing with an empty option-set */
+
 /*========================================================================*/
 int check_no_argv(int argc, char **argv)
 {
@@ -32,4 +35,3 @@ int check_no_argv(int argc, char **argv)
    };
    return parse_argv(optioninfo, argc, argv);
 }
-

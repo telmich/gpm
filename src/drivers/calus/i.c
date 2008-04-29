@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,17 +20,18 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
-#include "mice.h"                   /* mice stuff       */
-#include "daemon.h"                 /* which_mouse      */
-#include "drivers.h"                /* I_serial         */
+#include "types.h"              /* Gpm_type */
+#include "mice.h"               /* mice stuff */
+#include "daemon.h"             /* which_mouse */
+#include "drivers.h"            /* I_serial */
 
-
-Gpm_Type *I_calus(int fd, unsigned short flags, struct Gpm_Type *type, int argc, char **argv)
+Gpm_Type *I_calus(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
+                  char **argv)
 {
-   if (check_no_argv(argc, argv)) return NULL;
+   if(check_no_argv(argc, argv))
+      return NULL;
 
-   if ((which_mouse->opt_baud) == 1200) (which_mouse->opt_baud)=9600; /* default to 9600 */
+   if((which_mouse->opt_baud) == 1200)
+      (which_mouse->opt_baud) = 9600;   /* default to 9600 */
    return I_serial(fd, flags, type, argc, argv);
 }
-

@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,16 +20,15 @@
  *
  ********/
 
-#include <unistd.h>     /* unlink,geteuid */
+#include <unistd.h>             /* unlink,geteuid */
 
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
 
 /* what todo atexit */
 void gpm_exited(void)
 {
-   gpm_report(GPM_PR_DEBUG,GPM_MESS_REMOVE_FILES, GPM_NODE_PID, GPM_NODE_CTL);
+   gpm_report(GPM_PR_DEBUG, GPM_MESS_REMOVE_FILES, GPM_NODE_PID, GPM_NODE_CTL);
    unlink(GPM_NODE_PID);
    unlink(GPM_NODE_CTL);
 }
-

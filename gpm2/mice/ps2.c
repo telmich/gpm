@@ -1,3 +1,4 @@
+
 /*
  * gpm2 - mouse driver for the console
  *
@@ -21,8 +22,8 @@
  *    handle standard ps2
  ********/
 
-#include <unistd.h>        /* usleep()    */
-#include <termios.h>       /* tcflush()   */
+#include <unistd.h>             /* usleep() */
+#include <termios.h>            /* tcflush() */
 #include <stdio.h>
 
 #include "gpm2-daemon.h"
@@ -48,23 +49,27 @@
  */
 
 /* standard ps2 */
+
 /* FIXME: implement error handling and options as described on
  * http://www.computer-engineering.org/ps2mouse/
  */
 int gpm2_open_ps2(int fd)
 {
-   //static unsigned char s[] = { 246, 230, 244, 243, 100, 232, 3, };
+   // static unsigned char s[] = { 246, 230, 244, 243, 100, 232, 3, };
 //   write(fd, s, sizeof (s));
 
 //   static unsigned char s[] = { 246, 230, 244, 243, 100, 232, 3, };
 
    char obuf, ibuf;
-   /* FIXME: check return */
 
-   obuf = 0xff; /* reset mouse */
+   /*
+    * FIXME: check return 
+    */
+
+   obuf = 0xff;                 /* reset mouse */
    write(fd, &obuf, 1);
-   read(fd,&ibuf,1);
-   printf("RX: %#hhx\n",ibuf);
+   read(fd, &ibuf, 1);
+   printf("RX: %#hhx\n", ibuf);
 //   if(ibuf != 0xfa) return 0;
 
 //   obuf = 0xf6; /* set mouse to default */
@@ -72,25 +77,33 @@ int gpm2_open_ps2(int fd)
 //   read(fd,&ibuf,1);
 //   printf("DF: %#hhx\n",ibuf);
 
-   obuf = 0xf2; /* device id */
+   obuf = 0xf2;                 /* device id */
    write(fd, &obuf, 1);
-   read(fd,&ibuf,1);
-   printf("ST: %#hhx\n",ibuf);
-   read(fd,&ibuf,1);
-   printf("DI: %#hhx\n",ibuf);
+   read(fd, &ibuf, 1);
+   printf("ST: %#hhx\n", ibuf);
+   read(fd, &ibuf, 1);
+   printf("DI: %#hhx\n", ibuf);
 
-   /* set resolution: 0xe8 */
+   /*
+    * set resolution: 0xe8 
+    */
 
-   //if(scaling = 2) { e7h
-   //
+   // if(scaling = 2) { e7h
+   // 
    // 0xe6 scaling =1
 
-   /* do 0xf2, get device id and print it out */
-   /* do 0xe9 and print out values as status */
+   /*
+    * do 0xf2, get device id and print it out 
+    */
+   /*
+    * do 0xe9 and print out values as status 
+    */
 
-   /* FIXME: time correct? */
-   usleep (30000);
-   tcflush (fd, TCIFLUSH);
+   /*
+    * FIXME: time correct? 
+    */
+   usleep(30000);
+   tcflush(fd, TCIFLUSH);
    return 0;
 
 }
@@ -105,17 +118,21 @@ int gpm2_decode_ps2(int fd)
    data[1] = 0;
    data[2] = 0;
 
-   read(fd,data,3);
+   read(fd, data, 3);
 
-   if(data[0] & 0x01) mini_printf("left!\n",1);
-   if(data[0] & 0x02) mini_printf("right!\n",1);
-   if(data[0] & 0x04) mini_printf("middle!\n",1);
+   if(data[0] & 0x01)
+      mini_printf("left!\n", 1);
+   if(data[0] & 0x02)
+      mini_printf("right!\n", 1);
+   if(data[0] & 0x04)
+      mini_printf("middle!\n", 1);
 
-   /* decoded->button_left     = data[0] & 0x01;
-   decoded->button_right    = data[0] & 0x02;
-   decoded->button_middle   = data[0] & 0x04;
-   
-   decoded-> */
+   /*
+    * decoded->button_left = data[0] & 0x01; decoded->button_right = data[0] &
+    * 0x02; decoded->button_middle = data[0] & 0x04;
+    * 
+    * decoded-> 
+    */
 
    return 1;
 }

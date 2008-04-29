@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,34 +20,34 @@
  *
  ********/
 
-#include <unistd.h>                 /* read             */
+#include <unistd.h>             /* read */
 
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
-#include "gpmInt.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
+#include "gpmInt.h"             /* daemon internals */
 
 /*-------------------------------------------------------------------*
  * This  was inline, and incurred in a compiler bug (2.7.0)
  *-------------------------------------------------------------------*/
-int get_data(Gpm_Connect *where, int whence)
+int get_data(Gpm_Connect * where, int whence)
 {
    static int i;
 
 #ifdef GPM_USE_MAGIC
-   while ((i=read(whence,&check,sizeof(int)))==4 && check!=GPM_MAGIC)
-      gpm_report(GPM_PR_INFO,GPM_MESS_NO_MAGIC);
+   while((i = read(whence, &check, sizeof(int))) == 4 && check != GPM_MAGIC)
+      gpm_report(GPM_PR_INFO, GPM_MESS_NO_MAGIC);
 
-   if (!i) return 0;
-   if (check!=GPM_MAGIC) {
-     gpm_report(GPM_PR_INFO,GPM_MESS_NOTHING_MORE);
-     return -1;
+   if(!i)
+      return 0;
+   if(check != GPM_MAGIC) {
+      gpm_report(GPM_PR_INFO, GPM_MESS_NOTHING_MORE);
+      return -1;
    }
 #endif
 
-   if ((i=read(whence, where, sizeof(Gpm_Connect)))!=sizeof(Gpm_Connect)) {
+   if((i = read(whence, where, sizeof(Gpm_Connect))) != sizeof(Gpm_Connect)) {
       return i ? -1 : 0;
    }
 
    return 1;
 }
-

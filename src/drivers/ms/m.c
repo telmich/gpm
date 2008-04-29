@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,24 +20,24 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
-#include "daemon.h"         /* daemon internals */
+#include "types.h"              /* Gpm_type */
+#include "daemon.h"             /* daemon internals */
 
-int M_ms(Gpm_Event *state,  unsigned char *data)
+int M_ms(Gpm_Event * state, unsigned char *data)
 {
    /*
     * some devices report a change of middle-button state by
     * repeating the current button state  (patch by Mark Lord)
     */
-   static unsigned char prev=0;
+   static unsigned char prev = 0;
 
-   if (data[0] == 0x40 && !(prev|data[1]|data[2]))
-      state->buttons = GPM_B_MIDDLE; /* third button on MS compatible mouse */
+   if(data[0] == 0x40 && !(prev | data[1] | data[2]))
+      state->buttons = GPM_B_MIDDLE;    /* third button on MS compatible mouse */
    else
-      state->buttons= ((data[0] & 0x20) >> 3) | ((data[0] & 0x10) >> 4);
+      state->buttons = ((data[0] & 0x20) >> 3) | ((data[0] & 0x10) >> 4);
    prev = state->buttons;
-   state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
-   state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
+   state->dx = (signed char) (((data[0] & 0x03) << 6) | (data[1] & 0x3F));
+   state->dy = (signed char) (((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
 
    return 0;
 }

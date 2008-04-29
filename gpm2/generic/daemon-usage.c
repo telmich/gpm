@@ -1,3 +1,4 @@
+
 /*
  * gpm2 - mouse driver for the console
  *
@@ -25,8 +26,8 @@
 
 void usage()
 {
-   mini_printf("gpm2-daemon: written by Nico Schottelius\n",1);
-   mini_printf("\n",1);
-   mini_printf("  -c <cconfig>: specify configuration directory\n",1);
-   mini_printf("  -f:           fork into background after startup \n",1);
+   mini_printf("gpm2-daemon: written by Nico Schottelius\n", 1);
+   mini_printf("\n", 1);
+   mini_printf("  -c <cconfig>: specify configuration directory\n", 1);
+   mini_printf("  -f:           fork into background after startup \n", 1);
 }

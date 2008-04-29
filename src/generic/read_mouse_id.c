@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,9 +20,8 @@
  *
  ********/
 
-#include <unistd.h>        /* read/write        */
-#include "mice.h"          /* Gpm_type         */
-
+#include <unistd.h>             /* read/write */
+#include "mice.h"               /* Gpm_type */
 
 /*
  * Sends the SEND_ID command to the ps2-type mouse.
@@ -34,11 +34,10 @@ int read_mouse_id(int fd)
 
    write(fd, &c, 1);
    read(fd, &c, 1);
-   if (c != GPM_AUX_ACK) {
-      return(GPM_AUX_ID_ERROR);
+   if(c != GPM_AUX_ACK) {
+      return (GPM_AUX_ID_ERROR);
    }
    read(fd, &id, 1);
 
-   return(id);
+   return (id);
 }
-

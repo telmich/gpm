@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -28,15 +29,16 @@ int getsym(const unsigned char *p0, unsigned char *res)
    char c;
 
    c = *p++;
-   if (c == '\\' && *p) {
+   if(c == '\\' && *p) {
       c = *p++;
-      if (isodigit(c)) {
+      if(isodigit(c)) {
          c -= '0';
-         if (isodigit(*p)) c = 8*c + (*p++ - '0');
-         if (isodigit(*p)) c = 8*c + (*p++ - '0');
+         if(isodigit(*p))
+            c = 8 * c + (*p++ - '0');
+         if(isodigit(*p))
+            c = 8 * c + (*p++ - '0');
       }
    }
    *res = c;
    return (p - p0);
 }
-

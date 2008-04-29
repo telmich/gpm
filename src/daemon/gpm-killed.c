@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse support
  *
@@ -21,12 +22,12 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
-#include <signal.h>                 /* SIG*              */
-#include <stdlib.h>                 /* exit()            */
-#include <unistd.h>                 /* getpid()          */
+#include <signal.h>             /* SIG* */
+#include <stdlib.h>             /* exit() */
+#include <unistd.h>             /* getpid() */
 
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
 
 void gpm_killed(int signo)
 {
@@ -35,8 +36,9 @@ void gpm_killed(int signo)
       opt_resize++;
       return;
    }
-   if(signo==SIGUSR1) {
-     gpm_report(GPM_PR_WARN,GPM_MESS_KILLED_BY, option.progname, getpid(), option.progname);
+   if(signo == SIGUSR1) {
+      gpm_report(GPM_PR_WARN, GPM_MESS_KILLED_BY, option.progname, getpid(),
+                 option.progname);
    }
 
    exit(0);

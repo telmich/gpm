@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse support for Linux
  *
@@ -25,30 +26,33 @@
 #include "message.h"
 #include "daemon.h"
 
-#include <stdlib.h> /* malloc() */
+#include <stdlib.h>             /* malloc() */
 
 /* DESCR:   when leaving, we should reset mice to their normal state */
+
 /* RETURN:  0 - failed to reset one or more devices
             1 - reset was fine */
+
 /* COMMENT: does error handling and exiting itself */
 int reset_mice(struct micetab *micelist)
 {
    struct micetab *tmp = micelist;
    struct micetab *end = tmp;
 
-   while(tmp != NULL) { /* FIXME! I never get NULL, as free()d before */
+   while(tmp != NULL) {         /* FIXME! I never get NULL, as free()d before */
       end = tmp;
-      while(tmp->next != NULL) {       /* set end to the last mouse */
+      while(tmp->next != NULL) {        /* set end to the last mouse */
          end = tmp;
          tmp = tmp->next;
       }
 
-      gpm_report(GPM_PR_DEBUG,"reset: %s with proto %s",end->device,end->protocol);
+      gpm_report(GPM_PR_DEBUG, "reset: %s with proto %s", end->device,
+                 end->protocol);
       if(tmp->options != NULL) {
-         gpm_report(GPM_PR_DEBUG,"and options %s",end->options);
+         gpm_report(GPM_PR_DEBUG, "and options %s", end->options);
       }
-      free(end);                       /* be clean() */
-      tmp = micelist;                  /* reset to the first mice again */
+      free(end);                /* be clean() */
+      tmp = micelist;           /* reset to the first mice again */
    }
 
    return 1;

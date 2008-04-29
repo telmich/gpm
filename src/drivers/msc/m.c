@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,14 +20,12 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
+#include "types.h"              /* Gpm_type */
 
-
-int M_msc(Gpm_Event *state,  unsigned char *data)
+int M_msc(Gpm_Event * state, unsigned char *data)
 {
-   state->buttons= (~data[0]) & 0x07;
-   state->dx=      (signed char)(data[1]) + (signed char)(data[3]);
-   state->dy=     -((signed char)(data[2]) + (signed char)(data[4]));
+   state->buttons = (~data[0]) & 0x07;
+   state->dx = (signed char) (data[1]) + (signed char) (data[3]);
+   state->dy = -((signed char) (data[2]) + (signed char) (data[4]));
    return 0;
 }
-

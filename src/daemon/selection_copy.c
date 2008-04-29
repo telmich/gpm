@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,43 +20,44 @@
  *
  ********/
 
-#include <fcntl.h>                  /* open              */
-#include <unistd.h>                 /* close             */
-#include <time.h>                   /* time              */
+#include <fcntl.h>              /* open */
+#include <unistd.h>             /* close */
+#include <time.h>               /* time */
 
-
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
 
 void selection_copy(int x1, int y1, int x2, int y2, int mode)
 {
+
 /*
  * The approach in "selection" causes a bus error when run under SunOS 4.1
  * due to alignment problems...
  */
-   unsigned char buf[6*sizeof(short)];
-   unsigned short *arg = (unsigned short *)buf + 1;
+   unsigned char buf[6 * sizeof(short)];
+   unsigned short *arg = (unsigned short *) buf + 1;
    int fd;
 
-   buf[sizeof(short)-1] = 2;  /* set selection */
+   buf[sizeof(short) - 1] = 2;  /* set selection */
 
-   arg[0]=(unsigned short)x1;
-   arg[1]=(unsigned short)y1;
-   arg[2]=(unsigned short)x2;
-   arg[3]=(unsigned short)y2;
-   arg[4]=(unsigned short)mode;
+   arg[0] = (unsigned short) x1;
+   arg[1] = (unsigned short) y1;
+   arg[2] = (unsigned short) x2;
+   arg[3] = (unsigned short) y2;
+   arg[4] = (unsigned short) mode;
 
-   if ((fd=open_console(O_WRONLY))<0)
-      gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
-   /* FIXME: should be replaced with string constant (message.h) */
-   gpm_report(GPM_PR_DEBUG,"ctl %i, mode %i",(int)*buf, arg[4]);
-   if (ioctl(fd, TIOCLINUX, buf+sizeof(short)-1) < 0)
-     gpm_report(GPM_PR_OOPS,GPM_MESS_IOCTL_TIOCLINUX);
+   if((fd = open_console(O_WRONLY)) < 0)
+      gpm_report(GPM_PR_OOPS, GPM_MESS_OPEN_CON);
+   /*
+    * FIXME: should be replaced with string constant (message.h) 
+    */
+   gpm_report(GPM_PR_DEBUG, "ctl %i, mode %i", (int) *buf, arg[4]);
+   if(ioctl(fd, TIOCLINUX, buf + sizeof(short) - 1) < 0)
+      gpm_report(GPM_PR_OOPS, GPM_MESS_IOCTL_TIOCLINUX);
    close(fd);
 
-   if (mode < 3) {
+   if(mode < 3) {
       opt_aged = 0;
       last_selection_time = time(0);
    }
 }
-

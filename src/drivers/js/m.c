@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -21,13 +22,14 @@
 
 #include <linux/joystick.h>
 
-#include "types.h"                  /* Gpm_type         */
+#include "types.h"              /* Gpm_type */
 
 #ifdef HAVE_LINUX_JOYSTICK_H
+
 /* Joystick mouse emulation (David Given) */
-int M_js(Gpm_Event *state,  unsigned char *data)
+int M_js(Gpm_Event * state, unsigned char *data)
 {
-   struct JS_DATA_TYPE *jdata = (void*)data;
+   struct JS_DATA_TYPE *jdata = (void *) data;
    static int centerx = 0;
    static int centery = 0;
    static int oldbuttons = 0;
@@ -36,7 +38,7 @@ int M_js(Gpm_Event *state,  unsigned char *data)
    int dy;
 
    count++;
-   if (count < 200) {
+   if(count < 200) {
       state->buttons = oldbuttons;
       state->dx = 0;
       state->dy = 0;
@@ -44,31 +46,39 @@ int M_js(Gpm_Event *state,  unsigned char *data)
    }
    count = 0;
 
-   if (centerx == 0) {
+   if(centerx == 0) {
       centerx = jdata->x;
       centery = jdata->y;
    }
 
    state->buttons = ((jdata->buttons & 1) * GPM_B_LEFT) |
-                    ((jdata->buttons & 2) * GPM_B_RIGHT);
-   oldbuttons     = state->buttons;
+      ((jdata->buttons & 2) * GPM_B_RIGHT);
+   oldbuttons = state->buttons;
 
-   dx             = (jdata->x - centerx) >> 6;
-   dy             = (jdata->y - centery) >> 6;
+   dx = (jdata->x - centerx) >> 6;
+   dy = (jdata->y - centery) >> 6;
 
-   if (dx > 0) state->dx =   dx * dx;
-   else        state->dx = -(dx * dx);
+   if(dx > 0)
+      state->dx = dx * dx;
+   else
+      state->dx = -(dx * dx);
    state->dx >>= 2;
 
-   if (dy > 0) state->dy = dy * dy;
-   else        state->dy = -(dy * dy);
+   if(dy > 0)
+      state->dy = dy * dy;
+   else
+      state->dy = -(dy * dy);
    state->dy >>= 2;
 
-   /* Prevent pointer drift. (PC joysticks are notoriously inaccurate.) */
+   /*
+    * Prevent pointer drift. (PC joysticks are notoriously inaccurate.) 
+    */
 
-   if ((state->dx >= -1) && (state->dx <= 1)) state->dx = 0;
-   if ((state->dy >= -1) && (state->dy <= 1)) state->dy = 0;
+   if((state->dx >= -1) && (state->dx <= 1))
+      state->dx = 0;
+   if((state->dy >= -1) && (state->dy <= 1))
+      state->dy = 0;
 
    return 0;
 }
-#endif /* have joystick.h */
+#endif                          /* have joystick.h */

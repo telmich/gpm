@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse support for Linux
  *
@@ -25,99 +26,133 @@
 #include "message.h"
 #include "daemon.h"
 
-#include <stdlib.h> /* malloc() */
+#include <stdlib.h>             /* malloc() */
 
 /* DESCR:   add this to the list of mice. initialization follows later */
+
 /* RETURN:  - */
+
 /* COMMENT: does error handling and exiting itself */
 void add_mouse(int type, char *value)
 {
    struct micetab *tmp = option.micelist;
 
-   /* PREAMBLE for all work: */
-   /* -m /dev/misc/psaux -t ps2 [ -o options ] */
+   /*
+    * PREAMBLE for all work: 
+    */
+   /*
+    * -m /dev/misc/psaux -t ps2 [ -o options ] 
+    */
 
-   switch(type) {
+   switch (type) {
 
       /*---------------------------------------------------------------------*/
+
       /********************** -m mousedevice *********************************/
+
       /*---------------------------------------------------------------------*/
 
       case GPM_ADD_DEVICE:
 
-         /* first invocation */
+         /*
+          * first invocation 
+          */
          if(option.micelist == NULL) {
-            gpm_report(GPM_PR_DEBUG,"adding mouse device: %s",value);
+            gpm_report(GPM_PR_DEBUG, "adding mouse device: %s", value);
             option.micelist = (struct micetab *) malloc(sizeof(struct micetab));
-            if(!option.micelist) gpm_report(GPM_PR_OOPS,GPM_MESS_NO_MEM);
-            option.micelist->next      = NULL;
-            option.micelist->device    = value;
-            option.micelist->protocol  = NULL;
-            option.micelist->options   = NULL;
+            if(!option.micelist)
+               gpm_report(GPM_PR_OOPS, GPM_MESS_NO_MEM);
+            option.micelist->next = NULL;
+            option.micelist->device = value;
+            option.micelist->protocol = NULL;
+            option.micelist->options = NULL;
             return;
          }
 
-         /* find actual mouse */
-         while(tmp->device != NULL && tmp->protocol != NULL && tmp->next !=NULL)
+         /*
+          * find actual mouse 
+          */
+         while(tmp->device != NULL && tmp->protocol != NULL
+               && tmp->next != NULL)
             tmp = tmp->next;
 
-         gpm_report(GPM_PR_DEBUG,"finished searching");
+         gpm_report(GPM_PR_DEBUG, "finished searching");
 
-         /* found end of micelist, add new mouse */
+         /*
+          * found end of micelist, add new mouse 
+          */
          if(tmp->next == NULL && tmp->protocol != NULL) {
-            gpm_report(GPM_PR_DEBUG,"next mouse making");
+            gpm_report(GPM_PR_DEBUG, "next mouse making");
             tmp->next = (struct micetab *) malloc(sizeof(struct micetab));
-            if(!tmp) gpm_report(GPM_PR_OOPS,GPM_MESS_NO_MEM);
-            tmp->next      = NULL;
-            tmp->device    = value;
-            tmp->protocol  = NULL;
-            tmp->options   = NULL;
+            if(!tmp)
+               gpm_report(GPM_PR_OOPS, GPM_MESS_NO_MEM);
+            tmp->next = NULL;
+            tmp->device = value;
+            tmp->protocol = NULL;
+            tmp->options = NULL;
             return;
-         } else gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
+         } else
+            gpm_report(GPM_PR_OOPS, GPM_MESS_FIRST_DEV);
 
-         //} else if(tmp->device != NULL && tmp->protocol == NULL)
+         // } else if(tmp->device != NULL && tmp->protocol == NULL)
          // gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV); /* -m -m */
-
 
          break;
 
       /*---------------------------------------------------------------------*/
+
       /************************* -t type / protocol **************************/
+
       /*---------------------------------------------------------------------*/
 
       case GPM_ADD_TYPE:
-         if(option.micelist == NULL) gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
+         if(option.micelist == NULL)
+            gpm_report(GPM_PR_OOPS, GPM_MESS_FIRST_DEV);
 
-         /* skip to next mouse, where either device or protocol is missing */
-         while(tmp->device != NULL && tmp->protocol != NULL && tmp->next !=NULL)
+         /*
+          * skip to next mouse, where either device or protocol is missing 
+          */
+         while(tmp->device != NULL && tmp->protocol != NULL
+               && tmp->next != NULL)
             tmp = tmp->next;
 
-         /* check whether device (-m) is there, if so, write protocol */
-         if(tmp->device == NULL) gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
+         /*
+          * check whether device (-m) is there, if so, write protocol 
+          */
+         if(tmp->device == NULL)
+            gpm_report(GPM_PR_OOPS, GPM_MESS_FIRST_DEV);
          else {
-            gpm_report(GPM_PR_DEBUG,"adding mouse type: %s",value);
+            gpm_report(GPM_PR_DEBUG, "adding mouse type: %s", value);
             tmp->protocol = value;
-            option.no_mice++;          /* finally we got our mouse */
+            option.no_mice++;   /* finally we got our mouse */
          }
 
          break;
 
       /*---------------------------------------------------------------------*/
+
       /*************************** -o options ********************************/
+
       /*---------------------------------------------------------------------*/
 
       case GPM_ADD_OPTIONS:
-         if(option.micelist == NULL) gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
+         if(option.micelist == NULL)
+            gpm_report(GPM_PR_OOPS, GPM_MESS_FIRST_DEV);
 
-         /* look for the last mouse */
+         /*
+          * look for the last mouse 
+          */
          tmp = option.micelist;
-         while(tmp->next != NULL) tmp = tmp->next;
+         while(tmp->next != NULL)
+            tmp = tmp->next;
 
-         /* if -m or -t are missing exit */
+         /*
+          * if -m or -t are missing exit 
+          */
          if(tmp->device == NULL || tmp->protocol == NULL)
-            gpm_report(GPM_PR_OOPS,GPM_MESS_FIRST_DEV);
+            gpm_report(GPM_PR_OOPS, GPM_MESS_FIRST_DEV);
          else {
-            gpm_report(GPM_PR_DEBUG,"adding mouse options: %s",value);
+            gpm_report(GPM_PR_DEBUG, "adding mouse options: %s", value);
             tmp->options = value;
          }
          break;

@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse support
  *
@@ -23,46 +24,47 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>        /* strerror(); ?!?  */
+#include <string.h>             /* strerror(); ?!? */
 #include <errno.h>
-#include <unistd.h>        /* select(); */
-#include <signal.h>        /* SIGPIPE */
-#include <time.h>          /* time() */
+#include <unistd.h>             /* select(); */
+#include <signal.h>             /* SIGPIPE */
+#include <time.h>               /* time() */
 #include <sys/param.h>
-#include <sys/fcntl.h>     /* O_RDONLY */
-#include <sys/wait.h>      /* wait()   */
-#include <sys/stat.h>      /* mkdir()  */
-#include <sys/time.h>      /* timeval */
-#include <sys/types.h>     /* socket() */
-#include <sys/socket.h>    /* socket() */
-#include <sys/un.h>        /* struct sockaddr_un */
+#include <sys/fcntl.h>          /* O_RDONLY */
+#include <sys/wait.h>           /* wait() */
+#include <sys/stat.h>           /* mkdir() */
+#include <sys/time.h>           /* timeval */
+#include <sys/types.h>          /* socket() */
+#include <sys/socket.h>         /* socket() */
+#include <sys/un.h>             /* struct sockaddr_un */
 
-#include <linux/vt.h>      /* VT_GETSTATE */
-#include <linux/serial.h>  /* for serial console check */
-#include <sys/kd.h>        /* KDGETMODE */
-#include <termios.h>       /* winsize */
+#include <linux/vt.h>           /* VT_GETSTATE */
+#include <linux/serial.h>       /* for serial console check */
+#include <sys/kd.h>             /* KDGETMODE */
+#include <termios.h>            /* winsize */
 
-#include "gpmInt.h"   /* old daemon header */
+#include "gpmInt.h"             /* old daemon header */
 #include "message.h"
 
-#include "daemon.h"   /* clean daemon header */
+#include "daemon.h"             /* clean daemon header */
 
 /* who the f*** runs gpm without glibc? doesn't have dietlibc __socklent_t? */
 #if !defined(__GLIBC__)
-   typedef unsigned int __socklen_t;
-#endif    /* __GLIBC__ */
+typedef unsigned int __socklen_t;
+#endif                          /* __GLIBC__ */
 
 /* global variables that are in daemon.h */
-struct options option;        /* one should be enough for us */
+struct options option;          /* one should be enough for us */
 Gpm_Type *repeated_type = 0;
 
 /* FIXME: BRAINDEAD..ok not really, but got to leave anyway... */
+
 /* argc and argv for mice initialization */
-int mouse_argc[3]; /* 0 for default (unused) and two mice */
-char **mouse_argv[3]; /* 0 for default (unused) and two mice */
+int mouse_argc[3];              /* 0 for default (unused) and two mice */
+char **mouse_argv[3];           /* 0 for default (unused) and two mice */
 
 int opt_aged = 0;
-int statusX,statusY,statusB; /* to return info */
+int statusX, statusY, statusB;  /* to return info */
 
 /*
  * all the values duplicated for dual-mouse operation are
@@ -73,44 +75,41 @@ int statusX,statusY,statusB; /* to return info */
 
 struct mouse_features mouse_table[3] = {
    {
-      DEF_TYPE, DEF_DEV, DEF_SEQUENCE, DEF_CALIB,
-      (char *)NULL /* extra */,
-      -1,
-      DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, 0 /* scaley */,
-      DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_GLIDEPOINT_TAP,
-      DEF_DMINX, DEF_DMAXX, DEF_DMINY, DEF_DMAXY,
-      DEF_OMINX, DEF_OMAXX, DEF_OMINY, DEF_OMAXY,
-      (Gpm_Type *)NULL
-   }
+    DEF_TYPE, DEF_DEV, DEF_SEQUENCE, DEF_CALIB,
+    (char *) NULL /* extra */ ,
+    -1,
+    DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, 0 /* scaley */ ,
+    DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_GLIDEPOINT_TAP,
+    DEF_DMINX, DEF_DMAXX, DEF_DMINY, DEF_DMAXY,
+    DEF_OMINX, DEF_OMAXX, DEF_OMINY, DEF_OMAXY,
+    (Gpm_Type *) NULL}
 };
 struct mouse_features *which_mouse;
 
 /* These are only the 'global' options */
 
-char *opt_lut=DEF_LUT;
-int opt_test=DEF_TEST;
-int opt_ptrdrag=DEF_PTRDRAG;
-int opt_double=0;
+char *opt_lut = DEF_LUT;
+int opt_test = DEF_TEST;
+int opt_ptrdrag = DEF_PTRDRAG;
+int opt_double = 0;
 
-char *opt_special=NULL; /* special commands, like reboot or such */
-int opt_rawrep=0;
+char *opt_special = NULL;       /* special commands, like reboot or such */
+int opt_rawrep = 0;
 
 struct winsize win;
 int maxx, maxy;
-int fifofd=-1;
+int fifofd = -1;
 
-int eventFlag=0;
-Gpm_Cinfo *cinfo[MAX_VC+1];
+int eventFlag = 0;
+Gpm_Cinfo *cinfo[MAX_VC + 1];
 
 time_t last_selection_time;
 time_t opt_age_limit = 0;
 
+int opt_resize = 0;             /* not really an option */
 
-int opt_resize=0; /* not really an option */
-
-
-int  statusC = 0; /* clicks */
-void get_console_size(Gpm_Event *ePtr);
+int statusC = 0;                /* clicks */
+void get_console_size(Gpm_Event * ePtr);
 
 /* in daemon.h */
 fd_set selSet, readySet, connSet;

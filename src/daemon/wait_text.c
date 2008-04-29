@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,13 +20,13 @@
  *
  ********/
 
-#include <unistd.h>                 /* sleep()           */
-#include <fcntl.h>                  /* open              */
-#include <linux/kd.h>               /* KDGETMODE         */
+#include <unistd.h>             /* sleep() */
+#include <fcntl.h>              /* open */
+#include <linux/kd.h>           /* KDGETMODE */
 
-#include "message.h"        /* messaging in gpm  */
-#include "daemon.h"         /* daemon internals  */
-#include "gpmInt.h"         /* evil old headers  */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
+#include "gpmInt.h"             /* evil old headers */
 
 int wait_text(int *fdptr)
 {
@@ -33,20 +34,23 @@ int wait_text(int *fdptr)
    int kd_mode;
 
    close(*fdptr);
-   do
-   {
+   do {
       sleep(2);
       fd = open_console(O_RDONLY);
-      if (ioctl(fd, KDGETMODE, &kd_mode)<0)
-         gpm_report(GPM_PR_OOPS,GPM_MESS_IOCTL_KDGETMODE);
+      if(ioctl(fd, KDGETMODE, &kd_mode) < 0)
+         gpm_report(GPM_PR_OOPS, GPM_MESS_IOCTL_KDGETMODE);
       close(fd);
-   } while (kd_mode != KD_TEXT);
+   } while(kd_mode != KD_TEXT);
 
-   /* reopen, reinit (the function is only used if we have one mouse device) */
-   if ((*fdptr=open((which_mouse->opt_dev),O_RDWR))<0)
-      gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN,(which_mouse->opt_dev));
-   if ((which_mouse->m_type)->init)
-      (which_mouse->m_type)=((which_mouse->m_type)->init)(*fdptr, (which_mouse->m_type)->flags, (which_mouse->m_type), mouse_argc[1],
-              mouse_argv[1]);
+   /*
+    * reopen, reinit (the function is only used if we have one mouse device) 
+    */
+   if((*fdptr = open((which_mouse->opt_dev), O_RDWR)) < 0)
+      gpm_report(GPM_PR_OOPS, GPM_MESS_OPEN, (which_mouse->opt_dev));
+   if((which_mouse->m_type)->init)
+      (which_mouse->m_type) =
+         ((which_mouse->m_type)->init) (*fdptr, (which_mouse->m_type)->flags,
+                                        (which_mouse->m_type), mouse_argc[1],
+                                        mouse_argv[1]);
    return (1);
 }

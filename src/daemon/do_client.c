@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,42 +20,55 @@
  *
  ********/
 
-#include <unistd.h>                 /* write             */
+#include <unistd.h>             /* write */
 
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
-#include "gpmInt.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
+#include "gpmInt.h"             /* daemon internals */
 
 /*-------------------------------------------------------------------*/
+
 /* returns 0 if the event has not been processed, and 1 if it has */
-int do_client(Gpm_Cinfo *cinfo, Gpm_Event *event)
+int do_client(Gpm_Cinfo * cinfo, Gpm_Event * event)
 {
-   Gpm_Connect info=cinfo->data;
-   int fd=cinfo->fd;
-   /* value to return if event is not used */
+   Gpm_Connect info = cinfo->data;
+   int fd = cinfo->fd;
+
+   /*
+    * value to return if event is not used 
+    */
    int res = !(info.defaultMask & event->type);
 
-   /* instead of returning 0, scan the stack of clients */
-   if ((info.minMod & event->modifiers) < info.minMod)
+   /*
+    * instead of returning 0, scan the stack of clients 
+    */
+   if((info.minMod & event->modifiers) < info.minMod)
       goto scan;
-   if ((info.maxMod & event->modifiers) < event->modifiers)
+   if((info.maxMod & event->modifiers) < event->modifiers)
       goto scan;
 
-   /* if not managed, use default mask */
-   if (!(info.eventMask & GPM_BARE_EVENTS(event->type))) {
-      if (res) return res;
-      else goto scan;
+   /*
+    * if not managed, use default mask 
+    */
+   if(!(info.eventMask & GPM_BARE_EVENTS(event->type))) {
+      if(res)
+         return res;
+      else
+         goto scan;
    }
 
-   /* WARNING */ /* This can generate a SIGPIPE... I'd better catch it */
-   MAGIC_P((write(fd,&magic, sizeof(int))));
-   write(fd,event, sizeof(Gpm_Event));
+   /*
+    * WARNING 
+    *//*
+    * This can generate a SIGPIPE... I'd better catch it 
+    */
+   MAGIC_P((write(fd, &magic, sizeof(int))));
+   write(fd, event, sizeof(Gpm_Event));
 
-   return info.defaultMask & GPM_HARD ? res : 1; /* HARD forces pass-on */
+   return info.defaultMask & GPM_HARD ? res : 1;        /* HARD forces pass-on */
 
-   scan:
-   if (cinfo->next != 0)
-      return do_client (cinfo->next, event); /* try the next */
-   return 0; /* no next, not used */
+ scan:
+   if(cinfo->next != 0)
+      return do_client(cinfo->next, event);     /* try the next */
+   return 0;                    /* no next, not used */
 }
-

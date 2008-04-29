@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,35 +20,37 @@
  *
  ********/
 
-#include <signal.h>                 /* kill              */
-#include <unistd.h>                 /* kill, getpid      */
+#include <signal.h>             /* kill */
+#include <unistd.h>             /* kill, getpid */
 
-#include "message.h"        /* messaging in gpm */
-#include "daemon.h"         /* daemon internals */
+#include "message.h"            /* messaging in gpm */
+#include "daemon.h"             /* daemon internals */
 
 /* itz Sat Sep 12 10:30:05 PDT 1998 this function used to mix two
    completely different things; opening a socket to a running daemon
    and checking that a running daemon existed.  Ugly. */
+
 /* rewritten mostly on 20th of February 2002 - nico */
 void check_uniqueness(void)
 {
-   FILE *fp    =  0;
+   FILE *fp = 0;
    int old_pid = -1;
 
    if((fp = fopen(GPM_NODE_PID, "r")) != NULL) {
       fscanf(fp, "%d", &old_pid);
-      if (kill(old_pid,0) == -1) {
-         gpm_report(GPM_PR_INFO,GPM_MESS_STALE_PID, GPM_NODE_PID);
+      if(kill(old_pid, 0) == -1) {
+         gpm_report(GPM_PR_INFO, GPM_MESS_STALE_PID, GPM_NODE_PID);
          unlink(GPM_NODE_PID);
-      } else /* we are really running, exit asap! */
-         gpm_report(GPM_PR_OOPS,GPM_MESS_ALREADY_RUN, old_pid);
+      } else                    /* we are really running, exit asap! */
+         gpm_report(GPM_PR_OOPS, GPM_MESS_ALREADY_RUN, old_pid);
    }
-   /* now try to sign ourself */
-   if ((fp = fopen(GPM_NODE_PID,"w")) != NULL) {
-      fprintf(fp,"%d\n",getpid());
+   /*
+    * now try to sign ourself 
+    */
+   if((fp = fopen(GPM_NODE_PID, "w")) != NULL) {
+      fprintf(fp, "%d\n", getpid());
       fclose(fp);
    } else {
-      gpm_report(GPM_PR_OOPS,GPM_MESS_NOTWRITE,GPM_NODE_PID);
+      gpm_report(GPM_PR_OOPS, GPM_MESS_NOTWRITE, GPM_NODE_PID);
    }
 }
-

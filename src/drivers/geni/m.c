@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse (gpm)
  *
@@ -19,28 +20,25 @@
  *
  ********/
 
-#include "types.h"                  /* Gpm_type         */
+#include "types.h"              /* Gpm_type */
 
-#include "daemon.h"         /* daemon internals */
+#include "daemon.h"             /* daemon internals */
 
 /* 'Genitizer' (kw@dtek.chalmers.se 11/12/97) */
-int M_geni(Gpm_Event *state,  unsigned char *data)
+int M_geni(Gpm_Event * state, unsigned char *data)
 {
-   /* this is a little confusing. If we use the stylus, we
-    * have three buttons (tip, lower, upper), and if
-    * we use the puck we have four buttons. (And the
-    * protocol is a little mangled if several of the buttons
-    * on the puck are pressed simultaneously.
-    * I don't use the puck, hence I try to decode three buttons
-    * only. tip = left, lower = middle, upper = right
+   /*
+    * this is a little confusing. If we use the stylus, we have three buttons
+    * (tip, lower, upper), and if we use the puck we have four buttons. (And
+    * the protocol is a little mangled if several of the buttons on the puck
+    * are pressed simultaneously. I don't use the puck, hence I try to decode
+    * three buttons only. tip = left, lower = middle, upper = right 
     */
    state->buttons =
-      (data[0] & 0x01)<<2 |
-      (data[0] & 0x02) |
-      (data[0] & 0x04)>>2;
+      (data[0] & 0x01) << 2 | (data[0] & 0x02) | (data[0] & 0x04) >> 2;
 
-   state->dx = ((data[1] & 0x3f) ) * ((data[0] & 0x10)?1:-1);
-   state->dy = ((data[2] & 0x3f) ) * ((data[0] & 0x8)?-1:1);
+   state->dx = ((data[1] & 0x3f)) * ((data[0] & 0x10) ? 1 : -1);
+   state->dy = ((data[2] & 0x3f)) * ((data[0] & 0x8) ? -1 : 1);
 
    return 0;
 }
