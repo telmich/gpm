@@ -27,8 +27,6 @@ man7dir     = $(mandir)/man7
 man8dir     = $(mandir)/man8
 infodir     = $(ROOT)@infodir@
 
-srcdir = @srcdir@
-
 # it would be nice to figure this out automatically, but the Emacs
 # load path often has many elements, most of them reserved for
 # specialised packages like w3 and auctex.

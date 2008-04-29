@@ -6,6 +6,7 @@
 # Copyright (C) 2001-2008 	Nico Schottelius <nico-gpm2008 at schottelius.org>
 #
 
+srcdir = @srcdir@
 top_builddir = ..
 
 ## INCLUDES
