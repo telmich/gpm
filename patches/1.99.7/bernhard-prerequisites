@@ -1,0 +1,36 @@
+
+Signed-off-by: aldot <rep.dot.nop@gmail.com>
+---
+ src/Makefile.in |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/src/Makefile.in b/src/Makefile.in
+index 1ecd8a9..ccb61c1 100644
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -115,11 +115,13 @@ prog/%:	prog/%.o
+ $(OBJECTS): headers/drivers.h
+ 
+ headers/drivers.h: $(addprefix $(srcdir)/,$(GDRIVERS)) $(top_srcdir)/scripts/generate_drivers_header.sh
++	@@MKDIR_P@ $(@D)
+ 	$(top_srcdir)/scripts/generate_drivers_header.sh $(srcdir) > $@
+ 
+ #-include $(SRCSP)
+ 
+-Makefile.drivers.generated:
++Makefile.drivers.generated: $(top_srcdir)/scripts/generate_drivers_makefile.sh
++	@@MKDIR_P@ $(@D)
+ 	$(top_srcdir)/scripts/generate_drivers_makefile.sh $(srcdir) > $@
+ 
+ ### INSTALL
+@@ -208,5 +210,6 @@ allclean: clean
+ 	rm -f headers/config.h.in
+ 
+ ### GPM2 integration
+-gpm2/become_daemon.c: $(srcdir)/../gpm2/daemon/become_daemon.c
++$(srcdir)/gpm2/become_daemon.c: $(top_srcdir)/gpm2/daemon/become_daemon.c
++	@@MKDIR_P@ $(@D)
+ 	cp $^ $@
+-- 
+1.5.5
+
