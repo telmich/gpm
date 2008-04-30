@@ -7,6 +7,8 @@
 #
 
 srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+builddir = @builddir@
 top_builddir = ..
 
 ## INCLUDES
@@ -60,7 +62,10 @@ PROG = $(POBJ:.o=)
 
 SRCS = $(GSRC) $(LSRC) $(PSRC)
 SRCSP= $(SRCS:.c=.P) lib/libcurses.P
-OBJECTS = $(SRCS:.c=.o)
+OBJECTS = $(GOBJ) $(filter-out @CURSES_OBJS@,$(LOBJ)) $(POBJ)
+# All objects depend on their respective sources
+$(OBJECTS) @CURSES_OBJS@: %.o: $(srcdir)/%.c
+$(PICS): %.lo: $(srcdir)/%.c
 
 DEFS  = @DEFS@
 
@@ -80,20 +85,26 @@ gpm:	$(GOBJ)
 # user-overridable flags, but it's also all the implicit rule looks at.
 
 # the prog rules are not very clean...
-prog/%.o: prog/%.c
-	$(CC) -Iheaders @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@ $<
+prog/%.o: $(srcdir)/prog/%.c
+	@@MKDIR_P@ $(@D)
+	$(CC) @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@ $<
 
 prog/%:	prog/%.o
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS)
 
-%.o: %.c
+
+#Make sure that our output-dir exists. autotools would have done this
+#for us for SUBDIRS, but we do not use them here (why, btw?)
+%.o:
+	@@MKDIR_P@ $(@D)
 	$(CC) -MD @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@ $<
 	@cp $*.d $*.P; \
    sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
      	 -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $*.P; \
 	#rm -f $*.d
 
-%.lo:	%.c
+%.lo:
+	@@MKDIR_P@ $(@D)
 	$(CC) @CPPFLAGS@ $(CPPFLAGS) @PICFLAGS@ @CFLAGS@ $(CFLAGS) -c -o $@ $<
 
 %:	%.o
@@ -101,16 +112,15 @@ prog/%:	prog/%.o
 
 ### GENERATED INCLUDES
 
-# FIXME: add absolute path of source files below
 $(OBJECTS): headers/drivers.h
 
-headers/drivers.h: $(GDRIVERS) ../scripts/generate_drivers_header.sh
-	../scripts/generate_drivers_header.sh . > $@
+headers/drivers.h: $(addprefix $(srcdir)/,$(GDRIVERS)) $(top_srcdir)/scripts/generate_drivers_header.sh
+	$(top_srcdir)/scripts/generate_drivers_header.sh $(srcdir) > $@
 
 #-include $(SRCSP)
 
 Makefile.drivers.generated:
-	../scripts/generate_drivers_makefile.sh . > $@
+	$(top_srcdir)/scripts/generate_drivers_makefile.sh $(srcdir) > $@
 
 ### INSTALL
 check:	all
@@ -160,8 +170,8 @@ prog/gpm-root: prog/gpm-root.c lib/libgpm.so
 	$(CC) -I. @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@.o $<
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.so
 
-prog/mouse-test:	prog/mouse-test.o mice.o prog/open_console.o  \
-						$(GCOMMON:.c=.o) $(GDRIVERS:.c=.o)
+prog/mouse-test: prog/mouse-test.o mice.o prog/open_console.o  \
+						$(GSRC:.c=.o)
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS) -lm
 
 $(PROG):	lib/libgpm.so

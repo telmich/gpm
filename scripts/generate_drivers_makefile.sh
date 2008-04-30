@@ -32,7 +32,7 @@ GDRIVERS = \\
 eof
 
 (
-   cd $1
+   cd $dir
    ls drivers/*/*.c
 ) | sed 's/$/ \\/'
 
