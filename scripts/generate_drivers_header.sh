@@ -39,11 +39,11 @@ eof
    # they have line breaks :-(
    cat drivers/*/i.c |  \
       awk 'BEGIN { RS="{"; }
-            /Gpm_Type \*I_/ {
+            /Gpm_Type[ 	][ 	]*\*I_/ {
                idx=index($0,"Gpm_Type *I_");
-               func=substr($0, idx);
-               gsub(/\n/, " ", func);
-               print func
+               fn=substr($0, idx);
+               gsub(/\n/, " ", fn);
+               print fn
             }'
    grep -h "^int R_"    drivers/*/r.c
 ) | sed -e '/^$/d' -e 's/$/;/' -e 's/  */ /g'
