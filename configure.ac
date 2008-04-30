@@ -10,8 +10,8 @@ AC_CONFIG_HEADER([src/headers/config.h])
 
 AC_CANONICAL_HOST
 
-revgit="`cat .gitversion`"
-releasedate="`cat .releasedate`"
+revgit="`cat $srcdir/.gitversion`"
+releasedate="`cat $srcdir/.releasedate`"
 AC_DEFINE_UNQUOTED([GPM_RELEASE_GIT],["$revgit"],[git short revision])
 AC_DEFINE_UNQUOTED([GPM_RELEASE_DATE],["$releasedate"],[release date])
 
