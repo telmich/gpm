@@ -26,20 +26,22 @@
 
 SHELL = /bin/sh
 srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+builddir = @builddir@
 top_builddir = ..
 
 include $(top_builddir)/Makefile.include
 
 MANPAGES = gpm.8 mev.1 gpm-root.1 gpm-types.7 mouse-test.1
 
-all: $(srcdir)/gpm.info gpm.man
+all: gpm.info gpm.man
 
 # HTML (texi2html)
 %.html: %.texinfo
 	if [ $(TEXI2HTML) != "no" ]; then $(TEXI2HTML) -monolithic $< ;fi
 
 # TEXINFO (-)
-%.texinfo: doc.% Makefile
+%.texinfo: doc.% Makefile $(srcdir)/infofilter
 	@rm -f $@ # correct here ?
 	$(SED) -f $(srcdir)/infofilter $< > $@
 	chmod 400 $@
@@ -53,13 +55,13 @@ all: $(srcdir)/gpm.info gpm.man
 	if [ "$(MAKEINFO)" != "no" ]; then $(MAKEINFO) --no-split $< -o $@; fi
 
 # TXT (-)
-%.txt: %.info
+%.txt: %.info $(srcdir)/mktxt
 	$(AWK) -f $(srcdir)/mktxt $< > $@
 
 # MAN (-)
 $(MANPAGES): gpm.man
 gpm.man: doc.gpm $(srcdir)/manpager
-	$(AWK) -f $(srcdir)/manpager doc.gpm
+	$(AWK) -f $(srcdir)/manpager $<
 	for i in gpm-root.1 gpm-types.7 gpm.8 mev.1 mouse-test.1; do \
 		expand $$i | sed s/^'[ ]*'//g > $$i.new; \
 		mv $$i.new $$i; \
@@ -98,10 +100,6 @@ gpm.man: doc.gpm $(srcdir)/manpager
 		  $(TEXINDEX) $*.?? && $(TEX) $<; \
 		fi; \
 	fi
-
-# Main portion
-
-all: $(srcdir)/gpm.info $(MANPAGES)
 
 # why gpmdoc.ps and gpm.ps??
 # there is no gpm.ps in my tree and no rule to generate gpm.ps.
