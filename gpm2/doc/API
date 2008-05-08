@@ -1,0 +1,20 @@
+What to export how to the clients.
+
+Perhaps use doxygen for it?
+
+Currently just some ideas (based on gpm1 experience):
+
+
+Functions
+---------
+
+- get_num_mice(): returns number of attached mice
+
+
+Data / structures
+-----------------
+
+gpm2_event
+~~~~~~~~~~
+
+- unsigned short mouse_number; /* which mouse reported the event */
