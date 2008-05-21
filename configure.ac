@@ -25,7 +25,7 @@ dnl I do not see the use right now -> disabled
 #abi_full=$abi_lev.$abi_age.$abi_rev
 
 abi_lev="2"
-abi_age="1"
+abi_age="0"
 abi_rev="0"
 abi_full="${abi_lev}.${abi_age}.${abi_rev}"
 
