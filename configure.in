@@ -14,12 +14,17 @@ AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date",[release date as a string])
 
 dnl These are chosen so that we can switch to the libtool scheme
 dnl transparently.
-abi=21
-abi_age=20
-abi_rev=0
+dnl Nico, 20080520: Is this somewhere needed?
+dnl I do not see the use right now -> disabled
+#abi=21
+#
+#abi_lev=`expr $abi - $abi_age`
+#abi_full=$abi_lev.$abi_age.$abi_rev
 
-abi_lev=`expr $abi - $abi_age`
-abi_full=$abi_lev.$abi_age.$abi_rev
+abi_lev="2"
+abi_age="1"
+abi_rev="0"
+abi_full="${abi_lev}.${abi_age}.${abi_rev}"
 
 dnl Make srcdir an absolute path.
 if test x$srcdir = x ; then
