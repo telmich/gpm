@@ -7,8 +7,8 @@ AC_INIT(src/daemon/main.c)
 AC_PREREQ(2.12)
 AC_CONFIG_HEADER(src/headers/config.h)
 
-release=1.20.3
-release_date="15th of April 2008"
+release=1.20.4
+release_date="XXth of April 2008"
 AC_DEFINE_UNQUOTED(GPM_RELEASE,"$release",[GPM release number as a string])
 AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date",[release date as a string])
 
@@ -22,7 +22,7 @@ dnl I do not see the use right now -> disabled
 #abi_full=$abi_lev.$abi_age.$abi_rev
 
 abi_lev="2"
-abi_age="1"
+abi_age="0"
 abi_rev="0"
 abi_full="${abi_lev}.${abi_age}.${abi_rev}"
 

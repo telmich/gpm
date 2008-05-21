@@ -111,13 +111,14 @@ install:	check
 	# 2.x goes along; unfortunately that means an additional
 	# headache in cases like this
 	if test "x@SHLIB@" != "x" ; then \
-		$(INSTALL_DATA) -m 644 lib/libgpm.so.@abi_full@ $(libdir)/libgpm.so.@abi_full@ ;\
-		cd $(libdir) && $(LN_S) -f libgpm.so.@abi_lev@ libgpm.so \
-		             && $(LN_S) -f libgpm.so.@abi_full@ libgpm.so.@abi_lev@ ;\
-      echo "WARNING: We installed a lib, you should now call ldconfig" ; \
-      echo "f.i.: ldconfig -n -l $(libdir)/libgpm.so.@abi_full@" ;\
-      echo "Or to update everything just type ldconfig"; \
+		$(INSTALL_DATA) -m 644 lib/libgpm.so.@abi_full@ $(libdir)/libgpm.so.@abi_full@	;	\
+		cd $(libdir) && $(LN_S) -f libgpm.so.@abi_full@ libgpm.so.@abi_lev@ 					;	\
+      echo "WARNING: We installed a lib, you should now call ldconfig" 						; 	\
+      echo "f.i.: ldconfig -n -l $(libdir)/libgpm.so.@abi_full@" 								;	\
+      echo "Or to update everything just type ldconfig"											;	\
 	fi
+#			The unversioned files seems to be not needed -> correct me, if I am wrong.
+#			&& $(LN_S) -f libgpm.so.@abi_lev@  libgpm.so 											;	\
 
    # prog/
 	for i in $(PROG); do \
@@ -146,14 +147,14 @@ prog/gpm-root.c:	$(srcdir)/prog/gpm-root.y
 	$(YACC) $(YFLAGS) $< && mv y.tab.c prog/gpm-root.c
 
 # gpm-root needs an own rule, because gpm-root.c is not in $(srcdir)
-prog/gpm-root: prog/gpm-root.c lib/libgpm.so
+prog/gpm-root: prog/gpm-root.c lib/libgpm.so.@abi_lev@
 	$(CC) -I. @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@.o $<
-	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.so
+	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.so.@abi_lev@
 
 prog/mouse-test:	prog/mouse-test.o mice.o twiddler.o synaptics.o prog/open_console.o
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS) -lm
 
-$(PROG):	lib/libgpm.so
+$(PROG):	lib/libgpm.so.@abi_lev@
 
 # Subdirectory lib/
 lib/libgpm.a:	$(LOBJ)
@@ -163,8 +164,11 @@ lib/libgpm.a:	$(LOBJ)
 lib/libgpm.so.@abi_full@:	$(PICS)
 	$(CC) @SOLDFLAGS@libgpm.so.@abi_lev@ \
 	@LDFLAGS@ $(LDFLAGS) -o lib/libgpm.so.@abi_full@ $^ @LIBS@ @SHARED_LIBS@ $(LIBS)	
-lib/libgpm.so:	lib/libgpm.so.@abi_full@
-	$(LN_S) -f libgpm.so.@abi_full@ lib/libgpm.so
+lib/libgpm.so.@abi_lev@:	lib/libgpm.so.@abi_full@
+	$(LN_S) -f libgpm.so.@abi_full@ lib/libgpm.so.@abi_lev@
+# unneeded, isn't it?
+#lib/libgpm.so:	lib/libgpm.so.@abi_full@
+#	$(LN_S) -f libgpm.so.@abi_full@ lib/libgpm.so
 
 include $(DEPFILE)
 
