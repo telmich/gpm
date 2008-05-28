@@ -96,6 +96,7 @@ D_SOURCE=$(D_BASE)/browse_source/
 M_HOST=arcana.linux.it
 M_BASE=gpm/
 
+tars: $(TARS)
 
 # configure headers, produce new configure script
 distconf: configure.in aclocal.m4
