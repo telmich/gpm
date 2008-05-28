@@ -25,7 +25,6 @@
 
 /* This file is compiled conditionally, see the Makefile */
 
-#include <linux/limits.h> /* for OPEN_MAX */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
