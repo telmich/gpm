@@ -53,7 +53,7 @@ void check_kill(void)
    if (kill(old_pid,SIGTERM) == -1)
       gpm_report(GPM_PR_OOPS,GPM_MESS_CANT_KILL, old_pid);
 
-   gpm_report(GPM_PR_INFO,GPM_MESS_KILLED,old_pid);
+   gpm_report(GPM_PR_DEBUG,GPM_MESS_KILLED,old_pid);
    exit(0);
 }
 
