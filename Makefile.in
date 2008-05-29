@@ -127,10 +127,18 @@ dist: disttest distclean distconf $(TARS)
 	ssh "$(D_HOST)" "find \"$(D_SOURCE)/\" -type d -exec chmod 0755 {} \\;"
 
 
+### TEST: on nicos machine: not to be used anywhere else currently
 # create / update configure, delete other parts from earlier build
 disttest: distconf clean
 	./configure
 	make all
+
+TESTBUILDDIR=~/temp/gpm-build-test
+nicotest: $(TARS)
+	mkdir -p $(TESTBUILDDIR)
+	cp $(TARS) $(TESTBUILDDIR)
+	cd $(TESTBUILDDIR); tar xvfj gpm-$(release).tar.bz2;
+	cd $(TESTBUILDDIR)/gpm-$(release); ./configure && make && ./src/gpm -v
 
 ### CLEANUP
 distclean: clean do-clean do-distclean
@@ -141,3 +149,4 @@ distclean: clean do-clean do-distclean
 
 allclean: do-allclean distclean
 	rm -f configure
+
