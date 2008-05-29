@@ -135,7 +135,7 @@ disttest: distconf clean
 
 TESTBUILDDIR=~/temp/gpm-build-test
 nicotest: $(TARS)
-	echo rm -rf $(TESTBUILDDIR)
+	rm -rf $(TESTBUILDDIR)
 	mkdir -p $(TESTBUILDDIR)
 	cp $(TARS) $(TESTBUILDDIR)
 	cd $(TESTBUILDDIR); tar xvfj gpm-$(release).tar.bz2;
