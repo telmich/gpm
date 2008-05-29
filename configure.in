@@ -8,7 +8,7 @@ AC_PREREQ(2.12)
 AC_CONFIG_HEADER(src/headers/config.h)
 
 release=1.20.4
-release_date="28th of May 2008"
+release_date="29th of May 2008"
 AC_DEFINE_UNQUOTED(GPM_RELEASE,"$release",[GPM release number as a string])
 AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date",[release date as a string])
 
