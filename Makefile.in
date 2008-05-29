@@ -118,7 +118,7 @@ distconf: configure.in aclocal.m4
 
 # 3. Put package together into .tar.gz and .tar.bz2
 #dist: distclean distconf gpm-$(release).tar.bz2 gpm-$(release).tar.gz
-dist: disttest distclean distconf $(TARS)
+dist: disttest distclean distconf nicotest $(TARS)
 	chmod 0644 $(TARS)
 	scp $(TARS) $(D_HOST):$(D_DIR)
 	scp $(TARS) $(M_HOST):$(M_DIR)
@@ -135,6 +135,7 @@ disttest: distconf clean
 
 TESTBUILDDIR=~/temp/gpm-build-test
 nicotest: $(TARS)
+	echo rm -rf $(TESTBUILDDIR)
 	mkdir -p $(TESTBUILDDIR)
 	cp $(TARS) $(TESTBUILDDIR)
 	cd $(TESTBUILDDIR); tar xvfj gpm-$(release).tar.bz2;
