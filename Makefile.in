@@ -49,7 +49,7 @@ install-exec: installdirs
 
 installdirs:
 	@MKDIR_P@ $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
-	if test "x@ELISP@" != "x" ; then \
+	if test "x$(ELISP)" != "x" ; then \
 		@MKDIR_P@ $(lispdir) ; \
 	fi
 
