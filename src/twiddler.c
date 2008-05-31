@@ -322,7 +322,7 @@ char **twiddler_mod_to_table(char *mod)
    int len = strlen(mod);
    if (len == 0) return twiddler_map->table;
 
-   for (ptr = twiddler_map; ptr->table; ptr = ptr++) {
+   for (ptr = twiddler_map; ptr->table; ++ptr) {
       if (!strncasecmp(mod,ptr->keyword,len))
       return ptr->table;
    }
@@ -515,7 +515,7 @@ int twiddler_key_init(void)
 
          if (table[index]) {
 	         gpm_report(GPM_PR_ERR,GPM_MESS_REDEF_COORDS,option.progname,TW_SYSTEM_FILE,
-                                          lineno, mod, mod ? " " : "", chord);
+                                          lineno, mod, *mod ? " " : "", chord);
 	      }
          /* all done */
          if (value)
