@@ -51,7 +51,7 @@ install-strip:
 
 installdirs:
 	$(MKDIR) $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
-	if test "x@ELISP@" != "x" ; then \
+	if test "x$(ELISP)" != "x" ; then \
 		$(MKDIR) $(lispdir) ; \
 	fi
 
