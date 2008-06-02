@@ -39,7 +39,7 @@ int processConn(int fd)
    int vc, newfd;
 
    socklen_t len;
-   struct sockaddr_un addr;
+   struct sockaddr_un addr; /* reuse this each time */
    struct stat statbuf;
    uid_t uid;
    char *tty = NULL;
