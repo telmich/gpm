@@ -69,7 +69,7 @@ DEFS  = @DEFS@
 STRIP = -s
 
 ### REAL TARGETS
-all:	gpm lib/@SHLIB@ lib/libgpm.a $(PROG)
+all:	gpm lib/libgpm.so.@abi_lev@ lib/libgpm.a $(PROG)
 
 ### BUILD PROCESS
 
