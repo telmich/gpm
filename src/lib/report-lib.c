@@ -29,6 +29,9 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
    char *string = NULL;
    int log_level;
    va_list ap;
+
+   if (stat == GPM_STAT_DEBUG) return;
+
    va_start(ap,text);
 
    switch(stat) {
