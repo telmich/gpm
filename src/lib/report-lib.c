@@ -34,6 +34,7 @@ void gpm_report(int line, char *file, int stat, char *text, ...)
    line = 0;                    /* FIXME: gpm 1.99.13 */
    file = NULL;
 
+   if (stat == GPM_STAT_DEBUG) return;
    va_start(ap, text);
 
    switch (stat) {

@@ -45,7 +45,6 @@
 #include <sys/stat.h>       /* fstat() */
 #include <sys/utsname.h>    /* uname() */
 #include <termios.h>        /* winsize */
-#include <linux/limits.h>   /* OPEN_MAX */
 #include <linux/vt.h>       /* VT_ACTIVATE */
 #include <linux/keyboard.h> /* K_SHIFT */
 #include <utmp.h>

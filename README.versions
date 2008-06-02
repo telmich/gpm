@@ -13,9 +13,10 @@ Dear gpm README reader,
    So, how does that relate to the versions of gpm? Let us have a look at it:
 
       1.19.x: old versions, not continued
-      1.20.x: current stable versions
+      1.20.x: current stable versions: no new features.
       
-      1.99.x: versions that move to 2.x, but contain much 1.20.x code
+      1.99.x: versions that move to 2.x, but contain much 1.20.x code.
+              includes new features.
 
       2.0.x: future stable versions
       2.1.x: future testing versions

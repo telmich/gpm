@@ -87,7 +87,7 @@ AC_CHECK_HEADERS(sys/sysmacros.h linux/major.h linux/tty.h)
 
 ITZ_CHECK_TYPE(__u32,linux/types.h)
 if test ${itz_cv_type___u32} = yes || test ${ac_cv_type___u32} = yes ; then
-    AC_DEFINE(HAVE___U32,[],"have u32")
+    AC_DEFINE(HAVE___U32, 1, [define if the __u32 type exists either in sys/types.h or in linux/types.h])
 fi
 
 ITZ_SYS_ELF

@@ -104,7 +104,8 @@ gpm:	$(GOBJ)
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $(GOBJ) @LIBS@ $(LIBS) -lm
 
 
-### GENERATED INCLUDES
+# Do it all!
+all:	gpm lib/libgpm.so.@abi_lev@ lib/libgpm.a $(PROG)
 
 $(OBJECTS): headers/drivers.h
 
@@ -157,6 +158,9 @@ uninstall:
 	done
 
 # Configure & unconfigure
+
+Makefile: Makefile.in
+	$(top_builddir)/config.status Makefile
 
 # Subdirectory prog/
 prog/gpm-root.c:	$(srcdir)/prog/gpm-root.y

@@ -68,6 +68,8 @@ int Gpm_Wgetch(WINDOW * win)
             FD_ZERO(&selSet);
             FD_SET(fd, &selSet);
             FD_SET(gpm_fd, &selSet);
+	         if (gpm_fd>-1)
+	            FD_SET(gpm_fd,&selSet);
             gpm_timeout.tv_sec = SELECT_TIME;
             flag =
                select(max + 1, &selSet, (fd_set *) NULL, (fd_set *) NULL,

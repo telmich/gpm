@@ -1,4 +1,3 @@
-
 /*
  * general purpose mouse support for Linux
  *

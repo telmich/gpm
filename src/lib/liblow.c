@@ -213,6 +213,7 @@ int Gpm_Open(Gpm_Connect * conn, int flag)
    Gpm_Stst *new = NULL;
    char *sock_name = 0;
    static char *consolename = NULL;
+   int gpm_is_disabled = 0;
 
    /*
     * ....................................... First of all, check xterm 
@@ -343,16 +344,28 @@ int Gpm_Open(Gpm_Connect * conn, int flag)
       if(connect(gpm_fd, (struct sockaddr *) (&addr), i) < 0) {
          struct stat stbuf;
 
-         gpm_report(GPM_PR_INFO, GPM_MESS_DOUBLE_S, GPM_NODE_CTL,
-                    strerror(errno));
-         /*
-          * Well, try to open a chr device called /dev/gpmctl. This should
-          * be forward-compatible with a kernel server
-          */
-         close(gpm_fd);         /* the socket */
-         if((gpm_fd = open(GPM_NODE_DEV, O_RDWR)) == -1) {
-            gpm_report(GPM_PR_ERR, GPM_MESS_DOUBLE_S, GPM_NODE_DEV,
-                       strerror(errno));
+         if (errno == ENOENT) {
+            gpm_report(GPM_PR_DEBUG,"cannot find %s; ignoring (gpm disabled?)",
+                            GPM_NODE_CTL);
+            gpm_is_disabled++;
+         } else {
+            gpm_report(GPM_PR_INFO,GPM_MESS_DOUBLE_S,GPM_NODE_CTL,
+                            strerror(errno));
+         }
+          /*
+           * Well, try to open a chr device called /dev/gpmctl. This should
+           * be forward-compatible with a kernel server
+           */
+          close(gpm_fd); /* the socket */
+          if ((gpm_fd=open(GPM_NODE_DEV,O_RDWR))==-1) {
+            if (errno == ENOENT) {
+               gpm_report(GPM_PR_DEBUG,"Cannot find %s; ignoring (gpm disabled?)",
+                               GPM_NODE_DEV);
+               gpm_is_disabled++;
+            } else {
+               gpm_report(GPM_PR_ERR,GPM_MESS_DOUBLE_S,GPM_NODE_DEV
+                                                   ,strerror(errno));
+            }
             goto err;
          }
          if(fstat(gpm_fd, &stbuf) == -1 || (stbuf.st_mode & S_IFMT) != S_IFCHR) {
@@ -404,11 +417,10 @@ int Gpm_Open(Gpm_Connect * conn, int flag)
    }
    return gpm_fd;
 
-   /*
-    * ....................................... Error: free all memory 
-    */
- err:
-   gpm_report(GPM_PR_ERR, "Oh, oh, it's an error! possibly I die! ");
+  /*....................................... Error: free all memory */
+   err:
+   if (gpm_is_disabled < 2) /* be quiet if no gpmctl socket found */
+      gpm_report(GPM_PR_ERR,"Oh, oh, it's an error! possibly I die! ");
    while(gpm_stack) {
       new = gpm_stack->next;
       free(gpm_stack);

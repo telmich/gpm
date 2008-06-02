@@ -90,6 +90,11 @@ D_BASE=www/org/schottelius/unix/www/gpm
 D_DIR=$(D_BASE)/archives/
 D_SOURCE=$(D_BASE)/browse_source/
 
+M_HOST=arcana.linux.it
+M_DIR=gpm/
+
+tars: $(TARS)
+
 # configure headers, produce new configure script
 distconf: configure.ac aclocal.m4
 	autoheader && autoconf
@@ -111,21 +116,30 @@ distconf: configure.ac aclocal.m4
 $(CHKSUMS): $(TARS)
 	for file in $^; do sha512sum $$file > $${file}.sha512sum; done
 
-# 3. Put package together into .tar.gz and .tar.bz2
-dist: disttest distclean distconf $(CHKSUMS)
-
-distcopy: dist
+# Release
+dist: disttest distclean distconf nicotest $(CHKSUMS)
 	chmod 0644 $(TARS) $(CHKSUMS)
-	scp $(TARS) $(CHKSUMS) $(D_HOST):$(D_DIR)
+	chmod 0644 $(TARS)
+	scp $(TARS) $(D_HOST):$(D_DIR)
+	scp $(TARS) $(M_HOST):$(M_DIR)
 	ssh "$(D_HOST)" "tar xvfz $(D_DIR)/gpm-$(release).tar.gz -C $(D_SOURCE)"
 	ssh "$(D_HOST)" "find \"$(D_SOURCE)/\" -type f -exec chmod 0644 {} \\;"
 	ssh "$(D_HOST)" "find \"$(D_SOURCE)/\" -type d -exec chmod 0755 {} \\;"
 
 
+### TEST: on nicos machine: not to be used anywhere else currently
 # create / update configure, delete other parts from earlier build
 disttest: distconf clean
 	./configure
 	make all
+
+TESTBUILDDIR=~/temp/gpm-build-test
+nicotest: $(TARS)
+	rm -rf $(TESTBUILDDIR)
+	mkdir -p $(TESTBUILDDIR)
+	cp $(TARS) $(TESTBUILDDIR)
+	cd $(TESTBUILDDIR); tar xvfj gpm-$(release).tar.bz2;
+	cd $(TESTBUILDDIR)/gpm-$(release); ./configure && make && ./src/gpm -v
 
 ### CLEANUP
 distclean: clean do-clean do-distclean
@@ -134,3 +148,4 @@ distclean: clean do-clean do-distclean
 
 allclean: do-allclean distclean
 	rm -f configure
+
