@@ -875,6 +875,7 @@ static int           scrolling_amount_left = 0;   /* Tells how much to scroll up
 **
 ****************************************************************************/
 
+#if DEBUG_REPORTS
 /*
 ** Dump the report data for debugging.
 **
@@ -934,6 +935,7 @@ static void tp_dump_report_data (report_type report,
 	      (multi_finger_pressure>4500 && multi_finger_xy>50000? 'f':' '));
 
 }
+#endif
 
 
 /* syn_dump_info
