@@ -2,33 +2,41 @@
 *.o
 *.lo
 *.a
+*.d
+*.P
 .*.swp
 
 Makefile
 Makefile.include
+/aclocal.m4
 /autom4te.cache
 /config.log
 /config.status
 /configure
+/config
 
 /contrib/Makefile
 
 /src/headers/config.h
+/src/headers/config.h.in
+/src/headers/drivers.h
 /src/prog/gpm-root.c
 /src/subdirs-exist
 /src/headers/config.h.in
 /src/gpm
 /src/gpm2/tmp
 /src/gpm2/out
-/src/lib/libgpm.so
-/src/lib/libgpm.so.1.20.0
+/src/lib/libgpm.so.*
 /src/prog/disable-paste
 /src/prog/display-buttons
 /src/prog/display-coords
+/src/prog/gpm-root.c
 /src/prog/gpm-root
 /src/prog/hltest
 /src/prog/mev
 /src/prog/mouse-test
+/src/Makefile.drivers.generated
+/src/subdirs-exist
 
 /doc/doc.gpm
 /doc/gpm-root.1
@@ -38,3 +46,11 @@ Makefile.include
 /doc/gpm.man
 /doc/mev.1
 /doc/mouse-test.1
+
+/.releasedate
+/.gitversion
+
+# gpm2
+/gpm2/out/*
+/gpm2/tmp/*
+/src/gpm2
