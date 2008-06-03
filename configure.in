@@ -64,9 +64,11 @@ else
         lispdir='${datadir}/emacs/site-lisp'
 fi
 
-AC_CHECK_HEADERS(syslog.h linux/input.h linux/joystick.h ncurses.h ncurses/curses.h curses.h sys/socket.h)
+# Optional interfaces / libs / features
+AC_CHECK_HEADERS(syslog.h linux/input.h linux/joystick.h ncurses.h ncurses/curses.h curses.h)
 
-AC_CHECK_TYPE([socklen_t], [unsigned int])
+# Add posix headers here
+AC_CHECK_HEADERS(sys/socket.h,,[AC_MSG_ERROR([Required header file missing])])
 
 AC_ARG_WITH(curses,
 [  --without-curses        disable curses support even if curses found])
