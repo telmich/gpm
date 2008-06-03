@@ -1,3 +1,9 @@
 Released:
 Changes:
-   * Applied some bugfixes from Jonathan Nieder
+   * Fix possible segfault (FD_SET/negative) (Guillem Jover)
+   * Move more messages to debug (Jonathan Nieder)
+   * Remove unecessary headers (Jonathan Nieder)
+   * Allow specifying ELISP variable on commandline (Ulrich Mueller)
+   * Fix broken code semantics (Mike Frysinger)
+   * Cleanup documentation (Nico Schottelius)
+   * Fix socklen_t issue: Require posix header (Mike Frysinger/Nico Schottelius)
