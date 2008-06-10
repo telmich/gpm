@@ -73,7 +73,7 @@ int processConn(int fd)
       close(newfd);
       return -1;
    }
-#ifndef SO_PEERCRED
+
    if(stat(addr.sun_path, &statbuf) == -1 || !S_ISSOCK(statbuf.st_mode)) {
       gpm_report(GPM_PR_ERR, GPM_MESS_ADDRES_NSOCKET, addr.sun_path);
       free(info);               /* itz 10-12-95 verify client's right */
@@ -93,21 +93,7 @@ int processConn(int fd)
    }
 
    uid = statbuf.st_uid;        /* owner of socket */
-#else
-   {
-      struct ucred sucred;
-      socklen_t credlen = sizeof(struct ucred);
 
-      if(getsockopt(newfd, SOL_SOCKET, SO_PEERCRED, &sucred, &credlen) == -1) {
-         gpm_report(GPM_PR_ERR, GPM_MESS_GETSOCKOPT, strerror(errno));
-         free(info);
-         close(newfd);
-         return -1;
-      }
-      uid = sucred.uid;
-      gpm_report(GPM_PR_DEBUG, GPM_MESS_PEER_SCK_UID, uid);
-   }
-#endif
    if(uid != 0) {
       if((tty =
           malloc(strlen(option.consolename) + Gpm_cnt_digits(vc) +
