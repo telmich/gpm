@@ -23,9 +23,14 @@ dnl I do not see the use right now -> disabled
 #abi_full=$abi_lev.$abi_age.$abi_rev
 
 abi_lev="2"
-abi_age="0"
+abi_age="1"
 abi_rev="0"
 abi_full="${abi_lev}.${abi_age}.${abi_rev}"
+
+AC_DEFINE_UNQUOTED([GPM_ABI_LEV], [$abi_lev], [Library level])
+AC_DEFINE_UNQUOTED([GPM_ABI_AGE], [$abi_age], [Library age])
+AC_DEFINE_UNQUOTED([GPM_ABI_REV], [$abi_rev], [Library revision])
+AC_DEFINE_UNQUOTED([GPM_ABI_FULL],["$abi_full"],[Full library version])
 
 dnl Make srcdir an absolute path.
 if test x$srcdir = x ; then
@@ -66,10 +71,11 @@ else
         lispdir='${datadir}/emacs/site-lisp'
 fi
 
-# Optional interfaces / libs / features
+# Header-checks
 AC_CHECK_HEADERS(syslog.h linux/input.h linux/joystick.h ncurses.h ncurses/curses.h curses.h)
+AC_CHECK_HEADERS(sys/sysmacros.h linux/major.h linux/tty.h)
 
-# Add posix headers here
+# Required headers
 AC_CHECK_HEADERS(sys/socket.h,,[AC_MSG_ERROR([Required header file missing])])
 
 AC_ARG_WITH(curses,
@@ -85,7 +91,6 @@ No|no|N|n) : ;;
         CURSES_OBJS=lib/libcurses.o ; fi ;;
 esac
 
-AC_CHECK_HEADERS(sys/sysmacros.h linux/major.h linux/tty.h)
 
 ITZ_CHECK_TYPE(__u32,linux/types.h)
 if test ${itz_cv_type___u32} = yes || test ${ac_cv_type___u32} = yes ; then
@@ -138,8 +143,6 @@ AC_SUBST(SOLDFLAGS)
 AC_SUBST(CURSES_OBJS)
 AC_SUBST(SHARED_LIBS)
 AC_SUBST(lispdir)
-
-AC_DEFINE_UNQUOTED([GPM_VERSION_ABI],["$abi_full"],[Full library version])
 
 CPPFLAGS="$CPPFLAGS "'-I$(srcdir) $(DEFS) -include headers/config.h -DSYSCONFDIR="\"$(sysconfdir)\"" -DSBINDIR="\"$(sbindir)\""'
 LDFLAGS="$LDFLAGS "'-L$(srcdir)'

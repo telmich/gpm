@@ -38,11 +38,14 @@
  * these two functions return version information
  */
 
-static char *gpml_ver_s=GPM_VERSION_ABI;
+//static char *gpml_ver_s = GPM_ABI_FULL;
+//static int gpml_ver_i = 0;
 
 char *Gpm_GetLibVersion(int *where)
 {
-  return gpml_ver_s;
+   if(where)
+      *where = GPM_ABI_LEV * 10000 + GPM_ABI_AGE * 100 + GPM_ABI_REV;
+   return GPM_ABI_FULL;
 }
 
 static char gpm_ver_s[16];
@@ -129,7 +132,6 @@ int Gpm_GetSnapshot(Gpm_Event * ePtr)
    ePtr->type = 0;
    return i;                    /* number of buttons */
 }
-
 /* Local Variables: */
 
 /* c-indent-level: 2 */
