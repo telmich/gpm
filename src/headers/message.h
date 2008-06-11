@@ -62,7 +62,8 @@
 /* messages */
 
 /* info */
-#define GPM_MESS_VERSION            "gpm " PACKAGE_VERSION " git:" GPM_RELEASE_GIT ", " GPM_RELEASE_DATE
+//#define GPM_MESS_VERSION            "gpm " PACKAGE_VERSION " git:" GPM_RELEASE_GIT ", " GPM_RELEASE_DATE
+#define GPM_MESS_VERSION            "gpm " PACKAGE_VERSION
 #define GPM_MESS_STARTED            "Started gpm successfully. Entered daemon mode."
 #define GPM_MESS_KILLED             "Killed gpm(%d)."
 #define GPM_MESS_SKIP_DATA          "Skipping a data packet (?)"

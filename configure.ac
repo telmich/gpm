@@ -3,17 +3,23 @@ dnl written jan/1997 - T.E.Dickey <dickey@clark.net>
 
 AC_PREREQ(2.61)
 
-AC_INIT([gpm],[1.99.6],[http://unix.schottelius.org/gpm/])
+
+#AC_INIT([gpm],["$revgit"],[http://unix.schottelius.org/gpm/])
+
+#AC_INIT([gpm],["version set in .gitversion via acinclude.m4"],[http://unix.schottelius.org/gpm/])
+AC_INIT([gpm],["version-set-in-.gitversion-via-acinclude.m4"],[http://unix.schottelius.org/gpm/])
+
+#revgit="`cat $srcdir/.gitversion`"
+#releasedate="`cat $srcdir/.releasedate`"
+#AC_DEFINE_UNQUOTED([GPM_RELEASE_GIT],["$revgit"],[git short revision])
+#AC_DEFINE_UNQUOTED([GPM_RELEASE_DATE],["$releasedate"],[release date])
+
 AC_CONFIG_SRCDIR([src/daemon/main.c])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADER([src/headers/config.h])
 
 AC_CANONICAL_HOST
 
-revgit="`cat $srcdir/.gitversion`"
-releasedate="`cat $srcdir/.releasedate`"
-AC_DEFINE_UNQUOTED([GPM_RELEASE_GIT],["$revgit"],[git short revision])
-AC_DEFINE_UNQUOTED([GPM_RELEASE_DATE],["$releasedate"],[release date])
 
 dnl These are chosen so that we can switch to the libtool scheme
 dnl transparently.

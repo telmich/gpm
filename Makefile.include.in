@@ -62,4 +62,4 @@ RM                = rm
 
 
 # general
-release = @PACKAGE_VERSION@
+#release = @PACKAGE_VERSION@
