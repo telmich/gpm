@@ -150,4 +150,3 @@ distclean: clean do-clean do-distclean
 
 allclean: do-allclean distclean
 	rm -f configure
-
