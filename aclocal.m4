@@ -43,15 +43,33 @@ return 0;
 #
 #     AC_INIT([gpm],["$revgit"],[http://unix.schottelius.org/gpm/])
 #
-# What I have to do is seen below
+# As neither
+#
+#  revgit="`cat $srcdir/.gitversion`"
+#  m4_define([AC_PACKAGE_VERSION], [$revgit])
+#
+# nor
+#
+#  m4_define([AC_PACKAGE_VERSION], include(.gitversion))
+#
+# work, I generate an m4 define in .gitversion, which is called by
+# autogen.sh:
+#
+#  [13:59] denkbrett:gpm% cat .gitversion 
+#  define([AC_PACKAGE_VERSION], [1.99.6-83-gd80571b 20080611 13:56:54 +0200])
+#
+# This works in general, because if AC_PACKAGE_VERSION is set before running
+# AC_INIT, it will not overwrite it, as seen in /usr/share/autoconf/autoconf/general.m4:
+#
+# m4_ifndef([AC_PACKAGE_VERSION],
+#           [m4_define([AC_PACKAGE_VERSION],   [$2])])
+#
+#
+# So effectively, to change the version of gpm to something dynamically, it goes this way:
+#
+#  autogen.sh -> .gitversion -> acinclude.m4 -> auto* -> configure.ac -> configure
+#
+# Perhaps someone could simply this a bit?
 #
 
-#revgit="`cat $srcdir/.gitversion`"
-#releasedate="`cat $srcdir/.releasedate`"
-#m4_define([AC_PACKAGE_VERSION], [$revgit])
-#m4_define([AC_PACKAGE_VERSION], include(.gitversion))
-#AC_DEFINE_UNQUOTED([GPM_RELEASE_GIT],["$revgit"],[git short revision])
-#AC_DEFINE_UNQUOTED([GPM_RELEASE_DATE],["$releasedate"],[release date])
-
-#m4_define([AC_PACKAGE_VERSION], [fooooo])
 m4_include(.gitversion)

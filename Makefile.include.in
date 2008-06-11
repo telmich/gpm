@@ -62,10 +62,3 @@ RM                = rm
 
 
 DEPFILE = .depend
-
-# general
-<<<<<<< HEAD:Makefile.include.in
-release = @release@
-=======
-#release = @PACKAGE_VERSION@
->>>>>>> 4fc0570... outsource version to be dynamically set by git-describe:Makefile.include.in
