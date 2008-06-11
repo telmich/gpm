@@ -38,20 +38,11 @@
  * these two functions return version information
  */
 
-static char *gpml_ver_s = PACKAGE_VERSION;
-static int gpml_ver_i = 0;
+static char *gpml_ver_s=GPM_VERSION_ABI;
 
 char *Gpm_GetLibVersion(int *where)
 {
-   int i, j, k = 0;
-
-   if(!gpml_ver_i) {
-      sscanf(gpml_ver_s, "%d.%d.%d", &i, &j, &k);
-      gpml_ver_i = i * 10000 + j * 100 + k;
-   }
-   if(where)
-      *where = gpml_ver_i;
-   return gpml_ver_s;
+  return gpml_ver_s;
 }
 
 static char gpm_ver_s[16];
