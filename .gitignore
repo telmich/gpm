@@ -47,7 +47,6 @@ Makefile.include
 /doc/mev.1
 /doc/mouse-test.1
 
-/.releasedate
 /.gitversion
 
 # gpm2
