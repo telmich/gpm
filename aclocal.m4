@@ -34,3 +34,24 @@ $1 dummy;
 return 0;
 ],[itz_cv_type_$1=yes],[itz_cv_type_$1=no]))
 ])
+
+#
+# Fix autoconf: They don't allow shell variables in AC_INIT
+# So we have to define them via m4 to be accepted....
+#
+# What I simply wanted todo is 
+#
+#     AC_INIT([gpm],["$revgit"],[http://unix.schottelius.org/gpm/])
+#
+# What I have to do is seen below
+#
+
+#revgit="`cat $srcdir/.gitversion`"
+#releasedate="`cat $srcdir/.releasedate`"
+#m4_define([AC_PACKAGE_VERSION], [$revgit])
+#m4_define([AC_PACKAGE_VERSION], include(.gitversion))
+#AC_DEFINE_UNQUOTED([GPM_RELEASE_GIT],["$revgit"],[git short revision])
+#AC_DEFINE_UNQUOTED([GPM_RELEASE_DATE],["$releasedate"],[release date])
+
+#m4_define([AC_PACKAGE_VERSION], [fooooo])
+m4_include(.gitversion)
