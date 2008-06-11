@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 [ -d config ] || mkdir config
-git-rev-parse --short HEAD > .gitversion
+git-describe > .gitversion
 date +%Y%m%d\ %T\ %z > .releasedate
 ${ACLOCAL-aclocal} -I config
 ${LIBTOOLIZE-libtoolize} --force --copy
