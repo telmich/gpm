@@ -97,7 +97,7 @@ tars: $(TARS)
 
 # configure headers, produce new configure script
 distconf: configure.ac aclocal.m4
-	autoheader && autoconf
+	$(srcdir)/autogen.sh
 
 ../gpm-$(release).tar: $(srcdir)
 	# no exclude possible of .git with pax it seems
