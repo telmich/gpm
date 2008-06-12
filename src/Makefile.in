@@ -54,7 +54,7 @@ PICS = $(LOBJ:.o=.lo)
 HDRS = gpm.h gpmInt.h twiddler.h synaptics.h message.h
 
 PSRC = prog/mev.c prog/hltest.c prog/mouse-test.c prog/disable-paste.c			\
-		 prog/display-buttons.c  prog/display-coords.c
+		 prog/display-buttons.c  prog/display-coords.c prog/get-versions.c
 
 POBJ = $(PSRC:.c=.o) prog/gpm-root.o
 

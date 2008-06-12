@@ -32,6 +32,7 @@ Makefile.include
 /src/prog/display-coords
 /src/prog/gpm-root.c
 /src/prog/gpm-root
+/src/prog/get-versions
 /src/prog/hltest
 /src/prog/mev
 /src/prog/mouse-test
