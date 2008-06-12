@@ -17,8 +17,8 @@ set -x
 #
 version="$(git-describe)"
 date="$(date +%Y%m%d\ %T\ %z)"
-#echo "m4_define([AC_PACKAGE_VERSION], [${version}])" > .gitversion
-echo "define([AC_PACKAGE_VERSION], [${version} ${date}])" > .gitversion
+echo "define([AC_PACKAGE_VERSION], [${version} ${date}])" > .gitversion.m4
+echo "${version}" > .gitversion
 
 #date +%Y%m%d\ %T\ %z > .releasedate
 ${ACLOCAL-aclocal} -I config
