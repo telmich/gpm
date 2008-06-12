@@ -144,7 +144,7 @@ AC_SUBST(CURSES_OBJS)
 AC_SUBST(SHARED_LIBS)
 AC_SUBST(lispdir)
 
-CPPFLAGS="$CPPFLAGS "'-I$(srcdir) $(DEFS) -include headers/config.h -DSYSCONFDIR="\"$(sysconfdir)\"" -DSBINDIR="\"$(sbindir)\""'
+CPPFLAGS="$CPPFLAGS "'-I$(srcdir)/headers $(DEFS) -include headers/config.h -DSYSCONFDIR="\"$(sysconfdir)\"" -DSBINDIR="\"$(sbindir)\""'
 LDFLAGS="$LDFLAGS "'-L$(srcdir)'
 
 dnl AC_DEFINE_UNQUOTED(SYSCONFDIR,"$sysconfdir")
