@@ -24,7 +24,7 @@
 #include <stdio.h>            /* printf()             */
 #include <gpm.h>              /* gpm information      */
 
-int main(int argc, char **argv)
+int main()
 {
    char *ver;
    int  intver;
