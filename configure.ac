@@ -144,7 +144,7 @@ AC_SUBST(CURSES_OBJS)
 AC_SUBST(SHARED_LIBS)
 AC_SUBST(lispdir)
 
-CPPFLAGS="$CPPFLAGS "'-I$(srcdir)/headers $(DEFS) -include headers/config.h -DSYSCONFDIR="\"$(sysconfdir)\"" -DSBINDIR="\"$(sbindir)\""'
+CPPFLAGS="$CPPFLAGS "'$(DEFS) -DSYSCONFDIR="\"$(sysconfdir)\"" -DSBINDIR="\"$(sbindir)\"" -include headers/config.h -I$(srcdir)/headers -I$(srcdir)/../gpm2/include -I$(builddir)/headers '
 LDFLAGS="$LDFLAGS "'-L$(srcdir)'
 
 dnl AC_DEFINE_UNQUOTED(SYSCONFDIR,"$sysconfdir")
