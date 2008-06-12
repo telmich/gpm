@@ -72,4 +72,4 @@ return 0;
 # Perhaps someone could simply this a bit?
 #
 
-m4_include(.gitversion)
+m4_include(.gitversion.m4)
