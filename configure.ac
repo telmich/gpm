@@ -14,16 +14,16 @@ AC_CONFIG_HEADER([src/headers/config.h])
 
 AC_CANONICAL_HOST
 
+dnl Make srcdir an absolute path.
+if test x$srcdir = x ; then
+        srcdir = `pwd`
+else
+        srcdir=`cd $srcdir && pwd`
+fi
 
-dnl These are chosen so that we can switch to the libtool scheme
-dnl transparently.
-dnl Nico, 20080520: Is this somewhere needed?
-dnl I do not see the use right now -> disabled
-#abi=21
 #
-#abi_lev=`expr $abi - $abi_age`
-#abi_full=$abi_lev.$abi_age.$abi_rev
-
+# Versioning stuff
+#
 abi_lev="2"
 abi_age="1"
 abi_rev="0"
@@ -34,12 +34,13 @@ AC_DEFINE_UNQUOTED([GPM_ABI_AGE], [$abi_age], [Library age])
 AC_DEFINE_UNQUOTED([GPM_ABI_REV], [$abi_rev], [Library revision])
 AC_DEFINE_UNQUOTED([GPM_ABI_FULL],["$abi_full"],[Full library version])
 
-dnl Make srcdir an absolute path.
-if test x$srcdir = x ; then
-        srcdir = `pwd`
-else
-        srcdir=`cd $srcdir && pwd`
-fi
+releasedate="`cat $srcdir/.releasedate`"
+release="`cat $srcdir/.gitversion`"
+
+
+#
+# Find programs
+#
 
 AC_PROG_CC
 AC_PROG_RANLIB
@@ -131,8 +132,6 @@ esac
 
 GPMXTERM=
 AC_SUBST(GPMXTERM)
-AC_SUBST(release)
-AC_SUBST(release_date)
 AC_SUBST(abi_lev)
 AC_SUBST(abi_full)
 AC_SUBST(EMACS)
@@ -143,6 +142,9 @@ AC_SUBST(SOLDFLAGS)
 AC_SUBST(CURSES_OBJS)
 AC_SUBST(SHARED_LIBS)
 AC_SUBST(lispdir)
+AC_SUBST(AC_PACKAGE_VERSION)
+AC_SUBST(release)
+AC_SUBST(release_date)
 
 CPPFLAGS="$CPPFLAGS "'-I$(srcdir) $(DEFS) -include headers/config.h -Wall -DSYSCONFDIR="\"$(sysconfdir)\"" -DSBINDIR="\"$(sbindir)\"" -D_GNU_SOURCE'
 LDFLAGS="$LDFLAGS "'-L$(srcdir)'
