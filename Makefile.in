@@ -96,10 +96,12 @@ D_SOURCE=$(D_BASE)/browse_source/
 M_HOST=arcana.linux.it
 M_DIR=gpm/
 
+$(TARS): distconf
+
 tars: $(TARS)
 
 # configure headers, produce new configure script
-distconf: configure.ac aclocal.m4
+distconf: configure.ac acinclude.m4 .git/HEAD
 	$(srcdir)/autogen.sh
 
 ../gpm-$(release).tar: $(srcdir)
@@ -108,13 +110,13 @@ distconf: configure.ac aclocal.m4
 	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w .gitignore .gitversion *
 
 ../gpm-$(release).tar.gz:  ../gpm-$(release).tar
-	gzip -9 -c $^ > $@
+	gzip -9 -c $< > $@
 
 ../gpm-$(release).tar.bz2:  ../gpm-$(release).tar
-	bzip2 -9 -c $^ > $@
+	bzip2 -9 -c $< > $@
 
 ../gpm-$(release).tar.lzma:  ../gpm-$(release).tar
-	lzma -9 -c $^ > $@
+	lzma -9 -c $< > $@
 
 # 3. Put package together into .tar.gz and .tar.bz2
 #dist: distclean distconf gpm-$(release).tar.bz2 gpm-$(release).tar.gz
