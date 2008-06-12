@@ -35,7 +35,7 @@ uninstall:	do-uninstall
 
 clean: do-clean
 
-Makefile: $(srcdir)/Makefile.in config.status
+Makefile Makefilc.include: $(srcdir)/Makefile.in config.status .gitversion
 	./config.status
 
 config.status:	$(srcdir)/configure
