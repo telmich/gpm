@@ -51,13 +51,7 @@ $(versionfiles): .git/HEAD
 $(srcdir)/configure: configure.ac $(versionfiles) aclocal.m4
 	./autogen.sh
 
-Makefile Makefilc.include: $(srcdir)/configure config.status
-	./config.status
-
-Makefile: $(srcdir)/Makefile.in
-	./config.status
-
-Makefilc.include: $(srcdir)/Makefile.in
+Makefile Makefile.include: $(srcdir)/configure config.status $(srcdir)/Makefile.in $(srcdir)/Makefile.in
 	./config.status
 
 config.status:	$(srcdir)/configure
@@ -118,12 +112,12 @@ D_SOURCE=$(D_BASE)/browse_source/
 M_HOST=arcana.linux.it
 M_DIR=gpm/
 
-$(TARS): $(versionfiles) distconf
+$(TARS): distconf
 
 tars: $(TARS)
 
 # configure headers, produce new configure script
-distconf: configure.ac acinclude.m4 .git/HEAD
+distconf: configure.ac acinclude.m4 $(versionfiles)
 	$(srcdir)/autogen.sh
 
 ../gpm-$(release).tar: $(srcdir)
@@ -172,4 +166,4 @@ distclean: clean do-clean do-distclean
 	rm -f src/$(DEPFILE)
 
 allclean: do-allclean distclean
-	rm -f configure $(versionfiles)
+	rm -f configure $(versionfiles) aclocal.m4
