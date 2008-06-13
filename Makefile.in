@@ -123,7 +123,7 @@ distconf: configure.ac acinclude.m4 $(versionfiles)
 ../gpm-$(release).tar: $(srcdir)
 	# no exclude possible of .git with pax it seems
 	#pax -w -x ustar -s '/^\./gpm-$(release)/' -w . -f $@
-	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w .gitignore .gitversion *
+	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w .gitignore .gitversion* .git/HEAD *
 
 ../gpm-$(release).tar.gz:  ../gpm-$(release).tar
 	gzip -9 -c $< > $@
