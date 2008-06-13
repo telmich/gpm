@@ -1,5 +1,5 @@
 dnl $Id: aclocal.m4,v 1.2 2002/05/28 19:13:50 nico Exp $
-AC_DEFUN(ITZ_SYS_ELF,
+AC_DEFUN([ITZ_SYS_ELF],
 [AC_CACHE_CHECK([whether system is ELF],itz_cv_sys_elf,
 [AC_EGREP_CPP(win,
 [#ifdef __ELF__
@@ -16,7 +16,7 @@ else
         SOLDFLAGS=
 fi
 ])
-AC_DEFUN(ITZ_PATH_SITE_LISP,
+AC_DEFUN([ITZ_PATH_SITE_LISP],
 [AC_CACHE_CHECK([where to install Emacs Lisp files],itz_cv_path_site_lisp,
 [eval itz_cv_path_site_lisp=`${EMACS} -batch -l ${srcdir}/exec.el -exec "(mapcar 'print load-path)" 2>/dev/null |
 sed -e '/^$/d' | sed -n -e 2p`
@@ -25,7 +25,7 @@ x*site-lisp*) ;;
 x*) itz_cv_path_site_lisp='${datadir}/emacs/site-lisp' ;;
 esac])
 ])
-AC_DEFUN(ITZ_CHECK_TYPE,
+AC_DEFUN([ITZ_CHECK_TYPE],
 [AC_CACHE_CHECK([for $1],itz_cv_type_$1,
 AC_TRY_COMPILE([
 #include <$2>
@@ -72,4 +72,4 @@ return 0;
 # Perhaps someone could simply this a bit?
 #
 
-m4_include(.gitversion.m4)
+m4_include(.gitversion)
