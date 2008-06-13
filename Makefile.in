@@ -37,7 +37,7 @@ uninstall:	do-uninstall
 clean: do-clean
 
 
-versionfiles = .gitversion .gitversion.m4 .releasedate
+versionfiles =  .gitignore .gitversion .gitversion.m4 .releasedate
 distfiles = configure
 
 $(versionfiles): .git/HEAD
@@ -51,12 +51,11 @@ $(versionfiles): .git/HEAD
 $(srcdir)/configure: configure.ac $(versionfiles) aclocal.m4
 	./autogen.sh
 
-Makefile Makefile.include: $(srcdir)/configure config.status $(srcdir)/Makefile.in $(srcdir)/Makefile.in
-	./config.status
-
 config.status:	$(srcdir)/configure
 	if [ -f config.status ]; then $(SHELL) config.status --recheck; \
-	else ./configure; fi
+	else $(srcdir)/configure; fi
+
+Makefile Makefile.include: $(srcdir)/configure config.status $(srcdir)/Makefile.in $(srcdir)/Makefile.in
 
 ### INSTALL
 
@@ -123,7 +122,7 @@ distconf: configure.ac acinclude.m4 $(versionfiles)
 ../gpm-$(release).tar: $(srcdir)
 	# no exclude possible of .git with pax it seems
 	#pax -w -x ustar -s '/^\./gpm-$(release)/' -w . -f $@
-	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w .gitignore .gitversion* .git/HEAD *
+	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w .git/HEAD $(versionfiles)
 
 ../gpm-$(release).tar.gz:  ../gpm-$(release).tar
 	gzip -9 -c $< > $@
