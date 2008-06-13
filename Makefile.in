@@ -21,6 +21,7 @@ include Makefile.include
 
 SUBDIRS = src doc contrib
 
+
 ### simple, but effective rules
 
 all: do-all
@@ -35,7 +36,28 @@ uninstall:	do-uninstall
 
 clean: do-clean
 
-Makefile Makefilc.include: $(srcdir)/Makefile.in config.status .gitversion
+
+versionfiles = .gitversion .gitversion.m4 .releasedate
+distfiles = configure
+
+$(versionfiles): .git/HEAD
+	./autogen.sh
+
+# make the following rules clean in a later release
+#aclocal.m4: acinclude.m4
+#	./autogen.sh
+#
+
+$(srcdir)/configure: configure.ac $(versionfiles) aclocal.m4
+	./autogen.sh
+
+Makefile Makefilc.include: $(srcdir)/configure config.status
+	./config.status
+
+Makefile: $(srcdir)/Makefile.in
+	./config.status
+
+Makefilc.include: $(srcdir)/Makefile.in
 	./config.status
 
 config.status:	$(srcdir)/configure
@@ -96,7 +118,7 @@ D_SOURCE=$(D_BASE)/browse_source/
 M_HOST=arcana.linux.it
 M_DIR=gpm/
 
-$(TARS): distconf
+$(TARS): $(versionfiles) distconf
 
 tars: $(TARS)
 
