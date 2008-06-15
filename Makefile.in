@@ -37,7 +37,7 @@ uninstall:	do-uninstall
 clean: do-clean
 
 
-versionfiles =  .gitignore .gitversion .gitversion.m4 .releasedate
+versionfiles =  .gitversion .gitversion.m4 .releasedate
 dotfiles =  .gitignore .git/HEAD $(versionfiles)
 distfiles = configure
 
