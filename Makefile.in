@@ -38,17 +38,25 @@ clean: do-clean
 
 
 versionfiles =  .gitignore .gitversion .gitversion.m4 .releasedate
+dotfiles =  .gitignore .git/HEAD $(versionfiles)
 distfiles = configure
 
 $(versionfiles): .git/HEAD
-	./autogen.sh
+	date="$(date +%Y%m%d\ %T\ %z)"; 	\
+	version="$(git-describe)"; 		\
+	echo "define([AC_PACKAGE_VERSION], [${version} ${date}])" > .gitversion.m4; \
+	echo "${version}" > .gitversion; \
+	echo "${date}"    > .releasedate
+
+	#./autogen.sh
+
 
 # make the following rules clean in a later release
 #aclocal.m4: acinclude.m4
 #	./autogen.sh
 #
 
-$(srcdir)/configure: configure.ac $(versionfiles) aclocal.m4
+$(srcdir)/configure: configure.ac aclocal.m4 $(versionfiles)
 	./autogen.sh
 
 config.status:	$(srcdir)/configure
@@ -122,7 +130,7 @@ distconf: configure.ac acinclude.m4 $(versionfiles)
 ../gpm-$(release).tar: $(srcdir)
 	# no exclude possible of .git with pax it seems
 	#pax -w -x ustar -s '/^\./gpm-$(release)/' -w . -f $@
-	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w .git/HEAD $(versionfiles)
+	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w $(dotfiles)
 
 ../gpm-$(release).tar.gz:  ../gpm-$(release).tar
 	gzip -9 -c $< > $@
