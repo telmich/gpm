@@ -60,10 +60,8 @@ versioncheck:
 
 $(versionfiles): .git/HEAD versioncheck
 
-config:
-	mkdir -p config
-
-aclocal.m4: acinclude.m4 config
+aclocal.m4: acinclude.m4
+	$(MKDIR) config
 	aclocal -I config
 
 configure: configure.ac aclocal.m4 $(versionfiles)
