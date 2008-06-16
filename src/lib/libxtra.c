@@ -132,8 +132,3 @@ int Gpm_GetSnapshot(Gpm_Event * ePtr)
    ePtr->type = 0;
    return i;                    /* number of buttons */
 }
-/* Local Variables: */
-
-/* c-indent-level: 2 */
-
-/* End: */

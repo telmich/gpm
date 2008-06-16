@@ -37,9 +37,8 @@ int processConn(int fd)
    Gpm_Connect *request;
    Gpm_Cinfo *next;
    int vc, newfd;
-
    socklen_t len;
-   struct sockaddr_un addr; /* reuse this each time */
+   struct sockaddr_un addr;     /* reuse this each time */
    struct stat statbuf;
    uid_t uid;
    char *tty = NULL;
@@ -50,7 +49,7 @@ int processConn(int fd)
    addr.sun_family = AF_UNIX;
 
    len = sizeof(addr);
-   if((newfd = accept(fd, (struct sockaddr *) &addr, &len)) < 0) {
+   if((newfd = accept(fd, (struct sockaddr *) &addr, &len)) == -1) {
       gpm_report(GPM_PR_ERR, GPM_MESS_ACCEPT_FAILED, strerror(errno));
       return -1;
    }

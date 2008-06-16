@@ -21,6 +21,7 @@ include Makefile.include
 
 SUBDIRS = src doc contrib gpm2
 
+
 ### simple, but effective rules
 
 all: do-all
@@ -30,12 +31,47 @@ check: all
 uninstall: do-uninstall
 clean: do-clean
 
-Makefile: $(srcdir)/Makefile.in config.status
-	./config.status
 
-config.status:	$(srcdir)/configure
-	if [ -f config.status ]; then $(SHELL) config.status --recheck; \
-	else ./configure; fi
+versionfiles =  .gitversion .gitversion.m4 .releasedate
+dotfiles =  .gitignore .git/HEAD $(versionfiles)
+distfiles = configure
+
+# regen, if it changed; ignore if git is missing / fails
+versioncheck:
+	@v1="$$(git-describe 2>/dev/null)"; \
+	if [ -z "$$v1" ]; then					\
+		echo "No git available, not updating version"; 	\
+		exit 0; 														\
+	fi;											\
+	v2="$$(cat .gitversion)"; 				\
+	if [ "$$v1" != "$$v2" ]; then 		\
+	echo "updating versionfiles"; 		\
+	date="$$(date +%Y%m%d\ %T\ %z)"; 	\
+	version="$$v1"; 							\
+	echo "define([AC_PACKAGE_VERSION], [$${version} $${date}])" > .gitversion.m4; \
+	echo "$${version}" > .gitversion; 	\
+	echo "$${date}"    > .releasedate; 	\
+	fi
+
+$(versionfiles): .git/HEAD versioncheck
+
+aclocal.m4: acinclude.m4
+	$(MKDIR) config
+	aclocal -I config
+
+configure: configure.ac aclocal.m4 $(versionfiles)
+	libtoolize --force --copy
+	autoheader
+	autoconf
+
+config.status:	configure
+	if [ -f config.status ]; then $(SHELL) ./config.status --recheck; \
+	else $(SHELL) ./configure; fi
+
+Makefile: config.status         $(srcdir)/Makefile.in Makefile.include
+	./config.status
+Makefile.include: config.status $(srcdir)/Makefile.include.in
+	./config.status
 
 ### INSTALL
 
@@ -96,22 +132,21 @@ M_DIR=gpm/
 tars: $(TARS)
 
 # configure headers, produce new configure script
-distconf: configure.ac aclocal.m4
-	$(srcdir)/autogen.sh
+distconf: Makefile.in Makefile.include.in configure acinclude.m4 $(versionfiles)
 
-../gpm-$(release).tar: $(srcdir)
-	# no exclude possible of .git with pax it seems
+../gpm-$(release).tar: $(srcdir) distclean distconf
+	# no exclude possible of .git with pax it seems, so the following is not possible:
 	#pax -w -x ustar -s '/^\./gpm-$(release)/' -w . -f $@
-	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w .gitignore .gitversion *
+	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w $(dotfiles) *
 
 ../gpm-$(release).tar.gz:  ../gpm-$(release).tar
-	gzip -9 -c $^ > $@
+	gzip -9 -c $< > $@
 
 ../gpm-$(release).tar.bz2:  ../gpm-$(release).tar
-	bzip2 -9 -c $^ > $@
+	bzip2 -9 -c $< > $@
 
 ../gpm-$(release).tar.lzma:  ../gpm-$(release).tar
-	lzma -9 -c $^ > $@
+	lzma -9 -c $< > $@
 
 $(CHKSUMS): $(TARS)
 	for file in $^; do sha512sum $$file > $${file}.sha512sum; done
@@ -143,9 +178,8 @@ nicotest: $(TARS)
 
 ### CLEANUP
 distclean: clean do-clean do-distclean
-	rm -f config.log config.status config.cache Makefile Makefile.include
+	rm -f config.log config.status* config.cache Makefile Makefile.include
 	rm -rf autom4te.cache 
 
 allclean: do-allclean distclean
-	rm -f configure
-
+	rm -f configure $(versionfiles) aclocal.m4
