@@ -30,6 +30,7 @@
 int M_evdev(Gpm_Event * state, unsigned char *data)
 {
    struct input_event thisevent;
+
    (void) memcpy(&thisevent, data, sizeof(struct input_event));
    if(thisevent.type == EV_REL) {
       if(thisevent.code == REL_X)

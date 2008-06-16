@@ -31,9 +31,13 @@
 int parse_argv(argv_helper * info, int argc, char **argv)
 {
    int i, j = 0, errors = 0;
+
    long l;
+
    argv_helper *p;
+
    char *s, *t;
+
    int base = 0;                /* for strtol */
 
    for(i = 1; i < argc; i++) {

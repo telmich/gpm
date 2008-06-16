@@ -1,3 +1,4 @@
+
 /*
  * Get gpm library and server version
  *
@@ -21,19 +22,20 @@
  *
  ********/
 
-#include <stdio.h>            /* printf()             */
-#include <gpm.h>              /* gpm information      */
+#include <stdio.h>              /* printf() */
+#include <gpm.h>                /* gpm information */
 
 int main()
 {
    char *ver;
-   int  intver;
+
+   int intver;
 
    ver = Gpm_GetLibVersion(&intver);
-   printf("lib: %s, %d\n",ver,intver);
+   printf("lib: %s, %d\n", ver, intver);
 
    ver = Gpm_GetServerVersion(&intver);
-   printf("srv: %s, %d\n",ver,intver);
+   printf("srv: %s, %d\n", ver, intver);
 
    return 0;
 }

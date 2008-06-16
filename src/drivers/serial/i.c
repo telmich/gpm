@@ -34,7 +34,9 @@ Gpm_Type *I_serial(int fd, unsigned short flags, struct Gpm_Type *type,
                    int argc, char **argv)
 {
    int i;
+
    unsigned char c;
+
    fd_set set;
    struct timeval timeout = { 0, 0 };   /* used when not debugging */
 
@@ -51,9 +53,8 @@ Gpm_Type *I_serial(int fd, unsigned short flags, struct Gpm_Type *type,
    FD_ZERO(&set);
    for(i = 0; /* always */ ; i++) {
       FD_SET(fd, &set);
-      switch (select
-              (fd + 1, &set, (fd_set *) NULL, (fd_set *) NULL,
-               &timeout /* zero */ )) {
+      switch (select(fd + 1, &set, (fd_set *) NULL, (fd_set *) NULL, &timeout   /* zero 
+                                                                                 */ )) {
          case 1:
             if(read(fd, &c, 1) == 0)
                break;

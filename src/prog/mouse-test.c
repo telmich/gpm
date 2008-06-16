@@ -59,6 +59,7 @@ Gpm_Type *(*mt_I_serial) (int fd, unsigned short flags, struct Gpm_Type * type,
                           int argc, char **argv);
 
 int realposx = -1;
+
 int realposy = -1;
 
 /* this material is needed to pass options to mice.c */
@@ -67,7 +68,7 @@ struct mouse_features mymouse = {
    (char *) NULL /* extra */ ,
    -1 /* fd */ ,
    DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE,
-      DEF_SCALE /* scaley */ ,
+   DEF_SCALE /* scaley */ ,
    DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_GLIDEPOINT_TAP,
    DEF_DMINX, DEF_DMAXX, DEF_DMINY, DEF_DMAXY,
    DEF_OMINX, DEF_OMAXX, DEF_OMINY, DEF_OMAXY,
@@ -83,8 +84,11 @@ struct options option;
 struct mouse_features *which_mouse = &mymouse;
 
 char *progname;
+
 char *consolename;
+
 int devcount = 0;
+
 int typecount = 0;
 
 struct item {
@@ -169,6 +173,7 @@ void killed(int signo)
 struct device **gpm_makedev(struct device **current, char *name)
 {
    int fd;
+
    int modes;
 
    if((fd = open(name, O_RDWR | O_NONBLOCK)) == -1) {
@@ -233,9 +238,13 @@ int noneofthem(void)
 int eventlist(int fd, unsigned char *buff, int buflen, int test, int readstep)
 {
    fd_set selSet, readySet;
+
    struct timeval to;
+
    int active = 0;
+
    int pending;
+
    int got = 0;
 
    FD_ZERO(&readySet);
@@ -306,18 +315,28 @@ int eventlist(int fd, unsigned char *buff, int buflen, int test, int readstep)
 int main(int argc, char **argv)
 {
    struct item *list = NULL;
+
    struct item **nextitem;
+
    struct device *devlist = NULL;
+
    struct device **nextdev;
+
    Gpm_Type *cursor;
+
    int i, mousefd;
+
    char *mousename;
 
 #define BUFLEN 512
    unsigned char buf[BUFLEN];
+
    struct timeval timeout;
+
    fd_set checkSet;
+
    int pending, maxfd;
+
    int trial, readamount, packetsize, got;
    int baudtab[4] = { 1200, 9600, 4800, 2400 };
 #define BAUD(i) (baudtab[(i)%4])
@@ -340,6 +359,7 @@ int main(int argc, char **argv)
 
    if(argc == 1) {              /* no cmdline, get all devices */
       FILE *f;
+
       char s[64];
 
       /*
@@ -372,7 +392,9 @@ int main(int argc, char **argv)
    trial = 0;
    while(devcount > 1) {
       fd_set devSet, gotSet, savSet;
+
       struct device *cur;
+
       int gotthem;
 
       /*
@@ -568,8 +590,11 @@ int main(int argc, char **argv)
 
    for(nextitem = &list; *nextitem; /* nothing */ ) {
       struct item *cur = *nextitem;
+
       int packetheads = 0;
+
       int match = 0;
+
       Gpm_Event event;
 
       if(packetsize != cur->this->packetlen) {
@@ -657,6 +682,7 @@ int main(int argc, char **argv)
    pending = 0;
    for(nextitem = &list; *nextitem; /* nothing */ ) {
       struct item *cur = *nextitem;
+
       Gpm_Event event;
 
       /*
@@ -707,6 +733,7 @@ int main(int argc, char **argv)
    pending = 0;
    for(nextitem = &list; *nextitem; /* nothing */ ) {
       struct item *cur = *nextitem;
+
       Gpm_Event event;
 
       /*

@@ -35,8 +35,8 @@ int M_imps2(Gpm_Event * state, unsigned char *data)
       |((data[0] & 6) >> 1);    /* middle and right */
 
    if(data[0] == 0 && (which_mouse->opt_glidepoint_tap))        // by default
-                                                                // this is
-                                                                // false
+      // this is
+      // false
       state->buttons = tap_active = (which_mouse->opt_glidepoint_tap);
    else if(tap_active) {
       if(data[0] == 8)

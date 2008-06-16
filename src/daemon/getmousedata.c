@@ -38,8 +38,11 @@
 unsigned char *getMouseData(int fd, Gpm_Type * type, int kd_mode)
 {
    static unsigned char data[32];       /* quite a big margin :) */
+
    unsigned char *edata = data + type->packetlen;
+
    int howmany = type->howmany;
+
    int i, j;
 
 /*....................................... read and identify one byte */

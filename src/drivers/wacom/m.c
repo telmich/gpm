@@ -36,8 +36,11 @@
 
 /* for relative and absolute : */
 int WacomModell = -1;           /* -1 means "dont know" */
+
 int WacomAbsoluteWanted = 0;    /* Tell Driver if Relative or Absolute */
+
 int wmaxx, wmaxy;
+
 char upmbuf[25];                /* needed only for macro buttons of ultrapad */
 
 /* Data for Wacom Modell Identification */
@@ -58,7 +61,9 @@ struct WC_MODELL wcmodell[3] = {
 int M_wacom(Gpm_Event * state, unsigned char *data)
 {
    static int ox = -1, oy;
+
    int x, y;
+
    int macro = 0;               /* macro buttons from tablet */
 
    /*

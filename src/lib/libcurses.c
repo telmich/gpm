@@ -47,8 +47,11 @@
 int Gpm_Wgetch(WINDOW * win)
 {
    fd_set selSet;
+
    int max, flag, result;
+
    int fd = STDIN_FILENO;
+
    static Gpm_Event ev;
 
    if(!gpm_flag || gpm_fd == -1)
@@ -68,8 +71,8 @@ int Gpm_Wgetch(WINDOW * win)
             FD_ZERO(&selSet);
             FD_SET(fd, &selSet);
             FD_SET(gpm_fd, &selSet);
-	         if (gpm_fd>-1)
-	            FD_SET(gpm_fd,&selSet);
+            if(gpm_fd > -1)
+               FD_SET(gpm_fd, &selSet);
             gpm_timeout.tv_sec = SELECT_TIME;
             flag =
                select(max + 1, &selSet, (fd_set *) NULL, (fd_set *) NULL,
@@ -99,8 +102,11 @@ int Gpm_Wgetch(WINDOW * win)
 /* JD patch 11/08/1998 */
 #define MAXNBPREVCHAR 4         /* I don't think more is usefull, JD */
       static int nbprevchar = 0, prevchar[MAXNBPREVCHAR];
+
       extern int gpm_convert_event(unsigned char *data, Gpm_Event * event);
+
       int c;
+
       unsigned char mdata[4];
 
 /* JD patch 11/08/1998 */

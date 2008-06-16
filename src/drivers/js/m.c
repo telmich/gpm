@@ -30,11 +30,17 @@
 int M_js(Gpm_Event * state, unsigned char *data)
 {
    struct JS_DATA_TYPE *jdata = (void *) data;
+
    static int centerx = 0;
+
    static int centery = 0;
+
    static int oldbuttons = 0;
+
    static int count = 0;
+
    int dx;
+
    int dy;
 
    count++;

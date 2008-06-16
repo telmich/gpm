@@ -34,6 +34,7 @@
 void check_uniqueness(void)
 {
    FILE *fp = 0;
+
    int old_pid = -1;
 
    if((fp = fopen(GPM_NODE_PID, "r")) != NULL) {

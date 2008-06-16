@@ -41,8 +41,11 @@ int M_etouch(Gpm_Event * state, unsigned char *data)
 #define ELO_CLICK_ONTOUCH       /* ifdef then ButtonPress on first Touch else
                                  * first Move then Touch */
    int x, y;
+
    static int avgx = -1, avgy;  /* average over time, for smooth feeling */
+
    static int upx, upy;         /* keep track of last finger-up place */
+
    static struct timeval uptv, tv;      /* time of last up, and down events */
 
 #define REAL_TO_XCELL(x) (x * win.ws_col / 0x3FFF)
@@ -87,7 +90,7 @@ int M_etouch(Gpm_Event * state, unsigned char *data)
                                                                  * Touch
                                                                  * immediate
                                                                  * after finger 
-                                                                 * UP then
+                                                                 * * UP then
                                                                  * start DRAG */
          x = upx;
          y = upy;               /* A:start DRAG at finger-UP position */

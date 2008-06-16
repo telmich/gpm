@@ -49,12 +49,15 @@ char *Gpm_GetLibVersion(int *where)
 }
 
 static char gpm_ver_s[16];
+
 static int gpm_ver_i = 0;
 
 char *Gpm_GetServerVersion(int *where)
 {
    char line[128];
+
    FILE *f;
+
    int i, j, k = 0;
 
    if(!gpm_ver_s[0]) {
@@ -87,7 +90,9 @@ char *Gpm_GetServerVersion(int *where)
 int Gpm_GetSnapshot(Gpm_Event * ePtr)
 {
    Gpm_Connect conn;
+
    Gpm_Event event;
+
    fd_set sillySet;
    struct timeval to = { 0, 0 };
    int i;

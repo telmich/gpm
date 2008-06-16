@@ -32,7 +32,9 @@
 struct Gpm_Type *find_mouse_by_name(char *name)
 {
    Gpm_Type *type;
+
    char *s;
+
    int len = strlen(name);
 
    for(type = mice; type->fun; type++) {

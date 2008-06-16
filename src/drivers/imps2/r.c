@@ -28,6 +28,7 @@
 int R_imps2(Gpm_Event * state, int fd)
 {
    signed char buffer[4];
+
    int dx, dy;
 
    dx = limit_delta(state->dx, -256, 255);

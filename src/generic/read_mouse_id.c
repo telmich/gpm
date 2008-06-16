@@ -30,6 +30,7 @@
 int read_mouse_id(int fd)
 {
    unsigned char c = GPM_AUX_SEND_ID;
+
    unsigned char id;
 
    write(fd, &c, 1);

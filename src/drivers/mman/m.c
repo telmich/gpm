@@ -33,7 +33,9 @@ int M_mman(Gpm_Event * state, unsigned char *data)
     * and then switch to 4-byte mode.
     */
    static unsigned char prev = 0;
+
    static Gpm_Type *mytype = mice;      /* it is the first */
+
    unsigned char b = (*data >> 4);
 
    if(data[1] == GPM_EXTRA_MAGIC_1 && data[2] == GPM_EXTRA_MAGIC_2) {

@@ -42,6 +42,7 @@
 int M_calus_rel(Gpm_Event * state, unsigned char *data)
 {
    static int ox = -1, oy;
+
    int x, y;
 
    x = ((data[1] & 0x3F) << 7) | (data[2] & 0x7F);

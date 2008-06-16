@@ -30,6 +30,7 @@
 void get_console_size(Gpm_Event * ePtr)
 {
    int i, prevmaxx, prevmaxy;
+
    struct mouse_features *which_mouse;  /* local */
 
    /*

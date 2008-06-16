@@ -28,7 +28,9 @@
 int M_twid(Gpm_Event * state, unsigned char *data)
 {
    unsigned long message = 0UL;
+
    int i, h, v;
+
    static int lasth, lastv, lastkey, key, lock = 0, autorepeat = 0;
 
    /*
@@ -118,6 +120,7 @@ int M_twid(Gpm_Event * state, unsigned char *data)
        * in case I'll change the resolution 
        */
       static int tw_threshold = 5;      /* above this it moves */
+
       static int tw_scale = 5;  /* every 5 report one */
 
       if(h > -tw_threshold && h < tw_threshold)
@@ -142,8 +145,11 @@ int M_twid(Gpm_Event * state, unsigned char *data)
        * in case I'll change the resolution 
        */
       static int tw_threshold = 60;     /* above this, movement is ballistic */
+
       static int tw_scale = 10; /* ball: every 6 units move one unit */
+
       static int tw_static_scale = 3;   /* stat: every 3 units move one unit */
+
       static int lasthrest, lastvrest;  /* integral of small motions uses rest */
 
       if(!lock) {

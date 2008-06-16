@@ -26,6 +26,7 @@
 #include "types.h"              /* Gpm_type */
 
 extern int wizardpad_width;
+
 extern int wizardpad_height;
 
 /*  Genius Wizardpad tablet  --  Matt Kimball (mkimball@xmission.com)  */
@@ -33,7 +34,9 @@ Gpm_Type *I_wp(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
                char **argv)
 {
    struct termios tty;
+
    char tablet_info[256];
+
    int count, pos, size;
 
    flags = argc = 0;            /* FIXME: 1.99.13 */

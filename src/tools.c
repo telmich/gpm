@@ -38,6 +38,7 @@ char *Gpm_get_console(void)
 {
 
    char *back = NULL, *tmp = NULL;
+
    struct stat buf;
 
    /*

@@ -37,6 +37,7 @@
 int reset_mice(struct micetab *micelist)
 {
    struct micetab *tmp = micelist;
+
    struct micetab *end = tmp;
 
    while(tmp != NULL) {         /* FIXME! I never get NULL, as free()d before */

@@ -154,6 +154,7 @@ struct twiddler_fun_struct {
 int twiddler_console(char *s)
 {
    int consolenr = atoi(s);     /* atoi never fails :) */
+
    int fd;
 
    if(consolenr == 0)
@@ -175,6 +176,7 @@ int twiddler_console(char *s)
 int twiddler_exec(char *s)
 {
    int pid;
+
    extern struct options option;
 
    switch (pid = fork()) {
@@ -208,6 +210,7 @@ struct twiddler_active_fun {
    int (*fun) (char *s);
    char *arg;
 } twiddler_active_funs[TWIDDLER_MAX_ACTIVE_FUNS];
+
 static int active_fun_nr = 0;
 
 int twiddler_do_fun(int i)
@@ -224,6 +227,7 @@ int twiddler_do_fun(int i)
 static inline char **twiddler_get_table(unsigned long message)
 {
    unsigned long mod = message & TW_ANY_MOD;
+
    struct twiddler_map_struct *ptr;
 
    for(ptr = twiddler_map; ptr->table; ptr++)
@@ -236,7 +240,9 @@ static inline char **twiddler_get_table(unsigned long message)
 static inline int twiddler_use_item(char *item)
 {
    int fd = open_console(O_WRONLY);
+
    int i, retval = 0;
+
    unsigned char pushthis, unblank = 4; /* 4 == TIOCLINUX unblank */
 
    /*
@@ -267,6 +273,7 @@ static inline int twiddler_use_item(char *item)
 int twiddler_key(unsigned long message)
 {
    char **table = twiddler_get_table(message);
+
    char *val;
 
    /*
@@ -275,12 +282,14 @@ int twiddler_key(unsigned long message)
     * is transmitted; but as soon as it increases the cycle is restarted.
     */
    static unsigned long last_message;
+
    static int marked;
 
    /*
     * The time values are needed to implement repetition of keys
     */
    static struct timeval tv1, tv2;
+
    static unsigned int nclick, last_pressed;
 
 #define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))
@@ -349,6 +358,7 @@ int twiddler_key(unsigned long message)
 char **twiddler_mod_to_table(char *mod)
 {
    struct twiddler_map_struct *ptr;
+
    int len = strlen(mod);
 
    if(len == 0)
@@ -365,8 +375,11 @@ char **twiddler_mod_to_table(char *mod)
 int twiddler_chord_to_int(char *chord)
 {
    char *convert = "0LMR";      /* 0123 */
+
    char *tmp;
+
    int result = 0;
+
    int shift = 0;
 
    if(strlen(chord) != 4)
@@ -447,9 +460,13 @@ int twiddler_escape_sequence(char *s, int *len)
 char *twiddler_rest_to_value(char *s)
 {
    char *ptr;
+
    static char buf[64];
+
    int ibuf = 0, len;
+
    struct twiddler_f_struct *sptr;
+
    struct twiddler_fun_struct *fptr;
 
    /*
@@ -519,10 +536,15 @@ int twiddler_key_init(void)
    FILE *f;
    char *files[] = { TW_SYSTEM_FILE, TW_CUSTOM_FILE, NULL };
    int fileindex = 0;
+
    char s[128], buf[64];        /* buf is for the string */
+
    char mod[64], chord[64], *value;
+
    int index, lineno = 0, errcount = 0;
+
    char **table;
+
    static int initcount = 0;
 
    if(initcount)

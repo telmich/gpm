@@ -39,16 +39,23 @@
 #endif
 
 int realposx = -1;
+
 int realposy = -1;
 
 int old_main()
 {
    int ctlfd, newfd;
+
    struct sockaddr_un ctladdr;
+
    int i, len, kd_mode, fd;
+
    struct timeval timeout;
+
    int maxfd = -1;
+
    int pending;
+
    Gpm_Event event;
 
    for(i = 1; i <= 1 + opt_double; i++) {

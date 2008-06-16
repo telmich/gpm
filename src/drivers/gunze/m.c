@@ -28,7 +28,9 @@
 #include "daemon.h"             /* which_mouse */
 
 int gunze_avg = 9;              /* the bigger the smoother */
+
 int gunze_calib[4];             /* x0,y0 x1,y1 (measured at 1/8 and 7/8) */
+
 int gunze_debounce = 100;       /* milliseconds: ignore shorter taps */
 
 int M_gunze(Gpm_Event * state, unsigned char *data)
@@ -38,10 +40,15 @@ int M_gunze(Gpm_Event * state, unsigned char *data)
     * Check README.gunze for additional information.
     */
    int x, y;
+
    static int avgx, avgy;       /* average over time, for smooth feeling */
+
    static int upx, upy;         /* keep track of last finger-up place */
+
    static int released = 0, dragging = 0;
+
    static struct timeval uptv, tv;      /* time of last up, and down events */
+
    int timediff;
 
 #define REAL_TO_XCELL(x) (x * win.ws_col / 0x3FFF)

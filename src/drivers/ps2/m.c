@@ -31,8 +31,8 @@ int M_ps2(Gpm_Event * state, unsigned char *data)
       !!(data[0] & 1) * GPM_B_LEFT +
       !!(data[0] & 2) * GPM_B_RIGHT + !!(data[0] & 4) * GPM_B_MIDDLE;
 
-   if(data[0] == 0 && (which_mouse->opt_glidepoint_tap))        /* by default
-                                                                 * this is
+   if(data[0] == 0 && (which_mouse->opt_glidepoint_tap))        /* by default * 
+                                                                 * this is *
                                                                  * false */
       state->buttons = tap_active = (which_mouse->opt_glidepoint_tap);
    else if(tap_active) {

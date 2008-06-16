@@ -31,10 +31,15 @@
 int processRequest(Gpm_Cinfo * ci, int vc)
 {
    int i;
+
    Gpm_Cinfo *cinfoPtr;
+
    Gpm_Cinfo *next;
+
    Gpm_Connect conn;
+
    static Gpm_Event event;
+
    static struct vt_stat stat;
 
    gpm_report(GPM_PR_INFO, GPM_MESS_CON_REQUEST, ci->fd, vc);

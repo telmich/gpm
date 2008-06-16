@@ -31,6 +31,7 @@
 int wait_text(int *fdptr)
 {
    int fd;
+
    int kd_mode;
 
    close(*fdptr);

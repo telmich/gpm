@@ -35,7 +35,9 @@ void selection_copy(int x1, int y1, int x2, int y2, int mode)
  * due to alignment problems...
  */
    unsigned char buf[6 * sizeof(short)];
+
    unsigned short *arg = (unsigned short *) buf + 1;
+
    int fd;
 
    buf[sizeof(short) - 1] = 2;  /* set selection */

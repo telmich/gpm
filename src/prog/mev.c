@@ -52,10 +52,12 @@
 #define GPM_DATE "X-Mas 2002"
 
 char *prgname;
+
 struct node {
    char *name;
    int flag;
 };
+
 struct node tableEv[] = {
    {"move", GPM_MOVE},
    {"drag", GPM_DRAG},
@@ -70,6 +72,7 @@ struct node tableEv[] = {
    {"none", 0},
    {NULL, 0}
 };
+
 struct node tableMod[] = {
    {"shift", 1 << KG_SHIFT},
    {"anyAlt", 1 << KG_ALT | 1 << KG_ALTGR},
@@ -84,13 +87,21 @@ struct node tableMod[] = {
 
 /* provide defaults */
 int opt_mask = ~0;              /* get everything */
+
 int opt_default = ~GPM_HARD;    /* pass everithing unused */
+
 int opt_minMod = 0;             /* run always */
+
 int opt_maxMod = ~0;            /* with any modifier */
+
 int opt_intrct = 0;
+
 int opt_vc = 0;                 /* by default get the current vc */
+
 int opt_emacs = 0;
+
 int opt_fit = 0;
+
 int opt_pointer = 0;
 
 /*===================================================================*/
@@ -119,7 +130,9 @@ int user_handler(Gpm_Event * event, void *data)
 int emacs_handler(Gpm_Event * event, void *data)
 {
    int i, j;
+
    static int dragX, dragY;
+
    static char buffer[64];
 
    data = NULL;                 /* FIXME: unused */
@@ -164,9 +177,13 @@ int emacs_handler(Gpm_Event * event, void *data)
    static char *s_button[] = { "3", "2", "1", NULL };
    static char *s_multi[] = { "double-", "triple-", 0 };
    static char s_count[] = "23";
+
    char count = '1';
+
    struct timeval tv_cur;
+
    long timestamp;
+
    static long dragTime;
 
    /*
@@ -298,8 +315,11 @@ int usage(void)
 void getmask(char *arg, int which, int *where)
 {
    int last = 0, value = 0;
+
    char *cur;
+
    struct node *table, *n;
+
    int mode = 0;                /* 0 = set, 1 = add, 2 = subtract */
 
    if('+' == arg[0]) {
@@ -417,7 +437,9 @@ int cmdline(int argc, char **argv, char *options)
 void do_snapshot()
 {
    Gpm_Event event;
+
    int i = Gpm_GetSnapshot(&event);
+
    char *s;
 
    if(-1 == i) {
@@ -444,7 +466,9 @@ void do_snapshot()
 int interact(char *cmd)
 {                               /* returns 0 on success and !=0 on error */
    Gpm_Connect conn;
+
    int argc = 0;
+
    char *argv[20];
 
    if(*cmd && cmd[strlen(cmd) - 1] == '\n')
@@ -521,8 +545,11 @@ int interact(char *cmd)
 int main(int argc, char **argv)
 {
    Gpm_Connect conn;
+
    char cmd[128];
+
    Gpm_Handler *my_handler;     /* not the real gpm handler! */
+
    fd_set readset;
 
    prgname = argv[0];

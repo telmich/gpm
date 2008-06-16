@@ -71,6 +71,7 @@ int colors[] = { 0x40, 0x60, 0x20, 0x30, 0x47, 0x67, 0x27, 0x37 };
 #define CLEAR (printf("\x1b[H\x1b[J"),fflush(stdout))
 
 int dev_vcs = -1;
+
 int wid, hei, vcsize;
 
 /*
@@ -79,6 +80,7 @@ int wid, hei, vcsize;
  */
 
 unsigned short clear_sel_args[6] = { 0, 0, 0, 0, 0, 4 };
+
 unsigned char *clear_sel_arg = (unsigned char *) clear_sel_args + 1;
 
 static inline int scrdump(char *buf)
@@ -138,6 +140,7 @@ void killed(int signo)
 }
 
 char *dumpbuf;
+
 char *dumpbuf_clean;
 
 #define DUMPCHAR(x,y) (dumpbuf+4+2*((y)*wid+(x)))
@@ -150,6 +153,7 @@ char *dumpbuf_clean;
 static inline int drawwin(Gpm_Roi * which)
 {
    char *curr;
+
    char name[5];
 
 #define GOTO(x,y)     (curr=DUMPCHAR(x,y))
@@ -162,6 +166,7 @@ static inline int drawwin(Gpm_Roi * which)
 #define VERLINE  0xba
 
    int attrib = ((WinInfo *) which->clientdata)->color;
+
    int i, j;
 
    /*
@@ -222,9 +227,13 @@ int drawthemall(Gpm_Roi * this)
 int newmsg(int window, char *msg)
 {
    static char *data = NULL;
+
    static char **strings;
+
    static int current, last;
+
    static time_t t;
+
    int i, j;
 
    /*
@@ -293,7 +302,9 @@ static inline void dorefresh(void)
 int handler(Gpm_Event * ePtr, void *clientdata)
 {
    WinInfo *info = clientdata;
+
    int number = info->number;
+
    int delta;
 
    if(ePtr->type & GPM_ENTER) {
@@ -386,8 +397,11 @@ int handler(Gpm_Event * ePtr, void *clientdata)
 int wincreate(int x, int y, int X, int Y)
 {
    static int winno = 0;
+
    Gpm_Roi *roi;
+
    WinInfo *cldata;
+
    int tmp;
 
    if(X < x)
@@ -445,7 +459,9 @@ int wincreate(int x, int y, int X, int Y)
 int xhandler(Gpm_Event * ePtr, void *clientdata)
 {
    static int x = 0, y = 0;
+
    int back = 0;
+
    char msg[32];
 
    msg[0] = '\0';
@@ -481,10 +497,15 @@ int xhandler(Gpm_Event * ePtr, void *clientdata)
 int main(int argc, char **argv)
 {
    Gpm_Connect conn;
+
    char *s, t[4];
+
    char devname[32];            /* very secure buffer ... */
+
    int c;
+
    int vc;
+
    struct winsize win;
 
    if(argc > 1) {
@@ -599,6 +620,7 @@ int main(int argc, char **argv)
    newmsg(0, NULL);             /* init data structures */
    while((c = Gpm_Getchar()) != EOF) {
       char s[32];
+
       Gpm_Roi *roi;
 
       roi = gpm_current_roi;

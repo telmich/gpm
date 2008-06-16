@@ -29,8 +29,11 @@
 #include "mice.h"               /* setspeed */
 
 extern int SUMMA_BORDER;
+
 extern int summamaxx;
+
 extern int summamaxy;
+
 extern signed char summaid;
 
 Gpm_Type *I_summa(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
@@ -46,7 +49,9 @@ Gpm_Type *I_summa(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
    }
    int waitsumma() {
       struct timeval timeout;
+
       fd_set readfds;
+
       int err;
 
       FD_ZERO(&readfds);
@@ -57,7 +62,9 @@ Gpm_Type *I_summa(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
       return (err);
    }
    int err;
+
    char buffer[255];
+
    char config[5];
 
    /*

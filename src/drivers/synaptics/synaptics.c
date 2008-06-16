@@ -279,7 +279,9 @@
 typedef unsigned char byte;
 
 static void syn_ps2_absolute_mode(int fd);
+
 static char *syn_model_name(int sensor);
+
 static void syn_ps2_send_cmd(int fd, int stick, byte cmd);
 
 /* Defines */
@@ -345,15 +347,18 @@ static void syn_ps2_send_cmd(int fd, int stick, byte cmd);
 ****************************************************************************/
 
 static int corner_taps_enabled = 1;     /* are corner taps enabled C */
+
 static int tap_gesture_enabled = 1;     /* are gestures treaded as taps enabled 
                                          * C */
 static int tossing_enabled = 1; /* is toss/catch enabled C */
+
 static int does_toss_use_static_speed = 1;      /* is toss/catch speed C */
 
                                                 /*
                                                  * based on toss dist 
                                                  */
 static int edge_motion_enabled = 1;     /* is edge motion enabled C */
+
 static int edge_motion_speed_enabled = 1;       /* does pressure control C */
 
                                                /*
@@ -369,37 +374,56 @@ static int tap_hold_edge_motion_enabled = 1;    /* Enable edge motion while
 
 /* pressure induced speed related configuration constants */
 static int low_speed_pressure = 60;
-/*C*/ static int speed_up_pressure = 60;
-/*C*/ static float speed_pressure_factor = 0.05;
-/*C*/ static float standard_speed_factor = 0.08;
 
-/*C*/
+ /*C*/ static int speed_up_pressure = 60;
+
+ /*C*/ static float speed_pressure_factor = 0.05;
+
+ /*C*/ static float standard_speed_factor = 0.08;
+
+ /*C*/
 
 /* toss/catch related constants */
 static int min_toss_time = 100; /* ms: 0.10 sec */
-static int max_toss_time = 300; /* ms: 0.30 sec */
-/*C*/ static int prevent_toss_time = 300;       /* ms: 0.25 sec */
-/*C*/ static int min_toss_dist = 2;     /* mm */
-/*C*/ static int static_toss_speed = 70;
-/*C*/ static float toss_speed_factor = 0.5;
 
-/*C*/
+static int max_toss_time = 300; /* ms: 0.30 sec */
+
+ /*C*/ static int prevent_toss_time = 300;      /* ms: 0.25 sec */
+
+ /*C*/ static int min_toss_dist = 2;    /* mm */
+
+ /*C*/ static int static_toss_speed = 70;
+
+ /*C*/ static float toss_speed_factor = 0.5;
+
+ /*C*/
 
 /* edge motion related configuration constants */
 static int x_min_center = 1632; /* define left edge C */
+
 static int x_max_center = 5312; /* define right edge C */
+
 static int y_min_center = 1408; /* define bottom edge C */
+
 static int y_max_center = 4108; /* define top edge C */
+
 static int edge_speed = 20;     /* default speed at edges C */
 
 /* gesture related configuration constants for when wmode is enabled. */
 static int wmode_enabled = 1;   /* is wmode enabled C */
+
 static int drag_lock_enabled = 1;       /* is drag locking enabled C */
+
 static int finger_threshold = 30;       /* pressure before it is a finger C */
+
 static int tap_lower_limit = 5; /* a tap last at least this long C */
+
 static int tap_upper_limit = 200;       /* a tap is at most this long C */
+
 static int tap_range = 100;     /* mm finger movement limit C */
+
 static int tap_interval = 200;  /* a tap reports button press this long C */
+
 static int multiple_tap_delay = 30;     /* time between reported button pressed 
                                          * C */
 static int pads_tap_interval = 8;       /* if pad sends gestures, what is it's
@@ -407,6 +431,7 @@ static int pads_tap_interval = 8;       /* if pad sends gestures, what is it's
 
 /* wmode capabilities */
 static int palm_detect_enabled = 1;     /* Ignore when palm on pad C */
+
 static int palm_detect_level = 12;      /* Detecting a palm level (between
                                          * 0-11) C */
 static int multi_finger_tap_enabled = 1;        /* No of fingers decides which
@@ -433,18 +458,21 @@ static int four_way_button_is_mouse = 1;        /* Is the button: 4 buttons or
                                                  * does it moves the mouse.  C */
 static int scrolling_enabled = 1;       /* Simulate wheel mouse in at the right 
                                          * edge C */
-static int scrolling_edge = RIGHT_EDGE; /* Which edge is a the scrolling edge C */
+static int scrolling_edge = RIGHT_EDGE; /* Which edge is a the scrolling edge C 
+                                         */
 static int scrolling_speed = 10;        /* less is faster, 1 fastest */
+
 static float scrolling_button_factor = 0.5;     /* How fast should a
                                                  * button/corner tap scroll,
                                                  * higher faster C */
 static int auto_scrolling_enabled = 1;  /* Moving to the upper/lower edge keeps 
                                          * scrolling up/downC */
 static int auto_scrolling_factor = 2.0; /* How fast should autoscrolling be C */
+
 static int reset_on_error_enabled = 0;  /* If a packet does not conform to any
                                          * absolute protocol should we reset
                                          * the touchpad? This is wrong, because 
-                                         * we should rather find out why it
+                                         * * we should rather find out why it
                                          * does that in first place. Do not
                                          * turn it on per default.  */
 
@@ -860,23 +888,36 @@ typedef struct {
 
 /* touchpad information */
 static int res_x;
+
 static int res_y;
+
 static int x_per_mm;
+
 static int y_per_mm;
 
 /* status information */
 static int packet_num = 0;
+
 static int was_edges = 0;
+
 static int was_non_edge = 0;
+
 static location_type last_locs[4];
+
 static Gpm_Event last_state;
+
 static int tap_lower_limit_packet;
+
 static int tap_upper_limit_packet;
+
 static int last_corner_action = GPM_B_NOT_SET;
+
 static int last_finger_action = GPM_B_NOT_SET;
+
 static int last_normal_button_actions[6] =
    { GPM_B_NOT_SET, GPM_B_NOT_SET, GPM_B_NOT_SET, GPM_B_NOT_SET, GPM_B_NOT_SET,
-GPM_B_NOT_SET };
+   GPM_B_NOT_SET
+};
 static int last_stick_button_actions[8] =
    { GPM_B_NOT_SET, GPM_B_NOT_SET, GPM_B_NOT_SET };
 static int last_4_way_button_actions[8] =
@@ -884,17 +925,26 @@ static int last_4_way_button_actions[8] =
 
 /* toss status information */
 static int is_tossing = 0;
+
 static int was_tossing = 0;
+
 static int min_toss_dist__2 = 32000;
+
 static int max_toss_packets;
+
 static int min_toss_packets;
+
 static int prevent_toss_packets;
+
 static int toss_timer;
+
 static location_type toss_speed;
+
 static location_type touch_loc;
 
 /* Multi tap information */
 static int gesture_delay = 0;
+
 static int fake_forget_tap_interval = 0;        /* if hardware sends tap-hold,
                                                  * we need to keep track */
 static int fake_time_to_forget_tap = 0; /* not to lose user defined actions in
@@ -904,15 +954,20 @@ static int fake_time_to_forget_tap = 0; /* not to lose user defined actions in
 
 /* Multi finger information */
 static int was_fingers = 0;
+
 static int multi_finger_stop_timer = 0;
+
 static int multi_finger_pressure = 0;
+
 static int multi_finger_xy = 0;
 
 /* Scrolling information */
 static int is_scrolling = 0;    /* Scrolling using touchpad edge */
+
 static int is_always_scrolling = 0;     /* Only report scrolling, no mouse
                                          * movement */
 static int scrolling_speed_timer = 0;
+
 static int scrolling_amount_left = 0;   /* Tells how much to scroll up or down */
 
 /****************************************************************************
@@ -933,6 +988,7 @@ static void tp_dump_report_data(report_type report,
                                 int edges, Gpm_Event * state)
 {
    static report_type last_report_reported;
+
    static unsigned int times_report_repeated = 0;
 
    report.left |= state->buttons & GPM_B_LEFT;
@@ -1160,7 +1216,9 @@ static void tp_handle_scrolling(Gpm_Event * state)
 static int tp_process_action(touchpad_action_type * action_list, int mask)
 {
    int i = 0;
+
    int status = GPM_B_NOT_SET;
+
    static int Left_Double_Click = 0;
 
    if(mask == 0) {
@@ -1450,7 +1508,9 @@ static int syn_ps2_process_extended_packets(unsigned char *data,
                                             Gpm_Event * state)
 {
    static int last_stick_buttons = GPM_B_NONE;
+
    static int last_4_way_buttons = GPM_B_NONE;
+
    int tmp_buttons = GPM_B_NONE;
 
    /*
@@ -1616,6 +1676,7 @@ static int tp_find_fingers(report_type * report, Gpm_Event * state)
 {
 
    static int fake_extra_finger;
+
    static int was_fake_pressure;
 
    state = NULL;                /* FIXME: gpm 1.99.13 */
@@ -1737,7 +1798,7 @@ static int tp_find_fingers(report_type * report, Gpm_Event * state)
                     last_report.fingers, report->fingers, fake_extra_finger);
 #endif
 
-      }                         /* Should be tested last, because of undo
+      }                         /* Should be tested last, because of undo *
                                  * moving when removing fingers. */
       else if(report->fingers == 0) {
          multi_finger_stop_timer = 0;
@@ -1862,9 +1923,13 @@ static int tp_find_fingers(report_type * report, Gpm_Event * state)
 static void tp_find_gestures(report_type * report)
 {
    static int finger_on_pad_timer = 0;
+
    static int time_to_forget_tap = 0;
+
    static int stroke_x;
+
    static int stroke_y;
+
    static int drag_locked = 0;
 
    if(report->fingers > 0) {
@@ -1933,7 +1998,7 @@ static void tp_find_gestures(report_type * report)
          } else
             time_to_forget_tap = tap_interval * 80 / 1000;      /* setup
                                                                  * gesture time 
-                                                                 * to count
+                                                                 * * to count
                                                                  * down */
 
       } else {                  /* It was not a tap */
@@ -1942,8 +2007,7 @@ static void tp_find_gestures(report_type * report)
           * a drag to lock? If user did a tap and quickly hold the finger
           * longer than a tap. 
           */
-         if(drag_lock_enabled &&
-            (time_to_forget_tap > 0)
+         if(drag_lock_enabled && (time_to_forget_tap > 0)
             && (finger_on_pad_timer >= (tap_upper_limit_packet)))
             drag_locked = 1;
 
@@ -1999,10 +2063,15 @@ static void tp_find_gestures(report_type * report)
 static void tp_process_report(Gpm_Event * state, report_type * report)
 {
    location_type loc;
+
    int edges;
+
    float pressure_speed_factor;
+
    float edge_speed_factor;
+
    int edge_motion_on;
+
    float dx, dy;
 
    /*
@@ -2265,12 +2334,19 @@ static void tp_process_report(Gpm_Event * state, report_type * report)
 void tp_read_config_file(char *config_filename)
 {
    char line[80];
+
    char *token;
+
    char *end_ptr;
+
    int param, tmp_read_int_param;
+
    FILE *config;
+
    char full_filename[100];
+
    int status;
+
    float tmp_read_float_param;
 
    status = snprintf(full_filename, 100, SYSCONFDIR "/%s", config_filename);
@@ -2455,6 +2531,7 @@ static void syn_process_config(info_type ident, model_id_type model)
 static unsigned char tp_hextoint(unsigned char byte1, unsigned char byte2)
 {
    unsigned char bytes[3];
+
    int result;
 
    bytes[0] = byte1;
@@ -2467,7 +2544,9 @@ static unsigned char tp_hextoint(unsigned char byte1, unsigned char byte2)
 static void tp_serial_flush_input(int fd)
 {
    struct timeval tv;
+
    fd_set rfds;
+
    unsigned char junk;
 
    FD_ZERO(&rfds);
@@ -2495,8 +2574,11 @@ static void tp_serial_flush_input(int fd)
 static void tp_serial_read(int fd, unsigned char *bytes, size_t count)
 {
    struct timeval tv;
+
    fd_set rfds;
+
    int num_read = 0;
+
    int read_count;
 
    FD_ZERO(&rfds);
@@ -2581,6 +2663,7 @@ static void syn_serial_read_ident(int fd, info_type * info)
 static void syn_serial_read_model_id(int fd, model_id_type * model)
 {
    unsigned char bytes[7];
+
    int model_int;
 
    /*
@@ -2618,6 +2701,7 @@ static void syn_serial_read_model_id(int fd, model_id_type * model)
 static void syn_serial_read_cap(int fd, ext_cap_type * cap)
 {
    unsigned char bytes[8];
+
    int cap_int = 0;
 
    tp_serial_send_cmd(fd, (unsigned char *) "%B");
@@ -2931,6 +3015,7 @@ static void syn_ps2_read_ident(int fd, int stick, info_type * info)
 static void syn_ps2_read_model_id(int fd, int stick, model_id_type * model)
 {
    unsigned char bytes[3];
+
    int model_int;
 
    syn_ps2_status_rqst(fd, stick, PS2_SYN_CMD_MODEL_ID, bytes);
@@ -2942,6 +3027,7 @@ static void syn_ps2_read_model_id(int fd, int stick, model_id_type * model)
 static void syn_ps2_read_cap(int fd, int stick, ext_cap_type * cap)
 {
    unsigned char bytes[3];
+
    int ext_cap_int;
 
    syn_ps2_status_rqst(fd, stick, PS2_SYN_CMD_CAPABILITIES, bytes);
@@ -2973,8 +3059,11 @@ static void syn_ps2_read_cap(int fd, int stick, ext_cap_type * cap)
 static void tp_ps2_disable_data(int fd)
 {
    struct timeval tv;
+
    fd_set rfds;
+
    unsigned char status;
+
    byte cmd = PS2_DISABLE_DATA;
 
    FD_ZERO(&rfds);
@@ -3027,6 +3116,7 @@ static void syn_ps2_enable_data(int fd)
 static void syn_ps2_send_reset(int fd, int stick)
 {
    byte status, id_code = PS2_MOUSE_IDCODE;
+
    byte reset_cmd = PS2_RESET;
 
    gpm_report(GPM_PR_DEBUG, "Reseting Synaptic PS/2 %s\n",
@@ -3388,9 +3478,9 @@ int syn_serial_init(int fd)
    syn_serial_set_mode(fd, (ABSOLUTE_MODE |
                             HIGH_REPORT_RATE |
                             USE_9600_BAUD |
-                            (model[0].
-                             info_new_abs ? EXTENDED_REPORT : NORMAL_REPORT) |
-                            (wmode_enabled ? REPORT_W_ON : REPORT_W_OFF)));
+                            (model[0].info_new_abs ? EXTENDED_REPORT :
+                             NORMAL_REPORT) | (wmode_enabled ? REPORT_W_ON :
+                                               REPORT_W_OFF)));
 
    return return_packetlength;
 }

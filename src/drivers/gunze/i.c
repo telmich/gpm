@@ -28,7 +28,9 @@
 
 /* from m.c */
 extern int gunze_avg;
+
 extern int gunze_calib[4];
+
 extern int gunze_debounce;
 
 /* simple initialization for the gunze touchscreen */
@@ -36,8 +38,11 @@ Gpm_Type *I_gunze(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
                   char **argv)
 {
    struct termios tty;
+
    FILE *f;
+
    char s[80];
+
    int i, calibok = 0;
 
    flags = 0;                   /* FIXME: 1.99.13 */

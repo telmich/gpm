@@ -43,17 +43,21 @@
 int processMouse(int fd, Gpm_Event * event, int kd_mode)
 {
    unsigned char *data;
+
    static int fine_dx, fine_dy, i, j, m, newB = 0,      /* old buttons and Type 
                                                          * to chain events */
       oldB = 0, oldT = 0;
 
    static Gpm_Event nEvent;
+
    static struct vt_stat stat;
    static struct timeval tv1 = { 0, 0 }, tv2;   /* tv1==0: first click is
                                                  * single */
    static struct timeval timeout = { 0, 0 };
    fd_set fdSet;
+
    int tempx, tempy;
+
    static int oldx, oldy;
 
    oldT = event->type;

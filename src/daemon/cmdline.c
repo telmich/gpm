@@ -33,7 +33,9 @@
 void cmdline(int argc, char **argv)
 {
    extern struct options option;
+
    char options[] = "a:A::b:B:c:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:Tuv23";
+
    int opt;
 
    /*

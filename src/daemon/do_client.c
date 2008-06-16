@@ -32,6 +32,7 @@
 int do_client(Gpm_Cinfo * cinfo, Gpm_Event * event)
 {
    Gpm_Connect info = cinfo->data;
+
    int fd = cinfo->fd;
 
    /*

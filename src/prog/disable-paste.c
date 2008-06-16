@@ -38,7 +38,9 @@
 int main()
 {
    Gpm_Connect conn;
+
    const int len = sizeof(Gpm_Connect);
+
    int exit_status = 0;
 
    conn.eventMask = (unsigned short) (-1);

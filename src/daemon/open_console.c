@@ -34,7 +34,9 @@
 int open_console(const int mode)
 {
    int fd;
+
    int maj;
+
    int twelve = 12;
 
 //   struct serial_struct si;

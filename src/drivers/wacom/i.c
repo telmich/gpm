@@ -85,7 +85,9 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
        *  Give back 0 on timeout condition, -1 on error and 1 for DataPresent
        */
       struct timeval timeout;
+
       fd_set readfds;
+
       int err;
 
       FD_ZERO(&readfds);

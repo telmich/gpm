@@ -26,7 +26,9 @@
 
 /*  Genius Wizardpad tablet  --  Matt Kimball (mkimball@xmission.com)  */
 int wizardpad_width = -1;
+
 int wizardpad_height = -1;
+
 int M_wp(Gpm_Event * state, unsigned char *data)
 {
    int x, y, pressure;

@@ -30,6 +30,7 @@
 void selection_paste(void)
 {
    char c = 3;
+
    int fd;
 
    if(!opt_aged && (0 != opt_age_limit) &&

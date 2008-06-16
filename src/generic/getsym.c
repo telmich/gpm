@@ -26,6 +26,7 @@
 int getsym(const unsigned char *p0, unsigned char *res)
 {
    const unsigned char *p = p0;
+
    char c;
 
    c = *p++;

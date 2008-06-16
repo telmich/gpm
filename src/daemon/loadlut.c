@@ -34,7 +34,9 @@
 int loadlut(char *charset)
 {
    int i, c, fd;
+
    unsigned char this, next;
+
    static uint32_t long_array[9] = {
       0x05050505,               /* ugly, but preserves alignment */
       0x00000000,               /* control chars */

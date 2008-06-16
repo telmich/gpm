@@ -1,3 +1,4 @@
+
 /*
  * general purpose mouse support for Linux
  *
@@ -36,6 +37,7 @@
 void startup(int argc, char **argv)
 {
    int i, opt;
+
    FILE *calib_file;
 
    static struct {

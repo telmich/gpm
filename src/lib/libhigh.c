@@ -25,8 +25,11 @@
 #include "gpmInt.h"
 
 Gpm_Roi *gpm_roi = NULL;
+
 Gpm_Roi *gpm_current_roi = NULL;
+
 Gpm_Handler *gpm_roi_handler = NULL;
+
 void *gpm_roi_data;
 
 /*-------------------------------------------------------------------*/
@@ -168,6 +171,7 @@ Gpm_Roi *Gpm_LowerRoi(Gpm_Roi * which, Gpm_Roi * after)
 int Gpm_HandleRoi(Gpm_Event * ePtr, void *clientdata)
 {
    static Gpm_Event backEvent;
+
    Gpm_Roi *roi = gpm_current_roi;
 
    clientdata = NULL;           /* FIXME: gpm 1.99.13 */

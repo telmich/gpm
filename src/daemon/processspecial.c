@@ -45,6 +45,7 @@
  */
 
 static int special_status = 0;  /* turns on when active */
+
 static int did_parse = 0;
 
   /*
@@ -59,7 +60,9 @@ static int did_parse = 0;
    */
 
 static char *commandL = NULL;   /* kill init */
+
 static char *commandM = "shutdown -h now";
+
 static char *commandR = "shutdown -r now";
 
 /*
@@ -69,7 +72,9 @@ static char *commandR = "shutdown -r now";
 int processSpecial(Gpm_Event * event)
 {
    char *command = NULL;
+
    int i;
+
    FILE *consolef;
 
    if((event->type & GPM_TRIPLE)

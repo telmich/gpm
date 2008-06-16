@@ -34,13 +34,21 @@
 int processConn(int fd)
 {                               /* returns newfd or -1 */
    Gpm_Cinfo *info;
+
    Gpm_Connect *request;
+
    Gpm_Cinfo *next;
+
    int vc, newfd;
+
    socklen_t len;
+
    struct sockaddr_un addr;     /* reuse this each time */
+
    struct stat statbuf;
+
    uid_t uid;
+
    char *tty = NULL;
 
 /*....................................... Accept */
@@ -96,6 +104,7 @@ int processConn(int fd)
 #else
    {
       struct ucred sucred;
+
       socklen_t credlen = sizeof(struct ucred);
 
       if(getsockopt(newfd, SOL_SOCKET, SO_PEERCRED, &sucred, &credlen) == -1) {
@@ -125,7 +134,8 @@ int processConn(int fd)
          return -1;
       }
       if(uid != statbuf.st_uid) {
-         gpm_report(GPM_PR_WARN, GPM_MESS_FAILED_CONNECT, uid, tty);    /* SUSPECT! */
+         gpm_report(GPM_PR_WARN, GPM_MESS_FAILED_CONNECT, uid, tty);    /* SUSPECT! 
+                                                                         */
          free(info);
          free(tty);
          close(newfd);

@@ -74,6 +74,7 @@
 void gpm_report(int line, char *file, int stat, char *text, ...)
 {
    FILE *console = NULL;
+
    va_list ap, ap3;
 
 #ifdef HAVE_VSYSLOG

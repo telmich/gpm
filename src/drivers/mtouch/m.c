@@ -34,8 +34,11 @@ int M_mtouch(Gpm_Event * state, unsigned char *data)
     * events. Check README.microtouch for additional information.
     */
    int x, y;
+
    static int avgx = -1, avgy;  /* average over time, for smooth feeling */
+
    static int upx, upy;         /* keep track of last finger-up place */
+
    static struct timeval uptv, tv;      /* time of last up, and down events */
 
 #define REAL_TO_XCELL(x) (x * win.ws_col / 0x3FFF)

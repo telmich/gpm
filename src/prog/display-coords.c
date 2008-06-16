@@ -44,7 +44,9 @@
 int display_data(Gpm_Event * event)
 {
    static time_t last = 0;
+
    time_t now = time(NULL);
+
    int delta;
 
    delta = now - last;
@@ -67,7 +69,9 @@ int display_data(Gpm_Event * event)
 int main(int argc, char **argv)
 {
    int vc;                      /* argv: console number */
+
    Gpm_Connect conn;            /* connection to gpm */
+
    fd_set fds;
 
    /*

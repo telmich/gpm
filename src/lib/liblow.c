@@ -65,20 +65,30 @@ typedef struct Gpm_Stst {
 int gpm_flag = 0;               /* almost unuseful now -- where was it used for 
                                  * ? can we remove it now ? FIXME */
 int gpm_tried = 0;
+
 int gpm_fd = -1;
+
 int gpm_hflag = 0;
+
 Gpm_Stst *gpm_stack = NULL;
 struct timeval gpm_timeout = { 10, 0 };
+
 Gpm_Handler *gpm_handler = NULL;
+
 void *gpm_data = NULL;
+
 int gpm_zerobased = 0;
+
 int gpm_visiblepointer = 0;
+
 int gpm_mx, gpm_my;             /* max x and y (1-based) to fit margins */
 
 unsigned char _gpm_buf[6 * sizeof(short)];
+
 unsigned short *_gpm_arg = (unsigned short *) _gpm_buf + 1;
 
 int gpm_consolefd = -1;         /* used to invoke ioctl() */
+
 int gpm_morekeys = 0;
 
 int gpm_convert_event(unsigned char *mdata, Gpm_Event * ePtr);
@@ -149,8 +159,11 @@ static struct sigaction gpm_saved_suspend_hook;
 static void gpm_suspend_hook(int success)
 {                               /* misuse the parameter */
    Gpm_Connect gpm_connect;
+
    sigset_t old_sigset;
+
    sigset_t new_sigset;
+
    struct sigaction sa;
 
    sigemptyset(&new_sigset);
@@ -206,13 +219,21 @@ static void gpm_suspend_hook(int success)
 int Gpm_Open(Gpm_Connect * conn, int flag)
 {
    char *tty = NULL;
+
    char *term = NULL;
+
    int i;
+
    struct sockaddr_un addr;
+
    struct winsize win;
+
    Gpm_Stst *new = NULL;
+
    char *sock_name = 0;
+
    static char *consolename = NULL;
+
    int gpm_is_disabled = 0;
 
    /*
@@ -344,27 +365,28 @@ int Gpm_Open(Gpm_Connect * conn, int flag)
       if(connect(gpm_fd, (struct sockaddr *) (&addr), i) < 0) {
          struct stat stbuf;
 
-         if (errno == ENOENT) {
-            gpm_report(GPM_PR_DEBUG,"cannot find %s; ignoring (gpm disabled?)",
-                            GPM_NODE_CTL);
+         if(errno == ENOENT) {
+            gpm_report(GPM_PR_DEBUG, "cannot find %s; ignoring (gpm disabled?)",
+                       GPM_NODE_CTL);
             gpm_is_disabled++;
          } else {
-            gpm_report(GPM_PR_INFO,GPM_MESS_DOUBLE_S,GPM_NODE_CTL,
-                            strerror(errno));
+            gpm_report(GPM_PR_INFO, GPM_MESS_DOUBLE_S, GPM_NODE_CTL,
+                       strerror(errno));
          }
-          /*
-           * Well, try to open a chr device called /dev/gpmctl. This should
-           * be forward-compatible with a kernel server
-           */
-          close(gpm_fd); /* the socket */
-          if ((gpm_fd=open(GPM_NODE_DEV,O_RDWR))==-1) {
-            if (errno == ENOENT) {
-               gpm_report(GPM_PR_DEBUG,"Cannot find %s; ignoring (gpm disabled?)",
-                               GPM_NODE_DEV);
+         /*
+          * Well, try to open a chr device called /dev/gpmctl. This should
+          * be forward-compatible with a kernel server
+          */
+         close(gpm_fd);         /* the socket */
+         if((gpm_fd = open(GPM_NODE_DEV, O_RDWR)) == -1) {
+            if(errno == ENOENT) {
+               gpm_report(GPM_PR_DEBUG,
+                          "Cannot find %s; ignoring (gpm disabled?)",
+                          GPM_NODE_DEV);
                gpm_is_disabled++;
             } else {
-               gpm_report(GPM_PR_ERR,GPM_MESS_DOUBLE_S,GPM_NODE_DEV
-                                                   ,strerror(errno));
+               gpm_report(GPM_PR_ERR, GPM_MESS_DOUBLE_S, GPM_NODE_DEV,
+                          strerror(errno));
             }
             goto err;
          }
@@ -417,10 +439,12 @@ int Gpm_Open(Gpm_Connect * conn, int flag)
    }
    return gpm_fd;
 
-  /*....................................... Error: free all memory */
-   err:
-   if (gpm_is_disabled < 2) /* be quiet if no gpmctl socket found */
-      gpm_report(GPM_PR_ERR,"Oh, oh, it's an error! possibly I die! ");
+   /*
+    * ....................................... Error: free all memory 
+    */
+ err:
+   if(gpm_is_disabled < 2)      /* be quiet if no gpmctl socket found */
+      gpm_report(GPM_PR_ERR, "Oh, oh, it's an error! possibly I die! ");
    while(gpm_stack) {
       new = gpm_stack->next;
       free(gpm_stack);
@@ -534,9 +558,13 @@ int Gpm_CharsQueued()
 int Gpm_Getc(FILE * f)
 {
    fd_set selSet;
+
    int max, flag, result;
+
    static Gpm_Event ev;
+
    int fd = fileno(f);
+
    static int count;
 
    /*
@@ -595,8 +623,11 @@ int Gpm_Getc(FILE * f)
 #define DELAY_MS 100
       static struct timeval to = { 0, DELAY_MS * 1000 };
       static fd_set selSet;
+
       extern int gpm_convert_event(unsigned char *data, Gpm_Event * event);
+
       int c;
+
       unsigned char mdata[4];
 
       if(nbprevchar)            /* if there are some consumed char ... */
@@ -683,6 +714,7 @@ int Gpm_Repeat(int msec)
 {
    struct timeval to = { 0, 1000 * msec };
    int fd;
+
    fd_set selSet;
 
    fd = gpm_fd >= 0 ? gpm_fd : 0;       /* either the socket or stdin */
@@ -722,6 +754,7 @@ int gpm_convert_event(unsigned char *mdata, Gpm_Event * ePtr)
 {
    static struct timeval tv1 = { 0, 0 }, tv2;
    static int clicks = 0;
+
    int c;
 
 #define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))

@@ -29,7 +29,9 @@
 char **build_argv(char *argv0, char *str, int *argcptr, char sep)
 {
    int argc = 1;
+
    char **argv;
+
    char *s;
 
    /*

@@ -30,6 +30,7 @@
 
 /* (Frank Holtz) hof@bigfoot.de Tue Feb 23 21:04:09 MET 1999 */
 int SUMMA_BORDER = 100, summamaxx, summamaxy;
+
 signed char summaid = -1;
 
 int M_summa(Gpm_Event * state, unsigned char *data)

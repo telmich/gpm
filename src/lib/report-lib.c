@@ -28,13 +28,16 @@
 void gpm_report(int line, char *file, int stat, char *text, ...)
 {
    char *string = NULL;
+
    int log_level = LOG_DEBUG;
+
    va_list ap;
 
    line = 0;                    /* FIXME: gpm 1.99.13 */
    file = NULL;
 
-   if (stat == GPM_STAT_DEBUG) return;
+   if(stat == GPM_STAT_DEBUG)
+      return;
    va_start(ap, text);
 
    switch (stat) {
