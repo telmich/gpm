@@ -43,7 +43,7 @@ distfiles = configure
 
 # regen, if it changed; ignore if git is missing / fails
 versioncheck:
-	@v1="$$(git-describe)" 2>/dev/null; 	\
+	@v1="$$(git-describe 2>/dev/null)"; \
 	if [ -z "$$v1" ]; then					\
 		echo "No git available, not updating version"; 	\
 		exit 0; 														\
