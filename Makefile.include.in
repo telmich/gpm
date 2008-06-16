@@ -27,6 +27,10 @@ man7dir     = $(mandir)/man7
 man8dir     = $(mandir)/man8
 infodir     = $(ROOT)@infodir@
 
+# autconf wants this, otherwise issues this warning:
+# config.status: WARNING:  Makefile.include.in seems to ignore the --datarootdir setting
+datarootdir  = @datarootdir@
+
 # it would be nice to figure this out automatically, but the Emacs
 # load path often has many elements, most of them reserved for
 # specialised packages like w3 and auctex.
