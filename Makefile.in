@@ -182,7 +182,7 @@ nicotest: $(TARS)
 
 ### CLEANUP
 distclean: clean do-clean do-distclean
-	rm -f config.log config.status config.cache Makefile Makefile.include
+	rm -f config.log config.status* config.cache Makefile Makefile.include
 	rm -rf autom4te.cache 
 	rm -f src/$(DEPFILE)
 
