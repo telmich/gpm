@@ -48,14 +48,6 @@ $(versionfiles): .git/HEAD
 	echo "${version}" > .gitversion; \
 	echo "${date}"    > .releasedate
 
-	#./autogen.sh
-
-
-# make the following rules clean in a later release
-#aclocal.m4: acinclude.m4
-#	./autogen.sh
-#
-
 config:
 	mkdir -p config
 
@@ -132,7 +124,7 @@ $(TARS): distconf
 tars: $(TARS)
 
 # configure headers, produce new configure script
-distconf: configure.ac acinclude.m4 $(versionfiles)
+distconf: configure configure.ac acinclude.m4 $(versionfiles)
 	$(srcdir)/autogen.sh
 
 ../gpm-$(release).tar: $(srcdir)
