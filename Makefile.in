@@ -55,7 +55,7 @@ aclocal.m4: acinclude.m4 config
 	aclocal -I config
 
 configure: configure.ac aclocal.m4 $(versionfiles)
-	./autogen.sh
+	$(srcdir)/autogen.sh
 
 config.status:	configure
 	if [ -f config.status ]; then $(SHELL) config.status; \
