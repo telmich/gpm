@@ -52,7 +52,7 @@ versioncheck:
 	echo "$${date}"    > .releasedate; \
 	fi
 
-$(versionfiles): .git/HEAD $(versioncheck)
+$(versionfiles): .git/HEAD versioncheck
 
 config:
 	mkdir -p config
@@ -67,7 +67,6 @@ config.status:	configure
 	if [ -f config.status ]; then $(SHELL) ./config.status --recheck; \
 	else $(SHELL) ./configure; fi
 
-#Makefile Makefile.include: $(srcdir)/configure config.status $(srcdir)/Makefile.in $(srcdir)/Makefile.in
 Makefile: config.status         $(srcdir)/Makefile.in Makefile.include
 	./config.status
 Makefile.include: config.status $(srcdir)/Makefile.include.in
