@@ -56,6 +56,12 @@ $(versionfiles): .git/HEAD
 #	./autogen.sh
 #
 
+config:
+	mkdir -p config
+
+aclocal.m4: acinclude.m4 config
+	aclocal -I config
+
 configure: configure.ac aclocal.m4 $(versionfiles)
 	./autogen.sh
 
