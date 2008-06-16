@@ -1,3 +1,4 @@
+- remove /Changes (obsolete)
 - mice driver:
    * load them dynamically
    * do not require senseless header (all functions have the same type)
