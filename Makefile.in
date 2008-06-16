@@ -134,8 +134,6 @@ D_SOURCE=$(D_BASE)/browse_source/
 M_HOST=arcana.linux.it
 M_DIR=gpm/
 
-$(TARS): 
-
 tars: $(TARS)
 
 # configure headers, produce new configure script
