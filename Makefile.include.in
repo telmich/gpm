@@ -37,6 +37,7 @@ datarootdir  = @datarootdir@
 lispdir = @lispdir@
 
 # programs
+MKDIR_P				= @MKDIR_P@
 CC                = @CC@
 CFLAGS				= -Wall -Wextra -Werror -pipe @CFLAGS@
 MAKEDEPEND 			= $(CC) -M $(CPPFLAGS) -o $*.d $<
