@@ -57,13 +57,13 @@ aclocal.m4: acinclude.m4 config
 configure: configure.ac aclocal.m4 $(versionfiles)
 	./autogen.sh
 
-config.status:	$(srcdir)/configure
+config.status:	configure
 	if [ -f config.status ]; then $(SHELL) config.status --recheck; \
-	else $(srcdir)/configure; fi
+	else $(SHELL) configure; fi
 
 #Makefile Makefile.include: $(srcdir)/configure config.status $(srcdir)/Makefile.in $(srcdir)/Makefile.in
-Makefile: configure $(srcdir)/Makefile.in Makefile.include
-Makefile.include: configure $(srcdir)/Makefile.include.in
+Makefile: config.status         $(srcdir)/Makefile.in Makefile.include
+Makefile.include: config.status $(srcdir)/Makefile.include.in
 
 ### INSTALL
 
@@ -124,7 +124,7 @@ $(TARS): distconf
 tars: $(TARS)
 
 # configure headers, produce new configure script
-distconf: configure configure.ac acinclude.m4 $(versionfiles)
+distconf: Makefile.include configure configure.ac acinclude.m4 $(versionfiles)
 	$(srcdir)/autogen.sh
 
 ../gpm-$(release).tar: $(srcdir)
