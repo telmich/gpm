@@ -3,28 +3,16 @@ AC_REVISION(configure.in,v 1.7 2008/02/16 nico)
 dnl Process this file with autoconf to produce a configure script.
 dnl written jan/1997 - T.E.Dickey <dickey@clark.net>
 
-AC_INIT(src/daemon/main.c)
-AC_PREREQ(2.12)
-AC_CONFIG_HEADER(src/headers/config.h)
+AC_PREREQ(2.61)
 
-release=1.20.4
-release_date="29th of May 2008"
-AC_DEFINE_UNQUOTED(GPM_RELEASE,"$release",[GPM release number as a string])
-AC_DEFINE_UNQUOTED(GPM_RELEASE_DATE,"$release_date",[release date as a string])
 
-dnl These are chosen so that we can switch to the libtool scheme
-dnl transparently.
-dnl Nico, 20080520: Is this somewhere needed?
-dnl I do not see the use right now -> disabled
-#abi=21
-#
-#abi_lev=`expr $abi - $abi_age`
-#abi_full=$abi_lev.$abi_age.$abi_rev
+AC_INIT([gpm],["version-set-in-.gitversion-via-acinclude.m4"],[http://unix.schottelius.org/gpm/])
 
-abi_lev="2"
-abi_age="0"
-abi_rev="0"
-abi_full="${abi_lev}.${abi_age}.${abi_rev}"
+AC_CONFIG_SRCDIR([src/daemon/main.c])
+AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_HEADER([src/headers/config.h])
+
+AC_CANONICAL_HOST
 
 dnl Make srcdir an absolute path.
 if test x$srcdir = x ; then
@@ -32,6 +20,27 @@ if test x$srcdir = x ; then
 else
         srcdir=`cd $srcdir && pwd`
 fi
+
+#
+# Versioning stuff
+#
+abi_lev="2"
+abi_age="1"
+abi_rev="0"
+abi_full="${abi_lev}.${abi_age}.${abi_rev}"
+
+AC_DEFINE_UNQUOTED([GPM_ABI_LEV], [$abi_lev], [Library level])
+AC_DEFINE_UNQUOTED([GPM_ABI_AGE], [$abi_age], [Library age])
+AC_DEFINE_UNQUOTED([GPM_ABI_REV], [$abi_rev], [Library revision])
+AC_DEFINE_UNQUOTED([GPM_ABI_FULL],["$abi_full"],[Full library version])
+
+releasedate="`cat $srcdir/.releasedate`"
+release="`cat $srcdir/.gitversion`"
+
+
+#
+# Find programs
+#
 
 AC_PROG_CC
 AC_PROG_RANLIB
@@ -64,9 +73,12 @@ else
         lispdir='${datadir}/emacs/site-lisp'
 fi
 
-AC_CHECK_HEADERS(syslog.h linux/input.h linux/joystick.h ncurses.h ncurses/curses.h curses.h sys/socket.h)
+# Header-checks
+AC_CHECK_HEADERS(syslog.h linux/input.h linux/joystick.h ncurses.h ncurses/curses.h curses.h)
+AC_CHECK_HEADERS(sys/sysmacros.h linux/major.h linux/tty.h)
 
-AC_CHECK_TYPE([socklen_t], [unsigned int])
+# Required headers
+AC_CHECK_HEADERS(sys/socket.h,,[AC_MSG_ERROR([Required header file missing])])
 
 AC_ARG_WITH(curses,
 [  --without-curses        disable curses support even if curses found])
@@ -81,7 +93,6 @@ No|no|N|n) : ;;
         CURSES_OBJS=lib/libcurses.o ; fi ;;
 esac
 
-AC_CHECK_HEADERS(sys/sysmacros.h linux/major.h linux/tty.h)
 
 ITZ_CHECK_TYPE(__u32,linux/types.h)
 if test ${itz_cv_type___u32} = yes || test ${ac_cv_type___u32} = yes ; then
@@ -121,8 +132,6 @@ esac
 
 GPMXTERM=
 AC_SUBST(GPMXTERM)
-AC_SUBST(release)
-AC_SUBST(release_date)
 AC_SUBST(abi_lev)
 AC_SUBST(abi_full)
 AC_SUBST(EMACS)
@@ -133,6 +142,9 @@ AC_SUBST(SOLDFLAGS)
 AC_SUBST(CURSES_OBJS)
 AC_SUBST(SHARED_LIBS)
 AC_SUBST(lispdir)
+AC_SUBST(AC_PACKAGE_VERSION)
+AC_SUBST(release)
+AC_SUBST(release_date)
 
 CPPFLAGS="$CPPFLAGS "'-I$(srcdir) $(DEFS) -include headers/config.h -Wall -DSYSCONFDIR="\"$(sysconfdir)\"" -DSBINDIR="\"$(sbindir)\"" -D_GNU_SOURCE'
 LDFLAGS="$LDFLAGS "'-L$(srcdir)'

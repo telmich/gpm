@@ -1477,11 +1477,12 @@ Note that fitting uses @code{gpm_mx} and @code{gpm_my}.
 
 This function returns a pointer to a static storage representing the
 version number of the library. It is only available from 0.98.2 onward,
-and returns a string like @samp{"0.98.2"}. The third number is optional,
-and the second number will always be reported as two digits; thus 1.10 is
-newer than 1.01. The @var{where} pointer, if not null, is used to store
-a decimal number representing the version -- 0.98.2 is 9802 and 1.1.8 is
-10108.
+and returns a string like @samp{"0.98.2"}. The third number is optional.
+All numbers may be one or two digits. This behaviour changed in version
+2.1.0 of libgpm. In releases before 2.1.0 the second number was always
+reported as two digits. The @var{where} pointer, if not null, is used to store
+a decimal number representing the version -- 0.98.2 is 9802 and 2.1.1 is
+20101.
 @end deftypefun
 
 %.........................................................................
