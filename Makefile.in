@@ -64,7 +64,9 @@ aclocal.m4: acinclude.m4 config
 	aclocal -I config
 
 configure: configure.ac aclocal.m4 $(versionfiles)
-	$(srcdir)/autogen.sh
+	libtoolize --force --copy
+	autoheader
+	autoconf
 
 config.status:	configure
 	if [ -f config.status ]; then $(SHELL) ./config.status --recheck; \
@@ -134,8 +136,7 @@ $(TARS): distconf
 tars: $(TARS)
 
 # configure headers, produce new configure script
-distconf: Makefile.include configure configure.ac acinclude.m4 $(versionfiles)
-	$(srcdir)/autogen.sh
+distconf: Makefile.in Makefile.include.in configure acinclude.m4 $(versionfiles)
 
 ../gpm-$(release).tar: $(srcdir)
 	# no exclude possible of .git with pax it seems
