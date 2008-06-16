@@ -58,7 +58,7 @@ configure: configure.ac aclocal.m4 $(versionfiles)
 	./autogen.sh
 
 config.status:	configure
-	if [ -f config.status ]; then $(SHELL) config.status --recheck; \
+	if [ -f config.status ]; then $(SHELL) config.status; \
 	else $(SHELL) configure; fi
 
 #Makefile Makefile.include: $(srcdir)/configure config.status $(srcdir)/Makefile.in $(srcdir)/Makefile.in
