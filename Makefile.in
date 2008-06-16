@@ -43,16 +43,19 @@ distfiles = configure
 
 # regen, if it changed; ignore if git is missing / fails
 versioncheck:
-	v1="$$(git-describeoooo)" 2>/dev/null; \
-	[ "$$v1" ] || exit 0; \; \
-	v2="$$(cat .gitversion)"; \
-	if [ "$$v1" != "$$v2" ]; then \
-	echo "updating versionfiles"; \
+	@v1="$$(git-describe)" 2>/dev/null; 	\
+	if [ -z "$$v1" ]; then					\
+		echo "No git available, not updating version"; 	\
+		exit 0; 														\
+	fi;											\
+	v2="$$(cat .gitversion)"; 				\
+	if [ "$$v1" != "$$v2" ]; then 		\
+	echo "updating versionfiles"; 		\
 	date="$$(date +%Y%m%d\ %T\ %z)"; 	\
-	version="$$v1"; 		\
+	version="$$v1"; 							\
 	echo "define([AC_PACKAGE_VERSION], [$${version} $${date}])" > .gitversion.m4; \
-	echo "$${version}" > .gitversion; \
-	echo "$${date}"    > .releasedate; \
+	echo "$${version}" > .gitversion; 	\
+	echo "$${date}"    > .releasedate; 	\
 	fi
 
 $(versionfiles): .git/HEAD versioncheck
