@@ -134,15 +134,15 @@ D_SOURCE=$(D_BASE)/browse_source/
 M_HOST=arcana.linux.it
 M_DIR=gpm/
 
-$(TARS): distclean distconf
+$(TARS): 
 
 tars: $(TARS)
 
 # configure headers, produce new configure script
 distconf: Makefile.in Makefile.include.in configure acinclude.m4 $(versionfiles)
 
-../gpm-$(release).tar: $(srcdir)
-	# no exclude possible of .git with pax it seems
+../gpm-$(release).tar: $(srcdir) distclean distconf
+	# no exclude possible of .git with pax it seems, so the following is not possible:
 	#pax -w -x ustar -s '/^\./gpm-$(release)/' -w . -f $@
 	pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w $(dotfiles) *
 
