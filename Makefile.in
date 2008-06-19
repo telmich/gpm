@@ -60,7 +60,7 @@ aclocal.m4: acinclude.m4
 	aclocal -I config
 
 configure: configure.ac aclocal.m4 $(versionfiles)
-	libtoolize --force --copy
+	libtoolize --force --copy `libtoolize -n --install >/dev/null 2>&1 && echo --install`
 	autoheader
 	autoconf
 
