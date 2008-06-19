@@ -50,7 +50,7 @@ int open_console(const int mode)
                }
           }
       }
-   return fd;
    } else
-   gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
+      gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
+   return fd;
 }
