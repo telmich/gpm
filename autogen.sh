@@ -21,6 +21,7 @@ echo "${version}" > .gitversion
 echo "${date}"    > .releasedate
 
 ${ACLOCAL-aclocal} -I config
-${LIBTOOLIZE-libtoolize} --force --copy
+${LIBTOOLIZE-libtoolize} -n --install 2>/dev/null && LIBTOOL_FLAGS="--install" || LIBTOOL_FLAGS=""
+${LIBTOOLIZE-libtoolize} --force --copy ${LIBTOOL_FLAGS}
 ${AUTOHEADER-autoheader}
 ${AUTOCONF-autoconf}
