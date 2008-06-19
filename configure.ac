@@ -5,7 +5,6 @@ dnl written jan/1997 - T.E.Dickey <dickey@clark.net>
 
 AC_PREREQ(2.61)
 
-
 AC_INIT([gpm],["version-set-in-.gitversion-via-acinclude.m4"],[http://unix.schottelius.org/gpm/])
 
 AC_CONFIG_SRCDIR([src/daemon/main.c])
@@ -142,7 +141,6 @@ AC_SUBST(SOLDFLAGS)
 AC_SUBST(CURSES_OBJS)
 AC_SUBST(SHARED_LIBS)
 AC_SUBST(lispdir)
-AC_SUBST(AC_PACKAGE_VERSION)
 AC_SUBST(release)
 AC_SUBST(release_date)
 
