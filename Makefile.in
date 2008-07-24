@@ -57,7 +57,7 @@ versioncheck:
 $(versionfiles): .git/HEAD versioncheck
 
 aclocal.m4: acinclude.m4
-	$(MKDIR) config
+	$(MKDIR_P) config
 	aclocal -I config
 
 configure: configure.ac aclocal.m4 $(versionfiles)
@@ -85,9 +85,9 @@ install-exec: installdirs
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) $(STRIP)' -C src install
 
 installdirs:
-	@MKDIR_P@ $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
+	@MKDIR_P_P@ $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
 	if test "x$(ELISP)" != "x" ; then \
-		@MKDIR_P@ $(lispdir) ; \
+		@MKDIR_P_P@ $(lispdir) ; \
 	fi
 
 ### GENERIC
