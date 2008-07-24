@@ -30,6 +30,7 @@ check: all
 
 uninstall: do-uninstall
 clean: do-clean
+	rm -f config.status.lineno
 
 
 versionfiles =  .gitversion .gitversion.m4 .releasedate
