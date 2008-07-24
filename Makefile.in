@@ -156,8 +156,8 @@ $(CHKSUMS): $(TARS)
 dist: disttest distclean distconf nicotest $(CHKSUMS)
 	chmod 0644 $(TARS) $(CHKSUMS)
 	chmod 0644 $(TARS)
-	scp $(TARS) $(D_HOST):$(D_DIR)
-	scp $(TARS) $(M_HOST):$(M_DIR)
+	scp $(TARS) $(CHKSUMS) $(D_HOST):$(D_DIR)
+	scp $(TARS) $(CHKSUMS) $(M_HOST):$(M_DIR)
 	ssh "$(D_HOST)" "tar xvfz $(D_DIR)/gpm-$(release).tar.gz -C $(D_SOURCE)"
 	ssh "$(D_HOST)" "find \"$(D_SOURCE)/\" -type f -exec chmod 0644 {} \\;"
 	ssh "$(D_HOST)" "find \"$(D_SOURCE)/\" -type d -exec chmod 0755 {} \\;"
