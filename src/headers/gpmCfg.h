@@ -32,14 +32,6 @@
 #include <linux/tty.h>
 #endif
 
-/* FIXME: still needed ?? */
-/* How many virtual consoles are managed? */
-#ifndef MAX_NR_CONSOLES
-#  define MAX_NR_CONSOLES 64 /* this is always sure */
-#endif
-
-#define MAX_VC    MAX_NR_CONSOLES  /* doesn't work before 1.3.77 */
-
 /* How many buttons may the mouse have? */
 /* #define MAX_BUTTONS 3  ===> not used, it is hardwired :-( */
 

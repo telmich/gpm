@@ -34,21 +34,16 @@
 int processConn(int fd)
 {                               /* returns newfd or -1 */
    Gpm_Cinfo *info;
-
    Gpm_Connect *request;
-
    Gpm_Cinfo *next;
 
-   int vc, newfd;
-
-   socklen_t len;
-
    struct sockaddr_un addr;     /* reuse this each time */
-
    struct stat statbuf;
 
+   socklen_t len;
    uid_t uid;
 
+   int vc, newfd;
    char *tty = NULL;
 
 /*....................................... Accept */
@@ -75,8 +70,8 @@ int processConn(int fd)
       return -1;
    }
 
-   if((vc = request->vc) > MAX_VC) {
-      gpm_report(GPM_PR_DEBUG, GPM_MESS_REQUEST_ON, vc, MAX_VC);
+   if((vc = request->vc) > MAX_NR_CONSOLES) {
+      gpm_report(GPM_PR_DEBUG, GPM_MESS_REQUEST_ON, vc, MAX_NR_CONSOLES);
       free(info);
       close(newfd);
       return -1;

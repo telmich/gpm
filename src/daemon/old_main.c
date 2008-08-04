@@ -175,7 +175,7 @@ int old_main()
          /*
           * and notify clients 
           */
-         for(i = 0; i < MAX_VC + 1; i++) {
+         for(i = 0; i < MAX_NR_CONSOLES; i++) {
             Gpm_Cinfo *ci;
 
             for(ci = cinfo[i]; ci; ci = ci->next)
@@ -269,7 +269,7 @@ int old_main()
       /*
        * itz 10-22-96 check _all_ clients, not just those on top! 
        */
-      for(i = 0; pending && (i <= MAX_VC); i++) {
+      for(i = 0; pending && (i < MAX_NR_CONSOLES); i++) {
          Gpm_Cinfo *ci;
 
          for(ci = cinfo[i]; pending && ci; ci = ci->next) {

@@ -27,17 +27,11 @@
 #include "gpm.h"           /* Gpm_Event         */
 #include "types.h"         /* Internal types    */
 #include <sys/select.h>    /* fd_set            */
+#include <linux/vt.h>      /* for cinfo -- to be moved to os/linux in 2.x! */
 
 /*************************************************************************
  * Macros
  */
-
-/* How many virtual consoles are managed? */
-#ifndef MAX_NR_CONSOLES
-#  define MAX_NR_CONSOLES 64 /* this is always sure */
-#endif
-
-#define MAX_VC    MAX_NR_CONSOLES  /* doesn't work before 1.3.77 */
 
 /* for adding a mouse; add_mouse */
 #define GPM_ADD_DEVICE        0
@@ -113,7 +107,7 @@ extern fd_set           selSet,
 extern int              eventFlag;
 extern struct winsize   win;
 
-extern Gpm_Cinfo       *cinfo[MAX_VC+1];
+extern Gpm_Cinfo       *cinfo[MAX_NR_CONSOLES];
 
 extern struct mouse_features  mouse_table[3],
                              *which_mouse;      /*the current one*/
