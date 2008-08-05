@@ -18,6 +18,10 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
+ *
+ *   Notice for me and all further hackers of gpm: This files is responsable
+ *   for drawing the mouse pointer.
+ *
  ********/
 
 #include <fcntl.h>              /* open */
@@ -50,10 +54,9 @@ void selection_copy(int x1, int y1, int x2, int y2, int mode)
 
    if((fd = open_console(O_WRONLY)) < 0)
       gpm_report(GPM_PR_OOPS, GPM_MESS_OPEN_CON);
-   /*
-    * FIXME: should be replaced with string constant (message.h) 
-    */
-   gpm_report(GPM_PR_DEBUG, "ctl %i, mode %i", (int) *buf, arg[4]);
+
+   gpm_report(GPM_PR_DEBUG, GPM_MESS_CTL_IOCTL, x1, x2, y1, y2, mode,
+              (int) *buf);
    if(ioctl(fd, TIOCLINUX, buf + sizeof(short) - 1) < 0)
       gpm_report(GPM_PR_OOPS, GPM_MESS_IOCTL_TIOCLINUX);
    close(fd);

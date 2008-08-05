@@ -214,6 +214,7 @@
 #define GPM_MESS_LONG_STATUS        "Pid %i, vc %i, ev %02X, def %02X, minm %02X, maxm %02X"
 #define GPM_MESS_SKIP_DATAP         "Skipping a data packet: Data %02x %02x %02x %02x"
 #define GPM_MESS_KILLING            "Trying to kill gpm running at pid %d"
+#define GPM_MESS_CTL_IOCTL          "TIOCLINUX: x1=%d, x2=%d, y1=%d, y2=%d, mode=%d, ctl=%d"
 
 /* other */
 #define GPM_MESS_SKIP_PASTE         "Skipping paste; selection has aged"
