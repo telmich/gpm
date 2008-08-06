@@ -56,6 +56,8 @@ int old_main()
 
    int pending;
 
+   int ret;                     /* return of do_client */
+
    Gpm_Event event;
 
    for(i = 1; i <= 1 + opt_double; i++) {
@@ -227,23 +229,25 @@ int old_main()
          if(FD_ISSET(which_mouse->fd, &selSet)) {
             FD_CLR(which_mouse->fd, &selSet);
             pending--;
-            if(processMouse(which_mouse->fd, &event, kd_mode))
+            if(processMouse(which_mouse->fd, &event, kd_mode)) {
 
                /*
                 * pass it to the client, if any or to the default handler, if
                 * any or to the selection handler 
                 */
+               ret = 0;
                if(cinfo[event.vc])
-                  if(!do_client(cinfo[event.vc], &event))
-                     if(cinfo[0])
-                        if(!do_client(cinfo[0], &event))
-                           do_selection(&event);
-
-            /*
-             * Same idea as above, just here for documentation (cinfo[event.vc] 
-             * && do_client(cinfo[event.vc], &event)) || (cinfo[0] &&
-             * do_client(cinfo[0], &event)) || do_selection(&event); 
-             */
+                  ret = do_client(cinfo[event.vc], &event);
+               if(!ret && cinfo[0])
+                  ret = do_client(cinfo[0], &event);
+               if(!ret)
+                  do_selection(&event);
+               /*
+                * Same idea as above, just here for documentation (cinfo[event.vc] 
+                * && do_client(cinfo[event.vc], &event)) || (cinfo[0] &&
+                * do_client(cinfo[0], &event)) || do_selection(&event); 
+                */
+            }
          }
       }
 
