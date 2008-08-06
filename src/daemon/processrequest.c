@@ -44,7 +44,8 @@ int processRequest(Gpm_Cinfo * ci, int vc)
 
    gpm_report(GPM_PR_INFO, GPM_MESS_CON_REQUEST, ci->fd, vc);
 
-   if(vc > MAX_NR_CONSOLES) return -1;
+   if(vc > MAX_NR_CONSOLES)
+      return -1;
 
    /*
     * itz 10-22-96 this shouldn't happen now 

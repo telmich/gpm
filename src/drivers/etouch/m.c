@@ -86,12 +86,11 @@ int M_etouch(Gpm_Event * state, unsigned char *data)
    if(avgx < 0) {               /* INITIAL TOUCH, FINGER WAS UP */
       GET_TIME(tv);
       state->buttons = 0;
-      if(DIF_TIME(uptv, tv) < (which_mouse->opt_time)) {        /* if Initial
-                                                                 * Touch
-                                                                 * immediate
-                                                                 * after finger 
-                                                                 * * UP then
-                                                                 * start DRAG */
+
+      /*
+       * if Initial Touch immediate after finger UP then start DRAG 
+       */
+      if(DIF_TIME(uptv, tv) < (which_mouse->opt_time)) {
          x = upx;
          y = upy;               /* A:start DRAG at finger-UP position */
          if(elo_click_ontouch == 0)

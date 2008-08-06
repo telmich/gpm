@@ -34,16 +34,21 @@
 int processConn(int fd)
 {                               /* returns newfd or -1 */
    Gpm_Cinfo *info;
+
    Gpm_Connect *request;
+
    Gpm_Cinfo *next;
 
    struct sockaddr_un addr;     /* reuse this each time */
+
    struct stat statbuf;
 
    socklen_t len;
+
    uid_t uid;
 
    int vc, newfd;
+
    char *tty = NULL;
 
 /*....................................... Accept */

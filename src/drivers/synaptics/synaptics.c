@@ -471,10 +471,10 @@ static int auto_scrolling_factor = 2.0; /* How fast should autoscrolling be C */
 
 static int reset_on_error_enabled = 0;  /* If a packet does not conform to any
                                          * absolute protocol should we reset
-                                         * the touchpad? This is wrong, because 
-                                         * * we should rather find out why it
-                                         * does that in first place. Do not
-                                         * turn it on per default.  */
+                                         * the touchpad? This is wrong, because
+                                         * we should rather find out why it does
+                                         * that in first place. Do not turn it on 
+                                         * per default.  */
 
 /*
 ** Types for describing actions.  When adding a new action, place it as
@@ -1798,8 +1798,10 @@ static int tp_find_fingers(report_type * report, Gpm_Event * state)
                     last_report.fingers, report->fingers, fake_extra_finger);
 #endif
 
-      }                         /* Should be tested last, because of undo *
-                                 * moving when removing fingers. */
+      }
+      /*
+       * Should be tested last, because of undo moving when removing fingers. 
+       */
       else if(report->fingers == 0) {
          multi_finger_stop_timer = 0;
       }
@@ -1996,11 +1998,10 @@ static void tp_find_gestures(report_type * report)
             drag_locked = 0;    /* unlock it and don't gesture. */
             time_to_forget_tap = 0;
          } else
-            time_to_forget_tap = tap_interval * 80 / 1000;      /* setup
-                                                                 * gesture time 
-                                                                 * * to count
-                                                                 * down */
-
+            /*
+             * setup gesture time to count down 
+             */
+            time_to_forget_tap = tap_interval * 80 / 1000;
       } else {                  /* It was not a tap */
 
          /*
