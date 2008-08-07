@@ -20,34 +20,21 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
-/* TODO:
-     resolution change (mice.c)
-     switch up/down (mice.c)
-     manage X....
-     modifiers
- */
 
-/* Done:
-      two cfg files
-      mouse buttons
-      unblank
-      special keys...
-      meta keys
-      auto-repeat: double press plus hold...
-      README
-*/
+/* The functions and their name */
+struct twiddler_fun_struct twiddler_functions[] = {
+   {"Console", twiddler_console},
+   {"Exec", twiddler_exec},
+   {NULL, NULL}
+};
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <ctype.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <linux/vt.h>
+/* The registered functions */
+struct twiddler_active_fun {
+   int (*fun) (char *s);
+   char *arg;
+} twiddler_active_funs[TWIDDLER_MAX_ACTIVE_FUNS];
+
+static int active_fun_nr = 0;
 
 #include "gpm.h"
 #include "gpmInt.h"
@@ -135,134 +122,4 @@ struct twiddler_fun_struct {
    int (*fun) (char *string);
 };
 
-/*===================================================================*/
-
-/*              This part deals with pushing keys                  */
-
-/* Function support:
-     if a chord maps to a function, we need two pointers: one to the
-     function and one to its argument. Therefore we must keep an array
-     that keeps both pointers, and the pointer in the table is just
-     an handle to this pair of pointers. The table has a maximum len
-*/
-
 #define TWIDDLER_MAX_ACTIVE_FUNS 128
-
-/* These are the special functions that perform special actions */
-int twiddler_console(char *s)
-{
-   int consolenr = atoi(s);     /* atoi never fails :) */
-
-   int fd;
-
-   if(consolenr == 0)
-      return 0;                 /* nothing to do */
-
-   fd = open_console(O_RDONLY);
-   if(fd < 0)
-      return -1;
-   if(ioctl(fd, VT_ACTIVATE, consolenr) < 0) {
-      close(fd);
-      return -1;
-   }
-
-/*if (ioctl(fd, VT_WAITACTIVE, consolenr)<0) {close(fd); return -1;} */
-   close(fd);
-   return 0;
-}
-
-int twiddler_exec(char *s)
-{
-   int pid;
-
-   extern struct options option;
-
-   switch (pid = fork()) {
-      case -1:
-         return -1;
-      case 0:
-         close(0);
-         close(1);
-         close(2);              /* very rude! */
-
-         open(GPM_NULL_DEV, O_RDONLY);
-         open(option.consolename, O_WRONLY);
-         dup(1);
-         execl("/bin/sh", "sh", "-c", s, NULL);
-         exit(1);               /* shouldn't happen */
-
-      default:                 /* father: */
-         return (0);
-   }
-}
-
-/* The functions and their name */
-struct twiddler_fun_struct twiddler_functions[] = {
-   {"Console", twiddler_console},
-   {"Exec", twiddler_exec},
-   {NULL, NULL}
-};
-
-/* The registered functions */
-struct twiddler_active_fun {
-   int (*fun) (char *s);
-   char *arg;
-} twiddler_active_funs[TWIDDLER_MAX_ACTIVE_FUNS];
-
-static int active_fun_nr = 0;
-
-int twiddler_do_fun(int i)
-{
-   twiddler_active_funs[i].fun(twiddler_active_funs[i].arg);
-   return 0;
-}
-
-/*
- * Ok, from now on it's normal handling
- */
-
-/* This returns the table to use */
-static inline char **twiddler_get_table(unsigned long message)
-{
-   unsigned long mod = message & TW_ANY_MOD;
-
-   struct twiddler_map_struct *ptr;
-
-   for(ptr = twiddler_map; ptr->table; ptr++)
-      if(ptr->modifiers == mod)
-         return ptr->table;
-   return NULL;
-}
-
-/* And this uses the item to push keys */
-static inline int twiddler_use_item(char *item)
-{
-   int fd = open_console(O_WRONLY);
-
-   int i, retval = 0;
-
-   unsigned char pushthis, unblank = 4; /* 4 == TIOCLINUX unblank */
-
-   /*
-    * a special function 
-    */
-   /*
-    * a single byte 
-    */
-   if(((unsigned long) item & 0xff) == (unsigned long) item) {
-      pushthis = (unsigned long) item & 0xff;
-      retval = ioctl(fd, TIOCSTI, &pushthis);
-   } else if(i = (struct twiddler_active_fun *) item - twiddler_active_funs,
-             i >= 0 && i < active_fun_nr)
-      twiddler_do_fun(i);
-   else                         /* a string */
-      for(; *item != '\0' && retval == 0; item++)
-         retval = ioctl(fd, TIOCSTI, item);
-
-   ioctl(fd, TIOCLINUX, &unblank);
-   if(retval)
-      gpm_report(GPM_PR_ERR, GPM_MESS_IOCTL_TIOCSTI, option.progname,
-                 strerror(errno));
-   close(fd);
-   return retval;
-}
