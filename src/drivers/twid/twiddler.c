@@ -20,7 +20,6 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
-
 /* The functions and their name */
 struct twiddler_fun_struct twiddler_functions[] = {
    {"Console", twiddler_console},

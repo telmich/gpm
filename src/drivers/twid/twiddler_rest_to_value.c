@@ -1,6 +1,6 @@
 
 /*
- * twiddler.c - support for the twiddler keyboard
+ * Support for the twiddler keyboard
  *
  * Copyright 1998          Alessandro Rubini (rubini at linux.it)
  * Copyright 2001 - 2008   Nico Schottelius (nico-gpm2008 at schottelius.org)
