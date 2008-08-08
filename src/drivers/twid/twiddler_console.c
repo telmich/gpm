@@ -20,6 +20,14 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
+#include <stdlib.h>     /* atoi */
+#include <fcntl.h>      /* open / O_RDONLY */
+#include <linux/vt.h>   /* #define VT_ACTIVATE  0x5606   */
+#include <sys/ioctl.h>  /* guess what */
+#include <unistd.h>     /* close()     */
+
+#include "daemon.h"     /* ‘open_console’ */
+
 /* These are the special functions that perform special actions */
 int twiddler_console(char *s)
 {

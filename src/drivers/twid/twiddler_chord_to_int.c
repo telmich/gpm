@@ -20,6 +20,8 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
+#include <string.h>
+
 /* Convert the "M00L"-type string to an integer */
 int twiddler_chord_to_int(char *chord)
 {

@@ -20,6 +20,13 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
+#include "gpm.h"
+#include "gpmInt.h"
+#include "message.h"
+#include "daemon.h"
+
+#include "twiddler.h"
+
 /* The functions and their name */
 struct twiddler_fun_struct twiddler_functions[] = {
    {"Console", twiddler_console},
@@ -33,14 +40,8 @@ struct twiddler_active_fun {
    char *arg;
 } twiddler_active_funs[TWIDDLER_MAX_ACTIVE_FUNS];
 
-static int active_fun_nr = 0;
+int active_fun_nr = 0;
 
-#include "gpm.h"
-#include "gpmInt.h"
-#include "message.h"
-#include "twiddler.h"
-
-#include "daemon.h"
 
 /*
  * Each table is made up of 256 entries, as these are the possible chords
@@ -114,11 +115,3 @@ struct twiddler_f_struct {
    "Right", "\033[C"}, {
    NULL, NULL}
 };
-
-/* Convert special keynames to functions */
-struct twiddler_fun_struct {
-   char *name;
-   int (*fun) (char *string);
-};
-
-#define TWIDDLER_MAX_ACTIVE_FUNS 128
