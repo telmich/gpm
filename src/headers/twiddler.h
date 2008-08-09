@@ -22,16 +22,9 @@
 #ifndef _GPM_TWIDDLER_H
 #define _GPM_TWIDDLER_H
 
-/* structs */
-
-/* Convert special keynames to functions */
-struct twiddler_fun_struct {
-   char *name;
-   int (*fun) (char *string);
-};
-
-
 /* definition of the twiddler protocol */
+#define TWIDDLER_MAX_ACTIVE_FUNS 128
+
 
 /*
  * 2400,8,n,1  5-bytes
@@ -82,6 +75,18 @@ struct twiddler_fun_struct {
 #define TW_SYSTEM_FILE SYSCONFDIR "/gpm-twiddler.conf"
 #define TW_CUSTOM_FILE SYSCONFDIR "/gpm-twiddler.user"
 
+/* structs */
+
+/* Convert special keynames to functions */
+struct twiddler_fun_struct {
+   char *name;
+   int (*fun) (char *string);
+};
+
+/* variables */
+struct twiddler_active_fun twiddler_active_funs[TWIDDLER_MAX_ACTIVE_FUNS];
+
+/* functions */
 int twiddler_chord_to_int(char *chord);
 int twiddler_console(char *s);
 int twiddler_do_fun(int i);
@@ -94,7 +99,5 @@ int twiddler_use_item(char *item);
 
 int twiddler_key(unsigned long message);
 int twiddler_key_init(void);
-
-#define TWIDDLER_MAX_ACTIVE_FUNS 128
 
 #endif
