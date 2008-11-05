@@ -109,7 +109,7 @@ gpmdoc.ps:	gpm.ps
 # install & uninstall
 
 installdirs:	
-	$(MKDIR) $(man1dir) $(man7dir) $(man8dir) $(infodir)	
+	$(MKDIR_P) $(man1dir) $(man7dir) $(man8dir) $(infodir)
 
 install:	all installdirs
 	$(INSTALL_DATA) -m 644 mev.1          $(man1dir)
