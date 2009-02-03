@@ -123,7 +123,7 @@ TARS :=../gpm-$(release).tar.gz
 TARS +=../gpm-$(release).tar.bz2 ../gpm-$(release).tar.lzma
 CHKSUMS := $(TARS:=.sha512sum)
 D_HOST=home.schottelius.org
-D_BASE=www/org/schottelius/unix/www/gpm
+D_BASE=www/unix.schottelius.org/www/gpm
 D_DIR=$(D_BASE)/archives/
 D_SOURCE=$(D_BASE)/browse_source/
 
