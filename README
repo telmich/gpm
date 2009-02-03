@@ -2,7 +2,7 @@
  * README -- gpm 1.xx
  *
  * Copyright 1995-2000   rubini@linux.it (Alessandro Rubini)
- * Copyright 2001-2008   nico-gpm2008 at schottelius.org (Nico Schottelius)
+ * Copyright 2001-2009   nico-gpm2009 at schottelius.org (Nico Schottelius)
  *
  *******/
 
@@ -75,9 +75,11 @@ The homepage of gpm can be found at
 
 You can get the latest development tree of gpm via git:
 
-   git-clone http://unix.schottelius.org/git/gpm 
+   git clone git://git.schottelius.org/gpm 
+                    or
+   git clone http://git.schottelius.org/gpm 
 
-There are three branches available:
+There are four branches available:
 
    master:
       Contains the latest gpm1 code, may be broken.
@@ -86,17 +88,19 @@ There are three branches available:
       Contains the latest stable source code of gpm1.
       Always compiles and runs, code is tested.
       Contents of this branch should always be merged
-      from the master branch.
+      from the master branch. You can use this branch if
+      you want to build packages for a distribution.
    gpm-2-dev:
       Contains work that heads to gpm2.
       It is not stable, does not need to compile.
    gpm-2-stable:
       Same as gpm-1-stable for gpm2 and mergebase is
-      gpm-2-dev.
+      gpm-2-dev. You can use this branch if you want
+      to include latest gpm2 into your distribution.
 
-You can browse the git-tree via gitweb:
+You can also browse the git-tree via gitweb:
 
-   http://unix.schottelius.org/cgi-bin/gitweb.cgi?p=gpm;a=summary
+   http://git.schottelius.org/?p=gpm
 
 
 =========== COMPILING AND INSTALLING
