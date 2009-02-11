@@ -42,7 +42,7 @@ release="`cat $srcdir/.gitversion`"
 #
 
 AC_PROG_CC
-AC_PROG_RANLIB
+AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 AC_PROG_YACC
 AC_PROG_LN_S
