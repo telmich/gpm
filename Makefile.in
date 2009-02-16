@@ -26,9 +26,11 @@ SUBDIRS = src doc contrib
 
 all: do-all
 
-dep:
-	touch src/$(DEPFILE) # to prevent unecessary warnings
-	make -C src dep
+src/$(DEPFILE):
+	touch $@ # to prevent unecessary warnings
+
+dep: src/$(DEPFILE)
+	$(MAKE) -C src dep
 
 check: all
 
