@@ -15,6 +15,7 @@ Makefile.include
 /config.status
 /configure
 /config
+/libtool
 
 /contrib/Makefile
 

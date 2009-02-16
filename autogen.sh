@@ -14,7 +14,7 @@ set -x
 # and
 # m4_define([AC_PACKAGE_VERSION], include(.gitversion))
 #
-version="$(git-describe)"
+version="$(git describe)"
 date="$(date +%Y%m%d\ %T\ %z)"
 echo "define([AC_PACKAGE_VERSION], [${version} ${date}])" > .gitversion.m4
 echo "${version}" > .gitversion
