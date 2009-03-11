@@ -231,11 +231,11 @@ The server can be configured to match the user's taste, and any
 application using the mouse will inherit the server's
 attitude. From release 1.02 up to 1.19.2 is was possible
 for any user logged on the system console to change the mouse @emph{feeling}
-using the @t{-q} option. This is no longer possible for security
+using the @t{\-q} option. This is no longer possible for security
 reasons.
 
 As of 0.97 the server program puts itself in the background. To kill
-@code{gpm} you can just reinvoke it with the @samp{-k} cmdline switch,
+@code{gpm} you can just reinvoke it with the @samp{\-k} cmdline switch,
 although @code{killall gpm} can be a better choice.
 
 @menu
@@ -274,15 +274,15 @@ The default special commands are:
         Reboot the system by signalling the init process
 
 @item middle button (if any)
-        Execute @code{/sbin/shutdown -h now}
+        Execute @code{/sbin/shutdown \-h now}
 
 @item right button
-        Execute @code{/sbin/shutdown -r now}
+        Execute @code{/sbin/shutdown \-r now}
 @end table
 
-The @samp{-S} command line switch enables special command processing and
+The @samp{\-S} command line switch enables special command processing and
 allows to change the three special commands. To accept the default
-commands use @samp{-S ""} (i.e., specify an empty argument).  To specify
+commands use @samp{\-S ""} (i.e., specify an empty argument).  To specify
 your own commands, use a colon-separated list to specify commands
 associated to the left, middle and right button. If any of the commands
 is empty, it is interpreted as `send a signal to the init process'. This
@@ -292,7 +292,7 @@ to fork; in these rare case the programmer should be able to shutdown
 the system anyways, and killing init from a running process is the only
 way to do it.
 
-As an example, @samp{-S ":telinit 1:/sbin/halt"}, associates killing
+As an example, @samp{\-S ":telinit 1:/sbin/halt"}, associates killing
 init to the left button, going single user to the middle one, and halting
 the system to the right button.
 
@@ -309,15 +309,15 @@ trusted people.
 Available command line options are the following:
 
 @table @code
-@item -a @var{accel}
+@item \-a @var{accel}
         Set the acceleration value used when a single motion event is
-        longer than @var{delta} (see @samp{-d}). 
+        longer than @var{delta} (see @samp{\-d}). 
 
-@item -A[@var{limit}]
+@item \-A[@var{limit}]
         Start up with selection pasting disabled.  This is intended as a
         security measure; a plausible attack on a system seems to be to
         stuff a nasty shell command into the selection buffer
-        (@code{rm -rf /}) including the terminating line break, then all the
+        (@code{rm \-rf /}) including the terminating line break, then all the
         victim has to do is click the middle mouse button ..
         As of version 1.17.2, this has developed
         into a more general aging mechanism; the
@@ -331,95 +331,95 @@ Available command line options are the following:
         addition to @file{/etc/profile} if you allow multiple users to
         work on your console.
 
-        @code{case $( /usr/bin/tty ) in @* /dev/tty[0-9]*) /usr/bin/disable-paste ;; @* esac}
+        @code{case $( /usr/bin/tty ) in @* /dev/tty[0\-9]*) /usr/bin/disable-paste ;; @* esac}
 
-@item -b @var{baud}
+@item \-b @var{baud}
         Set the baud rate.
 
-@item -B @var{sequence}
+@item \-B @var{sequence}
         Set the button sequence. @samp{123} is the
 	normal sequence, @samp{321} can be used by left-handed people,
         and @samp{132} can be useful with two-button mice (especially within
         Emacs). All the button permutations are allowable.
 
-@item -d @var{delta}
+@item \-d @var{delta}
         Set the delta value. When a single motion event
 	is longer than @var{delta}, @var{accel} is used as a multiplying
         factor. (Must be 2 or above)
 
-@item -D
+@item \-D
         Do not automatically enter background operation when started,
         and log messages to the standard error stream, not the syslog
         mechanism.  This is useful for debugging; in previous releases
         it was done with a compile-time option.
 
-@item -g @var{number}
+@item \-g @var{number}
         With glidepoint devices, emulate the specified button with tapping.
         @var{number} must be @samp{1}, @samp{2}, or @samp{3}, and refers to the
-        button number @emph{before} the @samp{-B} button remapping is performed.
+        button number @emph{before} the @samp{\-B} button remapping is performed.
         This option applies to the mman and ps2 decoding. No button is
         emulated by default because the ps2 tapping is incompatible with
         some normal ps2 mice
 
-@item -h
+@item \-h
         Print a summary of command line options.
 
-@item -i @var{interval}
+@item \-i @var{interval}
         Set @var{interval} to be used as an upper time limit
 	for multiple clicks. If the interval between button-up and
 	button-down events is less than @var{limit}, the press is considered
 	a double or triple click. Time is in milliseconds.
 
-@item -k 
+@item \-k 
         Kill a running gpm. This can be used by busmouse users to kill gpm
-        before running X (unless they use @samp{-R} or the single-open
+        before running X (unless they use @samp{\-R} or the single-open
         limitation is removed from the kernel).
 
-@item -l @var{charset}
+@item \-l @var{charset}
         Choose the @code{inword()} look up table. The
-	@var{charset} argument is a list of characters. @samp{-} is used to
+	@var{charset} argument is a list of characters. @samp{\-} is used to
 	specify a range and @samp{\ } is used to escape the next character
         or to provide octal codes.
 	Only visible character can appear in @var{charset} because control
 	characters can't appear in text-mode video memory, whence selection
 	is cut. 
 
-@item -m @var{filename}
-        Choose the mouse file to open. Must be before -t and -o.
+@item \-m @var{filename}
+        Choose the mouse file to open. Must be before \-t and \-o.
 
-@item -M
+@item \-M
         Enable multiple mode. The daemon will read two different mouse devices.
         Any subsequent option will refer to the second device, while any
         preceding option will be used for the first device. This option
-        automatically forces the @emph{repeater} (@samp{-R}) option on.
+        automatically forces the @emph{repeater} (@samp{\-R}) option on.
 
-@item -o @var{list-of-extra-options}
-	The option works similary to the ``-o'' option of mount; it is
+@item \-o @var{list-of-extra-options}
+	The option works similary to the ``\-o'' option of mount; it is
 	used to specify a list of ``extra options'' that are specific
 	to each mouse type. The list is comma-separated. The options
 	@samp{dtr}, @samp{rts} or @samp{both} are used by the serial
 	initialization to toggle the modem lines like, compatibly with
-	earlier @i{gpm} versions; note however that using @t{-o dtr}
+	earlier @i{gpm} versions; note however that using @t{\-o dtr}
 	associated with non-plain-serial mouse types may now generate
 	an error. @xref{Mouse Types}.
-   And by the way, use -o after -m and after -t.
+   And by the way, use \-o after \-m and after \-t.
         
-@item -p
+@item \-p
         Forces the pointer to be visible while selecting. This is the
         behaviour of @file{selection-1.7}, but it is sometimes confusing.
         The default is not to show the pointer, which can be confusing as well.
 
 
-@item -r @var{number}
+@item \-r @var{number}
         Set the responsiveness. A higher responsiveness is used for a faster
         cursor motion.
 
-@item -R[@var{name}]
+@item \-R[@var{name}]
         Causes @code{gpm} to act as a repeater: any mouse data received while
         in graphic mode will be produced on the fifo @file{/dev/gpmdata}
         in protocol @var{name}, given as an optional argument (no space in
         between !).  In principle, you can use the same
-        names as for the @samp{-t} option, although repeating into some
+        names as for the @samp{\-t} option, although repeating into some
         protocols may not be implemented for a while.  @xref{Mouse Types}.
         In addition, you can specify @samp{raw} as the @var{name}, to repeat
         the mouse data byte by byte, without any protocol translation.
@@ -429,37 +429,37 @@ Available command line options are the following:
         bus-mouse owners to override the single-open limitation. It is also
         an easy way to manage those stupid dual-mode mice which force you
         to keep the middle button down while changing video mode. The option
-        is forced on by the @samp{-M} option.
+        is forced on by the @samp{\-M} option.
 
-@item -s @var{number}
+@item \-s @var{number}
         Set the sample rate for the mouse device.
 
-@item -S @var{commands}
+@item \-S @var{commands}
         Enable special-command processing, and optionally specify custom
         commands as a colon-separated list. See above for a detailed
         description of special commands.
 
-@item -t @var{name}
-        Set the mouse type. Use @samp{-t help} to get a list
+@item \-t @var{name}
+        Set the mouse type. Use @samp{\-t help} to get a list
 	of allowable types. Since version 1.18.1, the list also shows
-        which protocols are available as repeaters (see @t{-R} above),
+        which protocols are available as repeaters (see @t{\-R} above),
         by marking them with an asterisk (``@t{*}'').
         @xref{Mouse Types}.
-        Use -t after you selected the mouse device with -m.
+        Use \-t after you selected the mouse device with \-m.
 
-@item -v
+@item \-v
         Print version information and exit.
 
-@item -2
+@item \-2
         Force two buttons. This means that the middle button, if any,
         will be taken as it was the right one.
 
-@item -3
+@item \-3
         Force three buttons. By default the
         mouse is considered to be a 2-buttons one, until the middle button
         is pressed. If three buttons are there, the right one is used
         to extend the selection, and the middle one is used to paste it.
-        Beware: if you use the @samp{-3} option with a 2-buttons mouse, you
+        Beware: if you use the @samp{\-3} option with a 2-buttons mouse, you
         won't be able to paste the selection. 
 
 @end table
@@ -474,7 +474,7 @@ The right button is used to extend the selection, like in `xterm'.
 Two-button mice use the right button to paste text.
 
 Double and triple clicks select whole word and whole lines. Use of
-the `-p' option is recommended for best visual feedback.
+the `\-p' option is recommended for best visual feedback.
 
 If a trailing space after the contents of a line is highlighted, and if
 there is no other text on the remainder of the line, the rest of the
@@ -503,15 +503,15 @@ re-enabled when text mode is resumed. (But see BUGS section below.)
 %M .SH BUGS
 The @code{gpm} server may have problems interacting with X: if your
 mouse is a single-open device (i.e. a bus mouse), you should kill
-@code{gpm} before starting X, or use the @samp{-R} option (see
-above).  To kill @code{gpm} just invoke @code{gpm -k}. This problem doesn't
+@code{gpm} before starting X, or use the @samp{\-R} option (see
+above).  To kill @code{gpm} just invoke @code{gpm \-k}. This problem doesn't
 apply to serial mice.
 
 Two instances of gpm can't run on the same system. If you have two mice use
-the @samp{-M} option (see above).
+the @samp{\-M} option (see above).
 
 While the current console is in graphic mode, @code{gpm} sleeps until
-text mode is back (unless @samp{-R} is used). Thus, it won't reply to
+text mode is back (unless @samp{\-R} is used). Thus, it won't reply to
 clients. Anyways, it is unlikely that mouse-eager clients will spur
 out in hidden consoles.
 
@@ -542,7 +542,7 @@ the source distribution of gpm.
 .nf
 /var/run/gpm.pid The PID of the running gpm
 /dev/gpmctl     A control socket for clients
-/dev/gpmdata    The fifo written to by a \fBrepeater\fP (`-R') daemon.
+/dev/gpmdata    The fifo written to by a \fBrepeater\fP (`\-R') daemon.
 .fi
 
 .SH SEE ALSO
@@ -578,7 +578,7 @@ look at the source code, you'll find that pointer-specific code is
 confined to @file{mice.c} (while it used to only include mouse decoders,
 @i{gpm} now supports tablets and touchscreens as well).
 
-The mouse type is specified on command line with the @samp{-t}
+The mouse type is specified on command line with the @samp{\-t}
 option. The option takes an argument, which represents the name of a
 mouse type. Each type can be associated to different names. For old
 mouse types, one name is the old selection-compatible name, and another
@@ -591,13 +591,13 @@ this feature was already present, we wouldn't have for example @t{ms+}
 and @t{ms+lr} as different mouse types).
 
 The initialization procedure of each mouse type can also receive extra
-option, by means of the @t{-o} command line option. Since
+option, by means of the @t{\-o} command line option. Since
 interpretation of the option string is decoder-specific, the allowed
 options are described in association to each mouse type. When no
 description of option strings is provided, that means the option
 string is unused for that mouse type and specifying one generates an
 error. When the document refer to ``standard serial options'' it means
-that one of @t{-o dtr}, @t{-o rts}, @t{-o both} can be specified to
+that one of @t{\-o dtr}, @t{\-o rts}, @t{\-o both} can be specified to
 toggle the control lines of the serial port.
 
 The following mouse type are corrently recognized:
@@ -608,8 +608,8 @@ The following mouse type are corrently recognized:
         two buttons. If your device has three, you should either try
         running the @t{mman} decoder or @t{msc}. In the latter case,
         you need to tell the mouse to talk @t{msc} protocol by
-        toggling the DTR and RTS lines (with one of @t{-o drt}, @t{-o
-        rts} or @t{-o both}) or invoking @code{gpm -t msc} while
+        toggling the DTR and RTS lines (with one of @t{\-o drt}, @t{\-o
+        rts} or @t{\-o both}) or invoking @code{gpm \-t msc} while
         keeping the middle button pressed. Very annoying, indeed.
 	This mouse decoder accepts standard serial options, although they
 	should not be needed.
@@ -620,30 +620,30 @@ The following mouse type are corrently recognized:
         packets which can be misunderstood as middle-button events. If
         this is your case, use the @samp{bare} mouse type.  Some new
         two-button devices are ``plug and play'', and they don't play
-        fair at all; in this case try @t{-t pnp}.  Many (most)
+        fair at all; in this case try @t{\-t pnp}.  Many (most)
         three-button devices that use the microsoft protocol fail to
         report some middle-button events during mouse motion.  Since
         the protocol does not distinguish between the middle button
         going up and the middle button going down it would be liable
         to get out of step, so this decoder declares the middle button
         to be up whenever the mouse moves. This prevents dragging with
-        the middle button, so you should probably use @samp{-t ms+lr}
+        the middle button, so you should probably use @samp{\-t ms+lr}
         instead of this decoder, especially if you want to use X.
         This mouse decoder accepts standard serial options, although
         they should not be needed.
 
 @item ms+
-	This is the same as @samp{-t ms} except that the middle button
+	This is the same as @samp{\-t ms} except that the middle button
 	is not reset during mouse motion. So you can drag with the
 	middle button. However, if your mouse exhibits the usual buggy
 	behaviour the decoder is likely to get out of step with
 	reality, thinking the middle button is up when it's down and
-	vice versa.  You should probably use @samp{-t ms+lr} instead
+	vice versa.  You should probably use @samp{\-t ms+lr} instead
 	of this decoder.  This mouse decoder accepts standard serial
 	options, although they should not be needed.
 
 @item ms+lr
-	This is the same as @samp{-t ms+} except that there is an
+	This is the same as @samp{\-t ms+} except that there is an
 	additional facility to reset the state of the middle button by
 	pressing the other two buttons together. Do this when the
 	decoder gets into a confused state where it thinks the middle
@@ -658,14 +658,14 @@ The following mouse type are corrently recognized:
 @item msc MouseSystems
         This is the standard protocol for three-button serial devices.
 	Some of such devices only enter MouseSystem mode if the RTS, DTR
-	or both lines are pushed low. Thus, you may try @t{-t msc}
-	associated with @t{-o rts}, @t{-o dtr} or @t{-o both}.
+	or both lines are pushed low. Thus, you may try @t{\-t msc}
+	associated with @t{\-o rts}, @t{\-o dtr} or @t{\-o both}.
 
 @item mman Mouseman
         The protocol used by the new Logitech devices with three
 	buttons.  It is backward compatible with the Microsoft
 	protocol, so if your mouse has three buttons and works with
-	@t{-t ms} or similar decoders you may try @t{-t mman} instead
+	@t{\-t ms} or similar decoders you may try @t{\-t mman} instead
 	to use the middle button.  This mouse decoder accepts standard
 	serial options, although they should not be needed.
 
@@ -699,8 +699,8 @@ The following mouse type are corrently recognized:
         with new tablets. This decoder was tested with Ultrapad,
         PenPartner, and Graphire tablets. 
 	Options: 
-	@t{-o relative} (default) for relative mode,
-	@t{-o absolute} for absolute mode.
+	@t{\-o relative} (default) for relative mode,
+	@t{\-o absolute} for absolute mode.
 
 @item genitizer
 	The \"Genitizer\" tablet, in relative mode.
@@ -715,7 +715,7 @@ The following mouse type are corrently recognized:
         This decoder works with the new mice produces by our friend Bill,
         and maybe with the old ones as well. The Pnp protocol is
         hardwired at 1200 baud and is upset by normal initialization, so
-	this is a @t{-t bare} decoder with no initialization at all.
+	this is a @t{\-t bare} decoder with no initialization at all.
         This mouse decoder accepts standard serial options, although
         they should not be needed.
 
@@ -742,7 +742,7 @@ The following mouse type are corrently recognized:
 @item twid
         Support for the twiddler keyboard. As of gpm-1.14 this decoder
         includes a char generator for the text console, but doesn't
-        yet support X keycodes. If used with @samp{-R}, @code{gpm} will anyway
+        yet support X keycodes. If used with @samp{\-R}, @code{gpm} will anyway
         repeat mouse events to the X server. More information about twiddler
         support can be found in @file{README.twiddler}, in the gpm
         distribution.
@@ -771,7 +771,7 @@ The following mouse type are corrently recognized:
 @item summa
 	This is a decode for the Symmagraphics of Genius tablet, run in
 	absolute mode. A repeater is associated to this decoder, so it
-	can @t{-R summa} can be used to generate X events even for other
+	can @t{\-R summa} can be used to generate X events even for other
 	absolute-pointing devices, like touchscreens. To use the repeated
 	data from X, you need a modified @t{xf86Summa.o} module.
 
@@ -1769,48 +1769,48 @@ handle mouse events to Emacs.
 Command line switches for @code{mev} are the following:
 
 @table @code
-@item -C @var{number}
+@item \-C @var{number}
 	Select a virtual console to get events from.
 	This is intended to be used for debugging.
 
-@item -d @var{number}
+@item \-d @var{number}
 	Choose a default mask. By default the server gets
 	any events not belonging to the event mask. The mask can be
 	provided either as a
 	decimal number, or as a symbolic string.
 
-@item -e @var{number}
+@item \-e @var{number}
 	Choose the event mask. By default any event
 	is received. The mask can be provided either as a
 	decimal number, or as a symbolic string.
 
-@item -E
+@item \-E
 	Enter emacs mode. In emacs mode events are reported as
 	lisp forms rather than numbers. This is the format used by the
 	t-mouse package within emacs.
 
-@item -f
+@item \-f
         Fit events inside the screen before reporting them. This options
         re-fits drag events, which are allowed to exit the screen border,
         @xref{Margins}.
-@item -i
+@item \-i
 	Interactive. Accepts input from @code{stdin} to change connection
 	parameters.
 
-@item -m @var{number}
+@item \-m @var{number}
 	Choose the minimum modifier mask. Any event with
 	fewer modifiers will not be reported to @code{mev}. It defaults to @samp{0}.
 	The mask must be provided either as a
 	decimal number, or as a symbolic string.
 
-@item -M @var{number}
+@item \-M @var{number}
 	Choose the maximum modifier mask. Any event with
 	more modifier than specified will not be reported to @code{mev}.
 	It defaults to @samp{\~0}, i.e. all events are received.
 	The mask must be provided either as a
 	decimal number, or as a symbolic string.
 
-@item -p
+@item \-p
         Requests to draw the pointer during drags. This option is used
         by emacs to avoid invoking @code{ioctl()} from lisp code.
 @end table
@@ -1826,12 +1826,12 @@ Allowed names for events are @samp{move}, @samp{drag}, @samp{down} or
 Allowed names for modifiers are @samp{shift}, @samp{leftAlt},
 @samp{rightAlt}, @samp{anyAlt} (one or the other), @samp{control}.
 
-When the @samp{-i} switch is specified, @code{mev} looks at its standard input as
+When the @samp{\-i} switch is specified, @code{mev} looks at its standard input as
 command lines rather than events. The input lines are parsed, and the
 commands @samp{push} and @samp{pop} are recognized.
 
-The @samp{push} command, then, accepts the options @samp{-d}, @samp{-e}, @samp{-m}
-and @samp{-M}, with the same meaning described above. Unspecified options
+The @samp{push} command, then, accepts the options @samp{\-d}, @samp{\-e}, @samp{\-m}
+and @samp{\-M}, with the same meaning described above. Unspecified options
 retain the previous value and the resulting masks are used to reopen
 the connection with the server. @samp{pop} is used to pop the connection
 stack. If an empty stack is popped the program exits.
@@ -2228,8 +2228,8 @@ in understanding the internal workings.
 
 This experimental and incomplete application tries to help in detecting
 which protocol does your mouse speak. It is able to detect MouseMan
-devices, and to choose between @samp{-t ms} (three-buttons aware) and
-@samp{-t bare} old two-buttons-only serial mice.
+devices, and to choose between @samp{\-t ms} (three-buttons aware) and
+@samp{\-t bare} old two-buttons-only serial mice.
 
 %M .SH BUGS
 
