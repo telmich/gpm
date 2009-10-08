@@ -27,7 +27,7 @@ int setspeed(int fd, int old, int new, int needtowrite, unsigned short flags)
 {
    struct termios tty;
 
-   char *c;
+   const char *c;
 
    tcgetattr(fd, &tty);
 
