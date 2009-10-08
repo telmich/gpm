@@ -87,7 +87,7 @@ struct mouse_features *which_mouse;
 
 /* These are only the 'global' options */
 
-char *opt_lut = DEF_LUT;
+const char *opt_lut = DEF_LUT;
 
 int opt_test = DEF_TEST;
 

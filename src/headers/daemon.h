@@ -76,7 +76,7 @@
  * Global variables
  */
 
-extern char             *opt_lut;
+extern const char       *opt_lut;
 extern char             *opt_special;
 
 extern int              opt_resize;       /* not really an option          */
