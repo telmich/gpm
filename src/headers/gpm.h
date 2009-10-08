@@ -292,7 +292,7 @@ int Gpm_cnt_digits(int number);
 void gpm_oops(int line, char *file, char *text, ... );
 
 /* report.c / report-lib.c */
-void gpm_report(int line, char *file, int stat, char *text, ... );
+void gpm_report(int line, const char *file, int stat, const char *text, ... );
 
 #ifdef __cplusplus
   };

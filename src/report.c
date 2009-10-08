@@ -71,7 +71,7 @@
  *
  */
 
-void gpm_report(int line, char *file, int stat, char *text, ...)
+void gpm_report(int line, const char *file, int stat, const char *text, ...)
 {
    FILE *console = NULL;
 
