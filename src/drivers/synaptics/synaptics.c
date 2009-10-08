@@ -280,7 +280,7 @@ typedef unsigned char byte;
 
 static void syn_ps2_absolute_mode(int fd);
 
-static char *syn_model_name(int sensor);
+static const char *syn_model_name(int sensor);
 
 static void syn_ps2_send_cmd(int fd, int stick, byte cmd);
 
@@ -553,7 +553,7 @@ typedef enum {
 } param_type_type;
 
 typedef struct {
-   char *name;
+   const char *name;
    param_type_type p_type;
    union {
       void *gen_p;              /* avoids complaints by the compiler later on */
@@ -721,7 +721,7 @@ static model_id_type model[2];
 ** The sensor types as of STIG 2.5
 ** Page 11. Plus some guessing.
 */
-static char *model_names[] = {
+static const char *model_names[] = {
    "Unknown",                   /* 0 */
    "Standard TouchPad (TM41xx134)",
    "Mini Module (TM41xx156)",
@@ -776,7 +776,7 @@ static char *model_names[] = {
 ** For older models the default resolution is 85x94.
 */
 typedef struct {
-   char *model;
+   const char *model;
    int x_per_mm;
    int y_per_mm;
    float width_mm;
@@ -1088,7 +1088,7 @@ static void syn_dump_info(int stick)
 }
 
 /* Get model name, STIG page 11 */
-static char *syn_model_name(int sensor)
+static const char *syn_model_name(int sensor)
 {
    if(sensor < 0 || 44 < sensor) {
       return "Reserved";
@@ -2332,7 +2332,7 @@ static void tp_process_report(Gpm_Event * state, report_type * report)
 ** Read the configuration data from the global config file
 ** SYSCONFDIR "/gpm-syn.conf".
 */
-void tp_read_config_file(char *config_filename)
+void tp_read_config_file(const char *config_filename)
 {
    char line[80];
 
