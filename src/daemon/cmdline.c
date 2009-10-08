@@ -127,7 +127,7 @@ void cmdline(int argc, char **argv)
             if(optarg)
                opt_special = optarg;
             else
-               opt_special = "";
+               opt_special = strdup("");
             break;
          case 't':
             add_mouse(GPM_ADD_TYPE, optarg);
