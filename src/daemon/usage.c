@@ -23,7 +23,7 @@
 #include "message.h"            /* messaging in gpm */
 #include "daemon.h"             /* daemon internals */
 
-int usage(char *whofailed)
+int usage(const char *whofailed)
 {
    if(whofailed) {
       gpm_report(GPM_PR_ERR, GPM_MESS_SPEC_ERR, whofailed, option.progname);

@@ -166,7 +166,7 @@ int  reset_mice(struct micetab *micelist);
 void cmdline(int argc, char **argv);
 int giveInfo(int request, int fd);
 int loadlut(char *charset);
-int usage(char *whofailed);
+int usage(const char *whofailed);
 struct Gpm_Type *find_mouse_by_name(char *name);
 void check_uniqueness(void);
 void check_kill(void);
