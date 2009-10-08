@@ -773,8 +773,8 @@ int main(int argc, char **argv)
 
    {
       int toggle[3] = { TIOCM_DTR | TIOCM_RTS, TIOCM_DTR, TIOCM_RTS };
-      char *tognames[3] = { "both", "dtr", "rts" };
-      char *Xtognames[3] =
+      const char *tognames[3] = { "both", "dtr", "rts" };
+      const char *Xtognames[3] =
          { "'ClearDTR' and 'ClearRTS'", "'ClearDTR'", "'ClearRTS'" };
       int alllines, lines, index;
 
