@@ -167,7 +167,7 @@ void cmdline(int argc, char **argv);
 int giveInfo(int request, int fd);
 int loadlut(char *charset);
 int usage(const char *whofailed);
-struct Gpm_Type *find_mouse_by_name(char *name);
+struct Gpm_Type *find_mouse_by_name(const char *name);
 void check_uniqueness(void);
 void check_kill(void);
 

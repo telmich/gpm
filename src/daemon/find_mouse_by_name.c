@@ -29,11 +29,11 @@
 /*****************************************************************************
  * the function returns a valid type pointer or NULL if not found
   *****************************************************************************/
-struct Gpm_Type *find_mouse_by_name(char *name)
+struct Gpm_Type *find_mouse_by_name(const char *name)
 {
    Gpm_Type *type;
 
-   char *s;
+   const char *s;
 
    int len = strlen(name);
 
