@@ -224,7 +224,7 @@ int drawthemall(Gpm_Roi * this)
  * This one writes all the messages in the right position
  */
 
-int newmsg(int window, char *msg)
+int newmsg(int window, const char *msg)
 {
    static char *data = NULL;
 
