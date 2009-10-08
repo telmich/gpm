@@ -71,7 +71,7 @@ struct options {
    int            autodetect;          /* -u [aUtodetect..'A' is unavailable] */
    int            no_mice;             /* number of mice                      */
    int            repeater;            /* repeat data                         */
-   char           *repeater_type;      /* repeat data as which mouse type     */
+   const char     *repeater_type;      /* repeat data as which mouse type     */
    int            run_status;          /* startup/daemon/debug                */
    char           *progname;           /* hopefully gpm ;)                    */
    struct micetab *micelist;           /* mice and their options              */
