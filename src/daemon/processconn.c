@@ -27,7 +27,7 @@
 #include <sys/stat.h>           /* stat */
 #include <string.h>             /* str* */
 #include <errno.h>              /* errno.h */
-
+#include <time.h>
 #include "message.h"            /* messaging in gpm */
 #include "daemon.h"             /* daemon internals */
 
@@ -91,7 +91,7 @@ int processConn(int fd)
 
    unlink(addr.sun_path);       /* delete socket */
 
-   staletime = time(0) - 30;
+   long staletime = time(0) - 30;
    if(statbuf.st_atime < staletime
       || statbuf.st_ctime < staletime || statbuf.st_mtime < staletime) {
       gpm_report(GPM_PR_ERR, GPM_MESS_SOCKET_OLD);
