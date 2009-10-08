@@ -105,7 +105,7 @@ char *consolename;
 int run_status  = GPM_RUN_STARTUP;
 struct winsize win;
 int disallocFlag=0;
-struct node {char *name; int flag;};
+struct node {const char *name; int flag;};
 
 struct node  tableMod[]= {
    {"shift",    1<<KG_SHIFT},
@@ -156,7 +156,7 @@ typedef struct Posted {
 Draw *drawList=NULL;
 
 /* support functions and vars */
-int yyerror(char *s);
+int yyerror(const char *s);
 int yylex(void);
 
 DrawItem *cfg_cat(DrawItem *, DrawItem *);
@@ -244,7 +244,7 @@ item: T_STRING T_FUNC             {$$=cfg_makeitem('F',$1,$2, NULL);}
 
 %% /* end grammar ###########################################################*/
 
-int yyerror(char *s)
+int yyerror(const char *s)
 {
    fprintf(stderr,"%s:%s(%i): %s\n",prgname,cfgname,cfglineno,s);
    return 1;
@@ -256,7 +256,7 @@ int yywrap()
 }
 
 struct tokenName {
-   char *name;
+   const char *name;
    int token;
    int value;
    };
@@ -280,7 +280,7 @@ struct tokenName tokenList[] = {
    };
 
 struct funcName {
-   char *name;
+   const char *name;
    int token;
    int (*fun)();
    };
