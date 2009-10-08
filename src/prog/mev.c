@@ -54,7 +54,7 @@
 char *prgname;
 
 struct node {
-   char *name;
+   const char *name;
    int flag;
 };
 
@@ -145,7 +145,7 @@ int emacs_handler(Gpm_Event * event, void *data)
    /*
     * static char *s_mod[]={"S-","M-","C-","M-",NULL}; 
     */
-   static char *s_mod[] = {
+   static const char *s_mod[] = {
       "",                       /* 000 */
       "S-",                     /* 001 */
       "M-",                     /* 002 */
@@ -172,11 +172,11 @@ int emacs_handler(Gpm_Event * event, void *data)
     * calls `drag' is just `mouse-movement' to emacs. 
     */
 
-   static char *s_type[] =
+   static const char *s_type[] =
       { "mouse-movement", "mouse-movement", "down-mouse-", "mouse-", NULL };
-   static char *s_button[] = { "3", "2", "1", NULL };
-   static char *s_multi[] = { "double-", "triple-", 0 };
-   static char s_count[] = "23";
+   static const char *s_button[] = { "3", "2", "1", NULL };
+   static const char *s_multi[] = { "double-", "triple-", 0 };
+   static const char s_count[] = "23";
 
    char count = '1';
 
@@ -386,7 +386,7 @@ void getmask(char *arg, int which, int *where)
 }
 
 /*===================================================================*/
-int cmdline(int argc, char **argv, char *options)
+int cmdline(int argc, char **argv, const char *options)
 {
    int opt;
 
@@ -440,7 +440,7 @@ void do_snapshot()
 
    int i = Gpm_GetSnapshot(&event);
 
-   char *s;
+   const char *s;
 
    if(-1 == i) {
       fprintf(stderr, "Warning: cannot get snapshot!\n");
