@@ -31,7 +31,7 @@
 #include "daemon.h"             /* daemon internals */
 #include "gpmInt.h"             /* GPM_SYS_CONSOLE */
 
-int loadlut(char *charset)
+int loadlut(const char *charset)
 {
    int i, c, fd;
 
