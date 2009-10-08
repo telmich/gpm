@@ -20,8 +20,12 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
+#include <stdio.h>
+
+#include "twiddler.h"
+
 /* This returns the table to use */
-static inline char **twiddler_get_table(unsigned long message)
+const char **twiddler_get_table(unsigned long message)
 {
    unsigned long mod = message & TW_ANY_MOD;
 

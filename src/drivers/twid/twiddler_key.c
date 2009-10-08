@@ -20,12 +20,17 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
+#include <stdio.h>
+#include <sys/time.h>
+
+#include "twiddler.h"
+
 /* return value is one if auto-repeating, 0 if not */
 int twiddler_key(unsigned long message)
 {
-   char **table = twiddler_get_table(message);
+   const char **table = twiddler_get_table(message);
 
-   char *val;
+   const char *val;
 
    /*
     * These two are needed to avoid transmitting single keys when typing

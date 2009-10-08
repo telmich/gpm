@@ -20,6 +20,13 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
+
+#include "gpmInt.h"
+#include "types.h"
+
 int twiddler_exec(char *s)
 {
    int pid;

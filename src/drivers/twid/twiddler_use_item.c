@@ -20,8 +20,18 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <string.h>
+#include <errno.h>
+#include <unistd.h>
+
+#include "twiddler.h"
+#include "message.h"
+#include "daemon.h"
+
 /* And this uses the item to push keys */
-static inline int twiddler_use_item(char *item)
+int twiddler_use_item(const char *item)
 {
    int fd = open_console(O_WRONLY);
 
@@ -39,7 +49,7 @@ static inline int twiddler_use_item(char *item)
       pushthis = (unsigned long) item & 0xff;
       retval = ioctl(fd, TIOCSTI, &pushthis);
    } else if(i = (struct twiddler_active_fun *) item - twiddler_active_funs,
-             i >= 0 && i < active_fun_nr)
+             i >= 0 && i < twiddler_active_fun_nr)
       twiddler_do_fun(i);
    else                         /* a string */
       for(; *item != '\0' && retval == 0; item++)

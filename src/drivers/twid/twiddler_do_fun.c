@@ -20,8 +20,12 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
+#include "twiddler.h"
+
 int twiddler_do_fun(int i)
 {
-   twiddler_active_funs[i].fun(twiddler_active_funs[i].arg);
+   if ((i<TWIDDLER_MAX_ACTIVE_FUNS) &&
+       (twiddler_active_funs[i].fun))
+      twiddler_active_funs[i].fun(twiddler_active_funs[i].arg);
    return 0;
 }

@@ -20,8 +20,12 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
+#include <string.h>
+
+#include "twiddler.h"
+
 /* retrieve the right table according to the modifier string */
-char **twiddler_mod_to_table(char *mod)
+const char **twiddler_mod_to_table(const char *mod)
 {
    struct twiddler_map_struct *ptr;
 

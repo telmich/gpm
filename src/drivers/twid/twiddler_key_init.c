@@ -20,19 +20,29 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <ctype.h>
+
+#include "twiddler.h"
+#include "message.h"
+#include "daemon.h"
+
 int twiddler_key_init(void)
 {
    FILE *f;
-   char *files[] = { TW_SYSTEM_FILE, TW_CUSTOM_FILE, NULL };
+   const char *files[] = { TW_SYSTEM_FILE, TW_CUSTOM_FILE, NULL };
    int fileindex = 0;
 
    char s[128], buf[64];        /* buf is for the string */
 
-   char mod[64], chord[64], *value;
+   char mod[64], chord[64];
 
    int index, lineno = 0, errcount = 0;
 
-   char **table;
+   const char *value;
+   const char **table;
 
    static int initcount = 0;
 
@@ -107,7 +117,7 @@ int twiddler_key_init(void)
          if(value)
             table[index] = value;
          else
-            table[index] = "";  /* the empty string represents the nul byte */
+            table[index] = strdup("");  /* the empty string represents the nul byte */
       }                         /* fgets */
       fclose(f);
       while(files[++fileindex]) /* next file, optional */

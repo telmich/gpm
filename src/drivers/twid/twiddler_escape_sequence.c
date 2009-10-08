@@ -20,6 +20,8 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
+#include <ctype.h>
+
 /* Convert an escape sequence to a single byte */
 int twiddler_escape_sequence(char *s, int *len)
 {

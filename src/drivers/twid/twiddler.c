@@ -35,12 +35,9 @@ struct twiddler_fun_struct twiddler_functions[] = {
 };
 
 /* The registered functions */
-struct twiddler_active_fun {
-   int (*fun) (char *s);
-   char *arg;
-} twiddler_active_funs[TWIDDLER_MAX_ACTIVE_FUNS];
+struct twiddler_active_fun twiddler_active_funs[TWIDDLER_MAX_ACTIVE_FUNS];
 
-int active_fun_nr = 0;
+int twiddler_active_fun_nr = 0;
 
 
 /*
@@ -50,14 +47,10 @@ int active_fun_nr = 0;
  * pointers represent strings. This is not very clean, but it works well.
  */
 
-char *twiddler_table[7][256];
+const char *twiddler_table[7][256];
 
 /* This maps modifiers to tables */
-struct twiddler_map_struct {
-   unsigned long modifiers;
-   char *keyword;
-   char **table;
-} twiddler_map[] = {
+struct twiddler_map_struct twiddler_map[] = {
    {
    TW_MOD_0, "", twiddler_table[0]}, {
    TW_MOD_S, "Shift", twiddler_table[1]}, {
@@ -76,10 +69,7 @@ struct twiddler_map_struct {
 };
 
 /* Convert special keynames to strings */
-struct twiddler_f_struct {
-   char *instring;
-   char *outstring;
-} twiddler_f[] = {
+struct twiddler_f_struct twiddler_f[] = {
    {
    "F1", "\033[[A"}, {
    "F2", "\033[[B"}, {

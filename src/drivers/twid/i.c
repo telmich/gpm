@@ -27,6 +27,8 @@
 
 int twiddler_key_init(void);    /* FIXME: from twiddler */
 
+static char __dtr[4] = "dtr";
+
 Gpm_Type *I_twid(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
                  const char **argv)
 {
@@ -42,7 +44,7 @@ Gpm_Type *I_twid(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
     */
    if((which_mouse->opt_baud) == DEF_BAUD)
       (which_mouse->opt_baud) = 2400;
-   argv[1] = "dtr";             /* argv[1] is guaranteed to be NULL (this is
+   argv[1] = __dtr;             /* argv[1] is guaranteed to be NULL (this is
                                  * dirty) */
    return I_serial(fd, flags, type, argc, argv);
 }

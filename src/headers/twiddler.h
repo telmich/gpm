@@ -79,12 +79,33 @@
 
 /* Convert special keynames to functions */
 struct twiddler_fun_struct {
-   char *name;
+   const char *name;
    int (*fun) (char *string);
 };
 
+struct twiddler_f_struct {
+   const char *instring;
+   const char *outstring;
+};
+
+struct twiddler_active_fun {
+   int (*fun) (char *s);
+   char *arg;
+} twiddler_active_funs[TWIDDLER_MAX_ACTIVE_FUNS];
+
+/* This maps modifiers to tables */
+struct twiddler_map_struct {
+   unsigned long modifiers;
+   const char *keyword;
+   const char **table;
+};
+
 /* variables */
-struct twiddler_active_fun twiddler_active_funs[TWIDDLER_MAX_ACTIVE_FUNS];
+extern struct twiddler_active_fun twiddler_active_funs[TWIDDLER_MAX_ACTIVE_FUNS];
+extern struct twiddler_map_struct twiddler_map[];
+extern struct twiddler_f_struct   twiddler_f[];
+extern struct twiddler_fun_struct twiddler_functions[];
+extern int    twiddler_active_fun_nr;
 
 /* functions */
 int twiddler_chord_to_int(char *chord);
@@ -92,10 +113,10 @@ int twiddler_console(char *s);
 int twiddler_do_fun(int i);
 int twiddler_escape_sequence(char *s, int *len);
 int twiddler_exec(char *s);
-char **twiddler_get_table(unsigned long message);
-char **twiddler_mod_to_table(char *mod);
-char *twiddler_rest_to_value(char *s);
-int twiddler_use_item(char *item);
+const char **twiddler_get_table(unsigned long message);
+const char **twiddler_mod_to_table(const char *mod);
+const char *twiddler_rest_to_value(char *s);
+int twiddler_use_item(const char *item);
 
 int twiddler_key(unsigned long message);
 int twiddler_key_init(void);

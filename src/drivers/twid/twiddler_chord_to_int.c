@@ -25,7 +25,7 @@
 /* Convert the "M00L"-type string to an integer */
 int twiddler_chord_to_int(char *chord)
 {
-   char *convert = "0LMR";      /* 0123 */
+   const char *convert = "0LMR";      /* 0123 */
 
    char *tmp;
 

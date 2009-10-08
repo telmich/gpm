@@ -20,11 +20,18 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  ********/
 
+#include <string.h>
+#include <ctype.h>
+
+#include "message.h"
+#include "twiddler.h"
+#include "daemon.h"
+
 /*
  * Convert the rest to a string or a byte
  * the special return value "s" signals an error
  */
-char *twiddler_rest_to_value(char *s)
+const char *twiddler_rest_to_value(char *s)
 {
    char *ptr;
 
@@ -84,15 +91,15 @@ char *twiddler_rest_to_value(char *s)
     */
    for(fptr = twiddler_functions; fptr->name; fptr++)
       if(!strncasecmp(fptr->name, ptr, strlen(fptr->name))) {
-         if(active_fun_nr == TWIDDLER_MAX_ACTIVE_FUNS) {
+         if(twiddler_active_fun_nr == TWIDDLER_MAX_ACTIVE_FUNS) {
             gpm_report(GPM_PR_ERR, GPM_MESS_TOO_MANY_SPECIAL, option.progname,
                        TWIDDLER_MAX_ACTIVE_FUNS);
             return s;
          }
-         twiddler_active_funs[active_fun_nr].fun = fptr->fun;
-         twiddler_active_funs[active_fun_nr].arg =
+         twiddler_active_funs[twiddler_active_fun_nr].fun = fptr->fun;
+         twiddler_active_funs[twiddler_active_fun_nr].arg =
             strdup(ptr + strlen(fptr->name));
-         return (char *) (twiddler_active_funs + active_fun_nr++);
+         return (char *) (twiddler_active_funs + twiddler_active_fun_nr++);
       }
 
    return s;                    /* error */
