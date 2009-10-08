@@ -56,7 +56,7 @@
 #endif
 
 Gpm_Type *(*mt_I_serial) (int fd, unsigned short flags, struct Gpm_Type * type,
-                          int argc, char **argv);
+                          int argc, const char **argv);
 
 int realposx = -1;
 

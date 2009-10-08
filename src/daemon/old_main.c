@@ -90,7 +90,7 @@ int old_main()
          (which_mouse->m_type) =
             ((which_mouse->m_type)->init) (fd, (which_mouse->m_type)->flags,
                                            (which_mouse->m_type), mouse_argc[i],
-                                           mouse_argv[i]);
+                                           (const char**)mouse_argv[i]);
       if(!(which_mouse->m_type))
          gpm_report(GPM_PR_OOPS, GPM_MESS_MOUSE_INIT);
 

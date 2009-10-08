@@ -27,7 +27,7 @@
 #include "message.h"            /* gpm_report */
 
 Gpm_Type *I_netmouse(int fd, unsigned short flags, struct Gpm_Type *type,
-                     int argc, char **argv)
+                     int argc, const char **argv)
 {
    unsigned char magic[6] = { 0xe8, 0x03, 0xe6, 0xe6, 0xe6, 0xe9 };
    int i;

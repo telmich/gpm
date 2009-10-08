@@ -28,7 +28,7 @@
 #include "types.h"              /* Gpm_type */
 
 Gpm_Type *I_mtouch(int fd, unsigned short flags, struct Gpm_Type *type,
-                   int argc, char **argv)
+                   int argc, const char **argv)
 {
    struct termios tty;
 

@@ -32,7 +32,7 @@
 
 /* Autodetect: Steve Bennett */
 Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
-                  char **argv)
+                  const char **argv)
 {
    int id;
    static unsigned char basic_init[] =

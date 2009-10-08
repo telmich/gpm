@@ -24,7 +24,7 @@
 #include "mice.h"               /* check_no_argv */
 
 Gpm_Type *I_empty(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
-                  char **argv)
+                  const char **argv)
 {
    /*
     * FIXME: remove unecessary init, but make gcc happy: warning: unused

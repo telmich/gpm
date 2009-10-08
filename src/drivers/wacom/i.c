@@ -31,7 +31,7 @@
 #include "wacom.h"              /* wacom */
 
 Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
-                  char **argv)
+                  const char **argv)
 {
 
 /* wacom graphire tablet */

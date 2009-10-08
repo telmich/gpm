@@ -31,7 +31,7 @@
 #include "synaptics.h"          /* synaptics support */
 
 Gpm_Type *I_serial(int fd, unsigned short flags, struct Gpm_Type *type,
-                   int argc, char **argv)
+                   int argc, const char **argv)
 {
    int i;
 

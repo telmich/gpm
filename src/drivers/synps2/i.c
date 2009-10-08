@@ -25,7 +25,7 @@
 
 /* synaptics touchpad, ps2 version: Henry Davies */
 Gpm_Type *I_synps2(int fd, unsigned short flags, struct Gpm_Type *type,
-                   int argc, char **argv)
+                   int argc, const char **argv)
 {
 
    flags = argc = 0;            /* FIXME: 1.99.13 */

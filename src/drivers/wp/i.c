@@ -31,7 +31,7 @@ extern int wizardpad_height;
 
 /*  Genius Wizardpad tablet  --  Matt Kimball (mkimball@xmission.com)  */
 Gpm_Type *I_wp(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
-               char **argv)
+               const char **argv)
 {
    struct termios tty;
 

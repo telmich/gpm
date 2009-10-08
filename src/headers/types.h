@@ -39,15 +39,15 @@ typedef struct Gpm_Cinfo {
 
 /* and this is the entry in the mouse-type table */
 typedef struct Gpm_Type {
-   char              *name;
-   char              *desc;      /* a descriptive line */
-   char              *synonyms;  /* extra names (the XFree name etc) as a list */
+   const char        *name;
+   const char        *desc;      /* a descriptive line */
+   const char        *synonyms;  /* extra names (the XFree name etc) as a list */
    /* mouse specific event handler: */
    int               (*fun)(Gpm_Event *state, unsigned char *data);
 
    /* mouse specific initialisation function: */
    struct Gpm_Type   *(*init)(int fd, unsigned short flags,
-                     struct Gpm_Type   *type, int argc, char **argv);
+                     struct Gpm_Type   *type, int argc, const char **argv);
 
    unsigned short    flags;
    unsigned char     proto[4];

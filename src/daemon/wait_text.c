@@ -52,6 +52,6 @@ int wait_text(int *fdptr)
       (which_mouse->m_type) =
          ((which_mouse->m_type)->init) (*fdptr, (which_mouse->m_type)->flags,
                                         (which_mouse->m_type), mouse_argc[1],
-                                        mouse_argv[1]);
+                                        (const char**)mouse_argv[1]);
    return (1);
 }

@@ -32,7 +32,7 @@ extern int gunze_calib[4];      /* FIXME: do not depend on other drivers! */
 
 /* simple initialization for the elo touchscreen */
 Gpm_Type *I_etouch(int fd, unsigned short flags, struct Gpm_Type *type,
-                   int argc, char **argv)
+                   int argc, const char **argv)
 {
    struct termios tty;
 

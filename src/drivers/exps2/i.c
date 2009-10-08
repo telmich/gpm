@@ -33,7 +33,7 @@
  * is named ExplorerPS/2 so I named it in the same way.
  */
 Gpm_Type *I_exps2(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
-                  char **argv)
+                  const char **argv)
 {
    static unsigned char s1[] = { 243, 200, 243, 200, 243, 80, };
 

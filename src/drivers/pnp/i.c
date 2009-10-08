@@ -26,7 +26,7 @@
 #include "mice.h"               /* option_modem_lines */
 
 Gpm_Type *I_pnp(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
-                char **argv)
+                const char **argv)
 {
    struct termios tty;
 
