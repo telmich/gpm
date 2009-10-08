@@ -80,7 +80,7 @@ struct options {
 
 /* this structure is used to hide the dual-mouse stuff */
 struct mouse_features {
-   char  *opt_type,
+   const char  *opt_type,
          *opt_dev,
          *opt_sequence,
          *opt_calib,
