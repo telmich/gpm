@@ -28,7 +28,7 @@
 /* Provide a common error engine by parsing with an empty option-set */
 
 /*========================================================================*/
-int check_no_argv(int argc, char **argv)
+int check_no_argv(int argc, const char **argv)
 {
    static argv_helper optioninfo[] = {
       {"", ARGV_END, {NULL}, 0}

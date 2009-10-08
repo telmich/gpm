@@ -28,7 +28,7 @@
 #include "message.h"            /* messaging in gpm */
 #include "daemon.h"             /* daemon internals */
 
-int parse_argv(argv_helper * info, int argc, char **argv)
+int parse_argv(argv_helper * info, int argc, const char **argv)
 {
    int i, j = 0, errors = 0;
 
@@ -36,7 +36,8 @@ int parse_argv(argv_helper * info, int argc, char **argv)
 
    argv_helper *p;
 
-   char *s, *t;
+   const char* s;
+   char *t;
 
    int base = 0;                /* for strtol */
 

@@ -31,7 +31,7 @@
 /* Parse the "old" -o options */
 
 /*========================================================================*/
-int option_modem_lines(int fd, int argc, char **argv)
+int option_modem_lines(int fd, int argc, const char **argv)
 {
    static int err, lines, reallines;
 
