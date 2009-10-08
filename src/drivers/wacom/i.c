@@ -100,7 +100,7 @@ Gpm_Type *I_wacom(int fd, unsigned short flags, struct Gpm_Type *type, int argc,
 
    char buffer[50], *p;
 
-   int RequestData(char *cmd) {
+   int RequestData(const char *cmd) {
       int err;
 
       /*
