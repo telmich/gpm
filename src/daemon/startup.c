@@ -41,8 +41,8 @@ void startup(int argc, char **argv)
    FILE *calib_file;
 
    static struct {
-      char *in;
-      char *out;
+      const char *in;
+      const char *out;
    } seq[] = {
       {
       "123", "01234567"}, {
