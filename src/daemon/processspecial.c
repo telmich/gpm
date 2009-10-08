@@ -61,9 +61,9 @@ static int did_parse = 0;
 
 static char *commandL = NULL;   /* kill init */
 
-static char *commandM = "shutdown -h now";
+static const char *commandM = "shutdown -h now";
 
-static char *commandR = "shutdown -r now";
+static const char *commandR = "shutdown -r now";
 
 /*
  * The return value is 0 if the event has been eaten,
@@ -71,7 +71,7 @@ static char *commandR = "shutdown -r now";
  */
 int processSpecial(Gpm_Event * event)
 {
-   char *command = NULL;
+   const char *command = NULL;
 
    int i;
 
@@ -96,14 +96,16 @@ int processSpecial(Gpm_Event * event)
          did_parse++;
          if(opt_special && opt_special[0]) {    /* not empty */
             commandL = opt_special;
-            commandM = strchr(opt_special, ':');
-            if(commandM) {
-               *commandM = '\0';
-               commandM++;
-               commandR = strchr(commandM, ':');
-               if(commandR) {
-                  *commandR = '\0';
-                  commandR++;
+            char *walk = strchr(opt_special, ':');
+            if(walk) {
+               *walk = '\0';
+               walk++;
+               commandM = walk;
+               walk = strchr(commandM, ':');
+               if(walk) {
+                  *walk = '\0';
+                  walk++;
+                  commandR = walk;
                }
             }
          }
