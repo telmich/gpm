@@ -37,8 +37,8 @@
 char *Gpm_get_console(void)
 {
 
-   char *back = NULL, *tmp = NULL;
-
+   char *back = NULL;
+   const char *tmp = NULL;
    struct stat buf;
 
    /*
