@@ -22,6 +22,7 @@
 
 #include <stdlib.h>             /* atoi */
 #include <unistd.h>             /* getopt */
+#include <string.h>
 
 #include "message.h"            /* messaging in gpm */
 #include "daemon.h"             /* daemon internals */
