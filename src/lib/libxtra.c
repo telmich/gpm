@@ -41,7 +41,7 @@
 //static char *gpml_ver_s = GPM_ABI_FULL;
 //static int gpml_ver_i = 0;
 
-char *Gpm_GetLibVersion(int *where)
+const char *Gpm_GetLibVersion(int *where)
 {
    if(where)
       *where = GPM_ABI_LEV * 10000 + GPM_ABI_AGE * 100 + GPM_ABI_REV;

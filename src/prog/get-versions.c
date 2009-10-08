@@ -27,7 +27,7 @@
 
 int main()
 {
-   char *ver;
+   const char *ver;
 
    int intver;
 

@@ -281,7 +281,7 @@ extern int Gpm_Wgetch();
 #define Gpm_Getch() (Gpm_Wgetch(NULL))
 
 /* libxtra.c */
-char *Gpm_GetLibVersion(int *where);
+const char *Gpm_GetLibVersion(int *where);
 char *Gpm_GetServerVersion(int *where);
 int   Gpm_GetSnapshot(Gpm_Event *ePtr);
 
