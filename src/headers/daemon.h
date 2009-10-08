@@ -122,7 +122,7 @@ time_t                  last_selection_time;
  * Functions
  */
 
-char **build_argv(char *argv0, char *str, int *argcptr, char sep);
+char **build_argv(const char *argv0, const char *str, int *argcptr, char sep);
 
 void  disable_paste(int vc);
 

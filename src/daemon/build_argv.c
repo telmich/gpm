@@ -26,25 +26,29 @@
 #include "message.h"            /* messaging in gpm */
 
 /* build_argv is used for mouse initialization routines */
-char **build_argv(char *argv0, char *str, int *argcptr, char sep)
+char **build_argv(const char *argv0, const char *str1, int *argcptr, char sep)
 {
    int argc = 1;
 
    char **argv;
 
+   char* str = NULL;
    char *s;
 
    /*
     * argv0 is never NULL, but the extra string may well be 
     */
-   if(str)
+   if(str1)
+   {
+      str = strdup(str1);
       for(s = str; sep && (s = strchr(s, sep)); argc++)
          s++;
+   }
 
    argv = calloc(argc + 2, sizeof(char **));
    if(!argv)
       gpm_report(GPM_PR_OOPS, GPM_MESS_ALLOC_FAILED);
-   argv[0] = argv0;
+   argv[0] = strdup(argv0);
 
    if(!str) {
       *argcptr = argc;          /* 1 */
