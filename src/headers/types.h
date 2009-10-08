@@ -120,7 +120,7 @@ enum argv_type {
 };
 
 typedef struct argv_helper {
-   char *name;
+   const char *name;
    enum argv_type type;
    union u {
       int *iptr;   /* used for int and bool arguments */
