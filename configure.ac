@@ -10,6 +10,7 @@ AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_HEADER([src/headers/config.h])
 
 AC_CANONICAL_HOST
+AC_USE_SYSTEM_EXTENSIONS
 
 AC_DEFINE_UNQUOTED([GPM_ABI_LEV], [$abi_lev], [Library level])
 AC_DEFINE_UNQUOTED([GPM_ABI_AGE], [$abi_age], [Library age])

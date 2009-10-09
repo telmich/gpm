@@ -20,8 +20,6 @@
  *
  ********/
 
-#define _GNU_SOURCE
-
 #include <sys/socket.h>         /* accept */
 #include <stdlib.h>             /* malloc */
 #include <unistd.h>             /* close */
