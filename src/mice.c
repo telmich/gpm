@@ -2052,25 +2052,26 @@ static Gpm_Type *I_synps2(int fd, unsigned short flags,
    return type;
 }
 
+static void I_summa_reset_summa(int fd)
+{
+   write(fd,0,1); /* Reset */
+   usleep(400000); /* wait */
+}
+
+static int I_summa_wait_summa(int fd)
+{
+   struct timeval timeout;
+   fd_set readfds;
+   int err;
+   FD_ZERO(&readfds);  FD_SET(fd, &readfds);
+   timeout.tv_sec = 0; timeout.tv_usec = 200000;
+   err = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+   return(err);
+}
 
 static Gpm_Type *I_summa(int fd, unsigned short flags,
           struct Gpm_Type *type, int argc, char **argv) 
 {
-   void resetsumma()
-   {
-      write(fd,0,1); /* Reset */
-      usleep(400000); /* wait */
-   }
-   int waitsumma()
-   {
-      struct timeval timeout;
-      fd_set readfds;
-      int err;
-      FD_ZERO(&readfds);  FD_SET(fd, &readfds);
-      timeout.tv_sec = 0; timeout.tv_usec = 200000;
-      err = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
-      return(err);
-   }
    int err;
    char buffer[255];
    char config[5];
@@ -2090,7 +2091,7 @@ static Gpm_Type *I_summa(int fd, unsigned short flags,
 
    /* Set speed to 9600bps */
    setspeed (fd, 1200, 9600, 1, B9600|CS8|CREAD|CLOCAL|HUPCL|PARENB|PARODD);  
-   resetsumma(); 
+   I_summa_reset_summa(fd); 
  
    write(fd, SS_PROMPT_MODE, strlen(SS_PROMPT_MODE));
   
@@ -2099,7 +2100,7 @@ static Gpm_Type *I_summa(int fd, unsigned short flags,
    if (summaid<0) { /* Summagraphics test */
       /* read the Summa Firm-ID */
       write(fd, SS_FIRMID, strlen(SS_FIRMID));
-      err=waitsumma();
+      err=I_summa_wait_summa(fd);
       if (!((err == -1) || (!err))) {
          summaid=10; /* Original Summagraphics */
          read(fd, buffer, 255); /* Read Firm-ID */
@@ -2107,14 +2108,14 @@ static Gpm_Type *I_summa(int fd, unsigned short flags,
    }
   
    if (summaid<0) { /* Genius-test */
-      resetsumma();
+      I_summa_reset_summa(fd);
       write(fd,GEN_MMSERIES,1); 
       write(fd,&GEN_MODELL,1); /* Read modell */
-      err=waitsumma();
+      err=I_summa_wait_summa(fd);
       if (!((err == -1) || (!err))) { /* read Genius-ID */
-           err=waitsumma();
+           err=I_summa_wait_summa(fd);
          if (!((err == -1) || (!err))) {
-            err=waitsumma();
+            err=I_summa_wait_summa(fd);
             if (!((err == -1) || (!err))) {
                read(fd,&config,1);
                summaid=(config[0] & 224) >> 5; /* genius tablet-id (0-7)*/
@@ -2125,12 +2126,12 @@ static Gpm_Type *I_summa(int fd, unsigned short flags,
 
    /* unknown tablet ?*/
    if ((summaid<0) || (summaid==11)) { 
-      resetsumma(); 
+      I_summa_reset_summa(fd); 
       write(fd, SS_BINARY_FMT SS_PROMPT_MODE, 3);
    }
 
    /* read tablet size */
-   err=waitsumma();  
+   err=I_summa_wait_summa(fd);  
    if (!((err == -1) || (!err))) read(fd,buffer,sizeof(buffer));
    write(fd,SS_READCONFIG,1);
    read(fd,&config,5);
