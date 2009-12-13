@@ -1748,9 +1748,6 @@ static Gpm_Type* I_logi(int fd, unsigned short flags,
    return type;
 }
 
-static Gpm_Type *I_wacom(int fd, unsigned short flags,
-                         struct Gpm_Type *type, int argc, char **argv)
-{
 /* wacom graphire tablet */
 #define UD_RESETBAUD     "\r$"      /* reset baud rate to default (wacom V) */
                                     /* or switch to wacom IIs (wacomIV)     */ 
@@ -1760,62 +1757,67 @@ static Gpm_Type *I_wacom(int fd, unsigned short flags,
 #define UD_COORD         "~C\r"     /* Request max coordinates              */
 #define UD_STOP          "\nSP\r"   /* stop sending coordinates             */
 
-   void reset_wacom()
-   { 
-      /* Init Wacom communication; this is modified from xf86Wacom.so module */
-      /* Set speed to 19200 */
-      setspeed (fd, 1200, 19200, 0, B19200|CS8|CREAD|CLOCAL|HUPCL);
-      /* Send Reset Baudrate Command */ 
-      write(fd, UD_RESETBAUD, strlen(UD_RESETBAUD));
-      usleep(250000);   
-      /* Send Reset Command */
-      write(fd, UD_RESET,     strlen(UD_RESET));
-      usleep(75000);
-      /* Set speed to 9600bps */
-      setspeed (fd, 1200, 9600, 0, B9600|CS8|CREAD|CLOCAL|HUPCL);
-      /* Send Reset Command */
-      write(fd, UD_RESET, strlen(UD_RESET));
-      usleep(250000);  
-      write(fd, UD_STOP, strlen(UD_STOP));
-      usleep(100000);
-   }
+static void I_wacom_reset_wacom(int fd)
+{
+   /* Init Wacom communication; this is modified from xf86Wacom.so module */
+   /* Set speed to 19200 */
+   setspeed (fd, 1200, 19200, 0, B19200|CS8|CREAD|CLOCAL|HUPCL);
+   /* Send Reset Baudrate Command */
+   write(fd, UD_RESETBAUD, strlen(UD_RESETBAUD));
+   usleep(250000);
+   /* Send Reset Command */
+   write(fd, UD_RESET,     strlen(UD_RESET));
+   usleep(75000);
+   /* Set speed to 9600bps */
+   setspeed (fd, 1200, 9600, 0, B9600|CS8|CREAD|CLOCAL|HUPCL);
+   /* Send Reset Command */
+   write(fd, UD_RESET, strlen(UD_RESET));
+   usleep(250000);
+   write(fd, UD_STOP, strlen(UD_STOP));
+   usleep(100000);
+}
 
-   int wait_wacom()
-   {
-      /* 
-       *  Wait up to 200 ms for Data from Tablet. 
-       *  Do not read that data.
-       *  Give back 0 on timeout condition, -1 on error and 1 for DataPresent
-       */
-      struct timeval timeout;
-      fd_set readfds;
-      int err;
-      FD_ZERO(&readfds);  FD_SET(fd, &readfds);
-      timeout.tv_sec = 0; timeout.tv_usec = 200000;
-      err = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
-      return((err>0)?1:err);
-   }
+static int I_wacom_wait_wacom(int fd)
+{
+   /*
+    *  Wait up to 200 ms for Data from Tablet.
+    *  Do not read that data.
+    *  Give back 0 on timeout condition, -1 on error and 1 for DataPresent
+    */
+   struct timeval timeout;
+   fd_set readfds;
+   int err;
+   FD_ZERO(&readfds);  FD_SET(fd, &readfds);
+   timeout.tv_sec = 0; timeout.tv_usec = 200000;
+   err = select(FD_SETSIZE, &readfds, NULL, NULL, &timeout);
+   return((err>0)?1:err);
+}
 
-   char buffer[50], *p;
-
-   int RequestData(char *cmd)
-   {
-      int err;
-      /* 
-       * Send cmd if not null, and get back answer from tablet. 
-       * Get Data to buffer until full or timeout.
-       * Give back 0 for timeout and !0 for buffer full
-       */
-      if (cmd) write(fd,cmd,strlen(cmd));
-      memset(buffer,0,sizeof(buffer)); p=buffer;
-      err=wait_wacom();
-      while (err != -1 && err && (p-buffer)<(sizeof(buffer)-1)) {
-         p+= read(fd,p,(sizeof(buffer)-1)-(p-buffer));
-         err=wait_wacom();
-      }
-      /* return 1 for buffer full */
-      return ((strlen(buffer) >= (sizeof(buffer)-1))? !0 :0);
+static int I_wacom_RequestData(char *cmd, int fd, char *buffer,
+        unsigned int buffer_len, char *p)
+{
+   int err;
+   /*
+    * Send cmd if not null, and get back answer from tablet.
+    * Get Data to buffer until full or timeout.
+    * Give back 0 for timeout and !0 for buffer full
+    */
+   if (cmd) write(fd,cmd,strlen(cmd));
+   memset(buffer,0,sizeof(char)*buffer_len); p=buffer;
+   err=I_wacom_wait_wacom(fd);
+   while (err != -1 && err && (p-buffer)<(sizeof(char)*buffer_len-1)) {
+      p+= read(fd,p,(sizeof(char)*buffer_len-1)-(p-buffer));
+      err=I_wacom_wait_wacom(fd);
    }
+   /* return 1 for buffer full */
+   return ((strlen(buffer) >= (sizeof(char)*buffer_len-1))? !0 :0);
+}
+
+static Gpm_Type *I_wacom(int fd, unsigned short flags,
+                         struct Gpm_Type *type, int argc, char **argv)
+{
+#define BUFFER_SIZE 50
+   char buffer[BUFFER_SIZE], *p;
 
    /*
     * We do both modes, relative and absolute, with the same function.
@@ -1835,13 +1837,13 @@ static Gpm_Type *I_wacom(int fd, unsigned short flags,
    };
    parse_argv(optioninfo, argc, argv); 
    type->absolute = WacomAbsoluteWanted;
-   reset_wacom();
+   I_wacom_reset_wacom(fd);
 
    /* "Flush" input queque */
-   while(RequestData(NULL)) ;
+   while(I_wacom_RequestData(NULL, fd, buffer, BUFFER_SIZE, p)) ;
 
    /* read WACOM-ID */
-   RequestData(UD_FIRMID); 
+   I_wacom_RequestData(UD_FIRMID, fd, buffer, BUFFER_SIZE, p); 
 
    /* Search for matching modell */
    for(WacomModell=0;
@@ -1862,7 +1864,7 @@ static Gpm_Type *I_wacom(int fd, unsigned short flags,
    
    /* read Wacom max size */
    if(WacomModell!=(-1) && (!wcmodell[WacomModell].maxX)) {
-      RequestData(UD_COORD);
+      I_wacom_RequestData(UD_COORD, fd, buffer, BUFFER_SIZE, p);
       sscanf(buffer+2, "%d,%d", &wmaxx, &wmaxy);
       wmaxx = (wmaxx-wcmodell[WacomModell].border);
       wmaxy = (wmaxy-wcmodell[WacomModell].border);
