@@ -23,6 +23,7 @@
 
 struct gpm2_mouse_info {
    int fd;                    /* opened device        */
+   char *name;                /* name = file          */
 };
 
 struct gpm2_mouse_proto {
@@ -36,9 +37,9 @@ struct gpm2_mouse_proto {
 };
 
 struct gpm2_mouse {
-   char *name;                /* name = file          */
-   struct gpm2_mouse_proto proto;   /* protocol used        */
    struct gpm2_mouse_info info;     /* mouse information    */
+   struct gpm2_mouse_proto *proto;  /* protocol used        */
+   struct gpm2_mouse *next;
 };
 
 struct gpm2_event {

@@ -55,6 +55,5 @@ Makefile.include
 # gpm2
 /gpm2/out/*
 /gpm2/tmp/*
-/src/gpm2
 /.gitversion.m4
 /.releasedate

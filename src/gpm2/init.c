@@ -16,34 +16,17 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  *
- * Create a small working hack to be expanded
+ *   Init structures
  *
  */
 
 #include <gpm2.h>
-#include "gpm2-daemon.h"
 
-int main()
+struct gpm2_mice *mice;
+
+int init()
 {
 
-   /* connect one mouse and print out data like display-coords.c */
 
-   /* init global variables */
-   init();
-
-   /* add mouse */
-   mouse_add("/dev/input/mouse0", "imps2");
-
-   /* init all mice */
-//   gpm2_mice_init();
-
-   /* init clients */
-//   gpm2_client_init();
-
-   /* handle input */
-//   gpm2_inputloop();
-
-   /* close gpm2 */
-//   gpm2_exit();
-
+   return 1;
 }

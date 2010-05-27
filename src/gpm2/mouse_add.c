@@ -16,34 +16,32 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  *
- * Create a small working hack to be expanded
+ * Add a mouse to the micelist
  *
  */
 
+#include <fcntl.h>              /* open */
+#include <unistd.h>             /* close/dup2 */
+#include <stdio.h>              /* perror */
+#include <stdlib.h>             /* malloc */
+
 #include <gpm2.h>
-#include "gpm2-daemon.h"
 
-int main()
+int mouse_add(char *name, char *proto)
 {
+   struct gpm2_mouse *mouse = NULL;
 
-   /* connect one mouse and print out data like display-coords.c */
+   mouse = malloc(sizeof(struct gpm2_mouse));
 
-   /* init global variables */
-   init();
+   if(!mouse) return 0;
 
-   /* add mouse */
-   mouse_add("/dev/input/mouse0", "imps2");
+   mouse->info.name = name;
+   mouse->info.fd = open(name, 0);
 
-   /* init all mice */
-//   gpm2_mice_init();
+   if(mouse->info.fd == -1) {
+      perror(name);
+      return 0;
+   }
 
-   /* init clients */
-//   gpm2_client_init();
-
-   /* handle input */
-//   gpm2_inputloop();
-
-   /* close gpm2 */
-//   gpm2_exit();
 
 }
