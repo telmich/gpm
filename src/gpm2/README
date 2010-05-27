@@ -1,0 +1,8 @@
+You know, gpm is a hack.
+
+The idea of gpm2 is to be a nicer hack.
+
+ * Support n mice
+ * Do not draw stuff, but write client to do so
+ * Usable under different OS
+
