@@ -31,11 +31,8 @@ int main()
    /* init global variables */
    init();
 
-   /* add mouse */
+   /* add mouse: for testing, not in real code */
    mouse_add("/dev/input/mouse0", "imps2");
-
-   /* init all mice */
-//   gpm2_mice_init();
 
    /* init clients */
 //   gpm2_client_init();
