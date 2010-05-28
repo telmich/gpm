@@ -1,10 +1,11 @@
 You know, gpm is a hack.
 
-The idea of gpm2 is to be a nicer hack.
+The idea of gpm2 is to be a nicer hack:
 
  * Support n mice
  * Do not draw stuff, but write client to do so
  * Usable under different OS
+ * Allow hotplugging of mice (i.e. gpm2d can run without any mice at startup)
 
 
 ## Development
@@ -13,3 +14,36 @@ The idea of gpm2 is to be a nicer hack.
 
  * gpm2_*: Stuff that may appear in a library
  * *: Stuff that will only be used in the gpm2 main process
+
+## Mouse protocols
+
+Protocols in gpm2 are *not* part of the main system. Instead,
+each protocol is implemented in its own binary, which is called
+from gpm2d.
+
+This prevents to create just another ugly "static" struct array
+or the need to dlopen() and friends.
+
+### Implementing a protocol
+
+If you want to implement a mouse protocol, there are some things
+to take care of:
+
+ * You have a free choice of the programming language
+ * gpm2d will exec() gpm2-<protocol> from its path,
+ * gpm2d will connect stdin stdout of gpm2-<protocol> to the device file
+ * gpm2d will connect stderr to gpm2d, so gpm2-<protocol> can send messages
+ * gpm2d can drop priviliges to a specific, non-root user
+ * gpm2d will send SIGTERM to gpm2-<protocol> to signal normal termination
+  * gpm2-<protocol> should close the file and exit
+ * gpm2-<protocol> reports about events via stderr
+
+## Client protocols
+
+Clients for gpm2 do not need to be c programs, but can be any kind.
+The communication is a simple ASCII stream.
+
+
+### Connect to gpm2d
+
+Clients need to open /var/run/gpm2/gpm2d.sock to connect to gpm2d.
