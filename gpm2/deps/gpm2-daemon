@@ -1,7 +1,0 @@
-core/main.o
-core/read_config.o
-core/set_defaults.o
-generic/commandline.o
-generic/daemon-usage.o
-generic/mini_printf.o
-mice/mice_handler.o

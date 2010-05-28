@@ -1,7 +1,0 @@
-
-cat $1 | sed 's/gpm_debug_log/gpm_report/g' > $1.tmp
-cat $1.tmp | sed 's/LOG_NOTICE/GPM_PR_INFO/g' > $1.tmp2
-cat $1.tmp2 | sed 's/LOG_ERR/GPM_PR_ERR/g' > $1.tmp
-cat $1.tmp | sed 's/LOG_WARN/GPM_PR_WARN/g' > $1.tmp2
-cat $1.tmp2 | sed 's/LOG_DEBUG/GPM_PR_DEBUG/g' > $1.tmp
-echo "done:" $1.tmp

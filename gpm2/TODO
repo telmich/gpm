@@ -1,4 +1,0 @@
-- read cconfig-directory
-- create mouse structures
-- use cconfig-protocol-options as base for each protocol
-   char *fullpath?

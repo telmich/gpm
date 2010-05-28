@@ -1,8 +1,0 @@
-#!/bin/sh
-# Date: 3rd of October 2001
-# Description: still missing
-# Author: Nico Schottelius (nicos@pcsystems.de), 3rd of October 2001
-# Copying: GPL 2.0
-#
-
-diff -u --recursive --new-file $@
