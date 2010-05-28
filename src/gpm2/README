@@ -6,3 +6,10 @@ The idea of gpm2 is to be a nicer hack.
  * Do not draw stuff, but write client to do so
  * Usable under different OS
 
+
+## Development
+
+### Names
+
+ * gpm2_*: Stuff that may appear in a library
+ * *: Stuff that will only be used in the gpm2 main process
