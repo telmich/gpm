@@ -42,7 +42,4 @@ int main()
 
    /* close gpm2 */
    gpm2d_exit();
-
-   return 0;
-
 }
