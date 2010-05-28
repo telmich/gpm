@@ -26,22 +26,23 @@
 #include <stdlib.h>             /* malloc */
 
 #include <gpm2.h>
+#include "gpm2-daemon.h"
 
 int mouse_add(char *name, char *proto)
 {
    struct gpm2_mouse *mouse = NULL;
 
    mouse = malloc(sizeof(struct gpm2_mouse));
-
    if(!mouse) return 0;
 
-   mouse->info.name = name;
-   mouse->info.fd = open(name, 0);
+   mouse->name = name;
+   mouse->proto = proto;
 
-   if(mouse->info.fd == -1) {
-      perror(name);
-      return 0;
-   }
+   mouse->next = &mice;
+   mice.next = mouse;
 
+   if(!mouse_start(mouse)) return 0;
+
+   return 1;
 
 }

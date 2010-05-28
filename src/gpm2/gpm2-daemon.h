@@ -21,7 +21,13 @@
 #ifndef _GPM2_DAEMON_H
 #define _GPM2_DAEMON_H
 
+#include <gpm2.h>
+
 int init();
 int mouse_add(char *name, char *proto);
+int mouse_init();
+int mouse_start(struct gpm2_mouse *);
+
+extern struct gpm2_mouse mice;
 
 #endif

@@ -16,16 +16,53 @@
  *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  *
- *   Init structures
+ * Start a mouse driver
  *
  */
 
-#include <gpm2.h>
+#include <unistd.h>
 #include "gpm2-daemon.h"
 
-int init()
+int mouse_start(struct gpm2_mouse *mouse)
 {
-   if(!mouse_init()) return 0;
 
-   return 1;
+   /* create communication channel */
+   if(pipe(mouse->pipe) == -1) {
+      perror(mouse->name);
+      return 0;
+   }
+
+   /* fork away */
+   mouse->pid = fork();
+   if(mouse->pid == -1) {
+      perror(mouse->name);
+      return 0;
+   }
+
+   /* return in parent */
+   if(mouse->pid != 0) return 1;
+
+   /* open device */
+   mouse->fd = open(mouse->name, 0);
+   if(mouse->fd == -1) {
+      perror(mouse->name);
+      return 0;
+   }
+
+   /* connect device to stdin/out */
+   if(dup2(mouse->fd, STDIN_FILENO) == -1) {
+      perror(mouse->name);
+      return 0;
+   }
+
+   if(dup2(mouse->fd, STDOUT_FILENO) == -1) {
+      perror(mouse->name);
+      return 0;
+   }
+
+   /* drop priviliges (if configured) */
+   /* launch protocol handler */
+
+
+
 }

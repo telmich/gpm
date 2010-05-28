@@ -21,24 +21,15 @@
 #ifndef _GPM2_H
 #define _GPM2_H
 
-struct gpm2_mouse_info {
-   int fd;                    /* opened device        */
-   char *name;                /* name = file          */
-};
-
-struct gpm2_mouse_proto {
-   char *name;                /* identifier                 */
-   char *desc;                /* description                */
-
-   int   (*init)(struct gpm2_mouse_info *);     /* init mouse    */
-   int   (*handle)(struct gpm2_mouse_info *);   /* handle mouse  */
-   int   (*close)(struct gpm2_mouse_info *);    /* close mouse   */
-
-};
+#include <unistd.h>           /* pid_t                */
 
 struct gpm2_mouse {
-   struct gpm2_mouse_info info;     /* mouse information    */
-   struct gpm2_mouse_proto *proto;  /* protocol used        */
+   int fd;                    /* opened device        */
+   char *name;                /* name = file          */
+   char *proto;               /* protocol used        */
+   pid_t pid;                 /* process handling it  */
+   int pipe[2];               /* process messages     */
+
    struct gpm2_mouse *next;
 };
 

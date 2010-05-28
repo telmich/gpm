@@ -20,12 +20,16 @@
  *
  */
 
+#include <string.h>
 #include <gpm2.h>
-#include "gpm2-daemon.h"
 
-int init()
+struct gpm2_mouse mice;
+
+int mouse_init()
 {
-   if(!mouse_init()) return 0;
+
+   /* explicit zero, in case we move mice somewhere else */
+   memset(&mice, 0, sizeof(mice));
 
    return 1;
 }
