@@ -20,11 +20,17 @@
  *
  */
 
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+#include <limits.h>
 #include "gpm2-daemon.h"
 
 int mouse_start(struct gpm2_mouse *mouse)
 {
+
+   char path[PATH_MAX];
+   char *argv[2];
 
    /* create communication channel */
    if(pipe(mouse->pipe) == -1) {
@@ -60,9 +66,25 @@ int mouse_start(struct gpm2_mouse *mouse)
       return 0;
    }
 
+   /* connect stderr to gpm2d
+   if(dup2(mouse->pipe[1], STDERR_FILENO) == -1) {
+      perror(mouse->name);
+      return 0;
+   } */
+
    /* drop priviliges (if configured) */
+   /* create protocol handler */
+   strncpy(path, "gpm2-", PATH_MAX);
+   strncat(path, mouse->proto, PATH_MAX);
+
+   argv[0] = path;
+   argv[1] = NULL;
+
    /* launch protocol handler */
+   execv(path, argv);
 
+   perror(path);
 
+   _exit(1);
 
 }
