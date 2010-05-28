@@ -20,19 +20,25 @@
  *
  */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <gpm2.h>
 #include "gpm2-daemon.h"
 
-int main()
+int main(int argc, char **argv)
 {
-
    /* connect one mouse and print out data like display-coords.c */
+
+   if(argc != 3) {
+      printf("%s: <dev> ps2\n", argv[0]);
+      _exit(1);
+   }
 
    /* init global variables */
    init();
 
    /* add mouse: for testing, not in real code */
-   mouse_add("/dev/input/mouse2", "ps2");
+   mouse_add(argv[1], argv[2]);
 
    /* init clients */
 //   gpm2_client_init();
