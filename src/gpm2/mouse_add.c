@@ -32,14 +32,18 @@ int mouse_add(char *name, char *proto)
 {
    struct gpm2_mouse *mouse = NULL;
 
-   mouse = malloc(sizeof(struct gpm2_mouse));
+   mouse = calloc(1, sizeof(struct gpm2_mouse));
    if(!mouse) return 0;
 
    mouse->name = name;
    mouse->proto = proto;
 
-   mouse->next = &mice;
-   mice.next = mouse;
+   if(!mice) {
+      mice = mouse; /* mouse->next is zero, see calloc */
+   } else {
+      mouse->next = mice->next;
+      mice->next = mouse;
+   }
 
    if(!mouse_start(mouse)) return 0;
 

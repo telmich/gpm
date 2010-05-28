@@ -29,7 +29,7 @@ int mouse_list(struct gpm2_mouse **mouse)
 
    /* initial call */
    if(!(*mouse)) {
-      *mouse = mice.next;
+      *mouse = mice;
       printf("initial mouse\n");
    } else {
       printf("next mouse\n");

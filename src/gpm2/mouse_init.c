@@ -20,16 +20,15 @@
  *
  */
 
-#include <string.h>
+#include <stdio.h>
 #include <gpm2.h>
 
-struct gpm2_mouse mice;
+struct gpm2_mouse *mice;
 
 int mouse_init()
 {
-
    /* explicit zero, in case we move mice somewhere else */
-   memset(&mice, 0, sizeof(mice));
+   mice = NULL;
 
    return 1;
 }

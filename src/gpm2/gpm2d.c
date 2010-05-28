@@ -32,7 +32,7 @@ int main()
    init();
 
    /* add mouse: for testing, not in real code */
-   mouse_add("/dev/input/mouse1", "ps2");
+   mouse_add("/dev/input/mouse2", "ps2");
 
    /* init clients */
 //   gpm2_client_init();
@@ -41,6 +41,8 @@ int main()
 //   gpm2_inputloop();
 
    /* close gpm2 */
-//   gpm2_exit();
+   gpm2d_exit();
+
+   return 0;
 
 }

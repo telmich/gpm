@@ -30,7 +30,8 @@ int init();
 int mouse_add(char *name, char *proto);
 int mouse_init();
 int mouse_start(struct gpm2_mouse *);
+int mouse_list(struct gpm2_mouse **mouse);
 
-extern struct gpm2_mouse mice;
+extern struct gpm2_mouse *mice;
 
 #endif
