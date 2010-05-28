@@ -21,7 +21,6 @@
  */
 
 #include <gpm2.h>
-#include <stdio.h>
 #include "gpm2-daemon.h"
 
 int mouse_list(struct gpm2_mouse **mouse)
@@ -30,9 +29,7 @@ int mouse_list(struct gpm2_mouse **mouse)
    /* initial call */
    if(!(*mouse)) {
       *mouse = mice;
-      printf("initial mouse\n");
    } else {
-      printf("next mouse\n");
       *mouse = (*mouse)->next;
    }
 
