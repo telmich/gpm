@@ -23,6 +23,9 @@
 
 #include <gpm2.h>
 
+#define GPM2D_NAME      "gpm2d"
+#define GPM2D_VERSIOn   "0.1"
+
 int init();
 int mouse_add(char *name, char *proto);
 int mouse_init();

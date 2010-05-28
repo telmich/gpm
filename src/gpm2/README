@@ -38,6 +38,11 @@ to take care of:
   * gpm2-<protocol> should close the file and exit
  * gpm2-<protocol> reports about events via stderr
 
+### Reading options from gpm2d
+
+If at some point gpm2d needs to pass protocol options to the protocol
+handler, they can be found in GPM2_PROTO_OPTS.
+
 ## Client protocols
 
 Clients for gpm2 do not need to be c programs, but can be any kind.
