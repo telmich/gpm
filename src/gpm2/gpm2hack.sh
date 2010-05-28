@@ -1,5 +1,9 @@
 #!/bin/sh
 set -e
 
-gcc -I. gpm2hack.c -o gpm2hack
-./gpm2hack
+export PATH=$PATH:/home/users/nico/gpm2/protocols/ps2
+
+which gpm2-ps2
+make gpm2d
+./gpm2d
+

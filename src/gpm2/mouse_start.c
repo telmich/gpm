@@ -81,7 +81,7 @@ int mouse_start(struct gpm2_mouse *mouse)
    argv[1] = NULL;
 
    /* launch protocol handler */
-   execv(path, argv);
+   execvp(path, argv);
 
    perror(path);
 
