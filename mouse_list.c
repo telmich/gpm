@@ -37,7 +37,7 @@ int mouse_list(struct gpm2_mouse **mouse)
    }
 
    /* last element, which is empty */
-   if(!((*mouse)->next)) return 0;
+   if(!(*mouse)) return 0;
 
    return 1;
 }

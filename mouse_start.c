@@ -20,9 +20,11 @@
  *
  */
 
+#include <stdio.h>      /* perror */
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>      /* open */
 #include <limits.h>
 #include "gpm2-daemon.h"
 

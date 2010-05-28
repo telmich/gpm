@@ -44,8 +44,10 @@ int main(int argc, char **argv)
 //   gpm2_client_init();
 
    /* handle input */
-//   gpm2_inputloop();
+   gpm2d_inputloop();
 
    /* close gpm2 */
    gpm2d_exit();
+
+   return 0; /* never reached */
 }

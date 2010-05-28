@@ -26,11 +26,16 @@
 #define GPM2D_NAME      "gpm2d"
 #define GPM2D_VERSIOn   "0.1"
 
+/* stuff that is used by gpm2d, but could be reused */
 int init();
 int mouse_add(char *name, char *proto);
 int mouse_init();
 int mouse_start(struct gpm2_mouse *);
 int mouse_list(struct gpm2_mouse **mouse);
+
+/* gpm2d specific */
+void gpm2d_inputloop();
+void gpm2d_exit();
 
 extern struct gpm2_mouse *mice;
 
