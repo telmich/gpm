@@ -3,8 +3,9 @@ SRC+=gpm2d_inputloop.c
 
 CC=gcc
 CFLAGS=-Wall -Werror
-
 PROTOS=ps2
+
+RELBASE=/home/users/nico/niconetz/software/gpm2
 
 all: gpm2d protos
 
@@ -17,3 +18,6 @@ protos:
 clean:
 	rm -f gpm2d
 	for proto in $(PROTOS); do (cd protocols/$$proto && make clean); done
+
+release:
+	cp README $(RELBASE).mdwn

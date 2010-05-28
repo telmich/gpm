@@ -1,12 +1,28 @@
-You know, gpm is a hack.
+You know, [[gpm]] is a hack.
 
 The idea of gpm2 is to be a nicer hack:
 
- * Support n mice
- * Do not draw stuff, but write client to do so
+ * Support multiple mice
+ * Do not draw stuff, but write gpm2 client to do so (os/terminal specific stuff)
  * Usable under different OS
+ * Modular design, easy way to add new mice protocols
  * Allow hotplugging of mice (i.e. gpm2d can run without any mice at startup)
 
+## Trying out gpm2
+
+gpm2 is in its early design stage, but can so far display movement of a
+ps/2 compatible mouse.
+
+    git clone git://git.schottelius.org/gpm
+    cd gpm
+    git checkout -b gpm2 origin/gpm-2-hack
+    ./gpm2hack.sh /dev/input/mice
+    # move the mouse
+    # press enter key to end demonstration
+
+If you do not see mouse movement deltas, either your mouse in connected
+to a different device or you probably do not have permissions to communicate
+with it.
 
 ## Development
 
@@ -45,10 +61,11 @@ handler, they can be found in GPM2_PROTO_OPTS.
 
 ## Client protocols
 
-Clients for gpm2 do not need to be c programs, but can be any kind.
+Clients for gpm2 do not need to be c programs, but can be of any kind.
 The communication is a simple ASCII stream.
-
 
 ### Connect to gpm2d
 
 Clients need to open /var/run/gpm2/gpm2d.sock to connect to gpm2d.
+
+[[!tag unix]]
