@@ -1,0 +1,108 @@
+diff -uwr gpm-1.19.3.orig/liblow.c gpm-1.19.3/liblow.c
+--- gpm-1.19.3.orig/liblow.c	Tue Jul 18 14:06:06 2000
++++ gpm-1.19.3/liblow.c	Fri Dec  1 00:20:10 2000
+@@ -77,7 +77,8 @@
+ unsigned char    _gpm_buf[6*sizeof(short)];
+ unsigned short * _gpm_arg = (unsigned short *)_gpm_buf +1;
+ 
+-int gpm_consolefd=-1;  /* used to invoke ioctl() */
++enum { GPM_FD_INVALID = -1, GPM_FD_SCREEN = -2 };
++int gpm_consolefd = GPM_FD_INVALID;  /* used to invoke ioctl() */
+ int gpm_morekeys=0;
+ /*-------------------------------------------------------------------*/
+ static inline int putdata(int where,  Gpm_Connect *what)
+@@ -114,7 +115,14 @@
+       SIG_DFL != gpm_saved_winch_hook.sa_handler) {
+     gpm_saved_winch_hook.sa_handler(signum);
+   } /*if*/
+-  if (ioctl(gpm_consolefd, TIOCGWINSZ, &win) == -1) {
++  if (GPM_FD_SCREEN == gpm_consolefd) {
++    /* TODO: */
++    win.ws_col = 80;
++    win.ws_row = 25;
++  } else if (gpm_consolefd <= 0)
++      /* safety check */
++      return;
++  else if (ioctl(gpm_consolefd, TIOCGWINSZ, &win) == -1) {
+     return;
+   } /*if*/
+   if (!win.ws_col || !win.ws_row) {
+@@ -177,7 +185,7 @@
+ /*-------------------------------------------------------------------*/
+ int Gpm_Open(Gpm_Connect *conn, int flag)
+ {
+-  char tty[32];
++  char tty[64];
+   char *term;
+   int i;
+   struct sockaddr_un addr;
+@@ -236,13 +244,40 @@
+           if (!t) goto err;
+           strcpy(tty,t);
+           if (strncmp(tty,"/dev/tty",8) || !isdigit(tty[8]))
++            {
++              char* sty = getenv("STY");
++              /* as set by SCREEN, e.g
++               * STY=417.tty1.kristine
++               *                 ^hostname
++               */
++              if (sty)
++                {
++                  /* STY is set. Check, if it has a valid form */
++                  int n, vc;
++                  if (strlen(sty) >= sizeof tty
++                      || 3 != sscanf(sty, "%d.tty%d.%s", &n, &vc, tty))
++                    goto err;
++                  else
++                    {
++                      /* we're inside a SCREEN session. Don't connect to
++                       * the tty as below. TODO: how can we get lines
++                       * and columns from SCREEN ? */
++                      gpm_consolefd = GPM_FD_SCREEN;
++                      conn->vc = vc;
++                      win.ws_col = 80;
++                      win.ws_row = 25;
++                    }
++                }
++              else
+             goto err;
++            }
++          else
+           conn->vc=atoi(tty+8);
+         }
+       else /* a default handler -- use console */
+         sprintf(tty,"/dev/tty0");
+ 
+-      if (gpm_consolefd==-1)
++      if (gpm_consolefd == GPM_FD_INVALID) /* NOT called for SCREEN */
+         if ((gpm_consolefd=open(tty,O_WRONLY))<0)
+           {
+             gpm_debug_log(LOG_ERR,"%s: %s",tty,strerror(errno));
+@@ -254,6 +289,7 @@
+ 
+   /*....................................... Get screen dimensions */
+ 
++  if (gpm_consolefd != GPM_FD_SCREEN) /* NOT called for SCREEN */
+   ioctl(gpm_consolefd, TIOCGWINSZ, &win);
+ 
+   if (!win.ws_col || !win.ws_row)
+@@ -395,7 +431,7 @@
+   sigaction(SIGWINCH, &gpm_saved_winch_hook, 0);
+ #endif
+   close(gpm_consolefd);
+-  gpm_consolefd=-1;
++  gpm_consolefd = GPM_FD_INVALID;
+   return 0;
+ }
+ 
+diff -uwr gpm-1.19.3.orig/special.c gpm-1.19.3/special.c
+--- gpm-1.19.3.orig/special.c	Mon Jan 17 22:34:00 2000
++++ gpm-1.19.3/special.c	Fri Dec  1 00:19:05 2000
+@@ -26,6 +26,7 @@
+ 
+ /* This file is compiled conditionally, see the Makefile */
+ 
++#include <linux/limits.h> /* OPEN_MAX */
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>

@@ -1,0 +1,80 @@
+Index: b/src/headers/message.h
+===================================================================
+--- a/src/headers/message.h	2008-02-17 22:39:31.000000000 +0200
++++ b/src/headers/message.h	2008-02-17 22:40:43.000000000 +0200
+@@ -92,6 +92,7 @@
+          "    -R mouse-type    enter repeater mode. X should read /dev/gpmdata\n" \
+          "                     like it was a mouse-type device.  Default is MouseSystems.\n" \
+          "                     You can also specify \"raw\" to relay the raw device data.\n" \
++         "    -F               Always force repeat mode.\n" \
+          "    -s sample-rate   sets the sample rate (default %d)\n" \
+          "    -S [commands]    enable special commands (see man page)\n" \
+          "    -t mouse-type    sets mouse type (default '%s')\n" \
+Index: b/src/daemon/gpm.c
+===================================================================
+--- a/src/daemon/gpm.c	2008-02-16 16:14:40.000000000 +0200
++++ b/src/daemon/gpm.c	2008-02-17 22:40:43.000000000 +0200
+@@ -330,7 +330,8 @@ static inline char *getMouseData(int fd,
+    if((i=m_type->packetlen-howmany)) /* still to get */
+       do {
+          j = read(fd,edata-i,i); /* edata is pointer just after data */
+-         if (kd_mode!=KD_TEXT && fifofd != -1 && opt_rawrep && j > 0)
++         if ((kd_mode!=KD_TEXT || option.force_repeat)
++             && fifofd != -1 && opt_rawrep && j > 0)
+             write(fifofd, edata-i, j);
+          i -= j;
+       } while (i && j);
+@@ -445,7 +446,7 @@ static inline int processMouse(int fd, G
+ 
+ /*....................................... we're a repeater, aren't we? */
+ 
+-   if (kd_mode!=KD_TEXT) {
++   if (kd_mode!=KD_TEXT || option.force_repeat) {
+       if (fifofd != -1 && ! opt_rawrep) {
+          if (m_type->absolute) { /* hof Wed Feb  3 21:43:28 MET 1999 */ 
+             /* prepare the values from a absolute device for repeater mode */
+@@ -997,7 +998,7 @@ int old_main()
+       if (ioctl(fd, KDGETMODE, &kd_mode) < 0)
+          gpm_report(GPM_PR_OOPS,GPM_MESS_IOCTL_KDGETMODE);
+       close(fd);
+-      if(kd_mode != KD_TEXT && !option.repeater) {
++      if(kd_mode != KD_TEXT && !option.repeater && !option.force_repeat) {
+          wait_text(&mouse_table[1].fd);
+          maxfd=max(maxfd,mouse_table[1].fd);
+          readySet=connSet;
+Index: b/src/gpn.c
+===================================================================
+--- a/src/gpn.c	2008-02-17 22:39:31.000000000 +0200
++++ b/src/gpn.c	2008-02-17 22:40:43.000000000 +0200
+@@ -234,7 +234,7 @@ struct Gpm_Type *find_mouse_by_name(char
+ void cmdline(int argc, char **argv)
+ {
+    extern struct options option;
+-   char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:TuvV::23";
++   char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:FR::s:S:t:TuvV::23";
+    int  opt;
+ 
+    /* initialize for the dual mouse */ 
+@@ -262,6 +262,10 @@ void cmdline(int argc, char **argv)
+             if (option.repeater_type == 0)
+                option.repeater_type = "msc";
+             which_mouse=mouse_table+2;                   break;
++         case 'F': option.repeater++; option.force_repeat = 1;
++            if (option.repeater_type == 0)
++               option.repeater_type = "msc";
++            break;
+          case 'o': add_mouse(GPM_ADD_OPTIONS,optarg);
+                    gpm_report(GPM_PR_DEBUG,"options: %s",optarg);
+                    opt_options = optarg;                 break; /* GO AWAY */
+Index: b/src/headers/daemon.h
+===================================================================
+--- a/src/headers/daemon.h	2008-02-17 22:42:33.000000000 +0200
++++ b/src/headers/daemon.h	2008-02-17 22:42:56.000000000 +0200
+@@ -27,6 +27,7 @@
+ 
+ struct options {
+    int autodetect;            /* -u [aUtodetect..'A' is not available] */
++   int force_repeat;          /* force click repeat */
+    int no_mice;               /* number of mice */
+    int repeater;              /* repeat data */
+    char *repeater_type;       /* repeat data as which mouse type */

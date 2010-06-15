@@ -1,0 +1,77 @@
+From - Wed Jun  6 23:55:45 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id UAA13333
+	for <rubini@localhost>; Fri, 29 Dec 2000 20:30:50 +0100
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini/localhost> (single-drop); Fri, 29 Dec 2000 20:30:50 MET
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id TAA14746 for <rubini@pop.systemy.it>; Fri, 29 Dec 2000 19:33:08 +0100
+Received: from spock.linux.it (spock.linux.it [151.99.137.27])
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id SAA15401
+	for <rubini@systemy.it>; Fri, 29 Dec 2000 18:32:47 GMT
+Received: from blue.int.wirex.com (unknown [216.161.55.93])
+	by spock.linux.it (Postfix) with ESMTP id 10E3A197B9
+	for <rubini@linux.it>; Fri, 29 Dec 2000 19:32:45 +0100 (CET)
+Received: (from greg@localhost)
+	by blue.int.wirex.com (8.9.3/8.9.3) id KAA30085;
+	Fri, 29 Dec 2000 10:33:32 -0800
+Date: Fri, 29 Dec 2000 10:33:32 -0800
+From: Greg KH <greg@wirex.com>
+To: rubini@linux.it
+Cc: vendor-sec@lst.de, security@wirex.com
+Subject: temp file creation problem in gpm
+Message-ID: <20001229103332.G29373@wirex.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.2.5i
+X-Operating-System: Linux 2.2.18-immunix (i686)
+X-UIDL: 9c0bd8fe74181b95b30143ce1c2ddd42
+Status: RO
+
+Hi,
+
+In building Immunix Linux 7.0, we ran across the following problem in
+gpm 1.19.3.  I realize that gpm is unmaintained at this time, but we
+figured that you might want to add this patch to your patches section on
+the gpm ftp site.
+
+In the file gpn.c, the function check_uniqueness creates a temp file in
+an insecure way.  The following patch, by Steve Beattie
+<steve@wirex.com> should fix this problem.
+
+thanks,
+
+greg k-h
+
+
+diff -ur gpm-1.19.3-orig/gpn.c gpm-1.19.3/gpn.c
+--- gpm-1.19.3-orig/gpn.c	Tue Jul 18 05:06:06 2000
++++ gpm-1.19.3/gpn.c	Fri Dec 15 13:58:37 2000
+@@ -223,13 +223,16 @@
+ static void
+ check_uniqueness(void)
+ {
+-  static char tmp_pidfile [] = GPM_NODE_DIR "gpmXXXXXX";
++  static char tmp_pidfile [64]; 
++  int fd;
+   FILE* fp = 0;
+ 
+-  if (!mktemp(tmp_pidfile + strlen(GPM_NODE_DIR))) {
+-    oops("mktemp()");
++  strncpy (tmp_pidfile, GPM_NODE_DIR "gpmXXXXXX", 63);
++
++  if ((fd = mkstemp(tmp_pidfile)) == -1) {
++    oops("mkstemp()");
+   } /*if*/
+-  if ((fp = fopen(tmp_pidfile,"w")) != NULL) {
++  if ((fp = fdopen(fd,"w")) != NULL) {
+     fprintf(fp,"%d\n",getpid());
+     fclose(fp);
+   } else if (getuid()) {
+
+
+-- 
+greg@(kroah|wirex).com
+http://immunix.org/~greg
+

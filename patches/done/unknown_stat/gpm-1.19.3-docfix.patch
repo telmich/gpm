@@ -1,0 +1,56 @@
+--- gpm-1.19.3/doc/doc.gpm.docfix	Tue Jul 18 08:43:18 2000
++++ gpm-1.19.3/doc/doc.gpm	Thu Jul 19 12:23:36 2001
+@@ -720,10 +720,12 @@
+         ones. The wheel is currently unused.
+ 
+ @item imps2
+-	``IntelliMouse'' on the ps/2 port.
++	``IntelliMouse'' on the ps/2 port.  For serial
++        ``IntelliMouse'' devices, use the ``ms3'' decoder.
+ 
+ @item netmouse
+-        Decodes the ``Genius NetMouse'' type of devices.
++        Decodes the ``Genius NetMouse'' type of devices on the ps/2
++        port.  For serial ``Netmouse'' devices, use the ``ms3'' decoder.
+ 
+ @item cal
+ 	A decoder of the ``Calcomp UltraSlate device.
+@@ -1294,7 +1296,7 @@
+ @item int gpm_hflag
+ 	Used to signal if a character has been generated
+ 	by a mouse handler. 
+-        @xref{Handling Functions}
++        @xref{Handling Functions}.
+ @vindex gpm_handler
+ @vindex gpm_data
+ @item Gpm_Handler *gpm_handler; void *gpm_data
+--- gpm-1.19.3/doc/gpm.8.docfix	Tue Jul 18 09:21:19 2000
++++ gpm-1.19.3/doc/gpm.8	Thu Jul 19 12:26:31 2001
+@@ -354,6 +354,7 @@
+ .nf
+ \fB mev(1) \fP     A sample client for the gpm daemon.
+ \fB gpm-root(1) \fP An handler for Control-Mouse events.
++\fB gpm-types(7) \fP Description of mouse types supported by gpm.
+ 
+ .fi
+ The info file about `gpm', which gives more complete information and
+--- gpm-1.19.3/mice.c.docfix	Tue Mar  7 09:10:00 2000
++++ gpm-1.19.3/mice.c	Thu Jul 19 12:23:36 2001
+@@ -1988,7 +1988,7 @@
+   {"logim",  "Turn logitech into Mouse-Systems-Compatible.",
+            "", M_logimsc, I_serial, CS8 | CSTOPB | STD_FLG,
+                                 {0xf8, 0x80, 0x00, 0x00}, 5, 1, 0, 0, 0},
+-  {"pnp",  "Plug and pray. New mice may not run with '-t ms'.",
++  {"pnp",  "Plug and play. New mice may not run with '-t ms'.",
+            "", M_bare, I_pnp, CS7 | STD_FLG,
+                                 {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
+   {"imps2",   "Microsoft Intellimouse (ps2) - 3 buttons, wheel unused",
+@@ -1997,7 +1997,7 @@
+   {"ms3", "Microsoft Intellimouse (serial) - 3 buttons, wheel unused",
+            "", M_ms3, I_pnp, CS7 | STD_FLG,
+                                 {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0},
+-  {"netmouse",  "Genius NetMouse - 2 buttons and 2 buttons 'up'/'down'.",      
++  {"netmouse",  "Genius NetMouse (ps2) - 2 buttons and 2 buttons 'up'/'down'.",      
+            "", M_netmouse, I_netmouse, CS7 | STD_FLG,
+                                 {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
+   {"cal", "Calcomp UltraSlate",

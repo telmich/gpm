@@ -1,0 +1,42 @@
+This patch is inspired by Jonathan Atkin's imwheel2.patch.
+
+It introduces a slightly different approach to mouse wheel
+processing by GPM that allows to write a backward-compatible
+code, and does not need recompiling all existing GPM-based
+applications.
+
+Here is the short description of changes. For a detailed
+description refer to gpm.info after applying the patch:
+
+- New members appended to Gpm_Event structure:
+    w, dw - wheel displacement after previous reading, and
+            current wheel position (initially set to 0)		
+    pad   - reserve for future extensions
+	
+- New functions: Gpm_GetEventExt and Gpm_GetSnapshotExt allow
+  to get the extended Gpm_Event structure, while Gpm_GetEvent
+  and Gpm_GetSnapshot truncate it to the standard size for
+  backward compatibility
+
+- New event types: GPM_FWHEEL (wheel forward) and GPM_BWHEEL
+  (wheel backward) provide and alternative way of wheel
+  processing similar to ZAxis mapping in XFree86.
+
+- New definition:   #define GPM_EVENT_EXT
+  allows to write a backward-compatible code. 
+
+The gpm.info has been modified to reflect the changes. After
+the patch is applied and installed, type 'info gpm' for more
+information regarding wheel processing.
+
+The patch has been tested with PS/2 Intellimouse only.
+                
+N.B. This patch does not associate wheel motion with a keystroke,
+and does not automatically provide text scrolling - 'imwheel'
+package by Jonathan Atkins implements those feature, however it
+may be inconsistent with the current modifications.
+
+Michael Glickman <xsadp@yahoo.com>
+
+	
+

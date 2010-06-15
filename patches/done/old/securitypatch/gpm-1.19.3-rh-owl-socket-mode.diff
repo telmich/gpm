@@ -1,0 +1,14 @@
+--- gpm-1.19.3/gpm.c.orig	Tue Jul 18 16:06:06 2000
++++ gpm-1.19.3/gpm.c	Sat Jan  6 10:10:41 2001
+@@ -1012,8 +1012,9 @@
+       oops(ctladdr.sun_path);
+   maxfd=max(maxfd,ctlfd);
+ 
+-/* is this a bug in the new kernels? */
+-  chmod(GPM_NODE_CTL,0777);
++/* only allow the console user to access. */
++  if (chmod(GPM_NODE_CTL,0600)==-1)
++    oops(GPM_NODE_CTL);
+ 
+ /*....................................... get screen dimensions */
+ 

@@ -1,0 +1,2296 @@
+\input texinfo    @c -*-texinfo-*-
+%
+% doc.gpm - main file for the documentation
+%
+% Copyright 1994,1995,1998   rubini@linux.it (Alessandro Rubini)
+% Copyright (C) 1998 Ian Zimmerman <itz@speakeasy.org>
+% Copyright (C) 2001-2008 Nico Schottelius <nico-gpm2008 at schottelius.org>
+%
+%%%%
+
+%------------------------------------------------------------------------------
+%
+%                         NOTE FOR THE UNAWARE USER
+%                         =========================
+%
+%    This file is a texinfo source. It isn't the binary file of some strange
+%    editor of mine. If you want ASCII, you should "make gpm.txt".
+%
+%    Some strings maybe changed from the configure script.
+%
+%------------------------------------------------------------------------------
+
+%
+% This is not a conventional info file...
+% I use two extra features:
+%       - The '%' as a comment marker ("\%" -> "%")
+%       - leading blanks are allowed (and removed)
+%
+
+@comment %**start of header
+@setfilename gpm.info
+@settitle gpm @value{version}
+@iftex
+@afourpaper
+@end iftex
+@comment %**end of header
+
+@ifinfo
+@format
+@dircategory Miscellaneous
+@direntry
+* Gpm: (gpm).   Text-mode (non-X) mouse library and server daemon.
+@end direntry
+@end format
+@end ifinfo
+
+@setchapternewpage off
+
+@set version @release@
+@set update-month @release_date@
+
+@finalout
+
+@ifinfo
+%ASCII_BEGIN
+
+This file is a user's and programmer's manual for gpm @value{version}.
+
+Copyright (C) 1994,1995,1998 Alessandro Rubini
+Copyright (C) 2001-2008 Nico Schottelius
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+
+@end ignore
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation approved
+by the Free Software Foundation.
+@end ifinfo
+
+@setchapternewpage odd
+@titlepage
+@c use the new format for titles
+@title gpm @value{version}
+@subtitle A general purpose mouse server for the Linux console
+@subtitle @value{update-month}
+
+@author by Nico Schottelius <nico@@schottelius.org>
+
+@end titlepage
+@setchapternewpage off
+@headings single
+
+@ifinfo
+This file documents the @value{version} release of the "General Purpose
+Mouse" (gpm) server for the Linux text console (@value{update-month}).
+
+@node Top, Overview, (dir), (dir)
+@top gpm
+
+@menu
+* Overview::                    
+* Server Invocation::           
+* Gpm Internals::               
+* The ClientLib::               
+* Demo Clients::                
+* Type Index::                  
+* Function Index::              
+* Variable Index::              
+@end menu
+
+@end ifinfo
+%##########################################################################
+%##########################################################################
+
+@node Overview, Server Invocation, Top, Top
+@chapter Overview
+@cindex Overview of Gpm
+@cindex Gpm Overview
+
+
+The @dfn{gpm} package is a mouse server for the Linux console.  It is
+meant to provide cooked mouse events to text-only applications, such as
+editors and simple menu-based apps. The daemon is also able to repeat
+packets in "msc" format to a graphic application.  This last feature is
+meant to override the single-open problem of busmice.  The roots of
+@code{gpm} come from the @file{selection-1.5} package, by Andrew Haylett.
+
+The first application to support the mouse has been The Midnight Commander,
+by Miguel de Icaza.  @file{mc-0.11} and later releases offer
+mouse support if you have the mouse server running on your system.
+The file @file{t-mouse.el} provides support for using the
+mouse from within Emacs. @xref{Emacs Support}.
+
+As of release 0.96, a default-handler is released with gpm, and can be
+used to handle Control-Mouse events to draw menus on the screen.
+The @code{gpm-root} program, however, needs kernel 1.1.73 or newer.
+@xref{gpm-root}.
+
+Release 1.00 has been an incompatible one (is is incompatible with
+releases older than 0.97), but is compatible with the kernel-level mouse
+driver (available as @file{kmouse-?.??.tar.gz} from the mirrors of
+@uref{ftp://tsx-11.mit.edu}. With 1.0 the high level library is available,
+together with a demonstration/test program. A small utility to help in
+detecting your mouse-type is also included.
+
+As of release 1.20.0 the default device is removed. Now -m is a must.
+
+Release 1.20.1 introduces the must for -t and a specific way to use -m,-t,-o:
+Now you've got to use -m first, then -t and at last -o.
+This seems to be more complex, but makes using of multiply mice possible with
+clean code.
+
+@menu
+* Building the Release::        
+@end menu
+
+%=========================================================================
+@node Building the Release,  , Overview, Overview
+@section Compiling and Installing
+@cindex Building Gpm
+
+Just say @code{./configure && make && make install} to your
+shell. You'll need gpm installed to compile the latest release of
+The Midnight Commander with mouse support enabled.
+
+Binaries are not released with the package because it's safer for you to
+compile the package by yourself.
+
+%=========================================================================
+%@node Kernel Patches
+%@section Kernel Patches
+%@cindex Kernel Patches
+%@cindex Patches to Apply
+%
+%Old Linux kernels need to be patched to provide features I rely on. As
+%of 1.1.32, however, my patches are in the official release, so you won't
+%need any kernel recompilation. Remember, anyway, to enable selection while
+%compiling the kernel, or this package won't work.  Refer to
+%@file{kernel/README} to probe further.
+%
+%Other features are needed to run the @t{gpm-root} client. They are
+%really functional only since 1.1.73. 1.1.68, however, should be sufficient.
+%
+
+%##########################################################################
+@node Server Invocation, Gpm Internals, Overview, Top
+@chapter Server Invocation
+@cindex The Server
+@cindex Command Line (gpm)
+
+%MANPAGE gpm.8
+%M .TH GPM 8 "February 2002"
+%M .UC 4
+%M .SH NAME
+%M gpm \- a cut and paste utility and mouse server for virtual consoles
+%M .SH SYNOPSIS
+%M .B gpm
+%M [
+%M .I options
+%M ]
+%M .br
+%M .SH DESCRIPTION
+%M This package tries to be a useful
+%M mouse server for applications running on the Linux console.  It is
+%M based on the "selection" package, and some of its code
+%M comes from selection itself. This package is intended as a replacement
+%M for "selection" as a cut-and-paste mechanism; it also provides
+%M additional facilities. The "selection"
+%M package offered the first cut-and-paste implementation for Linux using
+%M two mouse buttons, and the cut buffer is still called "selection buffer"
+%M or just "selection" throughout this document.
+%M
+%M The information below is extracted from the texinfo file, which is the
+%M preferred source of information.
+
+The @code{gpm} executable is meant to act like a daemon (thus, @code{gpmd}
+would be a better name for it). This section is meant to describe the
+command-line options for @code{gpm}, while its internals are outlined in
+the next section.  
+@xref{Gpm Internals}.
+
+Due to restrictions in the @code{ioctl(TIOCLINUX)} system call, @code{gpm} must
+be run by the superuser. The restrictions have been added in the last 1.1
+kernels to fix a security hole related to selection and screen dumping.
+
+The server can be configured to match the user's taste, and any
+application using the mouse will inherit the server's
+attitude. From release 1.02 up to 1.19.2 is was possible
+for any user logged on the system console to change the mouse @emph{feeling}
+using the @t{-q} option. This is no longer possible for security
+reasons.
+
+As of 0.97 the server program puts itself in the background. To kill
+@code{gpm} you can just reinvoke it with the @samp{-k} cmdline switch,
+although @code{killall gpm} can be a better choice.
+
+@menu
+* Special Commands::            
+* Command Line::                
+* Bugs and Problems::           
+* Mouse Types::                 
+@end menu
+
+%M .SH SPECIAL COMMANDS
+%==========================================================================
+
+@node Special Commands, Command Line, Server Invocation, Server Invocation
+@section Special Commands
+
+Version 1.10 adds the capability to execute @emph{special} commands on
+certain circumstances. Special commands default to rebooting and halting
+the system, but the user can specify his/her personal choice. The
+capability to invoke commands using the mouse is a handy one for
+programmers, because it allows to issue a clean shutdown when the
+keyboard is locked and no network is available to restore the system to
+a sane state.
+
+Special commands are toggled by triple-clicking the left and right button --
+an unlikely event during normal mouse usage. The easiest way to triple-click
+is pressing one of the buttons and triple-click the other one. When special
+processing is toggled, a message appears on the console (and the speaker
+beeps twice, if you have a speaker); if the user releases all the buttons
+and presses one of them again within three seconds, then the special
+command corresponding to the button is executed.
+
+The default special commands are:
+
+@table @var
+@item left button
+        Reboot the system by signalling the init process
+
+@item middle button (if any)
+        Execute @code{/sbin/shutdown -h now}
+
+@item right button
+        Execute @code{/sbin/shutdown -r now}
+@end table
+
+The @samp{-S} command line switch enables special command processing and
+allows to change the three special commands. To accept the default
+commands use @samp{-S ""} (i.e., specify an empty argument).  To specify
+your own commands, use a colon-separated list to specify commands
+associated to the left, middle and right button. If any of the commands
+is empty, it is interpreted as `send a signal to the init process'. This
+particular operation is supported, in addition to executing external
+commands, because sometimes bad bugs put the system to the impossibility
+to fork; in these rare case the programmer should be able to shutdown
+the system anyways, and killing init from a running process is the only
+way to do it.
+
+As an example, @samp{-S ":telinit 1:/sbin/halt"}, associates killing
+init to the left button, going single user to the middle one, and halting
+the system to the right button.
+
+System administrators should obviously be careful about special
+commands, as gpm runs with superuser permissions. Special commands are
+best suited for computers whose mouse can be physically accessed only by
+trusted people.
+
+%M .SH COMMAND LINE OPTIONS
+%==========================================================================
+@node Command Line, Bugs and Problems, Special Commands, Server Invocation
+@section Command Line Options
+
+Available command line options are the following:
+
+@table @code
+@item -a @var{accel}
+        Set the acceleration value used when a single motion event is
+        longer than @var{delta} (see @samp{-d}). 
+
+@item -A[@var{limit}]
+        Start up with selection pasting disabled.  This is intended as a
+        security measure; a plausible attack on a system seems to be to
+        stuff a nasty shell command into the selection buffer
+        (@code{rm -rf /}) including the terminating line break, then all the
+        victim has to do is click the middle mouse button ..
+        As of version 1.17.2, this has developed
+        into a more general aging mechanism; the
+        gpm daemon can disable (@emph{age}) selection pasting
+        automatically after a period of inactivity.  To enable this mode
+        just give the optional @var{limit} parameter (no space in between !)
+        which is interpreted as the time in seconds for which a selection is
+        considered valid and pastable.
+        As of version 1.15.7, a trivial program called
+        @code{disable-paste} is provided. The following makes a good
+        addition to @file{/etc/profile} if you allow multiple users to
+        work on your console.
+
+        @code{case $( /usr/bin/tty ) in @* /dev/tty[0-9]*) /usr/bin/disable-paste ;; @* esac}
+
+@item -b @var{baud}
+        Set the baud rate.
+
+@item -B @var{sequence}
+        Set the button sequence. @samp{123} is the
+	normal sequence, @samp{321} can be used by left-handed people,
+        and @samp{132} can be useful with two-button mice (especially within
+        Emacs). All the button permutations are allowable.
+
+@item -d @var{delta}
+        Set the delta value. When a single motion event
+	is longer than @var{delta}, @var{accel} is used as a multiplying
+        factor. (Must be 2 or above)
+
+@item -D
+        Do not automatically enter background operation when started,
+        and log messages to the standard error stream, not the syslog
+        mechanism.  This is useful for debugging; in previous releases
+        it was done with a compile-time option.
+
+@item -g @var{number}
+        With glidepoint devices, emulate the specified button with tapping.
+        @var{number} must be @samp{1}, @samp{2}, or @samp{3}, and refers to the
+        button number @emph{before} the @samp{-B} button remapping is performed.
+        This option applies to the mman and ps2 decoding. No button is
+        emulated by default because the ps2 tapping is incompatible with
+        some normal ps2 mice
+
+@item -h
+        Print a summary of command line options.
+
+@item -i @var{interval}
+        Set @var{interval} to be used as an upper time limit
+	for multiple clicks. If the interval between button-up and
+	button-down events is less than @var{limit}, the press is considered
+	a double or triple click. Time is in milliseconds.
+
+@item -k 
+        Kill a running gpm. This can be used by busmouse users to kill gpm
+        before running X (unless they use @samp{-R} or the single-open
+        limitation is removed from the kernel).
+
+@item -l @var{charset}
+        Choose the @code{inword()} look up table. The
+	@var{charset} argument is a list of characters. @samp{-} is used to
+	specify a range and @samp{\ } is used to escape the next character
+        or to provide octal codes.
+	Only visible character can appear in @var{charset} because control
+	characters can't appear in text-mode video memory, whence selection
+	is cut. 
+
+@item -m @var{filename}
+        Choose the mouse file to open. Must be before -t and -o.
+
+@item -M
+        Enable multiple mode. The daemon will read two different mouse devices.
+        Any subsequent option will refer to the second device, while any
+        preceding option will be used for the first device. This option
+        automatically forces the @emph{repeater} (@samp{-R}) option on.
+
+@item -o @var{list-of-extra-options}
+	The option works similary to the ``-o'' option of mount; it is
+	used to specify a list of ``extra options'' that are specific
+	to each mouse type. The list is comma-separated. The options
+	@samp{dtr}, @samp{rts} or @samp{both} are used by the serial
+	initialization to toggle the modem lines like, compatibly with
+	earlier @i{gpm} versions; note however that using @t{-o dtr}
+	associated with non-plain-serial mouse types may now generate
+	an error. @xref{Mouse Types}.
+   And by the way, use -o after -m and after -t.
+        
+@item -p
+        Forces the pointer to be visible while selecting. This is the
+        behaviour of @file{selection-1.7}, but it is sometimes confusing.
+        The default is not to show the pointer, which can be confusing as well.
+
+
+@item -r @var{number}
+        Set the responsiveness. A higher responsiveness is used for a faster
+        cursor motion.
+
+@item -R[@var{name}]
+        Causes @code{gpm} to act as a repeater: any mouse data received while
+        in graphic mode will be produced on the fifo @file{/dev/gpmdata}
+        in protocol @var{name}, given as an optional argument (no space in
+        between !).  In principle, you can use the same
+        names as for the @samp{-t} option, although repeating into some
+        protocols may not be implemented for a while.  @xref{Mouse Types}.
+        In addition, you can specify @samp{raw} as the @var{name}, to repeat
+        the mouse data byte by byte, without any protocol translation.
+        If @var{name} is omitted, it defaults to @samp{msc}.
+        Using @i{gpm} in repeater mode, you can configure the X
+        server to use its fifo as a mouse device. This option is useful for
+        bus-mouse owners to override the single-open limitation. It is also
+        an easy way to manage those stupid dual-mode mice which force you
+        to keep the middle button down while changing video mode. The option
+        is forced on by the @samp{-M} option.
+
+@item -s @var{number}
+        Set the sample rate for the mouse device.
+
+@item -S @var{commands}
+        Enable special-command processing, and optionally specify custom
+        commands as a colon-separated list. See above for a detailed
+        description of special commands.
+
+@item -t @var{name}
+        Set the mouse type. Use @samp{-t help} to get a list
+	of allowable types. Since version 1.18.1, the list also shows
+        which protocols are available as repeaters (see @t{-R} above),
+        by marking them with an asterisk (``@t{*}'').
+        @xref{Mouse Types}.
+        Use -t after you selected the mouse device with -m.
+
+@item -v
+        Print version information and exit.
+
+@item -2
+        Force two buttons. This means that the middle button, if any,
+        will be taken as it was the right one.
+
+@item -3
+        Force three buttons. By default the
+        mouse is considered to be a 2-buttons one, until the middle button
+        is pressed. If three buttons are there, the right one is used
+        to extend the selection, and the middle one is used to paste it.
+        Beware: if you use the @samp{-3} option with a 2-buttons mouse, you
+        won't be able to paste the selection. 
+
+@end table
+
+@ignore
+.SH OPERATION
+
+To select text press the left mouse button and drag the mouse.
+To paste text in the same or another console, press the middle button.
+The right button is used to extend the selection, like in `xterm'.
+
+Two-button mice use the right button to paste text.
+
+Double and triple clicks select whole word and whole lines. Use of
+the `-p' option is recommended for best visual feedback.
+
+If a trailing space after the contents of a line is highlighted, and if
+there is no other text on the remainder of the line, the rest of the
+line will be selected automatically. If a number of lines are selected,
+highlighted trailing spaces on each line will be removed from the
+selection buffer.
+
+Any output on the virtual console holding the selection will clear the
+highlighted selection from the screen, to maintain integrity of the
+display, although the contents of the paste buffer will be unaffected.
+
+The selection mechanism is disabled if the controlling virtual console
+is placed in graphics mode, for example when running X11, and is
+re-enabled when text mode is resumed. (But see BUGS section below.)
+
+@end ignore
+
+%MSKIP
+@menu
+* Bugs and Problems::           
+@end menu
+
+@node Bugs and Problems, Mouse Types, Command Line, Server Invocation
+@section Bugs and Problems
+
+%M .SH BUGS
+The @code{gpm} server may have problems interacting with X: if your
+mouse is a single-open device (i.e. a bus mouse), you should kill
+@code{gpm} before starting X, or use the @samp{-R} option (see
+above).  To kill @code{gpm} just invoke @code{gpm -k}. This problem doesn't
+apply to serial mice.
+
+Two instances of gpm can't run on the same system. If you have two mice use
+the @samp{-M} option (see above).
+
+While the current console is in graphic mode, @code{gpm} sleeps until
+text mode is back (unless @samp{-R} is used). Thus, it won't reply to
+clients. Anyways, it is unlikely that mouse-eager clients will spur
+out in hidden consoles.
+
+The clients shipped out with gpm are not updated, thus there are potential
+security risks when using them.
+
+@ignore
+
+.SH AUTHORS
+.nf
+Andrew Haylett <ajh@gec-mrc.co.uk> (the original selection code)
+Ian Zimmerman <itz@speakeasy.org> (old maintainer)
+Alessandro Rubini <rubini@linux.it> (old maintainer (still helps a lot))
+Nico Schottelius <nico@schottelius.org> (maintainer)
+
+Many many contributors, to both selection and gpm.
+.fi
+
+.SH MAINTAINERS
+
+The current maintainer is Nico Schottelius. But without the help of
+Alessandro Rubini and the mailing list it would be impossible for me to
+maintain gpm. The development mailing list can be reached under
+gpm@lists.linux.it. More information on the list is in the README file part of
+the source distribution of gpm.
+
+.SH FILES
+.nf
+/var/run/gpm.pid The PID of the running gpm
+/dev/gpmctl     A control socket for clients
+/dev/gpmdata    The fifo written to by a \fBrepeater\fP (`-R') daemon.
+.fi
+
+.SH SEE ALSO
+.nf
+\fB mev(1)\fP        A sample client for the gpm daemon.
+\fB gpm-root(1)\fP   An handler for Control-Mouse events.
+
+.fi
+The info file about `gpm', which gives more complete information and
+explains how to write a gpm client.
+
+@end ignore
+%MANPAGE END
+
+%==========================================================================
+@node Mouse Types,  , Bugs and Problems, Server Invocation
+@section Mouse Types
+
+%MANPAGE gpm-types.7
+%M .TH GPM-TYPES 7 "July 2000"
+%M .UC 4
+%M .SH NAME
+%M gpm-types \- pointer types (mice, tablets, etc.) managed by gpm.
+%M .br
+%M The information below is extracted from the texinfo file, which is the
+%M preferred source of information.
+%M .SH DESCRIPTION
+%MSKIP
+This section of the gpm documentation manual
+%M This manpage
+describes the various pointer types currently available in @i{gpm}. If you
+look at the source code, you'll find that pointer-specific code is
+confined to @file{mice.c} (while it used to only include mouse decoders,
+@i{gpm} now supports tablets and touchscreens as well).
+
+The mouse type is specified on command line with the @samp{-t}
+option. The option takes an argument, which represents the name of a
+mouse type. Each type can be associated to different names. For old
+mouse types, one name is the old selection-compatible name, and another
+is the XFree name. After version 1.18.1 of @i{gpm}, the number of
+synonyms was made arbitrary and the actual name being used is made
+available to the function responsible for mouse
+initialization. Therefore it is possible for a mouse decoder to behave
+slightly differently according to the name being used for the device (if
+this feature was already present, we wouldn't have for example @t{ms+}
+and @t{ms+lr} as different mouse types).
+
+The initialization procedure of each mouse type can also receive extra
+option, by means of the @t{-o} command line option. Since
+interpretation of the option string is decoder-specific, the allowed
+options are described in association to each mouse type. When no
+description of option strings is provided, that means the option
+string is unused for that mouse type and specifying one generates an
+error. When the document refer to ``standard serial options'' it means
+that one of @t{-o dtr}, @t{-o rts}, @t{-o both} can be specified to
+toggle the control lines of the serial port.
+
+The following mouse type are corrently recognized:
+
+@table @code
+@item bare Microsoft
+        The Microsoft protocol, without any extension. It only reports
+        two buttons. If your device has three, you should either try
+        running the @t{mman} decoder or @t{msc}. In the latter case,
+        you need to tell the mouse to talk @t{msc} protocol by
+        toggling the DTR and RTS lines (with one of @t{-o drt}, @t{-o
+        rts} or @t{-o both}) or invoking @code{gpm -t msc} while
+        keeping the middle button pressed. Very annoying, indeed.
+	This mouse decoder accepts standard serial options, although they
+	should not be needed.
+
+@item ms 
+        This is the original Microsoft protocol, with a middle-button
+        extension.  Some old two-button devices send some spurious
+        packets which can be misunderstood as middle-button events. If
+        this is your case, use the @samp{bare} mouse type.  Some new
+        two-button devices are ``plug and play'', and they don't play
+        fair at all; in this case try @t{-t pnp}.  Many (most)
+        three-button devices that use the microsoft protocol fail to
+        report some middle-button events during mouse motion.  Since
+        the protocol does not distinguish between the middle button
+        going up and the middle button going down it would be liable
+        to get out of step, so this decoder declares the middle button
+        to be up whenever the mouse moves. This prevents dragging with
+        the middle button, so you should probably use @samp{-t ms+lr}
+        instead of this decoder, especially if you want to use X.
+        This mouse decoder accepts standard serial options, although
+        they should not be needed.
+
+@item ms+
+	This is the same as @samp{-t ms} except that the middle button
+	is not reset during mouse motion. So you can drag with the
+	middle button. However, if your mouse exhibits the usual buggy
+	behaviour the decoder is likely to get out of step with
+	reality, thinking the middle button is up when it's down and
+	vice versa.  You should probably use @samp{-t ms+lr} instead
+	of this decoder.  This mouse decoder accepts standard serial
+	options, although they should not be needed.
+
+@item ms+lr
+	This is the same as @samp{-t ms+} except that there is an
+	additional facility to reset the state of the middle button by
+	pressing the other two buttons together. Do this when the
+	decoder gets into a confused state where it thinks the middle
+	button is up when it's down and vice versa. (If you get sick
+	of having to do this, please don't blame gpm; blame your buggy
+	mouse! Note that most three-button mice that do the microsoft
+	protocol can be made to do the MouseSystems protocol
+	instead. The ``3 Button Serial Mouse mini-HOWTO'' has
+	information about this.)  This mouse decoder accepts standard
+	serial options, although they should not be needed.
+
+@item msc MouseSystems
+        This is the standard protocol for three-button serial devices.
+	Some of such devices only enter MouseSystem mode if the RTS, DTR
+	or both lines are pushed low. Thus, you may try @t{-t msc}
+	associated with @t{-o rts}, @t{-o dtr} or @t{-o both}.
+
+@item mman Mouseman
+        The protocol used by the new Logitech devices with three
+	buttons.  It is backward compatible with the Microsoft
+	protocol, so if your mouse has three buttons and works with
+	@t{-t ms} or similar decoders you may try @t{-t mman} instead
+	to use the middle button.  This mouse decoder accepts standard
+	serial options, although they should not be needed.
+
+@item sun
+        The protocol used on Sparc computers and a few others.
+        This mouse decoder accepts standard serial options, although
+        they should not be needed.
+
+@item mm MMSeries
+        Title says it all.
+        This mouse decoder accepts standard serial options, although
+        they should not be needed.
+
+@item logi Logitech
+        This is the protocol used by old serial Logitech mice.
+
+@item bm BusMouse
+        Some bus devices use this protocol, including those produced
+        by Logitech.
+
+@item ps2 PS/2
+        The protocol used by most busmice. 
+
+@item ncr
+        This `type' is able to decode the pointing pen found
+        on some laptops (the NCR 3125 pen)
+
+@item wacom
+	The protocol used by the Wacom tablet. Since version 1.18.1
+        we have a new Wacom decoder, as the old one was not working
+        with new tablets. This decoder was tested with Ultrapad,
+        PenPartner, and Graphire tablets. 
+	Options: 
+	@t{-o relative} (default) for relative mode,
+	@t{-o absolute} for absolute mode.
+
+@item genitizer
+	The \"Genitizer\" tablet, in relative mode.
+        This mouse decoder accepts standard serial options, although
+        they should not be needed.
+
+@item logim
+        Used to turn Logitech mice into Mouse-Systems-Compatible.
+        Obviously, it only works with some of the Logitech mice.
+
+@item pnp
+        This decoder works with the new mice produces by our friend Bill,
+        and maybe with the old ones as well. The Pnp protocol is
+        hardwired at 1200 baud and is upset by normal initialization, so
+	this is a @t{-t bare} decoder with no initialization at all.
+        This mouse decoder accepts standard serial options, although
+        they should not be needed.
+
+@item ms3
+        A decoder for the new serial IntelliMouse devices, the ones
+        with three buttons and a protocol incompatible with older
+        ones. The wheel is currently unused.
+
+@item imps2
+	``IntelliMouse'' on the ps/2 port. This type can also be used for
+        a generic 2-button ps/2 mouse too, since it will auto-detect the type.
+
+@item netmouse
+        Decodes the ``Genius NetMouse'' type of devices on the ps/2
+        port.  For serial ``Netmouse'' devices, use the ``ms3'' decoder.
+
+
+@item cal
+	A decoder of the ``Calcomp UltraSlate device.
+
+@item calr
+	Same as above, but in relative mode.
+
+@item twid
+        Support for the twiddler keyboard. As of gpm-1.14 this decoder
+        includes a char generator for the text console, but doesn't
+        yet support X keycodes. If used with @samp{-R}, @code{gpm} will anyway
+        repeat mouse events to the X server. More information about twiddler
+        support can be found in @file{README.twiddler}, in the gpm
+        distribution.
+
+@item syn synaptics
+	A decoder for the Synaptics TouchPad connected to the serial port.
+        This mouse decoder accepts standard serial options, although
+        they should not be needed.
+
+@item synps2 synaptics_ps2
+	Same as above, but for the devices attached to the ps2 port.
+
+@item brw
+	A decoder for the Fellowes Browser, a device with 4 buttons
+	and a wheel.
+        This mouse decoder accepts standard serial options, although
+        they should not be needed.
+
+@item js Joystick
+        This mouse type uses the joystick device to generate mouse
+        events. It is only available if the header @file{linux/joystick.h}
+        is found at compile time. The header (and the device as well)
+        has been introduced only during 2.1 development, and is not
+        present in version 2.0 of the kernel.
+
+@item summa
+	This is a decode for the Symmagraphics of Genius tablet, run in
+	absolute mode. A repeater is associated to this decoder, so it
+	can @t{-R summa} can be used to generate X events even for other
+	absolute-pointing devices, like touchscreens. To use the repeated
+	data from X, you need a modified @t{xf86Summa.o} module.
+
+@item mtouch
+        A decoder for the MicroTouch touch screen. Please refer to the
+        file @file{README.microtouch} in the source tree of gpm for
+        further information. In the near future, anyways, I plan to fold
+        back to this documentation the content of that file.
+
+@item gunze
+        A decoder for the gunze touch screen. Please refer to the
+        file @file{README.gunze} in the source tree of gpm for
+        further information. In the near future, anyways, I plan to fold
+        back to this documentation the content of that file. The decoder
+        accepts the following options: @t{smooth=}, @t{debounce=}. An
+        higher smoothness results in slower motion as well; a smaller
+        smoothness gives faster motion but, obviously, less smooth.
+        The default smoothness is 9. The debounce time is express in
+        milliseconds and is the minimum duration of an up-down event
+        to be taken as a tap. Smaller bounces are ignored.
+
+@item acecad
+	The Acecad tablet in absolute mode.
+
+@item wp wizardpad
+	Genius WizardPad tablet
+
+@end table
+
+@ignore
+
+.SH FILES
+.nf
+src/mice.c           The source file for pointer decoders
+.fi
+
+.SH SEE ALSO
+.nf
+\fB gpm(8) \fP     The General Purpose Mouse server
+
+.fi
+The info file about `gpm', which gives more complete information and
+explains how to write a gpm client.
+
+@end ignore
+
+%MANPAGE END
+
+
+%##########################################################################
+@node Gpm Internals, The ClientLib, Server Invocation, Top
+@chapter Gpm Internals
+@cindex Internals
+
+The server is organized as a main loop built around a @code{select()}
+system call. It responds both to mouse events and to input from the
+clients, which are connected to the server through a unix domain
+socket. The connection is used to tell the server what a client is
+interested in, and to get mouse events.
+
+When no clients are connected to the active console, the server runs
+the selection mechanism (cut and paste of text).  The selection
+mechanism is a simple and well-designed application, whose behaviour
+can be cloned by clients, by telling the server to inherit the default
+response for certain mouse events (motion being the most
+interesting).
+
+@menu
+* Events::                      
+* Margins::                     
+* Event Types::                 
+* Connection Details::          
+* Default Handlers::            
+@end menu
+
+%==========================================================================
+@node Events, Margins, Gpm Internals, Gpm Internals
+@section Events
+@cindex Events
+
+Whenever the mouse generates an event, the event is dispatched to the
+active client for the current console, or to the default handler, if
+present.  Otherwise selection is run. A default handler is a client
+process which gets mouse events form all the virtual
+consoles. 
+@xref{Default Handlers}.
+
+When a client is involved, it is handled a @code{Gpm_Event}
+structure, built by the server. The fields for @code{Gpm_Event} are the
+following:
+@tindex Gpm_Event
+
+@table @code
+
+@item unsigned char buttons;
+	An or-mask of the values @code{GPM_B_LEFT},
+	@code{GPM_B_MIDDLE} and @code{GPM_B_RIGHT}. It corresponds to
+	the state of the mouse buttons when the event is reported. The
+	current implementation of gpm allows at most three buttons.
+
+@item unsigned char modifiers;
+	The value of the kernel variable
+        @code{shift_state}, as of @file{keyboard.c}, when the event is
+        reported. It is a bitmask value, and corresponds to the least
+        significant byte of the value used by the @code{loadkeys}
+        program. Use of symbolic
+        names in source code is available after inclusion of
+        @file{linux/keyboard.h}, as exemplified in @file{mev.c}.
+
+@item unsigned short vc;
+	The number of the active virtual console when
+	the event is reported. The client is not expected to use this value,
+	which corresponds to the controlling terminal of the client process,
+        unless it gets events form multiple consoles. 
+        @xref{Default Handlers}.
+
+@item short x, y;
+	The position of the mouse pointer where the event
+	is reported. It is 1-based by default, to be compatible with
+        @code{selection} and @code{libcurses}.  This behavior can be
+        overriden, though, by setting the library variable
+        @code{gpm_zerobased}.  
+        @xref{Variables}.
+
+@item short dx, dy;
+	The change in position since the last reported
+	event.
+
+@item enum Gpm_Etype type;
+	A bit-mask, representing the
+	type of reported event, as described later. 
+        @xref{Event Types}.
+
+@item int clicks;
+	A counter, which is valid at button-down, drag or
+	button-up. It can be 0, 1 or 2 to mean single, double or triple
+	click.
+
+@item enum Gpm_Margin margin;
+	A bit-mask, telling if the pointer has
+	gone out of the visible screen. The indivudual bits are
+	named @code{GPM_TOP}, @code{GPM_BOT}, @code{GPM_LFT},
+        @code{GPM_RGT}. Only one
+	of them is active at a time, to allow using @code{switch} on the
+	value. Vertical outrun takes precedence on horizontal outrun.
+        @xref{Margins}.
+@end table
+
+%==========================================================================
+@node Margins, Event Types, Events, Gpm Internals
+@section How margins are managed
+
+Motion and button-press events are constrained to remain within the
+visible screen. This means that the @code{x} will be within 1 and 80 and
+@code{y} will be within 1 and 25 when the console is 80x25
+cells. However, a client can keep track of movements outside the
+screen, by using the @code{dx} and @code{dy} fields, which aren't subject to
+clipping.
+
+The server helps applications in detecting margin conditions by filling the
+@code{margin} field. Whenever the pointer tries to cross screen boundaries,
+it is forced to remain on the border, but a flag is set in @code{margin}.
+
+A different policy is in force for drag and button-release events. In this
+case the pointer is allowed to go outside the physical screen by exactly
+one position. This allows, for example, selecting to end of line
+by dragging down-left. The peculiar situation is nonetheless signaled
+through the @code{margin} flags. The client should be careful to 
+fit the values within the screen if needed. 
+@xref{Utility Functions}.
+
+
+%==========================================================================
+@node Event Types, Connection Details, Margins, Gpm Internals
+@section Event Types
+
+The @code{type} field in @code{Gpm_Event} is made up of bit-wide
+flags. The existing bit masks belong to two groups: bare events and
+cooked events. The bit-mask @code{GPM_BARE_EVENTS} is provided to
+extract bare events, by and-ing (@samp{&}) it with the @code{type} field.
+For any event, exactly one bit will be set in the resulting bitmask.
+
+Bare events are the following:
+
+@table @code
+@item GPM_MOVE
+	A motion event, with all buttons up.
+@item GPM_DRAG
+	A motion event, but one or more buttons are kept pressed.
+@item GPM_DOWN
+	A button press event. The @code{buttons} field will report
+        which buttons are pressed after the event.
+@item GPM_UP
+	A button release event. The @code{buttons} field will report
+        which buttons are being released. Note that this is different from
+        the previous case.
+@item GPM_ENTER
+        This means "enter in the current Region of Interest", and such 
+        event can only happen if the high-level library is used.
+        When the type is @code{GPM_ENTER}, all the other fields are undefined.
+        @xref{High Level Lib}.
+@item GPM_LEAVE
+        This is only delivered by the high level library, too. Events
+        of type @code{GPM_LEAVE} have all other fields undefined.
+@end table
+
+Cooked events are the following:
+
+@table @code
+@item GPM_SINGLE
+	This bit may be set at button-press,
+	drag and button release events, and can be used to identify a
+	single press. The time interval used to choose a double click
+	from two single clicks is set by a parameter in the daemon
+        (configurable at daemon invocation).
+@item GPM_DOUBLE
+	Used to identify a double click (press, drag, release)
+@item GPM_TRIPLE
+	Used to identify a triple click (press, drag, release)
+@item GPM_MFLAG
+	The ``motion flag'' is true if some dragging happened
+	between button-press and button-release. It can be used by
+	those applications which respond to events at button release.
+        It is available at drag and release.
+@end table
+
+%==========================================================================
+@node Connection Details, Default Handlers, Event Types, Gpm Internals
+@section Connection Details
+
+Each virtual console has a stack of clients attached to it. They talk to
+gpm by writing to a control socket and get mouse events by reading
+it. All the clients in the stack can receive events. Gpm-1.10 and earlier
+only sent events to the top client, but sometimes users play with
+multiple programs using suspend-resume (thanks Ian).
+
+In addition to the per-console stacks, another stack is there to store
+default-handling clients. 
+@xref{Default Handlers}.
+
+Each client registers with the server and tells which events it is
+interested in. Events not managed by the client can be handled by the
+selection mechanism, which is compiled in the server itself. This
+approach simplifies writing clients which respond only to button
+press/release events, because highlighting the mouse pointer can be
+performed by the server. A default handler in turn can respond only to
+mouse events associated with modifier keys, so that selection is used
+for any mouse-only event.
+
+Clients are required to fill a @code{Gpm_Connect} structure and pass
+it to the server. The structure is made up by four @code{unsigned int}
+fields.  
+@xref{Open and Close}.  
+@tindex Gpm_Connect
+
+@table @code
+@item eventMask
+	A bitmask of the events the client wants
+	to receive. Both bare and cooked events are
+	allowed to appear in the mask.
+
+@item defaultMask
+	A mask to tell which events allow
+	a default treatment (the selection one). These are mouse events,
+	independent of the modifier keys.
+
+@item minMod
+	The minimum amount of modifiers
+	required by the client. This field is used for default-handlers
+	which manage control-mouse events without interfering
+	with mouse-only ones.
+        @xref{Default Handlers}.
+
+@item maxMod
+	The maximum amount of modifiers the client is willing to receive.
+        Events featuring a modifier key not included in @code{maxMod} won't
+        be passed to the client.
+@end table
+@noindent
+Two more fields are there to tell about the connection itself, and you're
+not asked to fill them, because @code{Gpm_Open} will do it for you.
+
+@table @code
+@item int pid
+	The process id of the connecting application.
+@item int vc
+	Which virtual console to gain control of.
+@end table
+
+Keyboard modifiers are used to multiplex clients on the same virtual
+console. You (as a programmer) don't need to care about the internal
+workings.  They are detailed in @ref{Default Handlers}, but you only
+need to choose the right values for your application.
+
+Examples:
+@table @code
+@item minMod=0; maxMod=0;
+        specifies a client which senses mouse-only events, but neither
+        shift-mouse nor alt-mouse nor control-mouse.
+
+@item minMod=0; maxMod=~0;
+        is a client which gets any mouse event.
+
+@item minMod=1<<KG_SHIFT; maxMod=1<<KG_SHIFT;
+        is a client which senses all shift-mouse events and
+        nothing more.
+
+@item minMod=1<<KG_SHIFT; maxMod=~0;
+        is a client interested in shift-and-whatever-else mouse events,
+        but disregarding mouse-only events.
+@end table
+
+If the modifier keys in the event are too few or too many, the event
+won't be reported to the client. If the modifiers are right but the
+current event is not part of the @code{eventMask}, it is not reported as
+well. If the event is not used by the client, it can nonetheless be
+passed to another client (a default handler or the internal selection
+mechanism), according to the @code{defaultMask}.  If the event has been
+already reported to the current application, it will also be passed
+along the chain, if the GPM_HARD bit is set the @code{defaultMask}.
+
+Good values for @code{defaultMask} can thus be the following:
+
+@table @code
+@item 0
+	To sink any event, even those I don't use.
+@item ~eventMask
+	Pass along any event I don't use.
+@item ~GPM_HARD
+	Just the same, independently of @code{eventMask}.
+@item GPM_MOVE|GPM_HARD
+	Pass motion events, even if I use them.
+	This is the good choice for an application which wants information on
+	mouse motion, but leaves the task of cursor-drawing to the server.
+@end table
+
+%==========================================================================
+@node Default Handlers,  , Connection Details, Gpm Internals
+@section Default Handlers
+
+In addition to console-specific clients, @code{gpm} allows for
+console-independent clients -- those clients which handle events ignored
+by conventional clients
+
+Keyboard modifiers are used to multiplex the different clients on the
+same console, and a default handler should specify a non-zero minimum
+modifier set.
+
+To summarize, events which get to the server can be delivered to
+the following @emph{clients}, in the order of decreasing priority:
+
+@enumerate 1
+@item The current client for the current console, if any.
+
+@item The default handler, if any.
+
+@item The builtin `selection' mechanism.
+@end enumerate
+
+A keyboard modifier which connected with a @code{minMod} equal to the
+"Control" modifier and a @code{maxMod} of @samp{~0} (all bits on), will then
+get any event including the control key, if the application disregards it.
+
+This means that if the foreground application gets only the "Meta" key,
+control-mouse is sufficient to invoke the default handler. If the application
+gets control-mouse but disregards "Meta", conversely, meta-control-mouse will
+invoke the default handler, and meta-mouse will be delivered to selection.
+
+Both the @code{minMod} and @code{maxMod} fields are bitmasks, and their values
+are bitwise or-ed and and-ed with the current modifier mask.
+
+@code{gpm-root} is an example of default handler. It gets control-mouse events
+by default, and reads user-specific configuration files in order to draw
+menus on the background of your screen. 
+@xref{gpm-root}.
+
+%##########################################################################
+@node The ClientLib, Demo Clients, Gpm Internals, Top
+@chapter The Client Library
+
+The @file{libgpm.a} archive is meant to provide the mouse protocol at
+different levels of abstraction. Applications linking to the @code{gpm}
+server are expected to benefit from using the library, as compared to
+managing the raw socket interface. Any source file using the library
+should include @file{gpm.h} to get gpm specific macros and
+prototypes.
+
+Delivery of events within the library makes heavy use of the concept
+of "Handling Function" (or "handler", for short).
+
+@menu
+* Handling Functions::          
+* Low Level Library::           
+* High Level Lib::              
+* Xterm::                       
+@end menu
+
+%==========================================================================
+@node Handling Functions, Low Level Library, The ClientLib, The ClientLib
+@section Handling Functions
+
+A mouse handler is a function which registers itself within the
+library, and is called whenever a mouse event is reported to the
+application. It is passed two arguments and returns an integer value,
+according to the following typedef:
+
+@code{typedef int Gpm_Handler(Gpm_Event *@var{event}, void *@var{clientdata});}
+@tindex Gpm_Handler
+
+The @var{event} is used to instantiate the mouse event just received,
+and the @var{clientdata} pointer is needed to implement some higher
+level functionality. An handler will be typically invoked by
+@code{Gpm_Getc}, or by the high-level library, and the following
+discussion assumes the invoking function is @code{Gpm_Getc} (the
+high-level library only runs on behalf of @code{Gpm_Getc}).
+
+Handling functions can do whatever they want to, and return to the caller
+an integer value, which can be used to generate a keyboard event. This
+feature is useful in that often the mouse is a shortcut for something which
+could be made by means of the keyboard.
+
+The application main loop can detect if the keyboard event is a physical
+or generated one by looking at the global variable @code{gpm_hflag}, which
+is not zero only for handler-generated events.
+
+An handling function can generate more than one key in response of a single
+mouse event. If it sets the global variable @code{gpm_morekeys} to a non-zero
+variable before returning, it will be invoked again without waiting for
+mouse events. You can use @code{gpm_morekeys} as a counter of how
+many times you want to be called again -- the client library only compares
+it to zero.
+
+The return value from an handler is used as follows:
+
+@table @code
+@item EOF
+	This value is used to signal a fatal error, and will cause
+	@code{Gpm_Getc} to return the same value to the caller, after setting
+	@code{gpm_hflag} to 1.
+
+@item 0
+	A zero return value means that @code{Gpm_Getc} should go on as
+	before, without returning to the caller. The event has been eaten
+	by the handler and no key-press is simulated.
+
+@item @var{anything-else}
+	Any other value is considered a simulated
+	character, and is returned to the caller after setting
+	@code{gpm_hflag}.  This allows a quick way to implement yes/no
+	boxes and simple menus without interfering with the main body
+	of an existing application. Moreover, if return values greater
+	than 255 are used a single switch loop can parse both keyboard
+	and mouse events.
+@end table
+
+@noindent
+A mouse handler is passed as second argument the content of the
+@code{gpm_data} variable, i.e. the current clientdata. The clientdata is
+almost unuseful unless you use the high-level library, because it holds
+a static value. Delivering the clientdata however allows the
+high-level management of mouse events to be a superset of the
+low-level code, rather than an incompatible alternative.
+
+%==========================================================================
+@node Low Level Library, High Level Lib, Handling Functions, The ClientLib
+@section Low Level Library
+
+The library offers utility functions to establish the connection and
+to get mouse events. They are designed to work painlessly if the
+server is not running on the host machine. Xterm support is available
+as well. 
+@xref{Xterm}.
+
+@menu
+* Variables ::                  
+* Open and Close::              
+* Getting Events::              
+* Utility Functions::           
+* Extra Functions::             
+@end menu
+
+%--------------------------------------------------------------------------
+@node Variables , Open and Close, Low Level Library, Low Level Library
+@subsection Global Variables
+
+
+This is the list of all the global variables present in the client
+library:
+
+@table @code
+@vindex gpm_flag
+@item int gpm_flag
+	Initially zero, it is used to tell if the process
+	is connected with a mouse server or not. It is used as a counter to
+	manage multiple opens as well.
+@vindex gpm_tried
+@item int gpm_tried
+	A flag, used to avoid retrying a connection if
+	the server is not available on the system.
+@vindex gpm_fd
+@item int gpm_fd
+	Initially @samp{-1}, it is the file descriptor used
+	to talk with the server. If we run under xterm, it will be -2.
+@vindex gpm_zerobased
+@item int gpm_zerobased
+	Since selection and curses has always been one-based,
+	this variable, zero by default, can be used to trigger zero-based
+	coordinates in event reporting. It must be set before opening the mouse
+	connection, and never changed later. 
+        @xref{Events}.
+@vindex gpm_visiblepointer
+@item int gpm_visiblepointer
+        If not zero, causes the mouse cursor to be always visible on the
+        window. It is zero by default.
+@vindex gpm_mx
+@vindex gpm_my
+@item gpm_mx
+@itemx gpm_my
+        These variables (max X and max Y) are used when fitting events
+        inside the screen.  They are initialized by @code{Gpm_Open}, and
+        updated by a @code{SIGWINCH} handler internal to the library.
+        (Don't worry, the library doesn't @emph{replace} any
+        @code{SIGWINCH} handler your program may already have installed;
+        instead the library @emph{hooks} the signal, that is, it calls
+        any preexisting handler after taking care of its own needs.)
+@vindex gpm_hflag
+@item int gpm_hflag
+	Used to signal if a character has been generated
+	by a mouse handler. 
+        @xref{Handling Functions}.
+@vindex gpm_handler
+@vindex gpm_data
+@item Gpm_Handler *gpm_handler; void *gpm_data
+	Both initially @code{NULL},
+	they're used to setup asynchronous mouse handling, as
+	described below under the @code{Gpm_Getc()} item.
+@vindex gpm_morekeys
+@item gpm_morekeys
+        Used by the mouse handler to provide more than one key:
+        if @code{gpm_morekeys} is not zero, @code{Gpm_Getc} will
+        invoke the handler without waiting for events. @code{gpm_morekeys}
+        is never set by the mouse library.
+@end table
+
+
+%--------------------------------------------------------------------------
+@node Open and Close, Getting Events, Variables , Low Level Library
+@subsection Connecting and Disconnecting
+%.........................................................................
+@deftypefun int Gpm_Open (Gpm_Connect *@var{conn}, int @var{flag});
+
+Open a connection with the server.  The @var{conn} parameter points to
+the connection information for the being-created connection, as already
+described.  
+@xref{Connection Details}.  
+It is passed to the server after
+filling the @code{pid} and @code{vc} fields.
+
+@var{flag} should be @samp{0} for normal applications, those interested
+in events related to their own console. The own console is considered to
+be the one attached to @code{stdin}, and it must match the string
+@samp{/dev/tty*}. A negative value for @var{flag} is used to make the
+invoking application a default handler @ref{Default Handlers}, while a
+positive value is used to force connection to a particular console,
+either for debugging issues or whenever @code{stdin} is not a tty when
+@code{Gpm_Open} is invoked.
+
+Multiple opens are allowed, and a stack of @code{Gpm_Connect} structures
+is managed by the library. You can, thus, re-open the connection in
+order to temporarily change the range of events you're interested
+in. When you invoke an external program, for example, you should re-open
+the connection with @code{eventMask} zeroed, and @code{defaultMask},
+@code{minMod} and @code{maxMod} all equal to @samp{~0}.
+
+The return value is either @samp{-1} or the file descriptor used to
+communicate with the server. When run under xterm, a gpm client gets event
+through @code{stdin}, and the return value for @code{Gpm_Open()} will be @samp{-2}.
+This value is always available in @code{gpm_fd}.
+@end deftypefun
+
+%.........................................................................
+@deftypefun int Gpm_Close (void);
+
+Pops the connection stack. It is used to restore the previous situation
+after a change in the connection masks. Closes the actual connection
+when the stack gets empty. On last close it returns 0, -1 otherwise.
+@end deftypefun
+
+%--------------------------------------------------------------------------
+@node Getting Events, Utility Functions, Open and Close, Low Level Library
+@subsection Getting Events
+%.........................................................................
+@deftypefun int Gpm_GetEvent (Gpm_Event *@var{event});
+
+Reads an event form @code{gpm_fd}. It should be called only when the
+@code{gpm_fd} descriptor is reported as readable by a @code{select()}
+system call, or it will block until an event arrives (unless you put the
+mouse file in non-blocking mode). It returns 1 on success, -1 on
+failure, and 0 after closing the connection. Failure can happen if a
+signal interrupted the read system call. This function doesn't work with
+xterm mouse reporting and is meant for internal use by the library.
+@end deftypefun
+
+%.........................................................................
+@deftypefun int Gpm_CharsQueued (void);
+
+It returns the number of characters (contained in @code{nbprevchar} index)
+queued into the array @code{prevchar} by function @code{Gpm_Getc}. 
+This call is useful i.e. in recognition of function or arrow keys, when we
+need to know the next character read by @code{Gpm_getc} in order to
+subsequently get it.
+@end deftypefun
+
+%.........................................................................
+@deftypefun int Gpm_CharsQueued (void);
+
+It returns the number of characters (contained in @code{nbprevchar} index)
+queued into the array @code{prevchar} by function @code{Gpm_Getc}. 
+This call is useful i.e. in recognition of function or arrow keys, when we
+need to know the next character read by @code{Gpm_getc} in order to
+subsequently get it.
+@end deftypefun
+
+%.........................................................................
+@deftypefun int Gpm_Getc (FILE *@var{f});
+
+@deftypefunx int Gpm_Getchar (void);
+
+
+These are intended to be replacements for @code{getc()} and
+@code{getchar()} to be used by applications which are interested in the
+mouse. Their external behaviour is the same as @code{getc()}, but a mouse
+handler gets invoked whenever an event is available. 
+@xref{Handling Functions}.
+A mouse handler can force @code{Gpm_Getc} to return a
+specific value to the caller, and the ``simulated'' character is
+signaled by setting @code{gpm_hflag} to 1.
+@end deftypefun
+
+%.........................................................................
+@deftypefun int Gpm_Wgetch (WINDOW *@var{win});
+
+@deftypefunx int Gpm_Getch (void);
+
+
+These are intended to be replacements for @code{wgetch()} and
+@code{getch()} to be used by applications which are interested in the
+mouse. They are the curses equivalent of @code{Gpm_Getchar}.
+@end deftypefun
+
+%--------------------------------------------------------------------------
+@node Utility Functions, Extra Functions, Getting Events, Low Level Library
+@subsection Utility Functions
+%.........................................................................
+@deftypefun int Gpm_Repeat (int @var{millisecs});
+
+
+It returns 1 if no mouse events arrive in the next @var{millicecs}
+milliseconds, 0 otherwise. It is meant to be used by those handlers
+which need to repeat an action as long as the mouse button is pressed
+(@code{while(Gpm_Repeat(200))@dots{}}).
+@end deftypefun
+
+%.........................................................................
+@deftypefun int Gpm_DrawPointer (int @var{x}, int @var{y}, int @var{fd});
+
+@deftypefunx int GPM_DRAWPOINTER (Gpm_Event *@var{ePtr};)
+
+
+These are actually macros. They should be used to draw the mouse pointer after
+mangling the screen (while dragging on a menu, say), because letting it to
+the server won't work nicely, due to lack of synchronism between client and
+server. The file descriptor should refer to the console. The return value is
+0 on success and -1 on failure. @code{Gpm_DrawPointer} is obsolete, and is
+retained only for compatibility.
+@end deftypefun
+
+%.........................................................................
+@deftypefun int Gpm_FitValuesM (int *@var{x}, int *@var{y}, int @var{margin});
+
+@deftypefunx int Gpm_FitValues (@var{x},@var{y});
+
+@deftypefunx void Gpm_FitEvent (@var{ePtr});
+
+
+The first is a function, while the other are macros.
+Note that @code{Gpm_FitEvent} does not return values.
+These three procedures should be used to fit the pointer inside the visible
+screen. They are needed for drag and release event. A connection
+bit will be available in the future to force the pointer in the visible
+region.
+
+Note that fitting uses @code{gpm_mx} and @code{gpm_my}. 
+@xref{Variables}.
+@end deftypefun
+
+%--------------------------------------------------------------------------
+@node Extra Functions,  , Utility Functions, Low Level Library
+@subsection Extra Functions
+%.........................................................................
+@deftypefun char* Gpm_GetLibVersion (int *@var{where});
+
+
+This function returns a pointer to a static storage representing the
+version number of the library. It is only available from 0.98.2 onward,
+and returns a string like @samp{"0.98.2"}. The third number is optional.
+All numbers may be one or two digits. This behaviour changed in version
+2.1.0 of libgpm. In releases before 2.1.0 the second number was always
+reported as two digits. The @var{where} pointer, if not null, is used to store
+a decimal number representing the version -- 0.98.2 is 9802 and 2.1.1 is
+20101.
+@end deftypefun
+
+%.........................................................................
+@deftypefun char* Gpm_GetServerVersion (int *@var{where});
+
+
+This function returns a pointer to a static storage representing the
+version number of the server. The version is retrieved through
+@code{popen()}, so it could fail (and return @code{NULL})if no @code{gpm} program
+is in the current path. Alternatively, it could fail (and return a wrong
+value) if the @code{gpm} in the path is not the currently running one.
+The function is only available in the clientlibrary version 0.98.2 or
+newer, but it works with any daemon, from 0.01 onward. The string returned
+can be parsed in the same way as for @code{Gpm_GetLibVersion()}. A preparsed
+version is stored in *@var{where} if @var{where} is not null. Both these
+functions do their calculations only the first time they are invoked.
+@end deftypefun
+
+%.........................................................................
+@deftypefun int Gpm_GetSnapshot (Gpm_Event *@var{ePtr});
+
+
+This function gives a non-blocking snapshot of the current situation:
+it returns the number of mouse buttons, as known to the server, or -1
+if that information is not available (under Xterm, or before connecting).
+If @var{ePtr} is not null, it is filled with information about the current
+state of the mouse. The fields have the following meaning: @code{x,y}: current
+position of the cursor; @code{dx,dy} size of the window; @code{vc,modifiers} the
+current console and the current shift state; @code{buttons} which buttons
+are currently help down; @code{clicks} the number of clicks (0,1,2).
+This function is only available from 0.98.2 onward, and will return -1
+if run with an older server.
+
+Since this information travels on the same file descriptor as the
+events, and applications usually don't want to lose events, the function
+returns 0 if the input queue is not empty.
+
+@end deftypefun
+
+
+%--------------------------------------------------------------------------
+@node High Level Lib, Xterm, Low Level Library, The ClientLib
+@section High Level Library
+
+The high level library is part of the main @file{libgpm.a}, but it acts at
+a different level of abstraction. The high level library depends in the
+low-level one, so if you link your application with any object of the
+high-level library, you're forced to link in the low-level one too.
+
+If your application @emph{only} runs under xterm, please see
+@file{gpm-xterm} in the @file{sample} subdirectory of the distribution,
+which offers all the needed functionality.
+
+The main role of the high-level library is to define a way to manage
+windows (or "Regions of Interest" on your text screen). The regions
+are arranged in a stack, and event are delivered to the different
+windows according to their position both on the stack and on the screen.
+@xref{hltest}.
+
+@menu
+* Concepts::                    
+* hl-Variables::                
+* hl-Functions::                
+@end menu
+
+%--------------------------------------------------------------------------
+@node Concepts, hl-Variables, High Level Lib, High Level Lib
+@subsection Concepts
+
+The high-level library is completely independent of the low-level one,
+so it uses @code{gpm_handler} and @code{gpm_data} as connection point with
+@code{Gpm_Getc()}.
+
+All the functionality is based on the concept of RoI's. each RoI is
+described by a @code{Gpm_Roi} structure, which is made up by the following
+fields:
+@tindex Gpm_roi
+
+@table @code
+
+@item short xMin, xMax
+        These numbers identify the upper-left corner of the region.
+        When events are reported to the region, the event coordinate
+        will be relative to this position (zero-based).
+
+@item short yMin, yMax
+        These numbers identify the lower-right corner of the region.
+
+@item unsigned short minMod, maxMod
+        These modifier masks have the same role within the application as
+        the same fields have in inter-application multiplexing.
+
+@item unsigned short eventMask
+        It is the mask of events which are to be reported to the current
+        region.
+
+@item unsigned short owned
+        This is a bit, used to know if the region is owned by the
+        library or the application, in order to issue @code{free(0} when
+        needed.
+
+@item Gpm_Handler *handler
+        The function to be called when events are to be reported to the
+        current region.
+
+@item void *clientdata
+        The clientdata to be passed to the handler
+
+@item Gpm_Roi *next, *prev
+        Links to the RoI chain.
+
+@end table
+
+%--------------------------------------------------------------------------
+@node hl-Variables, hl-Functions, Concepts, High Level Lib
+@subsection Variables
+
+@table @code
+@item Gpm_Roi* gpm_roi
+        The linked list of regions (pointer to the top one).
+@vindex gpm_roi
+
+@item Gpm_Roi* gpm_current_roi
+        The region which got the last event (used to generate enter and
+        leave events).
+@vindex gpm_current_roi
+
+@item Gpm_Handler* gpm_roi_handler
+        This variable is meant to be set by the user. It is the catch-all
+        region of interest, which will be called for any mouse event not
+        falling within any registered region. If NULL, the event will be
+        discarded.
+@vindex gpm_roi_handler
+
+@item void* gpm_roi_data
+        the client data to be passed to @code{gpm_roi_handler}.
+@vindex gpm_roi_data
+@end table
+
+%--------------------------------------------------------------------------
+@node hl-Functions,  , hl-Variables, High Level Lib
+@subsection Functions
+
+
+
+%.........................................................................
+@deftypefun Gpm_Roi* Gpm_PushRoi (int @var{xmin}, int @var{ymin}, int @var{xmax}, int @var{ymax},
+        int @var{mask}, Gpm_Handler *@var{fun}, void *@var{xtradata});
+
+
+This function pushes a Region of Interest on top of the stack, after
+allocating it and filling with the provided values. @var{fun} is the
+function which will be called in order to handle events, and the
+roi itself will be passed to the function as clientdata. The Roi is
+represented by a @code{struct Gpm_Roi} structure, described in @file{gpm.h}.
+The @code{xtradata} field will be used to fill the @code{xtradata} field in
+@code{Gpm_Roi}.
+the return value is the Roi just pushed (i.e. the top of stack).
+@end deftypefun
+
+%.........................................................................
+@deftypefun char* Gpm_UseRoi (Gpm_Roi *@var{roi});
+
+
+While @code{Gpm_PushRoi} has to allocate the Region before pushing it, this
+function passes a pre-allocated function to the stack manager.
+The return value is the Roi just used.
+@end deftypefun
+
+%.........................................................................
+@deftypefun Gpm_Roi* Gpm_PopRoi (Gpm_Roi *@var{roi});
+
+Used to extract a Region of Interest from the stack, this function will
+also clear the Region if it is needed.
+@end deftypefun
+
+%.........................................................................
+@deftypefun Gpm_Roi* Gpm_RaiseRoi (Gpm_Roi *@var{which}, Gpm_Roi *@var{before});
+
+
+Raise the specified roi, either before the second Roi or at top-of-
+stack (if @var{before} is @code{NULL}). The return value is the new top-of-stack.
+@end deftypefun
+
+%.........................................................................
+@deftypefun Gpm_Roi* Gpm_LowerRoi (Gpm_Roi *@var{which}, Gpm_Roi *@var{after});
+
+
+Lower the specified roi, either after the second Roi or at bottom-of-
+stack (if @var{before} is NULL). The return value is the new top-of-stack.
+@end deftypefun
+
+%.........................................................................
+@deftypefun Gpm_Roi* Gpm_HandleRoi (Gpm_Event *@var{ePtr}, void * @var{clientdata});
+
+
+This function, which should not be invoked by the user, is the dispatching
+manager within the application for mouse events. This function will
+browse the stack of regions of interest in order to notify windows about
+Enter and Leave events (if they are interested in them), and then
+delivers the current event to the relevant Roi.
+
+If no Roi is interested in he event the @code{*gpm_roi_handler} function
+is invoked (if not null), with null clientdata.
+
+Reported events are all those in @code{Gpm_Event}, and also @code{GPM_ENTER}
+and @code{GPM_LEAVE}. These can be used to toggle highlighting on a
+button or to drop a menu if the menubutton is entered during a drag.
+Remember that when Enter or Leave is notified, no other information in
+the event item should be used.
+
+
+@end deftypefun
+
+
+%==========================================================================
+@node Xterm,  , High Level Lib, The ClientLib
+@section Running under @code{xterm}
+
+As of release 0.18, gpm-based applications can run under xterm
+without any need for recompilation. The library is designed to convert
+xterm mouse events to gpm-style structures, so that the client will get
+the same events it got under the Linux console. Moreover, a source file
+@file{sample/gpm-xterm.c} is available to mimic libgpm under a
+different OS than Linux. Porting to other text-based consoles is an open
+issue, but I myself have Linux alone.
+
+The goal is to provide a uniform mouse interface with both xterm and the
+Linux console. Some features of libgpm would not be available, but if
+you run under xterm you know what you get, so you couldn't use them on
+the console anyway.
+
+The @file{sample} directory in the distribution tree is meant to show how
+a simple mouse-sensitive application can be easily autoconfigured and
+compiled. The @code{rmev} program has proved to compile and run smoothly
+under Linux (both with and without @file{libgpm.a}), SunOS-4, Solaris-5,
+hpux-8.x and Ultrix-3.0.
+
+
+%##########################################################################
+@node Demo Clients, Type Index, The ClientLib, Top
+@chapter Demonstration Clients
+
+@menu
+* mev::                         
+* sample/rmev::                 
+* Emacs Support::               
+* gpm-root::                    
+* hltest::                      
+* mouse-test::                  
+@end menu
+
+%==========================================================================
+@node mev, sample/rmev, Demo Clients, Demo Clients
+@section @code{mev}
+
+
+%MANPAGE mev.1
+%M .TH MEV 1 "February 1995"
+%M .UC 4
+%M .SH NAME
+%M mev \- a program to report mouse events
+%M .SH SYNOPSIS
+%M .B mev
+%M [
+%M .I options
+%M ]
+%M .br
+%M .SH DESCRIPTION
+%M The `mev' program is part of the gpm package.
+%M
+%M The information below is extracted from the texinfo file, which is the
+%M preferred source of information.
+
+The @code{mev} program is modeled after @code{xev}. It prints to @code{stdout} the
+mouse console events it gets.
+
+@code{mev}'s default behaviour is to get anything, but command line switches
+can be used to set the various fields in the @code{Gpm_Connect} structure, in
+order to customize the program's behaviour. I'm using @code{mev} to
+handle mouse events to Emacs.
+@xref{Emacs Support}.
+
+Command line switches for @code{mev} are the following:
+
+@table @code
+@item -C @var{number}
+	Select a virtual console to get events from.
+	This is intended to be used for debugging.
+
+@item -d @var{number}
+	Choose a default mask. By default the server gets
+	any events not belonging to the event mask. The mask can be
+	provided either as a
+	decimal number, or as a symbolic string.
+
+@item -e @var{number}
+	Choose the event mask. By default any event
+	is received. The mask can be provided either as a
+	decimal number, or as a symbolic string.
+
+@item -E
+	Enter emacs mode. In emacs mode events are reported as
+	lisp forms rather than numbers. This is the format used by the
+	t-mouse package within emacs.
+
+@item -f
+        Fit events inside the screen before reporting them. This options
+        re-fits drag events, which are allowed to exit the screen border,
+        @xref{Margins}.
+@item -i
+	Interactive. Accepts input from @code{stdin} to change connection
+	parameters.
+
+@item -m @var{number}
+	Choose the minimum modifier mask. Any event with
+	fewer modifiers will not be reported to @code{mev}. It defaults to @samp{0}.
+	The mask must be provided either as a
+	decimal number, or as a symbolic string.
+
+@item -M @var{number}
+	Choose the maximum modifier mask. Any event with
+	more modifier than specified will not be reported to @code{mev}.
+	It defaults to @samp{\~0}, i.e. all events are received.
+	The mask must be provided either as a
+	decimal number, or as a symbolic string.
+
+@item -p
+        Requests to draw the pointer during drags. This option is used
+        by emacs to avoid invoking @code{ioctl()} from lisp code.
+@end table
+
+When the arguments are not decimal integers, they are considered lists
+of alphanumeric characters, separated by a single non-alphanumeric
+character. I use the comma (@samp{,}), but any will do.
+
+Allowed names for events are @samp{move}, @samp{drag}, @samp{down} or
+@samp{press}, @samp{up} or @samp{release}, @samp{motion} (which is both
+@samp{move} and @samp{drag}), and @samp{hard}.
+
+Allowed names for modifiers are @samp{shift}, @samp{leftAlt},
+@samp{rightAlt}, @samp{anyAlt} (one or the other), @samp{control}.
+
+When the @samp{-i} switch is specified, @code{mev} looks at its standard input as
+command lines rather than events. The input lines are parsed, and the
+commands @samp{push} and @samp{pop} are recognized.
+
+The @samp{push} command, then, accepts the options @samp{-d}, @samp{-e}, @samp{-m}
+and @samp{-M}, with the same meaning described above. Unspecified options
+retain the previous value and the resulting masks are used to reopen
+the connection with the server. @samp{pop} is used to pop the connection
+stack. If an empty stack is popped the program exits.
+
+Other commands recognized are @samp{info}, used to return the stack
+depth; @samp{quit} to prematurely terminate the program; and
+@samp{snapshot} to get some configuration information from the server.
+
+@ignore
+.SH BUGS
+Beginning with release 1.16, \fBmev\fP no longer works under xterm.
+Please use the \fBrmev\fP program (provided in the \fBsample\fP
+directory) to watch gpm events under xterm or rxvt.  \fBrmev\fP also
+displays keyboard events besides mouse events.
+
+.SH AUTHOR
+Alessandro Rubini <rubini@linux.it>
+.br
+Ian Zimmerman <itz@speakeasy.org>
+
+.SH FILES
+.nf
+/dev/gpmctl The socket used to connect to gpm.
+.fi
+
+.SH SEE ALSO
+.nf
+\fB gpm(8) \fP      The mouse server
+\fB gpm-root(1) \fP An handler for Control-Mouse events.
+
+.fi
+The info file about `gpm', which gives more complete information and
+explains how to write a gpm client.
+
+@end ignore
+%MANPAGE END
+
+%==========================================================================
+@node sample/rmev, Emacs Support, mev, Demo Clients
+@section @code{sample/rmev}
+
+@code{rmev} is a reduced version of @code{mev}, but it is designed to be as
+portable as possible. It uses a subset of the capabilities of @file{libgpm.a},
+but works smoothly on both xterm and the Linux console. It is distributed
+with @code{gpm} to show how a curses based application can support the mouse
+with a small effort. Most of the xterm decoding is by Janne Kukonlehto.
+@xref{Xterm}.
+
+%==========================================================================
+@node Emacs Support, gpm-root, sample/rmev, Demo Clients
+@section Emacs Support
+
+Emacs support is quite complete as of 0.14.  The enclosed file
+@file{t-mouse.el}, also available in byte-compiled form, is used to pass
+mouse events to emacs.  @file{t-mouse.elc} is installed in the correct
+@t{site-lisp} directory for you emacs installation (as detected by the
+configure phase).
+
+Events with modifiers other than Meta, Control, and Shift are not
+managed by the library.  Managed events are passed to the lisp program,
+which converts them to be similar to X mouse events inside
+emacs. Actions are then invoked through a local keymap.
+
+In my own environment I can use mouse-only and meta mouse within emacs,
+shift-mouse to run selection and control-mouse to run @code{gpm-root}.
+@xref{gpm-root}.
+
+I suggest to put the following form in your own @file{.emacs} file, to 
+avoid loading @code{t-mouse} when you aren't working on the Linux console:
+
+@lisp
+(if (and (string-match ".*-linux" system-configuration)
+         (or (string-match "linux" (getenv "TERM"))
+             (string-match "con.*" (getenv "TERM"))))
+    (load-library "t-mouse"))
+@end lisp
+
+Mouse events are appended to the list variable
+@code{unread-command-events} where the Emacs main event loop will find
+them.  They can be made to trigger any command (or interactive function,
+in Emacs Lisp terminology) at all.  Actually Emacs already comes with
+reasonable bindings for most mouse events, so usually you won't have to
+do anything beyond installing @code{t-mouse}.  If you want to modify
+what Emacs does in response to mouse events, please see
+@ref{Keymaps,,,elisp}.
+
+The scrollbar sits on the last column of the screen, though it is not
+visible.  When you click on the last column, a scroll-bar action is taken.
+If this annoys you, again it can be turned off by changing the
+appropriate Emacs keymap.
+
+If you kill the @code{gpm} server, Emacs won't respond to mouse events
+any more. If the server is then restarted, you can invoke `@kbd{M-x
+t-mouse-run}' to restart mouse responsiveness in the editor.
+
+%==========================================================================
+@node gpm-root, hltest, Emacs Support, Demo Clients
+@section The ``gpm-root'' program
+
+%MANPAGE gpm-root.1
+%M .TH GPM-ROOT 1 "February 1995"
+%M .UC 4
+%M .SH NAME
+%M gpm-root \- a default handler for gpm, used to draw menus on
+%M the root window
+%M
+%M .SH SYNOPSIS
+%M .B gpm-root
+%M [
+%M .I options
+%M ]
+%M .br
+%M .SH DESCRIPTION
+
+The program @code{gpm-root} is designed to handle Control-Mouse events to
+draw menus on the background of the current tty. The actual menus
+are described by a configuration file in the user's home directory.
+
+Please note that @code{gpm-root} needs to run with Linux 1.1.73 or
+newer, because previous kernels lack some screen handling capabilities
+required by the program.
+
+The program uses the files @file{/dev/vcs*} to draw to the console screen.
+These are available only from kernel 1.1.81 onward. If you miss those
+device nodes, you should create them using @code{create_vcs} in the
+distribution directory. The tool won't run with kernels older than 1.1.81,
+because they lacked a full screen dump/restore capability.
+
+Available command line options are the following:
+
+@table @code
+@item -m @var{number}
+        Choose the modifier to use (by default: @samp{control}). The modifier
+        can be provided either as a number or as a symbolic string.
+        Allowed strings are @samp{shift}, @samp{anyAlt}, @samp{leftAlt},
+        @samp{rightAlt}, @samp{control}.
+
+@item -u
+        Deny using user-specific configuration files. With this
+        option on, only @file{/etc/gpm-root.conf} will be used as a source
+        of configuration information. This option
+        is intended for those system administrators who fear security could
+        be broken by this daemon. Things should be sufficiently secure, but
+        if you find a hole please tell me about it.
+
+@item -D
+        Do not automatically enter background operation when started,
+        and log messages to the standard error stream, not the syslog
+        mechanism.  This is useful for debugging; in previous releases
+        it was done with a compile-time option.
+
+@item -V @var{verbosity increment}
+        Raise the maximum level of messages that will be logged.  Thus a
+        positive argument has the effect of making the program more
+        verbose.  One can also give a negative argument to hush the
+        program; however, note that due to @b{getopt(3)} rules a negative
+        argument must follow the option with no space betwixt (that is,
+        @samp{-V-1} but not @samp{-V -1}).  @xref{Program Arguments,,,libc}.
+        The argument is optional and its default value is 1.
+
+@end table
+
+Each time a menu is drawn, the configuration file is reparsed if it has
+changed. This allows modification of personal setup without reinvoking
+the daemon.
+
+%M The actual configuration file is better introduced by looking at your
+%M @file{/etc/gpm-root.conf}.
+%M
+%MSKIP
+
+The actual configuration file is better introduced by an example:
+
+@lisp
+# sample configuration file for gpm-root
+# edit it to suit your taste
+
+button 2 @{
+  name "system status"
+  foreground red
+  background black
+  border yellow
+  head bright yellow
+
+  ""          f.nop
+  "load: "    f.load
+  "free:"     f.free
+  "---------" f.nop
+  "disk usage" f.bgcmd  "du | sort -rn > /tmp/du"
+@}
+
+button 3 @{
+  name "jump"
+
+  foreground black
+  background red
+  border bright yellow
+  head bright yellow
+
+  "tty1"  f.jptty  "1"
+  "tty2"  f.jptty  "2"
+  "tty3"  f.jptty  "3"
+  "tty4"  f.jptty  "4"
+  "tty5"  f.jptty  "5"
+  "tty6"  f.jptty  "6"
+    ""        f.nop
+    "more of them..." @{
+          "tty 17" f.jptty  "17"
+          @}
+ @}
+@end lisp
+%M .fi
+
+The syntax for the file won't be described here, being it quite apparent
+from the example above. Blanks and newlines are unused in parsing the
+file, and the layout of the file is free. Comments are allowed in the
+file: any hash mark (@samp{#}) found at the beginning of the line or
+after white space makes the parser discard anything up to the next
+line. To insert quotes (@samp{"}) in strings precede them with a backslash.
+
+Note that recursive menus are allowed, to any level of recursion.
+
+Keywords belong to three groups: the button keyword, the cfg
+keywords and the action keywords. They are all described in the table
+below:
+
+@table @code
+@item button @var{number} @var{menu}
+        The @code{button} keyword is used to introduce a menu. It is
+        followed by the number of the relevant button (1=left,
+        2=middle, 3=right), an open brace, a menu and a closed brace.
+        A menu is made up of cfg statements, followed by
+        action statements. Cfg statements can come in any order,
+        while the order of action statements tells the actual order
+        in which actions will appear on the screen, top to bottom.
+@end table
+
+The following statements belong to the cfg set.
+
+@table @code
+@item name @var{string}
+        If the @code{name} keyword is present, the specified
+        @var{string} will be used as the name for the current menu.
+
+@item background @var{color}
+        This statements is used to specify the
+        background color to be used in the current menu. The @var{color}
+        can be specified with one of the eight canonical strings @samp{black},
+        @samp{red}, @samp{cyan} etc. The background defaults to black.
+
+@item foreground @var{color}
+        This statements is used to specify the
+        foreground color for menu items. Its value defaults to @samp{white}.
+        An optional @samp{bright} keyword can appear before the actual color.
+
+@item border @var{color}
+        @code{border} is used to specify the
+        border color for the menu. Its value defaults to @samp{white}.
+        An optional @samp{bright} keyword can appear before the actual color.
+
+@item head @var{color}
+        @code{head} is used to specify the
+        foreground color for the title of the menu. Its value defaults
+        to @samp{white}.
+        An optional @samp{bright} keyword can appear before the actual color.
+@end table
+
+The following statements belong to the action set.
+
+@table @code
+@item @var{string} f.fgcmd @var{cmdstring}
+        When the mouse button is
+        released above the corresponding menu item, the @var{cmdstring} is
+        pasted in the keyboard queue of the current console. This is
+        not yet implemented.
+
+@item @var{string} f.bgcmd @var{cmdstring}
+	When the mouse button is released above the
+        corresponding menu item, a shell (@file{/bin/sh}) is forked to
+        execute the specified command, with @code{stdin}
+        connected to @file{/dev/null}, and @code{stdout}, @code{stderr} connected
+        to the active console.
+
+@item @var{string} f.jptty @var{ttynumber}
+        When the mouse button is
+        released above the corresponding menu item, the console is
+        switched to the one specified. The @var{ttynumber} must be specified
+        as a string. Any tty can be reached this way, even those which are
+        not accessible via the keyboard.
+
+@item @var{string} f.mktty @var{ttynumber}
+        When the mouse button is
+        released above the corresponding menu item, an unused console is
+        selected, and @file{/sbin/mingetty} is executed in it. The current console
+        is switched to the newly opened console. I use this command to save
+        kernel memory by opening a single console through @file{/etc/inittab}
+        and requesting the others only when i need to login.
+
+@item @var{string} @var{Whole-menu}
+        A menu can directly follow the label string.
+        When the mouse pointer leaves the menu frame at the level of @var{string},
+        a second menu is posted on screen.
+
+@item @var{string} f.lock
+        When the mouse button is
+        released above the corresponding menu item, the keyboard and the
+        screen are locked, and only the locking user or the superuser
+        can unlock them. This is not yet implemented.
+
+@item @var{string} f.load
+        The current loadavg when the menu is posted is concatenated to @var{string}
+        to build the actual message displayed on screen. Nothing happens at
+        button release.
+
+@item @var{string} f.free
+        The free memory and swap when the menu is posted is concatenated
+        to @var{string}
+        to build the actual message displayed on screen. Nothing happens at
+        button release.
+
+@item @var{string} f.time
+        The current time is formatted with @b{strftime(3)}, according to
+        @var{string}. The resulting string is
+        the actual message displayed on screen. Nothing happens at
+        button release.
+
+@item @var{string} f.pipe @var{cmdline}
+        When the mouse pointer leaves the menu frame at the level of @var{string},
+        a message box is posted on screen showing the last ten lines
+        of the output of @var{cmdline}. @var{cmdline} is executed
+        by @file{/bin/sh}. This is not yet implemented.
+    
+        
+@item @var{string} f.nop
+        This does nothing, it only displays @var{string} on the menu.
+@end table
+
+The @code{HOME}, @code{LOGNAME} and @code{USER} environment variables are setup
+to the values for the invoking user before spawning an external
+process (@code{f.bgcmd}, @code{f.pipe}). The current directory is always @file{/}.
+
+%M .SH BUGS
+
+Known bugs have been fixed. In particular, if you invoke @code{gpm-root}
+right after @code{gpm}, it will delay a few seconds before trying to connect
+to the daemon.
+
+@ignore
+.SH AUTHOR
+Alessandro Rubini <rubini@linux.it>
+
+.SH FILES
+.nf
+/dev/gpmctl     The socket used to connect to gpm.
+/etc/gpm-root.conf  The default configuration file.
+$(HOME)/.gpm-root   The user configuration file.
+/dev/vcs*           Virtual Console Screens
+.fi
+
+.SH SEE ALSO
+.nf
+\fB gpm(8) \fP
+
+.fi
+The info file about `gpm', which gives more complete information and
+explains how to write a gpm client.
+
+@end ignore
+%MANPAGE END
+
+%==========================================================================
+@node hltest, mouse-test, gpm-root, Demo Clients
+@section @code{hltest}
+
+High-level test is a simple sample application using the high-level
+library. It implements something like a window manager for text windows,
+though it is small and unuseful.
+
+The application is meant to be read by programmers trying to use the
+high-level library. It is equipped with event reporting to help
+in understanding the internal workings.
+
+%==========================================================================
+@node mouse-test,  , hltest, Demo Clients
+@section @code{mouse-test}
+
+%MANPAGE mouse-test.1
+%M .TH mouse-test 1 "March 26, 1998" ""
+%M .SH NAME
+%M mouse-test \- a tool for determining mouse type and device it's attached to.
+%M .SH SYNTAX
+%M \fBmouse-test\fR [ \fIdevice\fR ... ]
+%M .SH DESCRIPTION
+
+This experimental and incomplete application tries to help in detecting
+which protocol does your mouse speak. It is able to detect MouseMan
+devices, and to choose between @samp{-t ms} (three-buttons aware) and
+@samp{-t bare} old two-buttons-only serial mice.
+
+%M .SH BUGS
+
+I know the application is buggy, but I only own one mouse device.
+If you are interested in this application, just call me and awake me
+from my laziness.
+
+
+@ignore
+.SS OPTIONS
+.IP \fIdevice\fP
+[ \fIdevice\fP ... ]
+.PP
+Check this \fIdevice\fP for a mouse.  If no devices are listed, mouse-test will try all possible devices.
+
+.SH AUTHOR
+Alessandro Rubini <rubini@linux.it>
+
+.SH FILES
+.nf
+/dev/*              The devices used to search for a mouse
+.fi
+
+.SH SEE ALSO
+.nf
+gpm(8)
+
+.fi
+
+@end ignore
+%MANPAGE END
+ 
+%##########################################################################
+@node Type Index, Function Index, Demo Clients, Top
+@unnumbered Type Index
+
+@printindex tp
+
+@node Function Index, Variable Index, Type Index, Top
+@unnumbered API Index
+
+@printindex fn
+
+@node Variable Index,  , Function Index, Top
+@unnumbered Variable Index
+
+@printindex vr
+
+%@iftex
+%@unnumbered Table of Contents
+%@contents
+%@end iftex
+
+
+@bye
+
+/*
+ * This is because Linus uses 4-wide tabstops,
+ * forcing me to use the same default to manage kernel sources
+ */
+
+/* Local Variables: */
+/* tab-width:8      */
+/* End:             */

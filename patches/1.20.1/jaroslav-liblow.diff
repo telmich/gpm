@@ -1,0 +1,13 @@
+*** liblow.old	Wed Sep 27 21:59:54 2006
+--- liblow.c	Wed Sep 27 21:59:59 2006
+***************
+*** 258,263 ****
+--- 258,265 ----
+              goto err;
+           }   
+           /* do we really need this check ? */
++ 	 if(option.consolename==NULL) goto err;
++ 	 if(tty==NULL) goto err;
+           if(strncmp(tty,option.consolename,strlen(option.consolename)-1)
+              || !isdigit(tty[strlen(option.consolename)-1])) {
+              gpm_report(GPM_PR_ERR,"strncmp/isdigit/option.consolename failed");

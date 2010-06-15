@@ -1,0 +1,24 @@
+
+mouse in got mouse event val=/dev/input/mouse2 
+mouse type in got mouse event=imps2
+mouse in got mouse event val=/dev/input/mouse1 
+mouse type in got mouse event=imps2
+mouse in processmouse.c val=/dev/input/mouse1 
+mouse type in processmouse.c=imps2
+return 3-0 data in event:/dev/input/mouse1
+mouse in got mouse event val=/dev/input/mouse2 
+mouse type in got mouse event=imps2
+mouse in got mouse event val=/dev/input/mouse1 
+mouse type in got mouse event=imps2
+mouse in got mouse event val=/dev/input/mouse2 
+mouse type in got mouse event=imps2
+mouse in processmouse.c val=/dev/input/mouse2 
+mouse type in processmouse.c=imps2
+return 5-1 data in event:/dev/input/mouse2
+mouse in got mouse event val=/dev/input/mouse1 
+mouse type in got mouse event=imps2
+mouse in got mouse event val=/dev/input/mouse2 
+mouse type in got mouse event=imps2
+mouse in processmouse.c val=/dev/input/mouse2 
+mouse type in processmouse.c=imps2
+return 5-1 data in event:/dev/input/mouse2

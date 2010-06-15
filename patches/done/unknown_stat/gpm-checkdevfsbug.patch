@@ -1,0 +1,52 @@
+--- gpm-1.19.4.orig/liblow.c	Sun May 27 22:53:22 2001
++++ gpm-1.19.4/liblow.c	Sun Sep  9 19:49:12 2001
+@@ -183,6 +183,31 @@
+ }
+ #endif /* SIGTSTP */
+ 
++/*
++ * check for devfs
++ */
++
++static int check_devfs( void )
++{
++
++  int fd, retval = GPM_IS_NOTHING;
++  struct stat buf;
++
++  /* first try the devfs device, because in the next time this will be
++   * the preferred one. If that fails, take the old console */
++   
++  /* Check for open new console */
++  if ((fd=stat(GPM_DEVFS_CONSOLE, &buf)) == 0)
++    retval = GPM_IS_DEVFS;
++  
++  /* Failed, try OLD console */
++  else if((fd=stat(GPM_NO_DEVFS_CONSOLE, &buf)) == 0)
++    retval = GPM_IS_NOT_DEVFS;
++  
++  return retval;
++
++}
++
+ /*-------------------------------------------------------------------*/
+ int Gpm_Open(Gpm_Connect *conn, int flag)
+ {
+@@ -196,6 +221,7 @@
+ 
+ 
+   /* check whether there is a devfs */
++  devfs_id = check_devfs();
+   switch(devfs_id)
+   {
+ 
+@@ -203,8 +229,7 @@
+     break;
+     case GPM_IS_NOT_DEVFS: consolename = GPM_NO_DEVFS_CONSOLE; vcname = GPM_NO_DEVFS_VC;
+     break;
+-    case GPM_IS_NOTHING: oops("No console to open");
+-    break;
++    case GPM_IS_NOTHING: return -1;
+ 
+   }
+ 

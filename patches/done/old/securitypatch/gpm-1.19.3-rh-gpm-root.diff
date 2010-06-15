@@ -1,0 +1,60 @@
+diff -ur gpm-1.19.3.orig/gpm-root.y gpm-1.19.3/gpm-root.y
+--- gpm-1.19.3.orig/gpm-root.y	Wed Apr 19 09:48:41 2000
++++ gpm-1.19.3/gpm-root.y	Tue Jun 26 01:55:18 2001
+@@ -50,6 +50,7 @@
+ #include <linux/vt.h>       /* VT_ACTIVATE */
+ #include <linux/keyboard.h> /* K_SHIFT */
+ #include <utmp.h>         
++#include <endian.h>
+ 
+ #ifdef HAVE_SYS_SYSMACROS_H
+ #include <sys/sysmacros.h>
+@@ -623,11 +624,7 @@
+ 	case 0:
+ 	  /* child: exec getty */
+ 	  sprintf(name,"tty%i",vc);
+-#ifdef __alpha__
+-	  execl("/daemons/getty","getty","38400",name,(char *)NULL);
+-#else
+ 	  execl("/sbin/mingetty","mingetty",name,(char *)NULL);
+-#endif __alpha__
+ 	  exit(1); /* shouldn't happen */
+ 
+         default:
+@@ -1045,6 +1042,12 @@
+ static int postcount;
+ static Posted *activemenu;
+ 
++#if __BYTE_ORDER == __BIG_ENDIAN
++#define bigendian 1
++#else
++#define bigendian 0
++#endif
++
+ Posted *postmenu(int fd, FILE *f, Draw *draw, int x, int y, int console)
+ {
+   Posted *new;
+@@ -1062,9 +1065,9 @@
+   lines=dump[0]; columns=dump[1];
+   i=(columns*dump[3]+dump[2])*2+1; /* where to get it */
+   if (i<0) i=1;
+-  new->colorcell=dump[4+i];
++  new->colorcell=dump[4+i-bigendian];
+   gpm_debug_log(LOG_DEBUG,"Colorcell=%02x (at %i,%i = %i)",
+-                new->colorcell,dump[2],dump[3],i);
++                new->colorcell,dump[2],dump[3],i-bigendian);
+ 
+   /* place the box relative to the mouse */
+   if (!postcount) x -= draw->width/2; else x+=2;
+@@ -1078,7 +1081,11 @@
+   new->y=y; new->Y=y+draw->height-1;
+ 
+   /* these definitions are dirty hacks, but they help in writing to the screen */
++#if __BYTE_ORDER == __BIG_ENDIAN
++#define PUTC(c,f,b)   (*(curr++)=((b)<<4)+(f),*(curr++)=(c))
++#else
+ #define PUTC(c,f,b)   (*(curr++)=(c),*(curr++)=((b)<<4)+(f))
++#endif
+ #define PUTS(s,f,b)   for(curr2=s;*curr2;PUTC(*(curr2++),f,b))
+ #define GOTO(x,y)     (curr=dump+4+2*((y)*columns+(x)))
+ 

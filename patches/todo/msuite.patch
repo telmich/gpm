@@ -1,0 +1,80 @@
+--- gpm-1.18.1/gpm.h	Fri Nov 12 15:27:37 1999
++++ gpm-1.18.2/gpm.h	Wed Jan  5 09:45:52 2000
+@@ -72,6 +72,13 @@
+ 
+ /*....................................... Cfg buttons */
+ 
++/* i think there are possible mouses with more, than 3 advanced buttons ? */
++#define GPM_B_ADVANCED5	128
++#define GPM_B_ADVANCED4	64
++
++#define GPM_B_ADVANCED3	32
++#define GPM_B_ADVANCED2	16
++#define GPM_B_ADVANCED1	8
+ #define GPM_B_LEFT      4
+ #define GPM_B_MIDDLE    2
+ #define GPM_B_RIGHT     1
+--- gpm-1.18.1/gpm-root.y	Fri Nov 12 15:27:37 1999
++++ gpm-1.18.2/gpm-root.y	Wed Jan  5 09:45:52 2000
+@@ -214,6 +214,11 @@
+ button: T_BUTTON '1' {$$=GPM_B_LEFT;}
+       | T_BUTTON '2' {$$=GPM_B_MIDDLE;}
+       | T_BUTTON '3' {$$=GPM_B_RIGHT;}
++      | T_BUTTON '4' {$$=GPM_B_ADVANCED1;}
++      | T_BUTTON '5' {$$=GPM_B_ADVANCED2;}
++      | T_BUTTON '6' {$$=GPM_B_ADVANCED3;}
++      | T_BUTTON '7' {$$=GPM_B_ADVANCED4;}
++      | T_BUTTON '8' {$$=GPM_B_ADVANCED5;}
+       ;
+ 
+ menu: '{'                       {$<draw>$=cfgcurrent=cfg_alloc();}
+--- gpm-1.18.1/gpm.c	Fri Nov 12 15:27:36 1999
++++ gpm-1.18.2/gpm.c	Wed Jan  5 09:50:40 2000
+@@ -411,7 +411,8 @@
+       event->modifiers = nEvent.modifiers; /* propagate modifiers */
+ 
+       /* propagate buttons */
+-      nEvent.buttons = opt_sequence[nEvent.buttons]&7; /* change the order */
++      nEvent.buttons = (nEvent.buttons & 0xf8) | /* 1111 1000 (mask for normal buttons) */
++          opt_sequence[nEvent.buttons]&7; /* change the order */
+       oldB=newB; newB=nEvent.buttons;
+       if (!i) event->buttons=nEvent.buttons;
+ 
+--- gpm-1.18.1/mice.c	Fri Nov 12 15:27:37 1999
++++ gpm-1.18.2/mice.c	Wed Jan  5 09:46:24 2000
+@@ -74,6 +74,25 @@
+  * The return value is the number of unprocessed bytes
+  */
+ 
++/* 
++ * M_msuite function was written by Vadim V. Osikov aka Osa 
++ * (osa@re.com.ua, http://re.com.ua/~osa)
++ */
++
++static int M_msuite(Gpm_Event *state, unsigned char *data) {
++	if ( data [1] == GPM_EXTRA_MAGIC_1 && data [2] == GPM_EXTRA_MAGIC_2 ) {
++		// advanced side buttons are D5 (lower) - D3 (higher)
++		state -> buttons |= ( ( data [0] & 7) << 3 ) ;
++	} else {
++		state -> buttons = ((data[0] & 0x20) >> 3) /* left */
++		    | ((data[0] & 0x10) >> 4);	/* right */
++		state -> dx = (char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
++		state -> dy = (char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
++		// state -> dz = (signed char)((data [3] & 0xf) << 4) >> 4 ;
++	}
++	return 0 ;
++}
++
+ static int M_ms(Gpm_Event *state,  unsigned char *data)
+ {
+   /*
+@@ -1436,6 +1455,9 @@
+   */
+ 
+ Gpm_Type mice[]={
++  {"msuite", "The MouseSuite 98 (side buttons and wheel) protocol.",
++  	   "", M_msuite, I_serial, CS7 | STD_FLG,
++                                {0x40, 0x40, 0x40, 0x00}, 4, 1, 1, 0},
+   {"mman", "The \"MouseMan\" and similar devices (3/4 bytes per packet).",
+            "Mouseman", M_mman, I_serial, CS7 | STD_FLG, /* first */
+                                 {0x40, 0x40, 0x40, 0x00}, 3, 1, 1, 0, 0},

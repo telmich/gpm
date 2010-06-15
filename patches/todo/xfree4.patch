@@ -1,0 +1,202 @@
+Index: doc/doc.gpm
+--- doc/doc.gpm.orig	Fri Mar 17 00:10:01 2000
++++ doc/doc.gpm	Fri Mar 17 00:15:51 2000
+@@ -398,6 +398,11 @@
+         behaviour of @file{selection-1.7}, but it is sometimes confusing.
+         The default is not to show the pointer, which can be confusing as well.
+ 
++@item -P
++        Use a pty as repeater device instead of a fifo, see @samp{-R}.
++	@file{/dev/gpmdata} will be a symbolic link to the pty.
++	XFree86 4.0 seems to need this.
++
+ @item -q
+         Quit after changing mouse behaviour. This is intended to allow
+         users to change the mouse @emph{feeling} (@samp{-a}, @samp{-B}, @samp{-d},
+@@ -414,15 +419,17 @@
+ 
+ @item -R @var{name}
+         Causes @code{gpm} to act as a repeater: any mouse data received while
+-        in graphic mode will be produced on the fifo @file{/dev/gpmdata}
+-        in protocol @var{name}.  In principle, you can use the same
++        in graphic mode will be produced on the fifo (or symlink, see the
++	@samp{-P} option) @file{/dev/gpmdata} in protocol @var{name}.
++	In principle, you can use the same
+         names as for the @samp{-t} option, although repeating into some
+         protocols may not be implemented for a while.  @xref{Mouse Types}.
+         In addition, you can specify @samp{raw} as the @var{name}, to repeat
+         the mouse data byte by byte, without any protocol translation.
+         If @var{name} is omitted, it defaults to @samp{msc}.
+         Using @i{gpm} in repeater mode, you can configure the X
+-        server to use its fifo as a mouse device. This option is useful for
++        server to use @file{/dev/gpmdata} as a mouse device.
++	This option is useful for
+         bus-mouse owners to override the single-open limitation. It is also
+         an easy way to manage those stupid dual-mode mice which force you
+         to keep the middle button down while changing video mode. The option
+Index: gpn.c
+--- gpn.c.orig	Thu Mar 16 23:42:00 2000
++++ gpn.c	Fri Mar 17 00:20:19 2000
+@@ -45,6 +45,10 @@
+ #include <sys/ioctl.h>
+ #endif
+ 
++#ifdef HAVE_PTY_H
++#include <pty.h>
++#endif
++
+ #ifndef HAVE___U32
+ typedef unsigned int __u32;
+ #endif
+@@ -315,11 +319,68 @@
+     return type;
+ }
+ 
++#ifdef HAVE_OPENPTY
++#include <pty.h>
++
++static int
++find_pty(int* ttyfd, char ttyName[])
++{
++  int master;
++  int ret = openpty(&master, ttyfd, ttyName, 0, 0);
++
++  return (ret == 0 ? master : ret);
++}
++
++#else /* HAVE_OPENPTY */
++
++static const char* major = "pqrstuvwxyzabcde";
++static const char* minor = "0123456789abcdef";
++
++static int
++find_pty(int* ttyfd, char ttyName[])
++{
++  char ptempl[] = "/dev/ptyXX";
++  char ttempl[] = "/dev/ttyXX";
++  int fd = -1;
++  const char* map;
++  const char* mip;
++  
++  for (map = major; *map && fd == -1; map++)
++  {
++    ptempl[8] = *map;
++    ttempl[8] = *map;
++    for (mip = minor; *mip && fd == -1; mip++)
++    {
++      int fd2;
++      ptempl[9] = *mip;
++      ttempl[9] = *mip;
++
++#ifndef O_NOCTTY
++#define O_NOCTTY 0
++#endif
++      if ((fd = open(ptempl, O_RDWR)) != -1 &&
++          (fd2 = open(ttempl, O_RDWR|O_NOCTTY)) != -1)
++      {
++        *ttyfd = fd2;
++        strcpy(ttyName, ttempl);
++      }
++      else
++      {
++        close(fd);
++        fd = -1;
++      }
++    }
++  }
++
++  return fd;
++}
++#endif /* HAVE_OPENPTY */
++
+ /*===================================================================*/
+ int 
+ cmdline(int argc, char **argv)
+ {
+-  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pqr:R::s:S:t:TvV::23";
++  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pPqr:R::s:S:t:TvV::23";
+   int i, opt;
+   static struct {char *in; char *out;} seq[] = {
+     {"123","01234567"},
+@@ -369,6 +430,7 @@
+           which_mouse=mouse_table+2; break;
+ 	case 'o': opt_options = optarg; break;
+         case 'p': opt_ptrdrag=0; break;
++        case 'P': opt_ptyrep=1; break;
+         case 'q': opt_quit++; gpm_log_daemon = 0; break;
+         case 'r':
+ 	  /* being called responsiveness, I must take the inverse */
+@@ -411,10 +473,24 @@
+     }
+   if (opt_repeater)
+     {
+-      if (mkfifo(GPM_NODE_FIFO,0666) && errno!=EEXIST)
+-        { oops(GPM_NODE_FIFO); }
+-      if ((fifofd=open(GPM_NODE_FIFO, O_RDWR|O_NONBLOCK))<0)
+-        { oops(GPM_NODE_FIFO); }
++      if (opt_ptyrep)
++	{
++	  char tty_name[32];
++	  int ttyfd;
++
++	  if ((fifofd=find_pty(&ttyfd,tty_name))==-1)
++	    { oops("can't find free pty"); }
++	  unlink(GPM_NODE_FIFO);
++	  if (symlink(tty_name,GPM_NODE_FIFO)==-1)
++	    { oops(GPM_NODE_FIFO); }
++	}
++      else
++	{
++	  if (mkfifo(GPM_NODE_FIFO,0666) && errno!=EEXIST)
++	    { oops(GPM_NODE_FIFO); }
++	  if ((fifofd=open(GPM_NODE_FIFO, O_RDWR|O_NONBLOCK))<0)
++	    { oops(GPM_NODE_FIFO); }
++	}
+     }
+ 
+ 
+Index: configure.in
+--- configure.in.orig	Thu Mar 16 23:15:40 2000
++++ configure.in	Thu Mar 16 23:40:33 2000
+@@ -64,7 +64,7 @@
+         CURSES_OBJS=libcurses.o ; fi ;;
+ esac
+ 
+-AC_CHECK_HEADERS(sys/sysmacros.h linux/major.h linux/tty.h)
++AC_CHECK_HEADERS(sys/sysmacros.h linux/major.h linux/tty.h pty.h)
+ 
+ ITZ_CHECK_TYPE(__u32,linux/types.h)
+ if test ${itz_cv_type___u32} = yes || test ${ac_cv_type___u32} = yes ; then
+@@ -78,7 +78,8 @@
+     SHLIB=
+ fi
+ 
+-AC_CHECK_FUNCS(vsyslog syslog)
++AC_CHECK_LIB(util, openpty)
++AC_CHECK_FUNCS(openpty vsyslog syslog)
+ AC_FUNC_ALLOCA
+ 
+ case $with_curses in
+Index: gpmInt.h
+--- gpmInt.h.orig	Thu Mar 16 23:47:30 2000
++++ gpmInt.h	Thu Mar 16 23:48:13 2000
+@@ -128,6 +128,7 @@
+ extern time_t opt_age_limit;
+ extern char *opt_special;
+ extern int opt_rawrep;
++extern int opt_ptyrep;
+ extern int fifofd;
+ extern char *consolename; /* the selected one */
+ 
+Index: gpm.c
+--- gpm.c.orig	Thu Mar 16 23:48:34 2000
++++ gpm.c	Thu Mar 16 23:49:11 2000
+@@ -79,6 +79,7 @@
+ int opt_aged = 0;
+ char *opt_special=NULL; /* special commands, like reboot or such */
+ int opt_rawrep=0;
++int opt_ptyrep=0;
+ Gpm_Type *repeated_type=0;
+ 
+ char *consolename = "/dev/tty0";
+

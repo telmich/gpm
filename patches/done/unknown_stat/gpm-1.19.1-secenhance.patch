@@ -1,0 +1,13 @@
+--- gpm-1.19.2/gpm.c.secenhance	Wed Jun 14 19:57:48 2000
++++ gpm-1.19.2/gpm.c	Wed Jun 14 19:58:31 2000
+@@ -1002,8 +1002,8 @@
+       oops(ctladdr.sun_path);
+   maxfd=max(maxfd,ctlfd);
+ 
+-/* is this a bug in the new kernels? */
+-  chmod(GPM_NODE_CTL,0777);
++/* only allow the console user to access. */
++  chmod(GPM_NODE_CTL,0700);
+ 
+ /*....................................... get screen dimensions */
+ 

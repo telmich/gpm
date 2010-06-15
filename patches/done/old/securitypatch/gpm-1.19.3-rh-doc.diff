@@ -1,0 +1,12 @@
+diff -ur gpm-1.19.3.orig/doc/doc.gpm gpm-1.19.3/doc/doc.gpm
+--- gpm-1.19.3.orig/doc/doc.gpm	Tue Jul 18 16:43:18 2000
++++ gpm-1.19.3/doc/doc.gpm	Tue Jun 26 01:41:26 2001
+@@ -1294,7 +1294,7 @@
+ @item int gpm_hflag
+ 	Used to signal if a character has been generated
+ 	by a mouse handler. 
+-        @xref{Handling Functions}
++        @xref{Handling Functions}.
+ @vindex gpm_handler
+ @vindex gpm_data
+ @item Gpm_Handler *gpm_handler; void *gpm_data

@@ -1,0 +1,562 @@
+diff -uNrX gpm-ignore-files gpm-1.18.1/gpmInt.h gpm-1.18.1.eb1/gpmInt.h
+--- gpm-1.18.1/gpmInt.h	Fri Nov 12 07:27:37 1999
++++ gpm-1.18.1.eb1/gpmInt.h	Sun Jan 30 00:30:04 2000
+@@ -67,6 +67,7 @@
+ 
+   int (*repeat_fun)(Gpm_Event *state, int fd); /* repeat this event into fd */
+                           /* itz Mon Jan 11 23:27:54 PST 1999 */
++  char *pnp_names[10];
+ }                   Gpm_Type;
+ 
+ #define GPM_EXTRA_MAGIC_1 0xAA
+Binary files gpm-1.18.1/hltest and gpm-1.18.1.eb1/hltest differ
+diff -uNrX gpm-ignore-files gpm-1.18.1/mice.c gpm-1.18.1.eb1/mice.c
+--- gpm-1.18.1/mice.c	Fri Nov 12 07:27:37 1999
++++ gpm-1.18.1.eb1/mice.c	Sun Jan 30 03:19:45 2000
+@@ -1189,6 +1189,349 @@
+   return type;
+ }
+ 
++
++/* The routines:
++ * pnpgets, pnpparse, & pnpproto are by Kazutaka YOKOTA, see below.
++ *
++ * This is code ripped almost directly out of X to enable automatic
++ * protocol selection in gpm.
++ *
++ * Eric Biederman 30 January 2000
++ */
++/*
++ * Copyright 1998 by Kazutaka YOKOTA <yokota@zodiac.mech.utsunomiya-u.ac.jp>
++ *
++ * Permission to use, copy, modify, distribute, and sell this software and its
++ * documentation for any purpose is hereby granted without fee, provided that
++ * the above copyright notice appear in all copies and that both that
++ * copyright notice and this permission notice appear in supporting
++ * documentation, and that the name of Kazutaka YOKOTA not be used in
++ * advertising or publicity pertaining to distribution of the software without
++ * specific, written prior permission.  Kazutaka YOKOTA makes no representations
++ * about the suitability of this software for any purpose.  It is provided
++ * "as is" without express or implied warranty.
++ *
++ * KAZUTAKA YOKOTA DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
++ * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
++ * EVENT SHALL KAZUTAKA YOKOTA BE LIABLE FOR ANY SPECIAL, INDIRECT OR
++ * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
++ * DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
++ * TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
++ * PERFORMANCE OF THIS SOFTWARE.
++ */
++
++
++static int pnpgets(int fd, char *buf)
++{
++	struct termios tty;
++	fd_set fds;
++	struct timeval timeout;
++	int i;
++	char c;
++
++	/*
++	 * Just put the device to 1200 baud. Thanks to Francois Chastrette
++	 * for his great help and debugging with his own pnp device.
++	 */
++	tcgetattr(fd, &tty);
++	
++	tty.c_iflag = IGNBRK | IGNPAR;
++	tty.c_oflag = 0;
++	tty.c_lflag = 0;
++	tty.c_line = 0;
++	tty.c_cc[VTIME] = 0;
++	tty.c_cc[VMIN] = 1;
++	tty.c_cflag = (CS7 | CREAD | CLOCAL | HUPCL) | B1200;
++	tcsetattr(fd, TCSAFLUSH, &tty); /* set parameters */
++
++	/* toggle rts */
++	ioctl(fd, TIOCMGET, &i);
++	i |= TIOCM_DTR;	/* DTR = 1 */
++	i &= ~TIOCM_RTS;	/* RTS = 0 */
++	ioctl(fd, TIOCMSET, &i);
++	usleep(200000);
++	
++	/* wait for response */
++	tcflush(fd, TCIFLUSH);
++	i = TIOCM_DTR | TIOCM_RTS; /* DTR = 1, RTS = 1 */
++	ioctl(fd, TIOCMBIS, &i);
++	
++	/* try to read something */
++	FD_ZERO(&fds);
++	FD_SET(fd, &fds);
++	timeout.tv_sec = 0;
++	timeout.tv_usec = 200000;
++	if (select(FD_SETSIZE, &fds, NULL, NULL, &timeout) <= 0)
++		goto connect_idle;
++	
++	/* collect PnP COM device ID (2.1.7) */
++	i = 0;
++	usleep(200000); /* the mouse must send `Begin ID' within 200msec */
++
++	while (read(fd, &c, 1) != 0) {
++		/* we may see "M", or "M3..." before `Begin ID' */
++		if ((c == 0x08) || (c == 0x28)) { /* Begin ID */
++			buf[i++] = c;
++			break;
++		}
++	}
++
++	if (i <= 0) {
++		/* we haven't seen `Begin ID' in time... */
++		goto connect_idle;
++	}
++	
++	++c;			/* make it `End ID' */
++	for (;;) {
++		FD_ZERO(&fds);
++		FD_SET(fd, &fds);
++		timeout.tv_sec = 0;
++		timeout.tv_usec = 200000;
++		if (select(FD_SETSIZE, &fds, NULL, NULL, &timeout) <= 0) 
++			break;
++		
++		read (fd, &buf[i], 1);
++		if (buf[i++] == c)	/* End ID */
++			break;
++		if (i >= 256)
++			break;
++	}
++	if (buf[i -1] != c)
++		goto connect_idle;
++	return i;
++	
++	/*
++	 * According to PnP spec, we should set DTR = 1 and RTS = 0 while 
++	 * in idle state.  But, `moused' shall set DTR = RTS = 1 and proceed, 
++	 * assuming there is something at the port even if it didn't 
++	 * respond to the PnP enumeration procedure.
++	 */
++ disconnect_idle:
++	i = TIOCM_DTR | TIOCM_RTS;		/* DTR = 1, RTS = 1 */
++	ioctl(fd, TIOCMBIS, &i);
++ connect_idle:
++	return 0;
++}
++
++/* serial PnP ID string */
++typedef struct {
++	int revision;	/* PnP revision, 100 for 1.00 */
++	char *eisaid;	/* EISA ID including mfr ID and product ID */
++	char *serial;	/* serial No, optional */
++	char *class;	/* device class, optional */
++	char *compat;	/* list of compatible drivers, optional */
++	char *description;	/* product description, optional */
++	int neisaid;	/* length of the above fields... */
++	int nserial;
++	int nclass;
++	int ncompat;
++	int ndescription;
++} pnpid_t;
++
++static int pnpparse(pnpid_t *id, char *buf, int len)
++{
++	char s[3];
++	int offset;
++	int sum = 0;
++	int i, j;
++
++	id->revision = 0;
++	id->eisaid = NULL;
++	id->serial = NULL;
++	id->class = NULL;
++	id->compat = NULL;
++	id->description = NULL;
++	id->neisaid = 0;
++	id->nserial = 0;
++	id->nclass = 0;
++	id->ncompat = 0;
++	id->ndescription = 0;
++
++	offset = 0x28 - buf[0];
++
++	/* calculate checksum */
++	for (i = 0; i < len - 3; ++i) {
++		sum += buf[i];
++		buf[i] += offset;
++	}
++	sum += buf[len - 1];
++	for (; i < len; ++i)
++		buf[i] += offset;
++	gpm_debug_log(LOG_DEBUG, "Mouse: PnP ID string: '%*.*s'\n", len, len, buf);
++
++	/* revision */
++	buf[1] -= offset;
++	buf[2] -= offset;
++	id->revision = ((buf[1] & 0x3f) << 6) | (buf[2] & 0x3f);
++	gpm_debug_log(LOG_DEBUG, "Mouse: PnP rev %d.%02d\n", 
++		id->revision / 100, id->revision % 100);
++
++    /* EISA vender and product ID */
++	id->eisaid = &buf[3];
++	id->neisaid = 7;
++
++    /* option strings */
++	i = 10;
++	if (buf[i] == '\\') {
++		/* device serial # */
++		for (j = ++i; i < len; ++i) {
++			if (buf[i] == '\\')
++				break;
++		}
++		if (i >= len)
++			i -= 3;
++		if (i - j == 8) {
++			id->serial = &buf[j];
++			id->nserial = 8;
++		}
++	}
++	if (buf[i] == '\\') {
++		/* PnP class */
++		for (j = ++i; i < len; ++i) {
++			if (buf[i] == '\\')
++				break;
++		}
++		if (i >= len)
++			i -= 3;
++		if (i > j + 1) {
++			id->class = &buf[j];
++			id->nclass = i - j;
++		}
++	}
++	if (buf[i] == '\\') {
++		/* compatible driver */
++		for (j = ++i; i < len; ++i) {
++			if (buf[i] == '\\')
++				break;
++		}
++		/*
++		 * PnP COM spec prior to v0.96 allowed '*' in this field, 
++		 * it's not allowed now; just igore it.
++		 */
++		if (buf[j] == '*')
++			++j;
++		if (i >= len)
++			i -= 3;
++		if (i > j + 1) {
++			id->compat = &buf[j];
++			id->ncompat = i - j;
++		}
++	}
++	if (buf[i] == '\\') {
++		/* product description */
++		for (j = ++i; i < len; ++i) {
++			if (buf[i] == ';')
++				break;
++		}
++		if (i >= len)
++			i -= 3;
++		if (i > j + 1) {
++			id->description = &buf[j];
++			id->ndescription = i - j;
++		}
++	}
++
++	/* checksum exists if there are any optional fields */
++	if ((id->nserial > 0) || (id->nclass > 0)
++		|| (id->ncompat > 0) || (id->ndescription > 0)) {
++		gpm_debug_log(LOG_DEBUG, "Mouse: PnP checksum: 0x%02X\n", sum); 
++		sprintf(s, "%02X", sum & 0x0ff);
++		if (strncmp(s, &buf[len - 3], 2) != 0) {
++#if 0
++			/* 
++			 * Checksum error!!
++			 * I found some mice do not comply with the PnP COM device 
++			 * spec regarding checksum... XXX
++			 */
++			return 0;
++#endif
++		}
++	}
++
++	return 1;
++}
++
++static Gpm_Type *pnplookup(char *s, int len)
++{
++	Gpm_Type *csr;
++	int index;
++	gpm_debug_log(LOG_DEBUG, "Mouse: PnP Looking up: %*.*s\n", len, len, s);
++	for(csr = mice; csr->fun; csr++) {
++		for(index = 0; csr->pnp_names[index]; index++) {
++			if (strncmp(csr->pnp_names[index], s, len) == 0) {
++				gpm_debug_log(LOG_DEBUG, "Mouse: PnP using: %*.*s\n", len, len, s);
++				return csr;
++			}
++		}
++	}
++	return NULL;
++}
++
++static Gpm_Type *pnpproto(pnpid_t *id)
++{
++	Gpm_Type *type;
++	int i, j;
++	
++	if (id->nclass > 0)
++		if (strncmp(id->class, "MOUSE", id->nclass) != 0)
++			/* this is not a mouse! */
++			return NULL;
++	
++	if (id->neisaid > 0) {
++		if (type = pnplookup(id->eisaid, id->neisaid)) {
++			return type;
++		}
++	}
++
++	/*
++	 * The 'Compatible drivers' field may contain more than one
++	 * ID separated by ','.
++	 */
++	if (id->ncompat <= 0)
++		return NULL;
++	for (i = 0; i < id->ncompat; ++i) {
++		for (j = i; id->compat[i] != ','; ++i)
++			if (i >= id->ncompat)
++				break;
++		if (i > j) {
++			if (type = pnplookup(id->compat +j, i - j)) {
++				return type;
++			}
++		}
++	}
++	return NULL;
++}
++
++static Gpm_Type *I_pnp_auto(int fd, unsigned short flags, struct Gpm_Type *type)
++{  
++	int len;
++	char buf[256];
++	pnpid_t pnpid;
++	int ret;
++	
++	ret = 0;
++	len = pnpgets(fd, buf);
++	
++	if (len) {
++		ret = pnpparse(&pnpid, buf, len);
++	}
++	if (ret == 0) {
++		return NULL;
++	}
++
++	type = pnpproto(&pnpid);
++	if (type) {
++		type = type->init(fd, type->flags, type);
++	}
++	return type;
++}
++
++
++static int M_pnp_auto(Gpm_Event *state, unsigned char *data)
++{
++	return -1;
++}
++
+ /* intellimouse, ps2 version: Ben Pfaff and Colin Plumb */
+ static Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type)
+ {
+@@ -1438,84 +1781,126 @@
+ Gpm_Type mice[]={
+   {"mman", "The \"MouseMan\" and similar devices (3/4 bytes per packet).",
+            "Mouseman", M_mman, I_serial, CS7 | STD_FLG, /* first */
+-                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 1, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 1, 0, 0, {}},
+   {"ms",   "The original ms protocol, with a middle-button extension.",
+            "", M_ms, I_serial, CS7 | STD_FLG,
+-                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0, {
++           }},
+   {"ms+", "Like 'ms', but allows dragging with the middle button.",
+            "", M_ms_plus, I_serial, CS7 | STD_FLG,
+-                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0, {}},
+   {"ms+lr", "'ms+', but you can reset m by pressing lr (see man page).",
+            "", M_ms_plus_lr, I_serial, CS7 | STD_FLG,
+-                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0, {}},
+   {"bare", "Unadorned ms protocol. Needed with some 2-buttons mice.",
+            "Microsoft", M_bare, I_serial, CS7 | STD_FLG,
+-                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0, {}},
+   {"msc",  "Mouse-Systems-Compatible (5bytes). Most 3-button mice.",
+            "MouseSystems", M_msc, I_serial, CS8 | CSTOPB | STD_FLG,
+-                                {0xf8, 0x80, 0x00, 0x00}, 5, 1, 0, 0, R_msc},
++                                {0xf8, 0x80, 0x00, 0x00}, 5, 1, 0, 0, R_msc, {
++           "PNP0F04",  /* MouseSystems */
++           "PNP0F05",  /* MouseSystems */
++           }},
+   {"sun",  "'msc' protocol, but only 3 bytes per packet.",
+            "", M_sun, I_serial, CS8 | CSTOPB | STD_FLG,
+-                                {0xf8, 0x80, 0x00, 0x00}, 3, 1, 0, 0, 0},
++                                {0xf8, 0x80, 0x00, 0x00}, 3, 1, 0, 0, 0, {}},
+   {"mm",   "MM series. Probably an old protocol...",
+            "MMSeries", M_mm, I_serial, CS8 | PARENB|PARODD | STD_FLG,
+-                                {0xe0, 0x80, 0x80, 0x00}, 3, 1, 0, 0, 0},
++                                {0xe0, 0x80, 0x80, 0x00}, 3, 1, 0, 0, 0, {}},
+   {"logi", "Used in some Logitech devices (only serial).",
+            "Logitech", M_logi, I_logi, CS8 | CSTOPB | STD_FLG,
+-                                {0xe0, 0x80, 0x80, 0x00}, 3, 3, 0, 0, 0},
++                                {0xe0, 0x80, 0x80, 0x00}, 3, 3, 0, 0, 0, {
++	   "LGI8001", /* Logitech serial */
++	   "PNP0F08", /* Logitech serial */
++	   "PNP0F17", /* Logitech compatible serial */
++	    }},
+   {"bm",   "Micro$oft busmice and compatible devices.",
+            "BusMouse", M_bm, NULL, STD_FLG, /* bm is sun */
+-                                {0xf8, 0x80, 0x00, 0x00}, 3, 3, 0, 0, 0},
++                                {0xf8, 0x80, 0x00, 0x00}, 3, 3, 0, 0, 0, {
++           "PNP0F00",  /* MS bus */
++	   "PNP0F02",  /* MS InPort */
++           "PNP0F0D",  /* MS InPort compatible */
++	   "PNP0F11",  /* MS bus compatible */
++           "PNP0F15",  /* Logitech bus */
++	   "PNP0F18",  /* Logitech bus compatible */
++           }},
+   {"ps2",  "Busmice of the ps/2 series. Most busmice, actually.",
+            "PS/2", M_ps2, NULL, STD_FLG,
+-                                {0xc0, 0x00, 0x00, 0x00}, 3, 1, 0, 0, 0},
++                                {0xc0, 0x00, 0x00, 0x00}, 3, 1, 0, 0, 0, {
++           "PNP0F03", /* MS PS/2 */
++           "PNP0F0E", /* MS PS/2 compatible */
++	   "PNP0F12", /* Logitech PS/2 */
++	   "PNP0F13", /* PS/2 */
++	   "PNP0F19", /* Logitech PS/2 compatible */
++           }},
+   {"ncr",  "Ncr3125pen, found on some laptops",
+            "", M_ncr, NULL, STD_FLG,
+-                                {0x08, 0x08, 0x00, 0x00}, 7, 7, 0, 1, 0},
++                                {0x08, 0x08, 0x00, 0x00}, 7, 7, 0, 1, 0, {}},
+   {"wacom", "Wacom graphire tablet: pen, mouse",
+            "", M_wacom, I_wacom, STD_FLG,
+-                                {0x80, 0x80, 0x80, 0x00}, 8, 8, 0, 0, 0},
++                                {0x80, 0x80, 0x80, 0x00}, 8, 8, 0, 0, 0, {}},
+   {"genitizer", "\"Genitizer\" tablet, in relative mode.",
+            "", M_geni, I_serial, CS8|PARENB|PARODD,
+-                                {0x80, 0x80, 0x00, 0x00}, 3, 1, 0, 0, 0},
++                                {0x80, 0x80, 0x00, 0x00}, 3, 1, 0, 0, 0, {}},
+   {"logim",  "Turn logitech into Mouse-Systems-Compatible.",
+            "", M_logimsc, I_serial, CS8 | CSTOPB | STD_FLG,
+-                                {0xf8, 0x80, 0x00, 0x00}, 5, 1, 0, 0, 0},
++                                {0xf8, 0x80, 0x00, 0x00}, 5, 1, 0, 0, 0, {}},
+   {"pnp",  "Plug and pray. New mice may not run with '-t ms'.",
+            "", M_bare, I_pnp, CS7 | STD_FLG,
+-                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0, {}},
++  {"pnp+",  "Plug and pray. New mice may not run with '-t ms'.",
++           "", M_ms_plus, I_pnp, CS7 | STD_FLG,
++                                {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0, {
++           "KYEEZ00", /* Genius EZScroll */
++           "KYE0001", /* Genius PnP Mouse */
++           "PNP0F01", /* MS serial */
++           "PNP0F09", /* MS BallPoint serial */
++           "PNP0F0A", /* MS PnP serial */
++           "PNP0F0B", /* MS PnP BallPoint serial */
++           "PNP0F0C", /* MS serial comatible */
++           "PNP0F0F", /* MS BallPoint compatible */
++           }},
+   {"imps2",   "Microsoft Intellimouse (ps2) - 3 buttons, wheel unused",
+            "", M_ps2, I_imps2, STD_FLG,
+-                                {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
++                                {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0, {}},
+   {"ms3", "Microsoft Intellimouse (serial) - 3 buttons, wheel unused",
+            "", M_ms3, I_pnp, CS7 | STD_FLG,
+-                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0},
++                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0, {
++	  "MSH0001",  /* MS IntelliMouse */
++          "MSH0004",  /* MS IntelliMouse TrackBall */
++          "KYE0003",  /* Genius NetMouse */
++          "LGI800C",  /* Logitech MouseMan (4 button model) */
++          "LGI8050",  /* Logitech MouseMan+ */
++	  "LGI8051",  /* Logitech FirstMouse+ */
++          }},
+   {"netmouse",  "Genius NetMouse - 2 buttons and 2 buttons 'up'/'down'.",      
+            "", M_netmouse, I_netmouse, CS7 | STD_FLG,
+-                                {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
++                                {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0, {}},
+   {"cal", "Calcomp UltraSlate",
+            "", M_calus, I_calus, CS8 | CSTOPB | STD_FLG,
+-                                {0x80, 0x80, 0x80, 0x00}, 6, 6, 0, 1, 0},
++                                {0x80, 0x80, 0x80, 0x00}, 6, 6, 0, 1, 0, {}},
+   {"calr", "Calcomp UltraSlate - relative mode",
+            "", M_calus_rel, I_calus, CS8 | CSTOPB | STD_FLG,
+-                                {0x80, 0x80, 0x80, 0x00}, 6, 6, 0, 0, 0},
++                                {0x80, 0x80, 0x80, 0x00}, 6, 6, 0, 0, 0, {}},
+   {"twid", "Twidddler keyboard",
+            "", M_twid, I_twid, CS8 | STD_FLG,
+-                                {0x80, 0x00, 0x80, 0x80}, 5, 1, 0, 0, 0},
++                                {0x80, 0x00, 0x80, 0x80}, 5, 1, 0, 0, 0, {}},
+   {"syn", "The \"Synaptics\" serial TouchPad.",
+            "synaptics", M_synaptics_serial, I_serial, CS7 | STD_FLG,
+-                                {0x40, 0x40, 0x40, 0x00}, 6, 6, 1, 0, 0},
++                                {0x40, 0x40, 0x40, 0x00}, 6, 6, 1, 0, 0, {}},
+   {"synps2", "The \"Synaptics\" PS/2 TouchPad",
+            "synaptics_ps2", M_synaptics_ps2, I_synps2, STD_FLG,
+-                                {0x80, 0x80, 0x00, 0x00}, 6, 1, 1, 0, 0},
++                                {0x80, 0x80, 0x00, 0x00}, 6, 1, 1, 0, 0, {}},
+   {"brw",  "Fellowes Browser - 4 buttons (and a wheel) (dual protocol?)",
+            "", M_brw, I_pnp, CS7 | STD_FLG,
+-                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0},
++                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0, {
++           "KYE0002",
++           }},
+ 
+ #ifdef HAVE_LINUX_JOYSTICK_H
+   {"js",   "Joystick mouse emulation",
+            "Joystick", M_js, NULL, 0,
+-                              {0xFC, 0x00, 0x00, 0x00}, 12, 12, 0, 0, 0},
++                              {0xFC, 0x00, 0x00, 0x00}, 12, 12, 0, 0, 0, {}},
+ #endif
+ 
+   {"summa",  "Summagraphics or Genius tablet absolute mode(MM-Series)",
+@@ -1523,19 +1908,38 @@
+                                 {0x98, 0x98, 0x00, 0x00}, 5, 1, 0, 1, R_summa}, 
+   {"mtouch",  "MicroTouch touch-screens (only button-1 events, by now)",
+            "", M_mtouch, I_mtouch, STD_FLG,
+-                                {0x80, 0x80, 0x80, 0x00}, 5, 1, 0, 1, NULL}, 
++                                {0x80, 0x80, 0x80, 0x00}, 5, 1, 0, 1, NULL, {}}, 
+ 
+   {"acecad",  "Acecad tablet absolute mode(Sumagrapics MM-Series mode)",
+            "", M_summa, I_summa, STD_FLG,
+-                                {0x80, 0x80, 0x00, 0x00}, 7, 1, 0, 1, 0}, 
++                                {0x80, 0x80, 0x00, 0x00}, 7, 1, 0, 1, 0, {}}, 
+ 
+   {"wp",      "Genius WizardPad tablet",
+            "wizardpad", M_wp, I_wp, STD_FLG,
+-                                {0xFA, 0x42, 0x00, 0x00}, 10, 1, 0, 1, 0},
++                                {0xFA, 0x42, 0x00, 0x00}, 10, 1, 0, 1, 0, {}},
++
++  {"auto",      "Automatic PNP mouse selection",
++           "", M_pnp_auto, I_pnp_auto, 0,
++                                {0x00, 0x00, 0x00, 0x00}, 0, 0, 0, 0, 0, {}},
+ 
+   {"",     "",
+            "", NULL, NULL, 0,
+-                                {0x00, 0x00, 0x00, 0x00}, 0, 0, 0, 0, 0}
++                                {0x00, 0x00, 0x00, 0x00}, 0, 0, 0, 0, 0, {NULL}}
++#if notyet
++  {
++          "KML0001", /* Kensignton ThinkingMouse */
++          "PNP0F06", /* Genius Mouse */
++          "PNP0F07", /* Genius Mouse */
++          "PNP0F10", /* TI QuickPort */
++          "PNP0F14", /* MS Kids Mouse */
++          "PNP0F16", /* Logitech SWIFT */
++          "PNP0F1A", /* Logitech SWIFT compatible */
++          "PNP0F1B", /* HP Omnibook */
++          "PNP0F1C", /* Compaq LTE TrackBall PS/2 */
++          "PNP0F1D", /* Compaq LTE TrackBall serial */
++          "PNP0F1E", /* MS Kids TrackBall */
++  }
++#endif
+ };
+ 
+ /*------------------------------------------------------------------------*/
+

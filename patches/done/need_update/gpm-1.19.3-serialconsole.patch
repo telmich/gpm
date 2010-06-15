@@ -1,0 +1,40 @@
+--- gpm-1.19.3/gpm.c.serialconsole	Fri Jan  5 14:10:46 2001
++++ gpm-1.19.3/gpm.c	Fri Jan  5 14:39:28 2001
+@@ -38,6 +38,7 @@
+ #include <sys/un.h>        /* struct sockaddr_un */
+ 
+ #include <linux/vt.h>      /* VT_GETSTATE */
++#include <linux/serial.h>  /* for serial console check */
+ #include <sys/kd.h>        /* KDGETMODE */
+ #include <termios.h>       /* winsize */
+ 
+@@ -142,10 +143,25 @@
+ static inline int open_console(const int mode)
+ {
+   int fd;
+-
+-  if ((fd=open(consolename, mode)) < 0)
+-    oops(consolename);
+-  return fd;
++  struct stat sb;
++  int maj, twelve=12;
++  struct serial_struct si;
++
++  fd = open(consolename, mode);
++  if (fd != -1) {
++      fstat(fd, &sb);
++      maj = major(sb.st_rdev);
++      if (maj != 4 && (maj < 136 || maj > 143)) {
++	  if (ioctl (fd, TIOCLINUX, &twelve) < 0) {
++	      if (ioctl (fd, TIOCGSERIAL, &si) >= 0) {
++		  if (si.line > 0)
++		      oops("we seem to be on a serial console");
++	      }
++	  }
++      }
++      return fd;
++  } else
++      oops(consolename);
+ }
+ 
+ /*-------------------------------------------------------------------*/

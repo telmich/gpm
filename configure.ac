@@ -1,0 +1,152 @@
+AC_REVISION(configure.in,v 1.7 2008/02/16 nico)
+
+dnl Process this file with autoconf to produce a configure script.
+dnl written jan/1997 - T.E.Dickey <dickey@clark.net>
+
+AC_PREREQ(2.61)
+
+AC_INIT([gpm],["version-set-in-.gitversion-via-acinclude.m4"],[http://unix.schottelius.org/gpm/])
+
+AC_CONFIG_SRCDIR([src/daemon/main.c])
+AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_HEADER([src/headers/config.h])
+
+AC_CANONICAL_HOST
+
+dnl Make srcdir an absolute path.
+if test x$srcdir = x ; then
+        srcdir = `pwd`
+else
+        srcdir=`cd $srcdir && pwd`
+fi
+
+#
+# Versioning stuff
+#
+abi_lev="2"
+abi_age="1"
+abi_rev="0"
+abi_full="${abi_lev}.${abi_age}.${abi_rev}"
+
+AC_DEFINE_UNQUOTED([GPM_ABI_LEV], [$abi_lev], [Library level])
+AC_DEFINE_UNQUOTED([GPM_ABI_AGE], [$abi_age], [Library age])
+AC_DEFINE_UNQUOTED([GPM_ABI_REV], [$abi_rev], [Library revision])
+AC_DEFINE_UNQUOTED([GPM_ABI_FULL],["$abi_full"],[Full library version])
+
+releasedate="`cat $srcdir/.releasedate`"
+release="`cat $srcdir/.gitversion`"
+
+
+#
+# Find programs
+#
+
+AC_PROG_CC
+AC_PROG_RANLIB
+AC_PROG_INSTALL
+AC_PROG_YACC
+AC_PROG_LN_S
+
+# check for programs.
+AC_PATH_PROG(DVIPS,dvips,no)
+AC_PATH_PROG(TEXI2HTML,texi2html,no)
+AC_PATH_PROG(TEX,tex,no)
+AC_PATH_PROG(TEXINDEX,texindex,no)
+AC_PATH_PROG(MAKEINFO,makeinfo,no)
+AC_PATH_PROG(DIFF,diff,no)
+AC_PATH_PROG(SED,sed,no)
+AC_PATH_PROG(emacs,emacs,no)
+
+if test ${ac_cv_path_emacs} = no ; then
+        EMACS=:
+        ELISP=
+else
+        EMACS=${ac_cv_path_emacs}
+        ELISP="emacs/t-mouse.el emacs/t-mouse.elc"
+fi
+
+if test $EMACS != : ; then
+        ITZ_PATH_SITE_LISP
+        lispdir=${itz_cv_path_site_lisp}
+else
+        lispdir='${datadir}/emacs/site-lisp'
+fi
+
+# Header-checks
+AC_CHECK_HEADERS(syslog.h linux/input.h linux/joystick.h ncurses.h ncurses/curses.h curses.h)
+AC_CHECK_HEADERS(sys/sysmacros.h linux/major.h linux/tty.h)
+
+# Required headers
+AC_CHECK_HEADERS(sys/socket.h,,[AC_MSG_ERROR([Required header file missing])])
+
+AC_ARG_WITH(curses,
+[  --without-curses        disable curses support even if curses found])
+
+CURSES_OBJS=
+
+case $with_curses in
+No|no|N|n) : ;;
+        *) if   test ${ac_cv_header_ncurses_h} = yes || 
+                test ${ac_cv_header_ncurses_curses_h} = yes ||
+                test ${ac_cv_header_curses_h} = yes ; then
+        CURSES_OBJS=lib/libcurses.o ; fi ;;
+esac
+
+
+ITZ_CHECK_TYPE(__u32,linux/types.h)
+if test ${itz_cv_type___u32} = yes || test ${ac_cv_type___u32} = yes ; then
+    AC_DEFINE(HAVE___U32, 1, [define if the __u32 type exists either in sys/types.h or in linux/types.h])
+fi
+
+ITZ_SYS_ELF
+if test ${itz_cv_sys_elf} = yes && test x${ac_cv_prog_gcc} = xyes ; then
+    SHLIB=libgpm.so
+else
+    SHLIB=
+fi
+
+AC_CHECK_FUNCS(vsyslog syslog)
+AC_FUNC_ALLOCA
+
+case $with_curses in
+No|no|N|n) SHARED_LIBS=-lc ;;
+*)
+    SAVELIBS=$LIBS
+    LIBS=
+    for i in tinfo ncurses termcap termlib; do
+        if test x$LIBS = x; then
+            AC_CHECK_LIB($i, tputs)
+        else :; fi
+    done
+    TERMLIBS=$LIBS
+    LIBS=
+    for i in ncurses curses; do
+        if test x$LIBS = x; then
+            AC_CHECK_LIB($i, wgetch,,,$TERMLIBS)
+        else :; fi
+    done
+    SHARED_LIBS="$LIBS $TERMLIBS -lc"
+    LIBS=$SAVELIBS ;;
+esac    
+
+GPMXTERM=
+AC_SUBST(GPMXTERM)
+AC_SUBST(abi_lev)
+AC_SUBST(abi_full)
+AC_SUBST(EMACS)
+AC_SUBST(ELISP)
+AC_SUBST(SHLIB)
+AC_SUBST(PICFLAGS)
+AC_SUBST(SOLDFLAGS)
+AC_SUBST(CURSES_OBJS)
+AC_SUBST(SHARED_LIBS)
+AC_SUBST(lispdir)
+AC_SUBST(release)
+AC_SUBST(release_date)
+
+CPPFLAGS="$CPPFLAGS "'-I$(srcdir) $(DEFS) -include headers/config.h -Wall -DSYSCONFDIR="\"$(sysconfdir)\"" -DSBINDIR="\"$(sbindir)\"" -D_GNU_SOURCE'
+LDFLAGS="$LDFLAGS "'-L$(srcdir)'
+
+dnl AC_DEFINE_UNQUOTED(SYSCONFDIR,"$sysconfdir")
+dnl AC_DEFINE_UNQUOTED(SBINDIR,"$sbindir")
+AC_OUTPUT(Makefile.include Makefile doc/Makefile src/Makefile contrib/Makefile doc/doc.gpm)

@@ -1,0 +1,9 @@
+
+All of these patches add field to Gpm_Event, which is the quantum
+of communication with gpm clients. Change Gpm_Event changes
+the communication protocol, and thus is an incompatible change.
+
+If the protocol has to be changed, we need to create a new channel
+and still keep the old protocol. Also, the new protocol must be as
+good and extensible as possible, to avoid any similar incompatible
+change in the future.

@@ -1,0 +1,2079 @@
+2002-12-24 Nico Schottelius <nico@schottelius.org>
+   * removed src/prog/Makefile*: it's easier with one Makefile
+   * some cleanups to Makefile.in,src/Makefile.in
+   
+   ==> gpm-1.20.1 release
+   
+2002-12-02 Nico Schottelius <nico@schottelius.org>
+   * added src/prog, src/lib so I don't confuse library / program
+     and normal source files...
+   * modified src/Makefile.in to fit latest the new directory structure  
+   * added src/prog/Makefile.in, src/lib/Makefile.in
+
+2002-11-30 Nico Schottelius <nico@schottelius.org>
+   * today leaving the hospital ->
+      gpm-1.20.1rc2 will be released, minor fixes/patches will be accepted
+      until 15th of Decembre...after that stable 1.20.1 should be out.
+
+2002-11-26 Nico Schottelius <nico@schottelius.org>
+   * gpn.c: moved some opt_ to option. structure
+   * gpn.c: cleanup up cmdline
+   * startup_n_daemon.c renamed to startup.c as the demon part is old_main
+   * server_tools.c: added prototype of init_mice
+   * server_tools.c: added prototype of reset_mice
+   * -u paramter for autodetection implemented, autodetect() is still missing
+   * removed headers/gpmInt.h from gpm-root.y
+   * updated -h informations
+   * added -DSYSCONFDIR patch from Ben Pfaff -> synaptics should work again
+
+2002-11-23 Nico Schottelius <nico@schottelius.org>
+   * some minimal changes to the Makefile.in, make dist works perfectly now!
+   * typo in MANIFEST
+   * removed gpmCfg.h from source tree. Merged with gpmInt.h
+      => configuring a program via header files is not necessary.
+      => either we tune things with ./configure or parameters
+   * removed gpm-proto.h as it is not used.
+   * added GPM_RELESE_DATE
+   * replacing date in doc/doc.gpm.in with @release_date@
+
+2002-11-22 Nico Schottelius <nico@schottelius.org>
+   * heavy work on -M,-o,-m,-t -> gpn.c,server_tools.c,...more description
+     follows
+   * added add_mouse in server_tools.c
+   * added primary support for more than two mice
+   * changes to gpn.c to let add_mouse work
+   * updated doc/doc.gpm.in
+
+2002-11-08 Nico Schottelius <nico@schottelius.org>
+   * added main.c, which will replace earlier main() function
+   * correct the running gpm check, now we start with a stale pidfile, too.
+   * added new struct options option
+   * next release will have the name 'gpm Autumn', cvs has this name right now
+
+2002-07-17 Dmitry V. Levin <ldv@altlinux.org>
+   * bugfix: restored fields order in struct Gpm_Event to avoid ABI change.
+
+2002-06-30 Nico Schottelius <nico@schottelius.org>
+   * removed some files, updated cvs.
+
+2002-05-31 Nico Schottelius <nico@schottelius.org>
+   * applied patch from Kerry Scott McLeod <gt2921b@prism.gatech.edu>,
+     which fixes some gpm_open() problems (gpm06122002-cvs-tty.patch)
+
+2002-05-31 Nico Schottelius <nico@schottelius.org>
+   * included latest updates to the synaptics driver from peter berg larsen
+     (patches/done/applied/diff_synaptics_c_7.gz)
+
+2002-05-27 Nico Schottelius <nico@schottelius.org>
+   * together with Alessandro's help there is now cvs access to gpm
+   * added Sven Dickert's <Sven.Dickert@planb.de> patch 
+      - ms3 wheel / repeater
+      - imps2 wheel
+     (partly changed to match current code)
+   * updated README  
+   * updated src/report.c: removed now unecessary \ns
+   * updated TODO
+   * moved ChangeLog to Changelog
+     
+2002-05-11 Nico Schottelius <nico@schottelius.org>
+   * updated the FAQ
+   * fixed problem with long filenames through linking (src/Makefile.in)
+   * added VSXXX-AA ("hockey puck") mice support: patch from
+     "Maciej W. Rozycki" <macro@ds2.pg.gda.pl>
+   * fixed minor problems with libgpm.so (shlib-patch, Maciej W. Rozycki)
+
+2002-04-26 Nico Schottelius <nico@schottelius.org>
+   * most of the exams are written, so time is back for gpm:
+     applied 3/4 of Peter Berg Larsen's [pebl@math.ku.dk] synaptics patch
+   * added doc/HACK_GPM, added a note in README  
+
+2002-03-11 Nico Schottelius <nico@schottelius.org>
+   * replaced 2spaces/tabs with three spaces in synaptics.c
+   * removed DEBUG_SYNAPTICS in synaptic.c
+
+2002-03-10 Nico Schottelius <nico@schottelius.org>
+   * added doc/support for vendor information about mouse support.
+     first document is from logitech
+
+2002-03-03 Nico Schottelius <nico@schottelius.org>
+   * added M_imps2 patch, which looks now for unsigned data instead of signed
+      (Paul ...)
+   * applied ms3 repeater patch from Andrew
+
+2002-02-28 Nico Schottelius <nico@schottelius.org>
+   * removed warnings about labels (missing semicolon at the end of
+     switch() statement)
+   * added stdlib.h for exit() to report-lib.c  
+
+2002-02-24 Nico Schottelius <nico@schottelius.org>
+   * changed DEF_CLUSTER from 10 to 0 in headers/gpmCfg.h. This makes the mouse
+     faster on modern machines, slower on 386. (Proposal by 
+     Andrew Pimlott and Alessandro Rubini)
+   * add DEF_CLUSTER into doc/FAQ if the mouse is too slow.  
+
+2002-02-23 Nico Schottelius <nico@schottelius.org>
+   * bugfix: problems in processConn/devfs code. snprintf() didn't work the way
+     I expected, so sprintf() and strncpy are used.
+   * bugfix: gpm-root won't compile outside the srcdir (Makefile problem)
+
+     ==> released gpm-1.20.0
+   
+2002-02-22 Nico Schottelius <nico@schottelius.org>
+   * bugfix: sedsid() in gpn.c should only be executed, if running as daemon
+      ==> gpm -D works now fine again.
+   * bugfix: if condition in gpm.c, gpm_exited() must leave
+      ==> removing gpm.pid works again.
+   * bugfix: hltest.c: could possibly run with devfs and without it...
+   * modifications to Makefile.in
+   
+2002-02-20 Nico Schottelius <nico@schottelius.org>
+   * removed gpm_oops and replaced it with gpm_report(GPM_PR_OOPS) although
+     the report function should normally not exit....but this way we can
+     decide better, if we should take _exit() or exit(). A simple 
+      'for file in *.c gpm-root.y ;
+         do cat $file | sed
+         's/gpm_oops(FL/gpm_report(GPM_PR_OOPS/g' > $file.new;
+         mv $file.new $file;
+       done'
+     did all the work.  
+   * added GPM_PR_OOPS to headers/message.h
+   * updated check_kill(): we don't need opt_kill, if -k is specified we kill, 
+     so we can call check_kill() directly.
+   * removed unecessary global variable opt_kill
+   * updated check_uniqueness: removed unecessary code. made everything more
+      simple.
+   * moved devfs parts to gpmInt.h (where it belongs to...)   
+   * removed debugging in gpmInt.h
+
+2002-02-10 Nico Schottelius <nico@schottelius.org>
+   * replaced two with three spaces in mouse-test.c (possibly cindent would have
+     helped, too. But I didn't use it until today)
+
+2002-02-10 Nico Schottelius <nico@schottelius.org>
+   * renamed the oops() function to gpm_oops() so we don't pollute
+     user space!
+
+2002-02-10 Nico Schottelius <nico@schottelius.org>
+   * added patches from Andreas Mohr: fixed many typos, added descriptions,
+     removed warnings (that were patches I really like, although they were
+     diffed against gpm-1.19.6.)
+     This first patch also included I_ps2, R_ps2
+
+     
+2002-02-06 Nico Schottelius <nico@schottelius.org>
+   * added report-lib.c: this is used in libgpm.
+   * added tools.c: used by clients (libgpm) and server. (Gpm_Open)
+   * added event device patch
+   * updated gpm-root.y
+   * fixed minor bug in src/Makefile.in
+   * 2->3 spaces in mev (via contrib/scripts/replace_2_with_3_spaces
+
+   * released gpm-1.20.0-gamma to mailing list.
+
+2002-02-04 Nico Schottelius <nico@schottelius.org>
+   * checked twiddler.c: indent is now okay and gpm_report,too.
+
+2002-02-02 Nico Schottelius <nico@schottelius.org>
+   * checking new functions/debugging other problems in gpm.c,gpn.c,
+     mice.c,liblow.c
+   * replaced tabs in mice.c with 3 spaces.
+   * removed more 'bad' report code (fprintf(stderr, .. ) is deprecated!)
+
+2002-01-29 Nico Schottelius <nico@schottelius.org>
+   * removed default device completly. (gpm.c)
+   * added x_high_y() and cnt_digits()
+   * replaced all 2/4 spaces in gpn.c with 3 spaces.
+
+2002-01-14 Nico Schottelius <nico@schottelius.org>
+   * applied patch from Blaise Gassend <blaisegassend@yahoo.com>:
+      - added an imps2 repeater
+      - slight changes to imps2 and synps2 so that roller motions could be
+        generated
+   * applied gpm-1.19.6-rh-gpm-root.diff from Solar Designer     
+   * updated MANIFEST: patches are now included in the gpm source tarball.     
+   * update src/headers/message.h: added new messages
+   * cleanup intetion level in gpm.c: now 3 spaces is the standard.
+     this makes no problem with tabs! other files follow...
+   * cleanup some old oops() calls, which are now oops(FL), as oops is not
+     an macro anymore. (gpm.c)
+   * cleanup some old gpm_debug_log calls. 
+   * added FIXME directives for people, who have time to fix some code.
+
+2002-01-08 Nico Schottelius <nico@schottelius.org>
+   * applied awk patch from Jason Gurtz and Mark Hymers
+     (markh@linuxfromscratch.org)
+
+2002-01-07 Nico Schottelius <nico@schottelius.org>
+   * updated TODO file.
+   * removed -V option (currently gpm_debug_level is not supported anymore)
+   * added #defines for message strings to message.h
+   * renamed check_devfs to get_console
+   * added some initializations to Gpm_Open
+
+2002-01-05 Nico Schottelius <nico@schottelius.org>
+   * finished report.c (gpm_report) which should replace all output
+     functions now
+   * removed devfs.c (last devfs code is now in gpn.c)
+   * removed debuglog.c (all messaging is done through report now)
+   * removed headers/wd.h, moved parts into headers/message.h
+   * begin to remove debuglog code. (was not clear enough)  
+   * updated headers/gpmInt.h
+   * applied following pataches:
+      - gpm-1.19.3-owl-warnings.diff (removed strings.h include)[Solar Designer]
+
+2001-12-02 Nico Schottelius <nico@schottelius.org>
+   * added sample initscript from Solar Designer to contrib/init
+
+2001-11-06 Nico Schottelius <nico@schottelius.org>
+   * removed src/Makefile.dep, added easy dependencies
+   * removed headers/general.h, defines.h, gpm-mess.h
+   * cleaned up doc/Makefile.in
+   * primary ROOT support (for installing in virtual tree)
+   
+2001-10-03 Nico Schottelius <nico@schottelius.org>
+   * moved doc/doc.gpm to doc/doc.gpm.in, version is replaced by configure
+
+2001-10-02 Nico Schottelius <nico@schottelius.org>
+   * added src/Makefile.dep, which produces dep files for src/Makefile.
+   * updated MANIFEST, README
+   * removed devfs from mouse-test.c, it's not needed there.
+
+2001-09-27 Nico Schottelius <nico@schottelius.org>
+   * added double include protection into new header files
+   * gpm.c: removed unecessary variables. fixed possible problem with
+     braces. thanks to gcc -Wall
+   * devfs.c: fixed some static problems stuff
+   * liblow.c/twidler.c: removed global variable consolename
+   * mice.c: added missing string.h, added braces. removed variables.
+   * src/Makefile.in: removed ELISP, those files are in contrib/ now
+
+2001-09-23 Nico Schottelius <nico@schottelius.org>
+	***** Release 1.19.5
+   * fixed libc5 and Linux 2.0 problems
+   * new problem with the main Makefile
+
+2001-09-13 Nico Schottelius <nico@schottelius.org>
+   * Makefile fixes (doc/)
+   * minor devfs changes
+   * added synaptics patch: now all 4 buttons of touchpads are supported.
+     (Chun-Chung Chen supplied this patch)
+
+2001-09-08 Nico Schottelius <nico@schottelius.org>
+   * new directory structure
+   * new file structure
+   * bug in liblow.c fixed: thanks to Jakub Bogusz
+   
+2001-09-04 Nico Schottelius <nico@schottelius.org>
+   * removed <linux/pc_keyb.h> from source, so we can compile under Linux 2.0
+   * rewrote parts of the readme, updated it
+
+2001-09-02 Nico Schottelius <nico@schottelius.org>
+	***** Release 1.19.4
+   * introduced problems with libc5 and linux 2.0!
+
+2001-08-21 Nico Schottelius <nico@schottelius.org>
+   * several files: applied some old patches (imps autodetect, mktemp
+     secure problem, IntelliMouse Explorer), preparing next gpm release.
+
+2001-04-23 Nico Schottelius <nico@schottelius.org>
+   * gpm.c: removed default taking of /dev/mouse (problem with devfs).
+     Instead print help message, to use the -m 'dev' option
+
+2001-04-22 Nico Schottelius <nico@schottelius.org>
+	* gpm.c, liblow.c, mouse-test.c: primary devfs support added. Now gpm will
+     at least start, but some of the hardcoded ttys are still there.
+
+2000-07-18  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* doc/doc.gpm (Command Line): removed "-q" documentation.
+
+2000-07-16  Ian Zimmerman  <itz@speakeasy.org>
+
+	* gpmInt.h (GPM_REQ_NOPASTE): add this to replace GPM_REQ_CONFIG.
+
+	* Makefile.in (GOBJ): no longer link gpm with liblow.o, it was
+	only needed for disable-paste.
+
+	* doc/doc.gpm (Command Line): remove part about needing setuid in
+	disable-paste.
+
+	* gpm.c (disable_paste): replace xfer_options with this function.
+	(opt_quit): remove.
+	(processRequest): replace xfer_options call with disable_paste().
+	(processRequest): replace GPM_REQ_CONFIG with GPM_REQ_NOPASTE.
+
+	* gpn.c (cmdline): remove all code dependent on opt_quit.
+	(cmdline): remove 'q' from getopt argument.
+	(xfer_options): remove.
+
+2000-07-14  Ian Zimmerman  <itz@speakeasy.org>
+
+	* Makefile.in (install): no longer install disable-paste with mode
+	4755.
+
+	* gpn.c (xfer_options): make a normal connection (Gpm_Open(*,0))
+	rather than a "default" one (Gpm_Open(*,-1)); with identification,
+	default connections must be made as root (at least when setuid
+	root), and disable-paste no longer runs as root per the previous
+	entry.
+
+	* gpm.c (processConn): if SO_PEERCRED is defined (which it is at
+	least with 2.2.* kernels), use the getsockopt(SO_PEERCRED)
+	interface to identify the client, rather than checking the name
+	bound to the peer.  Security problem reported by Olaf Kirch
+	<okir@caldera.de>
+	(processConn): close the newly accept()ed socket in case of
+	identification failure.
+	(main): remove initial setuid(0) call; as reported by Olaf Kirch
+	<okir@caldera.de> this is a general security problem because it
+	makes a setuid process appear to be a genuine root process to libc
+	internals.
+	(main): add a geteuid()==0 check after option processing and
+	before main loop.
+	
+	* liblow.c (Gpm_Open): if SO_PEERCRED is defined (which it is at
+	least with 2.2.* kernels), do not bind the client side of the gpm
+	socket.
+
+	* t-mouse.el (t-mouse-tty): merge patch by Wolfgang Sourdeau
+	<wolfgang@ultim.net> to deal with yet another and different
+	version of procps.
+
+2000-04-19  Koblinger Egmont <egmont@fazekas.hu>
+
+	***** Release 1.19.2
+
+	* gpm-root.y (f__fix): added initgroups() to definitely fix sec. hole
+
+2000-03-31  Alessandro Rubini  <rubini@ostro.systemy.it>
+
+	***** Release 1.19.1
+
+	* contrib/Makefile.in: use @release@ as needed
+
+	* contrib/: added new patches and reasons why I didn't apply them
+		I'll put further patches in ftp://ftp.prosa.it/pub/gpm/patches
+
+2000-03-30  Alessandro Rubini  <rubini@ostro.systemy.it>
+
+	* gpn.c (find_mouse_by_name): fix by Chris Ruhel (failed for synonyms)
+
+	* README.gunze: updated to refer to /dev/touchscreen
+
+	* gunze-setup: added missing line (bugfix) and changed default
+		device to /dev/touchscreen if available.
+
+	* gpm-root.y (f_bgcmd): avoid calling setuid, do it last instead
+		(still doesn't use initgroups(), I'll let this to others
+
+2000-03-07  Alessandro Rubini  <rubini@morgana.systemy.it> 
+
+	***** Release 1.19.0
+
+	* contrib/: new directory, with contributed and unapplied patches
+
+	* README: gpm is officially unmaintained
+
+2000-02-07  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* gpm.c (getMouseData): downgraded "Error in protocol" to LOG_DEBUG
+
+2000-02-02  Stefan Runkel  <runkel@runkeledv.de>
+
+        * mice.c (I_wacom, M_wacom): new Wacom IV protocol driver
+
+        * doc/doc.gpm              : Wacom Item updated
+
+2000-02-01  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* gpm.c (processMouse): re-check console size on console change
+	(get_console_size): preserve pointer position even if size changed
+
+2000-01-27  Roberto Amucano  <roberto.amucano@grandestevens.pedersoli.it>
+
+	* liblow.c (Gpm_CharsQueued): new function
+
+2000-01-20  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* MANIFEST: new file, used in "make dist" as well
+
+	* sample/rmev.c (main): reverted too.
+
+	* sample/*.in: reverted to the older standalone implementation
+
+	* configure.in: don't create sample/Makefile
+
+	* doc/localstyle.tex: removed unused file
+
+	* configure.in: changed versions (program and library)
+
+2000-01-19  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* doc/doc.gpm (Bugs and Problems): removed the pre-1.0 bug.
+	(Mouse Types): Moved chapter: from "internals" to "server invocation"
+	(Mouse Types): added the man page gpm-types.7
+
+	* tools/b2x.c: new directory and new file, to help with new protocols
+
+	* doc/doc.gpm (Mouse Types): added description of gunze
+
+2000-01-17  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* several files: changed maintainership and attributions
+
+	* *.[ch] */*.[ch]: fixed address of FSF (now in Boston)
+
+	* README doc/doc.gpm: fixed references to /usr and /usr/local
+	
+2000-01-17  Ian Zimmermann  <itz@speakeasy.org>
+
+	* doc/Makefile.in: renived dependency on Makefile
+
+	* Makefile.in: removed dependency on Makefile where not needed
+
+2000-01-16  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* mice.c (M_mman): removed unneeded message about extra byte
+
+2000-01-14  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* xf86Summa.*: the files have been added to CVS, for easy retrivial
+	
+	* mice.c (I_gunze, M_gunze): new touchscreen protocol supported
+
+	* gunze-setup: new file (needs to be merged with microtouch)
+
+	* README.gunze: new file (needs to be merged with microtouch)
+
+	* gpn.c (find_mouse_by_name): bugfix: didn't find repeater name
+
+2000-01-13  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* gpm.c (build_argv): bugfix, didn't parse multiple options.
+
+	* mice.c (parse_argv): new function, used by mouse initialization
+
+2000-01-10  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* gpm.c (get_data): avoid a message which is duplicated anyways
+
+	* liblow.c (Gpm_GetEvent): avoid the message if no data is there
+
+2000-01-05  Ian T Zimmerman  <itz@transbay.net>
+
+	* mev.c (main): continue if select is interrupted
+
+2000-01-04  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* mouse-test.c: various changes to fit the new mice.c layoutq
+
+	* mice.c: use new prototype for init function, and print errors if
+		too many options are passed
+	(option_modem_lines): use the "dtr", "rts" and "both" options for
+		serial devices.
+
+	* gpn.c (find_mouse_by_name): new function, using the sysnonym field
+		as a list of alternative names
+	(cmdline): changed use of the -o option
+	(cmdline): avoid closing stderr (init functions must print errors)
+
+	* gpmInt.h (Gpm_Type): rename "syn" to "synonyms", and changed its use
+	(Gpm_Type): changed prototype of the init function
+	(mouse_feautres): removed "opt_toggle", added "opt_options"
+
+	* gpm.c (build_argv): new function, used for "-o"
+	(wait_text): remove action on RTS and DTR, as it is in done in dev init
+	(main): create the argv associated to each device, don't act on DTR
+	
+
+	* doc/doc.gpm (Mouse Types): revised and completed this list
+	(Command Line): documented the new "-o" option
+
+	* debuglog.c (gpm_oops): always print to stderr as well
+
+1999-12-08  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* liblow.c (gpm_convert_event): use "unsigned char" for conversion of
+	xterm data (suggested and partially done by Christian Weisgerber)
+
+-----> 1.18.1 released
+	
+1999-11-07  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* configure.in (release): 1.18.1
+
+	* mice.c: new Wacom decoder, contributed by Stefan Runkel
+	<runkeledv@t-online.de>. Also a flag marking mouse types that
+	offer a repeater.
+
+1999-10-07  Alessandro Rubini  <rubini@morgana.systemy.it>
+
+	* README: added a paragraph about the CVS repository
+
+	* Makefile.in: removed ".SECONDARY" for gpm-root.c
+
+	* gpm-root.y (getdraw): lowered the loglevel for stat(user)
+
+1999-09-12  Ian T Zimmerman  <itz@transbay.net>
+
+	* doc/doc.gpm: Update version and update-month.
+
+	* configure.in (release): Bump to 1.18.0.
+
+1999-08-05  Ian T Zimmerman  <itz@transbay.net>
+
+	* mice.c (M_wp): Matt Kimball <mkimball@xmission.com> writes: A
+	few weeks ago I asked for help getting my Genius WizardPad tablet
+	to work.  (The 'acecad' driver got it to talk back, but gpm
+	couldn't understand).
+
+	Well, this morning I got the technical spec for my tablet from the
+	Genius people, and as of right now I am actually able to use my
+	tablet as my only pointing device under X.  Woohoo!
+
+	To do it, I actually added support for the WizardPad to gpm and
+	set gpm in Summa repeater mode.  Thanks gpm folks for making it so
+	easy to get my tablet working in so little time!  (After getting
+	the specs, of course).
+
+	Attached is a patch against gpm which provides support for the
+	WizardPad protocol.  It turns out that it isn't related to the one
+	that 'acecad' is using at all.  It just happened that 'acecad'
+	sent some things which made the WizardPad talk back.
+
+Mon Jun 28 07:18:44 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* doc/doc.gpm: Changed info file category because gpm is not
+ 	really part of Emacs.
+
+Thu May 27 23:20:15 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* synaptics.c (ser_read): Apply patch by Henry
+ 	<hdavies@ameritech.net> to allow the touchpad to be ignored if it
+ 	is unplugged.
+
+Tue May 11 18:57:15 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* mice.c: Geert Van der Plas <geert_vanderplas@email.com> provided
+	the code to support older Synaptics PS/2 touchpads.
+
+	* synaptics.c: Geert Van der Plas <geert_vanderplas@email.com>
+	provided the code to support older Synaptics PS/2 touchpads.
+
+	* mice.c (M_summa): realposy should be 0
+	based. <frank@hof-berlin.de>
+	
+Fri May  7 22:28:38 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* configure.in (release): Bumped to 1.17.8
+
+	* synaptics.c: Fixes by Henry Davies <hdavies@ameritech.net>
+
+	* README: Fix email addresses, contributed by Davide Barbieri
+ 	<paci@prosa.it>
+
+Tue Apr 20 07:12:57 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* aclocal.m4: Add ITZ_CHECK_TYPE.
+
+	* configure.in: Use ITZ_CHECK_TYPE.
+
+	* liblow.c (Gpm_Open): Before trying ttyname(0) etc., check that
+	the file number refers to a tty device in the first place.  This
+	is because libc 5 implementation of ttyname() can be wastefully
+	slow.  Antonio Colombo <antonio.colombo@jrc.org>
+
+Tue Apr  6 02:22:31 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* configure.in: Change way we deal with presence or absence of
+ 	__u32, due to glibc header differences.  Dan Yefimov
+	<dan@pc77a.cs.msu.su>
+	(release): Stepped release to 1.17.7
+
+Wed Mar 31 00:03:38 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* doc/doc.gpm (Demo Clients): Split index into Type, Function, and
+ 	Variable indices.  It was getting unwieldy.
+	(Mouse Types): Corrected mtouch item in mouse types.
+
+	* configure.in (release): Bumped release number to 1.17.6.
+
+	* Makefile.in (DIFFS): Add the microtouch files.
+
+	* mice.c (M_mtouch): Add Alessandro's MicroTouch tablet decoder.
+
+	* doc/doc.gpm (Mouse Types): Add info about microtouch device
+ 	type.
+
+	* README: Update information about mailing list and Alessandro's
+ 	current address.
+
+	* libxtra.c (Gpm_GetSnapshot): More defensive checks for the case
+ 	of missing gpm binary.
+
+	* mouse-test.c (main): Replaced makedev with gpm_makedev for
+ 	compatibility with glibc2.  Reported and fix suggested by David
+ 	Monniaux <monniaux@clipper.ens.fr>.
+
+Tue Mar 30 23:59:47 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* mev.c (do_snapshot): Now checking for error return from
+ 	Gpm_GetSnapshot.
+
+
+Sat Mar 27 22:01:35 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* doc/doc.gpm: Removed redundant @findex lines (@deftypefun
+ 	creates an index entry atomatically).  This didn't do any harm
+ 	when processed by makeinfo, but it confuses stupid texi2html into
+ 	producing 2 identical index entries.
+
+Tue Mar  2 00:29:40 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* mev.c (do_snapshot): Check return value from Gpm_GetSnapshot,
+	barf loudly if it fails. (Alessandro Rubini <rubini@prosa.it>, who
+	really should run "make install" someday :)
+
+	* mice.c: Apply patches from Frank Holtz <hof@bigfoot.de> to
+	handle Acecad tablets; and from Alessandro Rubini
+	<rubini@prosa.it> to fix stale comments about format of mouse type
+	table.
+
+Thu Feb 18 21:21:56 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* gpm.c (processMouse): Apply latest patch from Frank Holtz
+	<hof@bigfoot.de> to produce more isotropic moves.
+
+	* mice.c (M_summa): Add Frank Holtz's <hof@bigfoot.de> Summa
+	protocol support, at last.  This really needs testing.  But I
+	suppose we'll hear about any bugs even without asking.
+
+Wed Feb 17 21:51:00 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* gpn.c (check_kill): Really unlink the stale pid file, not jusk
+	talk about it.
+
+	* doc/doc.gpm (Command Line): Improve description of the -V option
+	as suggested by Mircea Damian <dmircea@secu.kappa.ro>. (Linux in
+	Romania -- world domination must be really close now).
+
+Mon Feb 15 10:25:53 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* synaptics.c: Make source likable to Emacs (function-opening
+	braces in column 1 please).
+	(syn_read_config_file): Config file should go to /usr/etc
+	(ie. SYSCONFDIR), look for it there.
+
+	* mice.c (I_serial): Assume synaptics device needs baud rate
+	notification like other serial mice.
+
+	* Makefile.in (%.elc): Correct Emacs byte compilation rule for
+	backward compatibility.
+
+	* mice.c: Add Synaptics support from Henry Davies
+ 	<hdavies@ameritech.net>.
+
+	* Makefile.in (DIST): Add Synaptics support files from Henry
+	Davies <hdavies@ameritech.net>. 
+
+Sat Feb 13 10:27:35 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* gpm.c (processMouse): Add Frank Holtz's <hof@bigfoot.de> code
+ 	for repeating from absolute protocols, with the deletion of some
+ 	device-specific and resolution-specific stuff.  This should be
+ 	tested, somebody with an absolute device please run "gpm -R msc"
+	and see what happens in X.
+
+	* mice.c: Add Frank Holtz's <hof@bigfoot.de> SummaSketch driver.
+  	It is disabled for nonce because of continuing confusion over that
+ 	protocol.  Anybody with better people/communication skills than I
+ 	have is encouraged to contact Frank and make sure his contribution
+	(which is very welcome in principle) conforms to gpm's design and
+ 	coding pratices.
+
+	* mev.c (main): Stop immediately if I discover I run in xterm.
+
+	* doc/doc.gpm (mev): Document newly missing xterm functionality.
+
+Sun Jan 24 09:03:47 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* Makefile.in (DIST): Add exec.el back in.
+
+Thu Jan 14 12:47:53 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* doc/manpager: Handle @file{} as well.
+
+	* doc/doc.gpm: Hardcode major release number back in.  Argh.
+	Fix more formatting in manpages.
+
+	* doc/Makefile.in (%.texinfo): Roll back this ill-considered
+	change; it forces re-TeXing gpm.texinfo.
+	(TEXI2HTML): Be consistent and make option part of make variable.
+
+Wed Jan 13 21:21:03 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* doc/doc.gpm: Fixed incosistent formatting, removed instances of
+	gratuitous visual formatting.
+
+	* doc/Makefile.in (%.texinfo): Give an additional script piece to
+	sed to substitute for %RELEASE%.
+	(%.html): Add rule for Web fanatics.
+
+Tue Jan 12 00:11:10 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* doc/manpager: Improve to italicize @var{} items.
+
+	* doc/doc.gpm (Command Line): Document parametrized repeater, in
+	particular raw repeater.
+
+Mon Jan 11 22:42:16 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* mice.c (mice): Add the repeat_fun fields.
+	(R_msc): Add.
+
+	* gpm.c: Apply patch from "Jan D."
+ 	<Jan.Djarv@mbox200.swipnet.se> for raw repeater.
+	(opt_repeater_type): Add.
+	(repeated_type): Add.
+	(processMouse):	Use repeat_fun rather than hardcoding msc protocol
+	in repeating.
+	
+	* gpmInt.h: Apply patch from "Jan D."
+ 	<Jan.Djarv@mbox200.swipnet.se> for raw repeater.
+	(opt_repeater_type): Add.
+	(repeated_type): Add.
+	(Gpm_Type): Add new method repeat_fun to handle the
+	task of repeating a given mouse event in a particular protocol.
+
+	* gpn.c: Apply patch from "Jan D." <Jan.Djarv@mbox200.swipnet.se>
+	for raw repeater.
+	(cmdline): Use an optional argument to -R rather than a new option.
+	Barf if the repeat_fun method of requested protocol is null.
+	
+Fri Jan  8 11:05:57 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* aclocal.m4: Change darned gcc test again because GCC variable is
+ 	modified by AC_PREFIX_PROGRAM.  Use ac_cv_prog_gcc instead.
+
+	* gpm-root.y (get_winsize): use /dev/tty0 not /dev/console.
+  	(f.debug): disable undocumented f.debug function
+ 	because it uses a file in /tmp in a fashion which invites symlink
+ 	abuse.
+
+	* mouse-test.c (main): exclude devices with a minor number of 130
+ 	from the device probe to avoid causing spontaneous reboots on
+ 	machines where watchdog is used.  Reported by Jim Studt
+ 	<jim@federated.com>, patch by James Troup <james@nocrew.org>.
+
+	* gpn.c (usage): typo (s/an unexistent/a non-existent/).  Patch by
+ 	James Troup <james@nocrew.org>.
+
+	* doc/manpager: Interpret only with gawk.  Patch by James Troup
+	<james@nocrew.org>. 
+
+	* aclocal.m4: Change broken test for gcc to use $GCC, not $CC.  As
+	reported by James Troup <james@nocrew.org>.
+	Replace -fpic with -fPIC.  As suggested by 
+	James Troup <james@nocrew.org>.
+	Add dependency on libc to shared library linking flags.  
+	As suggested by James Troup <james@nocrew.org>.
+
+Thu Jan  7 21:36:46 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* doc/doc.gpm: Apply patch from James Troup <james@nocrew.org>
+	fixing various typos and documenting the mouse-test program.
+
+Sun Jan  3 11:43:20 1999  Ian T Zimmerman  <itz@transbay.net>
+
+	* doc/Makefile.in (append-diff): diff exits with status 1 if it finds
+	differences. Argh.
+	(install): Make sure data files are installed with 644 mode.
+
+	* Makefile.in (append-diff): diff exits with status 1 if it finds
+	differences. Argh.
+	(install): Make sure data files are installed with 644 mode.
+	
+	* gpmCfg.h (MAX_VC): Use MAX_NR_CONSOLES to define this if
+	possible. 
+
+	* configure.in: Add a check for linux/tty.h.
+
+	* doc/doc.gpm (Command Line): Document -A [limit].
+
+	* gpn.c (usage): Indicate that -A takes an optional parameter. 
+	(cmdline): Add setting of opt_age_limit depending on optional
+	parameter to -A.
+
+	* gpmInt.h (opt_age_limit): Add.
+
+	* gpm.c (selection_paste): Add general aging test.
+
+Sun Dec 27 08:05:18 1998  Ian T Zimmerman  <itz@transbay.net>
+
+	* doc/doc.gpm: Add a directory entry for install-info.
+
+Sat Dec 26 17:05:22 1998  Ian T Zimmerman  <itz@transbay.net>
+
+	* Makefile.in (libgpm.so.@abi_full@): Start a new version number
+	scheme for the shared library.  This is intended to be compatible
+	with libtool versioning, and the initial number is chosen with
+	continuity in mind, so nothing needs to be recopmiled or even
+	relinked. 
+
+	* configure.in: Rewrite auto-configuration rules per Autoconf Info
+ 	page.
+
+	* Makefile.in (config.h): Add config.h support to reduce build
+ 	noise.
+
+Wed Dec 16 22:06:31 1998  Ian T Zimmerman  <itz@transbay.net>
+
+	* liblow.c (Gpm_Open): Use sigaction() instead of signal() to
+ 	manipulate SIGWINCH and SIGTSTP; suggested i.a. by Jan Vroonhof
+ 	<vroonhof@math.ethz.ch> to fix an infinite signal loop under
+ 	XEmacs.
+
+	* gpn.c (cmdline): Get rid of remaining uses of stderr
+	(suggested by md@linux.it (Marco d'Itri)).
+
+	* gpm.c (gpm_killed): Get rid of remaining uses of stderr
+	(suggested by md@linux.it (Marco d'Itri)).
+
+	* mice.c: Apply patch from John Anderson <elpdragon@email.com> to
+	support Calcomp UltraSlate tablets.
+
+	* t-mouse.el (t-mouse-make-event): Applied patch from Tom Breton
+ 	<tob@world.std.com> for braindead chords in t-mouse with 2 button
+ 	mice.
+
+Tue Nov 17 23:10:04 1998  Ian T Zimmerman  <itz@transbay.net>
+
+	* configure.in (release): Step to 1.16.0
+
+Mon Oct  5 22:00:19 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* Makefile.in (append-diff): Add some flags to the diff command
+	(most important, --unidirectional-new-file).
+
+Wed Sep 30 11:08:59 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* doc/manpager: Add handling of forced line breaks,
+	cross-references, and boldface (used for cross-references).
+
+	* doc/doc.gpm: Fixed manpage cross-references.
+	(Command Line): Mention disable-paste.
+
+Tue Sep 29 10:39:48 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* gpn.c (xfer_options): Move the option structure type into
+	gpmInt.h to prevent stupid future problems.
+
+	* Makefile.in (install): Add disable-paste (and make it setuid).
+
+	* disable-paste.c (main): Add a new program (not a large one :)
+
+	* mice.c (M_brw): Apply eb patch for broken Fellowes Browser mice.
+
+	* sample/Makefile.in (append-diff): Added rules to recursively
+	append to the diff file being created in top directory.
+
+	* Makefile.in (DIST): Remove exec.el from the distribution because
+	it is not needed anymore.  Modern Emacs has en --eval command line
+	option that allows me to do the same thing directly.
+
+	* configure.in (ITZ_PATH_SITE_LISP): Use it.
+
+	* aclocal.m4 (ITZ_PATH_SITE_LISP): Added.
+
+Mon Sep 14 18:03:45 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* doc/Makefile.in (gv): Replace "$(TARGET)" with "gpm".
+
+	* Makefile.in (gpm-%-to-@release@.diff): Added rule to create a
+	diff from snapshot of previous release.
+
+	* mice.c: Reapply Edmund Grimley Evans' patch with new mouse types
+	ms+ and ms-lr which get lost somewhere.
+
+Sun Sep 13 00:08:54 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* configure.in: Set CURSES_OBJS dependent on finding the curses header.
+
+Sat Sep 12 10:53:54 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* Makefile.in (LOBJ): Make the buliding of libcurses.o decided by
+	configure again.
+
+	* libcurses.c (Gpm_Wgetch): Remove the ELF assembler-dependent
+	wgetch hack again, as it is not really needed as long as clients
+	are linked statically.
+
+	* gpm.c (processRequest): Removed GPM_REQ_CLEAR again, now that its
+	functionality is available with the -A flag and opt_aged.
+
+	* gpmInt.h:  Removed GPM_REQ_CLEAR again, now that its
+ 	functionality is available with the -A flag and opt_aged.
+
+	* libxtra.c: Removed Gpm_ClearSelection() again, now that its
+ 	functionality is available with the -A flag and opt_aged.
+
+	* gpm.h: Removed Gpm_ClearSelection() again, now that its
+ 	functionality is available with the -A flag and opt_aged.
+
+	* mev.c (interact): Removed "clear" command again, now that its
+	functionality is available with the -A flag and opt_aged.
+
+	* gpmInt.h: Change signature of xfer_options().
+	Remove it altogether, it's better static and split to gpn.c and
+	gpm.c.
+	Add opt_aged.
+
+	* gpn.c (check_uniqueness): Completely rewritten.  This function
+	was a messy mixture of different things.
+
+Wed Sep  9 09:50:59 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* libxtra.c (Gpm_GetServerVersion): Provide explicit path for
+	popen of gpm daemon.
+
+	* sample/Makefile.in (rmev.o): Added target because of usage of
+	RMEV_RELEASE. 
+	(prefix): Looks like this has to be done in _every_ Makefile,
+	sigh.  Even if it is not used explicitly, configure subsitutes
+	e.g. "@sysconfdir@" with "$(prefix)/etc".
+	(sysconfdir): Added sysconfdir.
+
+	* Makefile.in (gpn.o gpm-root.o twiddler.o): gpn.o added to this
+	target because it uses RELEASE symbol substituted by configure.
+
+Tue Sep  8 14:04:44 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* mev.c (interact): Added case for "clear" command.
+
+	* libxtra.c (Gpm_ClearSelection): Added.
+
+	* gpmInt.h (GPM_REQ_CLEAR): Added (rubino's objection overruled;
+	the gpm protocol is not really ugly, it's the code that is, in
+	effect casting the data exchanged to Gpm_Conn and Gpm_Event.  It
+	could be coded cleanly or even fixed from present state, but don't
+	hold your breath, you could suffocate.)
+
+	* gpm.h: Add Gpm_ClearSelection.
+
+	* t-mouse.el (t-mouse-swap-alt-keys): Added.  This is what is
+ 	called "personal variable" :-) I swap the left and right Alt keys
+ 	in my Linux keytable, but I still want Emacs to handle left-Alt
+ 	events.
+
+Wed Sep  2 00:09:42 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* doc/Makefile.in (maintainer-clean): Ignore errors because the file
+	list can be empty.
+
+	* sample/Makefile.in (maintainer-clean): -rm -i for uniformity.
+
+	* Makefile.in (maintainer-clean): Ignore errors because the file
+	list can be empty.
+
+	* mouse-test.c (makedev): Add O_NONBLOCK to open ttyS devices
+	(otherwise the program hangs in this function, at least on my
+	system).
+
+	* doc/doc.gpm (gpm-root): Use @file at several places in
+	preference to other markup.  Fix several other general
+	documentation bugs, mostly referring to obsolete (non-)features. 
+
+	* doc/Makefile.in (.SECONDARY): Need both %.ps and gpm.ps ---
+	looks like a gmake bug.
+
+	* sample/gpm-xterm.h: Applied patch by Jean-Daniel
+ 	<jd@univ-lyon1.fr> for looking back when scanning arrow key
+ 	sequences.
+
+	* Makefile.in (datadir): Oops, need to define this if I define
+	elispdir.  GNU standard document a little incomplete on this
+	point. 
+
+Fri Aug 28 00:06:05 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* configure.in: Oops, autoconf hates newlines between filenames in
+	AC_CHECK_HEADERS.
+
+	* create_vcs: Create symlinks in /dev for the new (or old?) names
+	mandated by kernel device list.
+
+	* gpm-root.y (main): Check for both /dev/vcs and /dev/vcs0.  Also
+	check for correct device number.
+
+	* configure.in: Check for sys/sysmacros.h and linux/major.h.
+
+Thu Aug 27 09:33:56 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* sample/Makefile.in: Add TAGS rule.
+
+	* Makefile.in (libgpm.so.@release@): Change sed script to extract
+	the major release number, now that there are 2 dots in the
+	complete number.
+
+	* configure.in (release): Now includes the patchlevel number, for
+	instance 1.15.5.
+
+	* sample/configure.in (release): Define this as RMEV_RELEASE.
+
+	* configure.in (release): Define this as both GPM_RELEASE and
+	RMEV_RELEASE. 
+
+	* gpmCfg.h: Delete RELEASE definition. (will be passed from
+ 	configure).
+
+	* sample/rmev.c (RMEV_DATE): Define from RCS checkin date.
+	Delete RELEASE definition. (will be passed from configure).
+
+	* gpmCfg.h (GPM_DATE): Define from RCS checkin date.
+
+	* sample/gpm-xterm.c: Delete RELEASE definition.
+
+	* Makefile.in: For submakes, add -lgpm to LIBS.  Put do-all before
+	@SHLIB@ in the rule for all; let's hope that means submakes will
+	use the static library.
+	Oops, that didn't work.  Another try: name the shared library
+	libgpm.so.@release@ maybe that way linker won't find it.
+
+	* configure.in (GPMXTERM): This is needed because we now configure
+	under sample.
+
+	* Makefile.in: Add sample to subdirs for recursion.
+
+	* sample/gpm-xterm.c: Include whatever curses header we can find.
+
+	* sample/rmev.c (main): Rewrite to use termios to set raw terminal
+	mode, not n?curses.
+
+	* Makefile.in (top_builddir): Add top_builddir because it is now
+	mentioned in @LDFLAGS@.
+
+	* configure.in (CPPFLAGS): Add top_srcdir to the include path.
+	(LDFLAGS): Add top_builddir to library path.
+	Add sample/Makefile to output files.
+
+	* sample/configure.in: Simplified to use default autoconf behavior
+	where possible.
+	Only look for n?curses if we're building without gpm.
+	
+	* sample/Makefile.in: Rewrite to be able to act as slave for
+ 	toplevel.
+
+	* doc/Makefile.in: Mostly rewritten to act as slave for toplevel
+ 	Makefile.
+	(mostlyclean): Instead of moving gpm.ps to a funny filename and
+ 	then back just to delete all the gpm.?? files, let's just rename
+ 	it permanently to gpmdoc.ps.  Create a SECONDARY rule to avoid
+ 	re-TeXing after gpm.ps has been renamed.
+
+	* configure.in (lispdir): Set as recommended by GNU standard.
+
+	* Makefile.in (DIST): Fix typo (create-vcs => create_vcs).
+	(.SUFFIXES): Clear this before setting it.  Magic suggested by the
+ 	Standards Info file.
+	(install): Add install-strip.
+	Added subdirectory recursion magic.
+
+	* configure.in: Rewrite for new Makefile.
+
+	* aclocal.m4: Delete useless stuff.
+
+	* Makefile.in: Complete rewrite, now conforms to GNU standard.
+
+	* libcurses.c: Remove the curses argument, it's quite useless.
+	Check for the curses header in reasonable places.
+
+	* configure.in: Remove the curses argument, it's quite useless.
+	Check for the curses header in reasonable places.
+
+	* README: Fix references to /usr/bin/gpm as gpm is now installed
+	in /usr/sbin.
+	Fix reference to /etc/gpm-root.conf as this file is now installed
+	in SYSCONFDIR (== /usr/etc by default).
+
+	* gpm-root.y (SYSTEM_CFG): Place this in SYSCONFDIR not hardcoded
+	in /etc.
+
+	* README: Fixed reference to debugging version.
+
+Wed Aug 26 18:47:16 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* aclocal.m4: Add ITZ_PROG_EMACS.
+
+	* twiddler.h (TW_CUSTOM_FILE): These files now go to SYSCONFDIR
+	which is the GNUsically correct way.
+
+	* configure.in: Use LIBS (GNU standard) not LDLIBS.
+	Add AC_REVISION.
+	Make srcdir an absolute path.
+	Figure out default prefix based on location of gcc.
+	Use AC_CHECK_TYPE to look for __u32.
+	Don't cache the values from command-line options.
+	(REL_MAJ): This and RELEASE shouldn't be cached either, as
+	Alessandro has discovered.
+
+Thu Aug 20 00:07:42 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* Makefile.in (all): Should now recurse into doc ...
+
+	* doc/doc.gpm (Server Invocation): The server manpage should go to
+ 	section 8, not section 1.
+	(gpm-root): Fixed all references in the documentation to
+	/var/run/gpmctl to /dev/gpmctl.
+
+	* doc/Makefile.in (install): Added this rule here instead of
+ 	installing directly from top make.  Since I care about consistency
+ 	so much, I must have a little mind ...
+	(distclean): Don't directly rm doc/Makefile from top make,
+ 	instead recursively make distclean in doc subdirectory.
+
+	* Makefile.in (distclean): Don't directly rm doc/Makefile here,
+ 	instead recursively make distclean in doc subdirectory.
+
+Wed Aug 19 13:01:00 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* gpm.c (processConn): Added code to bind the client side of the
+	socket to the name of a temporary file.  This is a quick and dirty
+	authentication scheme described in Stevens p. 504.
+
+	* liblow.c (Gpm_Open): Added code to bind the client side of the
+	socket to the name of a temporary file.  This is a quick and dirty
+	authentication scheme described in Stevens p. 504.  Server side
+	hack to follow shortly.
+
+	* Makefile.in (distclean): Have to clean doc/Makefile as well.
+
+	* doc/doc.gpm (gpm-root): Argh, haven't understood that the
+	manpages are generated from the info source.  Added description of
+	the options here.  TODO: cross-references in manpages should be in
+	bold type.  Someone has to hack doc/manpager to do that.
+	(Emacs Support): Deleted obsolete rubbish about t-mouse.
+
+Thu Aug 13 13:39:23 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* Makefile.in (install): gpm should go to /usr/sbin not /usr/bin.
+
+	* configure.in: Enable libtinfo.
+
+	* libcurses.c: Added weak definition of wgetch() that programs
+ 	which don't need the curses part of the library don't need to link
+ 	the whole libncurses (instead they can link with libtinfo).
+
+	* gpm-root.y (main): restructured to use the new style logging exclusively.
+
+	* gpm.c (main): moved file cleanup into an atexit hook.
+
+	* gpn.c (cmdline): restructured to use the new style logging exclusively.
+
+Thu Jul  2 00:05:16 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* gpm-root.1: Add -D & -V to the options string. Add boldface to
+ 	man references.
+	Update pathname for /dev/gpmctl (should this be
+ 	done automatically?)
+	
+	* gpm.1: Described new -D & -V options.  Added boldface to other
+ 	manpage references, to make them behave as hyperlinks where
+ 	software allows.
+
+	* gpm-root.y (main): Add -D & -V to the options string.
+
+	* configure.in: Fixed show-stopping problem of repeated calls to
+ 	AC_OUTPUT.
+
+	* gpm-root.y: Replaced PERROR calls with gpm_debug_log.
+	(usage): Document new flags -D and -V, in analogy to gpm flags.
+	(cmdline): Implement the new options.
+
+Wed Jul  1 09:56:30 1998  Ian T Zimmerman  <itz@rahul.net>
+
+	* gpm-root.y: Replaced PDEBUGGGG calls with gpm_debug_log.
+	(PERROR): Remove.  
+
+	* gpm-root.y: Reindent.
+
+	* debuglog.c (gpm_oops): Moved va_list declaration in front of
+	initialization statements (I hate C!).
+
+	* gpm.c (processRequest): Fixed debug statement to look inside
+	passed Gpm_Cinfo structure.
+
+	* tar.exclude: added sundry files created by configure.
+
+	* Makefile.in (tar): changed tar flags to GNU style, otherwise
+	options get confused with filenames.  If anybody tries to use this
+	rule with a non-GNU tar, good luck.  Also added -9 flag to gzip
+	to squeeze that last byte :-)
+
+	* special.c: Replaced PDEBUG invocations.
+
+	* mouse-test.c (_oops): Delete, it is in the library now.
+
+	* mice.c: Replaced PDEBUG invocations with gpm_debug_log.
+	Reindent.
+
+	* libxtra.c: Reindent.
+	(Gpm_GetSnapshot): Replaced PDEBUG invocations with gpm_debug_log.
+
+	* liblow.c: Replaced PDEBUG invocations with gpm_debug_log.
+
+	* liblow.c: Reindent.
+
+	* gpn.c (cmdline): replaced old oops invocations.
+
+	* wd.h (gpm_oops): Add declaration.
+
+	* gpmInt.h: remove declaration of _oops (see above).
+
+	* debuglog.c (gpm_oops): Added as a replacement for _oops in gpn.c.
+
+	* configure.in: check for syslog() as well
+	Added check for alloca().
+
+	* gpn.c: removed _oops; see above.
+
+	* gpmInt.h (_oops): Changed signature of _oops
+	(oops): redefined accordingly
+
+	* gpm.c: Removed a few leftover newlines in logging calls
+
+	* gpn.c: Reindent, because it was so bad as to confuse my tools.
+	(usage): Added description of new options -D and -V.  Used D
+ 	partly because it is mentioned in the string passed to getopt(),
+ 	but is actually unused.
+	(cmdline): Added -D and -V to the getopt() loop.
+
+	* gpm.c: Replaced ugggly macros by calls to gpm_debug_log.
+
+	* debuglog.c (gpm_debug_log): Print a trailing newline if using
+ 	stdio.
+
+	* configure.in: Added generation of doc/Makefile
+
+	* gpn.c: Removed the Log function (now done through debuglog.c)
+
+	* gpmInt.h: Removed debug/log related declarations (now in
+ 	wd.h/debuglog.c)
+
+	* gpmCfg.h: Removed CONFIG_GPM_LOG line.
+
+	* gpm.h: Twiddled various pathnames, included paths.h
+
+	* Makefile.in (tar): exclude the files mentioned in tar.exclude.
+	Create the archive in the current directory, not parent.
+
+	* configure.in: Move doc/Makefile to doc/Makefile.in and make
+	configure generate doc/Makefile.  Right now it doesn't substitute
+	anything, but it might one day, the new way is better conformant
+	with GNU distribution guidelines, and it makes it easier to create
+	clean tarballs.  (There, a fine oxymoron.)
+
+	* Makefile.in (LOBJS): Added debuglog.o
+	(TARGET): Likewise.
+	(depend dep): The preprocessor run needs $(CPPFLAGS).
+	(DEPEND DEP): Likewise.
+	(CPPFLAGS): Split from CFLAGS to correctly distribute flags to
+	compilation and preprocessor rules.
+	(.sh.o): needs CPPFLAGS.
+	($(TARGET)): This needs LDFLAGS, not CFLAGS.
+	($(TARGET).static): Likewise.
+	(mouse-test): Likewise.
+
+	* tar.exclude: create
+
+	* wd.h: Rewritten to refer to debuglog.c.
+
+	* debuglog.c (gpm_debug_log): Prefixed globals with gpm_ as this
+	is going into the library.
+	(gpm_debug_log): Reversed level test.
+	(gpm_debug_level): 2 alternative definitions depending on DEBUG.
+
+	* aclocal.m4 (DEFS): -DDEBUG should go into DEFS, not CFLAGS.
+  	This would actually make a difference if we autogenerated header
+ 	dependencies.  Which we do, but the make rule for it is
+	imprecise.  See Makefile.in entry above.
+	Also, use AC_DEFINE instead of twiddling the flags by hand.
+	
+	* configure.in (DEFS): check for syslog.h and vsyslog().
+	(DEFS): Moved definition of PREFIX here from Makefile.in.
+	
+	* debuglog.c (debug_log): created.
+
+Sat Jul 25 21:08:46 1998 Edmund Grimley Evans (edmund@vocalis.com)
+
+	* mice.c: added M_ms_plus and M_ms_plus_lr
+
+Mon Jul  6 13:00:23 1998 Robin Houston (robin.houston@guardian.co.uk)
+
+	* mev.c (main): "-p" doesn't take an argument
+
+Sat Jul  4 14:40:09 1998  Dan Fandrich  (danf@npsnet.com)
+
+	* mice.c (I_serial): Send only "*X" to mman
+
+Mon Jun 15 21:31:35 1998  Pavel Machek  (pavel@ucw.cz)
+
+	===> 1.14 released
+	* mice.c: added support for Genius NetMouse
+
+Sun May 10 11:12:46 1998  David Given (dg@tao.co.uk)
+
+	* mice.c (M_js): joystick support
+
+Sun May 10 10:41:58 1998  Ian Zimmermann (itz@lanminds.com)
+
+	* t-mouse.el: partial rewrite to enhance its workings
+	* mev.c: partial rewrite to fit t-mouse.el
+
+Tue Apr 21 18:24:52 1998  Holger Jakob (jakob@ph-cip.Uni-Koeln.DE)
+
+	* mice.c: changed all (char) to (signed char), to suit ppc Linux 
+
+Tue Jan  6 00:31:25 1998  Alessandro Rubini  (rubini@amelia)
+
+	* gpn.c (cmdline): -M forces -R (why didn't it?)
+	* Makefile.in (YACC): Use autoconf to assign YACC
+
+Mon Jan  5 14:48:23 1998  kw@dtek.chalmers.se (Kristian Wiklund)
+
+	* mice.c (M_geni): new mouse type
+
+Mon Jan  5 00:53:57 1998  Alessandro Rubini  (rubini@amelia)
+
+	* twiddler.c: new file to support keyboard workings
+	* README.twiddler: documentation about the twiddler keyboard
+	* gpn.c (cmdline): opt_scale ("-r") is now limited to 100
+
+Mon Dec 29 09:43:28 1997    (rubini@morgana)
+
+	* mice.c (M_twid): new mouse type
+	* mice.c: removed the PROTO field
+	* kmouse.h: removed the file
+
+Thu Sep 11 21:43:27 1997    Jan Daciuk (jandac@pg.gda.pl)
+
+	===> 1.13 released
+	* t-mouse.el (t-mouse-tty): another possibility for ps
+	* gpm.h (GPM_XTERM_OFF): the string was buggy (James Troup)
+	* gpm-root.c (get_winsize): use tty0 not console
+
+Sun Sep  7 12:00:35 1997  Steve Bennett (s.bennett@lancaster.ac.uk)
+
+	* mice.c: new type "-t ms3" for intellimouse devices.
+
+Sun Sep  7 12:00:35 1997  Alessandro Rubini  (rubini@amelia)
+
+	* gpn.c (cmdline): bugfix: accel allowed to be 1
+
+Mon Sep  1 14:22:31 1997    (rubini@morgana)
+
+	* mice.c: new type "-t pnp", supporting braindead ms devices.
+
+Sun Aug 31 18:28:01 1997    (rubini@morgana)
+
+	* gpm-root.y (f_mktty): use /sbin/mingetty instead of agetty
+
+Fri Aug 29 08:11:32 1997    (rubini@morgana)
+
+	* Makefile (configure): update ./configure when needed
+
+Fri Apr 11 10:19:18 1997    (rubini@morgana)
+
+	* mev.c (main): Ctrl-C terminates the program
+	* doc/doc.gpm: revision of the docs. 
+
+Tue Apr  8 17:06:06 1997    (Dave Flater: dave@universe.digex.net)
+
+	* mice.c (M_ms): removed a typo in the disabled decoder
+	* FAQ: Marked the change in the decoder for ms-middle
+
+Tue Apr  8 16:57:17 1997    (Ian Zimmermann: itz@rahul.net)
+
+	* gpm.c: fix to handle the whole stack of clients
+	* liblow.c (Gpm_Open): support for SIGTSTP
+
+Tue Apr  8 01:27:09 1997    (Thomas E. Dickey: dickey@clark.net)
+
+	* aclocal.m4, configure.in: added support for autoconf
+
+Tue Apr  8 00:48:46 1997    (rubini@morgana)
+
+	* doc/doc.gpm (Mouse Types): fixed the list
+	* gpmCfg.h (MAX_VC): raised from 32 to 64 (needed by some users)
+	* README: Added a check for "window-system" in the .emacs clause
+
+Tue Apr  8 00:35:33 1997    (Pavel Machek: pavel@Elf.mj.gts.cz)
+
+	* mice.c (M_logimsc): new mode needed for some mice
+
+Tue Apr  8 00:13:30 1997    (Matthias Grimrath: y0001032@rzserv8.rz.tu-bs.de)
+
+	* gpm.h: check for c++ inclusion
+
+Tue Apr  8 00:10:33 1997    (Stephen Tell: tell@cs.unc.edu)
+
+	* mice.c (M_ps2): patch to support some strange devices
+
+Tue Aug 27 15:54:10 1996    (rubini@morgana)
+
+	* gpmCfg.h (SELECT_TIME): increased, to avoid possible hd spinup.
+
+Fri Jul 26 12:33:39 1996    (rubini@morgana)
+
+	===> 1.10 released
+	* FAQ: new file
+	* doc/doc.gpm: provided docs about special commands
+
+Thu Jul 25 09:38:29 1996    (jrt@miel.demon.co.uk)
+
+	* gpm-root.y (main): added a missing arg in a message
+
+Wed Jul 10 15:59:33 1996    (rubini@morgana)
+
+	* liblow.c (Gpm_Open): fixed a fault when stdin not a tty (John Davis)
+	* mice.c (I_wacom): fixed initialization
+	described the fields of Gpm_Type, in order to easily add new types
+	* special.c: new file, based on an idea by Karsten Ballueder
+	* gpm.c (processMouse): use a different "repeater" (Markus)
+
+Sun May  5 22:01:48 1996    (rubini@morgana)
+
+	===> 1.09 released
+	* gpmCfg.h (DEF_GLIDEPOINT_TAP): changed to 0. The tapping code
+	for ps2 mice must be disabled for non glidepoint protocols.
+
+Tue Apr 23 14:05:43 1996    (rubini@morgana)
+
+	===> 1.08 released
+	* mice.c: support glidepoint ps2 mice (suggested by Don Schwarz)
+
+Mon Apr 22 15:20:05 1996    (rubini@morgana)
+
+	* mice.c: added the wacom protocol
+
+Sun Apr 14 20:59:08 1996    (rubini@morgana)
+
+	* t-mouse.el (t-mouse-tty): comply with procps-0.99
+
+Sun Feb 11 01:05:07 1996    (rubini@morgana)
+
+	* Makefile (MAN): libgpm.so.1 was installed. Fixed.
+
+	* gpn.c: try to kill even if connection fails
+	(usage): removed the line about "-P" (dropped time ago)
+	(cmdline): added a missing "break": -o forced -p.
+
+	* gpmInt.h: new globals: opt_kernel, opt_explicittype
+
+	* gpn.c (cmdline): support for "-K" (kernel module)
+
+Fri Jan 12 00:31:40 1996    (Michael_Plass.PARC@xerox.com)
+
+	* mice.c (M_ms): allow motion and button change in a single event
+	   however, some mice won't work, so the code is still "#if 0"
+
+Tue Nov 14 14:18:26 1995    <rubini@godipmec.unipv.it>
+
+	===> 1.06 released, unexpectedly
+	* mouse-test.c: added missing variable to link with mice.c
+	(main): don't use absolute pointing devices as possible mice.
+
+Mon Nov 13 11:21:42 1995    (Marc Meis 100334.1426@compuserve.com)
+
+	===> 1.05 released
+	* gpmInt.h: added flag "absolute" to Gpm_Type to indicate
+	absolute pointing device
+	* mice.c: added NCR3125 pen support
+	* gpm.c: modified processMouse to support absolute pointing device
+
+
+Sat Nov 11 11:40:27 1995    (rubini@morgana)
+
+	* t-mouse.el (t-mouse-run): fixed bug in linux-to-linux remote link.
+	* doc/doc.gpm (gpm-root): documented the need for /dev/vcso
+	* gpm-root.y (main): check for /dev/vcs0 before starting
+	Only run with /dev/vcs -- disregard kernels 1.1.73-92
+	(scr_dump, scr_restore): if open(/dev/vcs) fails, write on syslog
+
+	* gpm.c (processMouse): only one margin is active at a time.
+
+Fri Nov 10 22:37:45 1995    (rubini@morgana)
+
+	* gpm.h (Gpm_FitEvent): bug fix: fit DRAG, not MOVE.
+	* gpm-root.y (main): only ctrl-move gets the default behaviour
+
+Fri Nov 09 20:33:26 1995    (lou@lounix4.conc.tdsnet.com)
+
+	* mice.c (M_mman): added support for glidepoint mice (Lou Sortman)
+
+Wed Sep 27 09:51:17 1995    (rubini@morgana)
+
+	===> 1.04 released
+	* Makefile: added a dirty check for __u32 
+
+Wed Sep 26 01:31:13 1995    (rubini@morgana)
+
+	* doc/doc.gpm: some fixes
+	* doc/gpmdoc.txt: new file: ascii for "less" readers.
+
+Sat Sep 23 08:44:01 1995    (rubini@merlino)
+
+	* doc/doc.gpm: updated the lisp form to load t-mouse
+	* README: added instructions on compiling and installing
+	* Makefile: minor fixes 
+
+Sun Sep 17 13:35:26 1995    (rubini@morgana)
+
+	===> 1.03 released
+	* doc/doc.gpm (Variables ): gpm_mx and gpm_my are documented.
+	* gpm.h (Gpm_FitEvent): this too was buggy, when dealing with motion.
+	* gpm.c (do_client): masked with GPM_BARE_EVENTS (long-standing bug)
+	(processMouse): removed GPM_SINGLE from motion events
+	* libxtra.c (Gpm_GetSnapshot): return 0 if the input queue is full
+	* mev.c (main): another fflush, I forgot about it.
+	* liblow.c (Gpm_Open): the fix of two days ago broke normal clients.
+
+Sat Sep 16 22:47:13 1995    (rubini@morgana)
+
+	* gpn.c (cmdline): added a missing "break;" (-L)
+
+Fri Sep 15 09:40:59 1995    (rubini@morgana)
+
+	* liblow.c (Gpm_Open): fixed a problem whit pty's (t-mouse broke)
+
+Thu Sep 14 01:50:23 1995    (rubini@morgana)
+
+	===> 1.02 released
+	* liblow.c (Gpm_Open): fixed a bug with multiple opens
+	* mev.c (user_handler): added fflush() 'cause didn't work with elf/lib5
+	* gpmInt.h (inline): inhibit inlining when debugging
+	* Makefile (install): some fixes to make it work (Mark Shadley)
+	(static): new target (I've an old gdb :-( )
+	* hltest.c (xhandler): fixed a problem with messages
+	* libhigh.c (Gpm_HandleRoi): fixed a segfault when no roi matches
+	* gpm.c (get_console_size): create a different resolution for x and y
+	(processMouse): return tiny motions (0,0) if some time has elapsed
+	* gpn.c (cmdline): introduced "-q". Obsoletes "-L".
+	* gpmCfg.h (SELECT_TIME): decuplicated time-out (10 minutes).
+	(MAX_VC): 32 virtual consoles
+
+Tue Sep 12 00:12:47 1995    (rubini@morgana)
+
+	===> 1.01 released
+	* Makefile: supports elf shlibs (Mark Shadley)
+
+Wed Sep  6 22:46:55 1995    (rubini@morgana)
+
+	* mev.c (main): use current tty instead of /dev/console
+	* liblow.c (Gpm_Open): use /dev/ttyxx instead
+	  of /dev/console (Pavel Kankovsky)
+	* gpn.c (cmdline): fixed "-o rts" 
+
+Wed Jul 26 14:44:59 1995  Alessandro Rubini  <rubini@ipvvis>
+
+	===> 1.00 released
+	* doc/doc.gpm (Emacs Support): upgrade
+	* t-mouse.el: upgrade by Ian T Zimmerman
+	* gpm-root.y (cmdline): last bug fix: missing break in switch
+
+Wed Jul 26 00:38:51 1995    (rubini@morgana)
+
+	* t-mouse.el: fixes and enhancements by Ian T Zimmerman
+	* Announce: new file. The announce for c.o.l.a.
+	* liblow.c (Gpm_Open): open console O_WRONLY instead of O_RDONLY
+	(Gpm_Getc): swapped two lines, to handle SIGWINCH in clients
+
+	* doc/doc.gpm: final fix
+
+Tue Jul 25 00:41:44 1995    (rubini@morgana)
+
+	* mouse-test.c: a new utility to "detect" your mouse type
+
+Mon Jul 24 15:52:11 1995    (rubini@morgana)
+
+	* gpm.c (gpm_killed): removed spurious and annoying message
+
+Fri Jul 21 10:57:07 1995    (rubini@morgana)
+
+	* libhigh.c (Gpm_HandleRoi): fixed a problem with gpm_visiblepointer
+
+Thu Jul 20 23:04:42 1995    (rubini@morgana)
+
+	* gpn.c (cmdline): "-D" removed (use "-k" instead)
+
+Wed Jul 19 09:12:29 1995    (rubini@morgana)
+
+	* gpm.c (processRequest): fixed nasty bug introduced with "-R"
+	* t-mouse.el (t-mouse-keymap): added double-drag and triple-drag
+	* gpm.c (processMouse): the GPM_SINGLE,GPM_DOUBLE and GPM_TRIPLE
+	flags are always delivered (as they should have always been).
+	* gpn.c (cmdline): removed the "-p" option (useless).
+	* doc/doc.gpm: Revised and updated.
+	* liblow.c (Gpm_Open): use the foreseeable device /dev/gmctl
+	* gpn.c (cmdline): no more symlink /tmp/gpmctl
+	* gpm-root.y (main): recursive menus definitely fixed
+
+Sat Jul 15 11:16:18 1995    (rubini@morgana)
+
+	* various places: applied axp patches. 
+	* libhigh.c: update, at last.
+	* hltest.c: new file, to test the high level library
+
+Mon Jul 10 20:03:46 1995    (rubini@morgana)
+
+	* gpm-root.y (main): recursive menus
+	* gpm.c (main): chmod 777 /var/run/gpmctl (1.2.9 and later broke it)
+	* mice.c (M_mman): chord-middle detected
+
+Wed Jul  5 09:29:52 1995    (rubini@morgana)
+
+	===> 0.99 released
+	* doc/Makefile: minor cleanup
+	* doc/manpager: changed any "continue" to "next"
+
+Fri Jun 30 09:14:13 1995    (rubini@morgana)
+
+	* gpm.c (wait_text): fixed interaction with X when non repeater.
+
+Wed May 31 09:17:55 1995    (rubini@morgana)
+
+	===> 0.98.3 released
+	* gpm.c (processMouse): fixed update of number of buttons
+	* doc/doc.gpm: minor fixes
+	* libxtra.c (Gpm_GetSnapshot): check if a connection is open
+
+Sun May 28 22:02:20 1995    (rubini@morgana)
+
+	* gpm-root.y (main): reset gpm_tried after failure
+
+Tue May 16 10:28:01 1995    (rubini@morgana)
+
+	* gpm.c: setuid(0)
+	* gpm-root.y: setuid(0)
+
+Tue Apr 25 18:02:03 1995    (rubini@morgana)
+
+	* t-mouse.el (t-mouse-make-event): fixed problem with split windows
+
+Sat Apr 22 13:19:50 1995    (rubini@morgana)
+
+	* t-mouse.el: mouse-2 in Info-mode is handled
+	mouse-2 in dired-mode is handled
+	* gpm-root.y (main): added  sleep() if Gpm_Open() fails
+
+Wed Apr 12 00:29:46 1995    (rubini@morgana)
+
+	===> 0.98.2 available
+	* mev.c (main): use the new library functions
+	* gpm.c (processRequest): added information retrivial
+	* liblow.c (Gpm_Open): try /tmp/gpmctl as well
+	* libxtra.c (Gpm_GetLibVersion): new function
+	(Gpm_GetServerVersion): new function
+	(Gpm_GetSnapshot): new function
+	* gpm-root.y (postmenu): use /dev/vcs and fine line-drawing chars
+	(main): change of semantic: use button-down to choose item.
+	(tableMod[]): use KG_SHIFT	
+	(main): logging out is correctly managed (in /etc/utmp)
+
+Tue Apr 11 15:48:27 1995    (rubini@morgana)
+
+	* t-mouse.el (t-mouse-process-filter): catch errors in mev messages
+	* mice.c (I_serial): mouseMan fix (Stephen Lee)
+	(mice[]): added an information string and a synonym.
+	(M_listTypes): new function to give some help
+	* mev.c (user_handler): added "0x" in printf (ajohnson)
+	(tableMod[]): use keyboard.h instead of constant values.
+	* gpm-root.y: added missing ';'s (ajohnson@apanix.apana.org.au)
+	(postmenu): fixed "unsigned char" bug (johnvl@einstein.et.tudelft.nl)
+	* Makefile (install): fixed problems with info file
+
+Thu Apr  6 00:33:03 1995    (rubini@morgana)
+
+	===> 0.98.1 made available
+	* gpm.c gpn.c: read two mice at a time
+	* gpm-root.y (f_jptty): added ioctl(VT_WAITACTIVE)
+	(main): console disallocation is provided
+
+Wed Apr  5 08:03:37 1995    (rubini@morgana)
+
+	* gpm.c (wait_text): only invoked if already graphics
+	(processMouse): be a repeater if we're in graphic mode
+	* gpn.c (check_uniqueness): fixed bug with "-k" and nobody to kill
+	* gpm-root.y (scr_dump): fixed bug with clr_selection and dump/restore
+	* wd.h: changed DEBUG(()) to PDEBUG(())
+
+Tue Apr  4 08:56:33 1995    (rubini@morgana)
+
+	* gpn.c (usage): changed semantics, to be more useful
+
+Sun Apr  2 13:20:28 1995    (rubini@merlino)
+
+	* gpn.c (cmdline): device is opened with O_NDELAY
+
+Mon Mar  6 09:49:19 1995    (rubini@morgana)
+
+	===> 0.98 released
+	* Makefile (info): new target: no more info file from simple "make"
+	* gpn.c (loadlut): use octal codes and latin-1 chars (Andries Brouwer)
+	(cmdline): create a symlink /tmp/gpmctl to run precompiled executables
+
+Sat Mar  4 18:44:54 1995    (rubini@morgana)
+
+	* t-mouse.el (t-mouse-keymap): use M-mouse to enable the scrollbar
+
+Tue Feb 28 00:20:35 1995    (rubini@morgana)
+
+	* mev.c (main): added report of kdb modifiers for key events
+	* Makefile (clean): remove *.1, since they're not sources
+	* kernel/*: removed the directory as obsolete
+	* root.y (scr_dump): added support for /dev/vcs
+
+Sun Feb 26 14:25:31 1995    (rubini@morgana)
+
+	* wd.h: when intactive use "" instead of "0" (to use "-Wall")
+	* various fixes to face "-Wall" messages
+
+Mon Feb 20 18:08:02 1995    (rubini@morgana)
+
+	* liblow.c (Gpm_Open): bug fix, closed an open comment (John E. Davis)
+
+Wed Feb 15 12:25:14 1995    (rubini@morgana)
+
+	* mev.c (sigHandler): propagate SIGWINCH to the father
+	* gpm.c (main): propagate SIGWINCH to the clients
+	* gpmInt.h: modified Gpm_Type; one more field to allow extra bytes
+	* mice.c (I_serial): changed prototype to autodetect mouseman
+	(M_mman): new mouse type for damned MouseMan.
+
+Tue Feb 14 00:33:34 1995    (rubini@morgana)
+
+	* gpn.c (cmdline): modem-line toggle added
+
+Thu Feb  9 00:42:51 1995    (rubini@morgana)
+
+	* root.y (main): the "-B" option is no longer supported
+	(scr_restore): be sensitive to SIGWINCH
+
+Wed Feb  8 11:46:52 1995    (rubini@morgana)
+
+	* gpm.c (main): added support for SIGWINCH
+
+Thu Jan 26 12:11:59 1995    (rubini@morgana)
+
+	===> 0.97 released
+	* root.y (postmenu): get color to restore from the cursor cell instead
+	of the previous one (it failed with `less')
+	(yylex): allow double quotes in strings
+	(main): go to background
+	* gpn.c (cmdline): go to background and setsid() (Stefan)
+	(cmdline): new switch -k (kill) for busmouse users
+	* gpm.h (GPM_NODE_DIR): use "/var/run" instead of "/tmp" (Larry)
+	* Makefile: use "-O3" and don't release binaries any more
+	* mice.c (I_logi): don't jump to I_serial anymore (Larry)
+
+Fri Jan 13 12:57:41 1995    (rubini@morgana)
+
+	===> 0.97alpha releasd
+	* gpm.c (gpm_killed): use signal SIGUSR1 to kill an existent gpm
+	(main): removed the annoting warning in signal()
+
+Thu Jan 12 11:45:08 1995    (rubini@morgana)
+
+	* mev.c: added "any" to event list
+	* t-mouse.el (t-mouse-suspend): fixed behaviour (thanks Larry)
+	* mice.c (I_serial): flushed pending input (thanks Miguel)
+	(I_logi): fixed "howmany" problem with serial vs. busmice
+	* gpn.c (cmdline): m_type is passed to m_type->init
+	* gpmInt.h: removed unused field "device" in Gpm_Type
+
+Mon Dec 26 01:21:54 1994    (rubini@morgana)
+
+	* gpn.c (cmdline): authentication moved here.
+
+Wed Dec 21 11:28:41 1994    (rubini@morgana)
+
+	* gpm.c (main): new (smarter) authentication
+
+Sun Dec 18 11:18:40 1994    (rubini@morgana)
+
+	===> gpm-0.96 released
+	* root.y: allright and tested
+	* gpn.c: new '-P' option
+	* doc/manpager: new file to generate man pages
+	* Makefile: fixed the installation stuff, use /usr as $(PREFIX).
+	* gpn.c, mice.c: removed the last #ifndef linux
+	* getopt.[ch]: removed from the distribution
+
+Fri Dec 16 17:09:19 1994    (rubini@morgana)
+
+	* doc/doc.gpm: general update, addition of gpm-root docs.
+
+Thu Dec  1 01:03:51 1994    (rubini@morgana)
+
+	* liblow.c (Gpm_Open): fixed console detection (thanks Miguel)
+	and removed unused ttyp* and ttyq* recognition
+
+Fri Nov 25 01:37:37 1994    (rubini@morgana)
+
+	* root.c (main): new file: a tentative default handler
+	* gpm.c (do_client): bug-fix: default handlers now can run
+	* gpm.h: new struct and prototypes for libhigh.c
+	* doc/doc.gpm: minor fixes
+	* libhigh.c: new file with "Region-of-Interest" management
+
+Fri Nov 25 01:24:45 1994    laurent@brasil.frmug.fr.net (Laurent Chemla)
+
+	* gpm.c (processMouse): fix for button-up reporting
+
+Tue Nov 22 19:54:54 1994    (rubini@morgana)
+
+	* gpm.c (do_selection): draw a running pointer or none at all
+
+Thu Nov 17 00:24:13 1994    (rubini@morgana)
+
+	===> gpm-0.93 released
+	* t-mouse.el (tm-scroll-jump): changed behaviour: doesn't jump
+	* doc/doc.gpm (Emacs Support): documented new word and line facilities
+	* liblow.c (gpm_convert_event): fix: use gpm_zerobased
+	(gpm_convert_event): fix: report all buttons on button-up
+
+Wed Nov 16 21:15:15 1994    (rubini@morgana)
+
+	* t-mouse.el: tm-word and tm-line implemented
+
+Thu Nov 10 15:27:07 1994    (rubini@godipmec)
+
+	===> gpm-0.92 released
+	* gpmInt.h (Gpm_Type): new field "howmany"
+	* mice.c: fixed behaviour for "-t bm" (thanks to Reuben Sumner)
+	* gpm.c (getMouseData): fixed data reading
+
+Sun Nov  6 13:18:34 1994    (rubini@morgana)
+
+	* removed all the outdated "#ifdef linux"
+
+Sat Nov  5 10:23:30 1994    (rubini@morgana)
+
+	* Makefile (all): executables are stripped
+
+Tue Nov  1 13:10:48 1994    (rick@razorback.brisnet.org.au)
+
+	* gpm.c (check_mode): fix in mouse re-openig
+
+Sun Oct 30 01:49:14 1994  Alessandro Rubini  (rubini@coroide)
+
+	===> gpm-0.9 released
+	* doc/infofilter: fixed indentation of lisp code
+
+Sat Oct 29 17:24:54 1994    (rubini@morgana)
+
+	* sample/configure.in: shows how to setup for both gpm and xterm
+	* sample/rmev.c: new file, to test xterm compatibility 
+	* mev.c (usage): fixed ugly bug in printf()
+	(main): added initscr() to work under sunos-hpux
+
+Fri Oct 28 13:19:37 1994    (rubini@godipmec)
+
+	* gpm-xterm.c, gpm-xterm.h: new files, for xterm applications
+	* mev.c (main): fixed ascii value reporting
+
+Thu Oct 27 01:56:13 1994    (rubini@morgana)
+
+	* libcurses.c: xterm support is there as well
+
+Wed Oct 26 21:07:11 1994    (rubini@morgana)
+
+	* liblow.c: xterm support is there
+
+Tue Oct 25 00:32:36 1994    (rubini@morgana)
+
+	* libcurses.c (Gpm_Wgetch): new file, single function
+
+	* gpm.h (Gpm_Getchar): removed a spurious "eject" string
+
+Mon Oct 24 22:47:37 1994    (rubini@morgana)
+
+	* liblow.c (Gpm_Repeat): new function
+	(Gpm_Open): uses gpm_consolefd
+	* doc/doc.gpm: updated info, created indexes
+
+Sun Oct 16 11:36:07 1994    (rubini@morgana)
+
+	==> gpm-0.17 released
+	* gpm.c (processConn): give the client a motion event at connection
+	* t-mouse.el (t-mouse-run): added interactive to restart mouse
+	(t-mouse-tty): bug fix: the -.16 one won't work on most machines
+
+Thu Oct 13 09:48:07 1994    (rubini@morgana)
+
+        ===> gpm-0.16 released
+	* gpm.c (main): a better check for uniqueness
+	(gpm_killed): a signal handler to remove /tmp/gpm* on exit
+
+Wed Oct 12 16:10:26 1994    (rubini@godipmec)
+
+	* Makefile (all): the info file is generated
+	* t-mouse.el (t-mouse-tty): procps 0.95 is recognized
+
+Fri Sep 23 12:26:37 1994    (rubini@morgana)
+
+        ===> gpm-0.15 released
+	* t-mouse.el (t-mouse-keymap): the scroll-bar is there.
+	* mev.c: new flag "-p" to show the pointer during drags
+
+Thu Sep 22 13:15:22 1994  Alessandro Rubini  (rubini@ipvvis)
+
+        ===> gpm-0.14 released
+	* doc/doc.gpm: fixed the section about emacs
+
+Fri Sep 23 12:26:37 1994    (rubini@morgana)
+
+	* t-mouse.el (t-mouse-keymap): the scroll-bar is there.
+
+Mon Sep 19 01:06:56 1994    (rubini@morgana)
+
+	* mev.c: new flag "-f" to fit events.
+	* Makefile (quickinst): new target
+	gpm.info is installed as well
+	(distrib): the precompiled binaries are distributed as well
+	* t-mouse.el: it is really full-featured, now.
+
+Sun Sep 18 11:44:36 1994    (rubini@morgana)
+
+	* mev.c (emacs_handler): up events now return the press location
+	* Makefile: binaries are now released with the package
+
+Wed Sep 14 14:12:48 1994    (rubini@morgana)
+
+	* t-mouse.el: removed free variables: clean compile
+	* Makefile: t-mouse.elc is properly compiled
+	* exec.el: used to compile elisp.
+	* doc/*: texinfo is used, and online docs are available
+
+Wed Sep  7 19:34:28 1994    (rubini@morgana)
+
+        ===> gpm-0.13 released
+	* gpmCfg.h (MAX_VC): manage 16 virtual consoles
+	* t-mouse.el: avoid invoking awk on startup
+	* mev.c (cmdline): accept hex numbers with "-C" 
+
+Sat Aug 27 11:41:57 1994    (rubini@morgana)
+
+	* t-mouse.el: added the "-s" option to 'mev', to prevent error msg.
+
+Mon Aug 22 20:28:47 1994    (rubini@morgana)
+
+	* liblow.c (Gpm_GetEvent): Closing connection correctly handled.
+	(Gpm_Close): fix to help the above handling
+
+Fri Aug 19 10:23:01 1994    (rubini@morgana)
+
+	===> gpm-0.12 released
+	* gpn.c (cmdline): new options: "-2" and "-3"
+	* doc/gpm.tex: (Emacs Support) new section
+
+Thu Aug 18 10:01:22 1994    (rubini@morgana.unipv.it)
+
+	* gpm.c (do_selection): use right button to extend selection,
+	if the middle one is present
+	* t-mouse.el: recognizes the controlling terminal
+	* doc/gpm.tex (Compiling and Installing) note about rc.local
+	* gpm.c (processMouse): fix: first click is single
+
+Wed Aug 17 09:20:54 1994    (Olav Woelfelschneider)
+
+	===> gpm-0.11 released
+	* gpmInt.h: changed "char proto[]" to unsigned
+
+Tue Aug  2 05:26:55 1994    (rubini@morgana)
+
+	===> gpm-0.10 released
+	* liblow.c (Gpm_FitValuesM): bug fix
+
+Mon Aug  1 19:22:50 1994    (rubini@morgana)
+
+	* gpn.c (cmdline): fixed bug with opt_device (Miguel de Icaza)
+	* liblow.c (Gpm_Close): fixed the gpm_tried bug
+	* gpm.c (processMouse): clustering added
+	(getMouseData): new function to ease readability
+
+Fri Jul 29 13:54:38 1994    (rubini@ipvvis)
+
+	* gpn.c: moved many functions to gpm.c to make them inline
+
+Fri Jul 29 01:56:39 1994    (rubini@morgana)
+
+	* gpm.h: Gpm_DrawPointer: new facility
+	* liblow.c: gpm_zerobased added
+	* gpn.c (do_client): added an option to map "drag" to "move" (ugly)
+
+Thu Jul 28 23:55:18 1994    (rubini@coroide)
+
+	===> gpm-0.06 released
+	* doc/gpm.tex: updated
+
+Thu Jul 28 11:02:48 1994    (rubini@morgana)
+
+	* gpn.c (cmdline): configurable button order
+	(cmdline): double click time, too.
+	(cmdline): "-L" option.
+	(do_selection): fixed bug about wrap-around.
+
+Wed Jul 27 23:56:14 1994    (rubini@morgana)
+
+	* liblow.c: no more public gpm_timeout
+	* gpn.c (do_client): bug fix
+
+Tue Jul 26 14:44:37 1994    (rubini@mimmo)
+
+	* gpm.h: ctl file now in /tmp 
+
+Sat Jul 23 13:22:29 1994    (rubini@morgana)
+
+	* gpn.c (cmdline): /dev/mouse is the default
+	* gpm.c (processMouse): button-up: report which one
+
+Fri Jul 22 15:57:35 1994    (rubini@morgana)
+
+	* mev.c: emacs syntax is there
+
+Wed Jul 20 19:35:16 1994    (rubini@morgana)
+
+	* gpm.h: added GPM_HARD
+	* gpn.c (do_client): fixed default management.
+
+Tue Jul 19 16:31:23 1994    (rubini@morgana)
+
+	* gpm.h: changed Gpm_Event to fit ptys
+
+Tue Jul 19 09:21:37 1994    (rubini@morgana)
+
+	===> gpm-0.04 released
+	* gpn.c (cmdline): use "/dev/mouse" as a second trial for the name
+	* gpm.c (processRequest): can override info
+	* mev.c (interact): new function to test stacking
+
+Mon Jul 18 11:44:13 1994    (rubini@morgana)
+
+	* liblow.c (Gpm_Open): added stacking and an ugly goto
+	* gpn.c (_oops): fixed bug about errno (Steven S. Dick)
+	* doc/gpm.tex: fixed the terrible language, hopefully.
+
+Fri Jul 15 18:21:08 1994    (rubini@merlino)
+
+	* mev.c: raw stdin added
+
+Tue Jul 12 16:57:45 1994    (rubini@ipvvis)
+
+        ===> gpm-0.03 released
+
+
+/* Local Variables: */
+/* tab-width:8      */
+/* End:             */
+
+ 

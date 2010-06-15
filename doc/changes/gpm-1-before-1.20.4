@@ -1,0 +1,66 @@
+* From 1.20.3 to 1.20.4:
+   * Corrected typos
+
+   pre1:
+      Possibly merge changes from 1.99.x to get tree up-to-date again
+
+* From 1.20.1 to 1.20.3: (bugfix/code cleanup)
+   o Applied many cleanups
+   o Added etouch support
+   o Added scripts/report_success.sh
+   o Updated README
+
+   pre6:
+      Cleaned up "make dist" target
+      Added two debbugging programs:
+         src/prog/display-buttons.c: display pressed buttons
+         src/prog/display-coords.c: display mouse coordinates
+      Fixed Bug#474516: gpm: debug messages in syslog (Debian)
+
+   pre5:
+      Fix default handler in liblow.c
+   pre4:
+      gpm.c and gpn.c were split off from each other.
+      Some Debian patches were applied.
+   pre3:
+      Many cleanups based on 1.20.1 were made, which should
+      make it usable for distributors and end-users.
+   pre2:
+      Pre-distributors release
+   pre1:
+      First compiling version made of 1.20.1 and bugfixes.
+
+* From 1.20.1 to 1.20.2:
+   * 1.20.2 does not exist as a real release, it is broken.
+
+* From 1.20.0 to 1.20.1: (bugfixes/code clean)
+   o synaptics ps2 touchpad support
+   o code cleanup in various main files
+   o prototype of mouse support for n-mice. expect final in 1.20.3.
+
+* From 1.19.6 to 1.20.0: (bugfix/new features/code clean release)
+   o removed compile problems
+   o objdir/ support without problems
+   o cleaned up internal message functions
+   o cleanup up most of tab/spaces mixture. Now we use 3 spaces for indention
+   o added more security bug fixing patches
+   o clean {g,m,}awk support
+   o clean ps2 initialization (allows using ps2 mouse after you used synps!)
+   o gpm clients can't cause gpm do die.
+
+* From 1.19.5 to 1.19.6: (just a bugfix release)
+   o bugfixes in Makefiles (now a 'make all install' should not make any errors)
+   o bugfix in libgpm, mouse-test, gpm
+   o doc/gpm.doc is up-to-date and the manfiles, too. info is still missing.
+
+* From 1.19.4 to 1.19.5: (minor fixes and one bugfix)
+   o libc5 and linux 2.0 support in again 
+   o cleaned up the directory tree
+   o many small changes to the Makefiles
+   o devfs seperated into new file
+   o Synaptics 4 Button Touchpad support
+   o new daemon name
+
+* From 1.19.3 to 1.19.4:
+   o libc5 and linux 2.0 support removed unfortuanally!
+   o primary devfs support (broken)

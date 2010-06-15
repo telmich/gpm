@@ -1,0 +1,189 @@
+#			-*-makefile-*- (gpm/src)
+#
+# Copyright 1994,1997  		rubini@linux.it
+# Copyright 1997       		dickey@clark.net
+# Copyright (C) 1998 		Ian Zimmerman <itz@rahul.net>
+# Copyright (C) 2001-2008 	Nico Schottelius <nico-gpm2008 at schottelius.org>
+#
+
+srcdir = @srcdir@
+top_builddir = ..
+
+include $(top_builddir)/Makefile.include
+
+# Main portion: regular build rules
+
+GSRC = mice.c twiddler.c synaptics.c 														\
+		daemon/add_mouse.c daemon/init_mice.c daemon/reset_mice.c					\
+		daemon/build_argv.c daemon/disable_paste.c daemon/do_client.c				\
+		daemon/do_selection.c daemon/get_console_size.c daemon/get_data.c			\
+		daemon/getmousedata.c daemon/gpm.c daemon/gpm-killed.c						\
+		daemon/header.c daemon/main.c daemon/old_main.c									\
+		daemon/open_console.c daemon/check_kill.c daemon/gpm_exited.c   			\
+		generic/isodigit.c generic/getsym.c      											\
+		daemon/processspecial.c daemon/processconn.c daemon/processmouse.c		\
+		daemon/processrequest.c daemon/selection_copy.c daemon/selection_paste.c\
+		daemon/cmdline.c daemon/loadlut.c daemon/find_mouse_by_name.c				\
+		daemon/usage.c daemon/check_uniqueness.c 											\
+		daemon/startup.c daemon/wait_text.c
+
+GOBJ = $(GSRC:.c=.o) report.o tools.o
+
+LSRC = lib/liblow.c lib/libhigh.c lib/libxtra.c lib/report-lib.c
+
+LOBJ = $(LSRC:.c=.o) tools.o @CURSES_OBJS@
+
+PICS = $(LOBJ:.o=.lo)
+
+HDRS = gpm.h gpmInt.h twiddler.h synaptics.h message.h
+
+PSRC = prog/mev.c prog/hltest.c prog/mouse-test.c prog/disable-paste.c			\
+		 prog/display-buttons.c  prog/display-coords.c prog/get-versions.c
+
+POBJ = $(PSRC:.c=.o) prog/gpm-root.o
+
+PROG = $(POBJ:.o=)
+
+SRCS = $(GSRC) $(LSRC) $(PSRC) report.c
+
+DEFS  = @DEFS@
+
+STRIP = -s
+
+### BUILD PROCESS
+
+# allow CFLAGS to be overriden from make command line
+# ideally one would never have to write this rule again, but the GNU
+# makefile standards are at cross-purposes: CFLAGS is reserved for
+# user-overridable flags, but it's also all the implicit rule looks at.
+
+# the prog rules are not very clean...
+prog/%.o: prog/%.c
+	$(CC) -Iheaders @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@ $<
+
+prog/%:	prog/%.o
+	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS)
+
+%.o: %.c
+	$(CC) @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@ $<
+
+%.lo:	%.c
+	$(CC) @CPPFLAGS@ $(CPPFLAGS) @PICFLAGS@ @CFLAGS@ $(CFLAGS) -c -o $@ $<
+
+%:	%.o
+	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS)
+
+# old, unused, but good rule [dependings]
+#%.d: $(srcdir)/%.c
+#	$(SHELL) -ec '$(CC) -M $(GPMCPPFLAGS) $(CPPFLAGS) $< \
+#		| $(SED) '\''s/\($*\)\.o\([ :]*\)/\1.o \1.lo\2/g'\'' > $(DEPDIR)/$@'
+
+# Do it all!
+all:	gpm lib/libgpm.so.@abi_lev@ lib/libgpm.a $(PROG)
+
+gpm:	$(GOBJ)
+	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $(GOBJ) @LIBS@ $(LIBS) -lm
+
+# construct dependings of sourcefiles and link sourcefiles
+$(DEPFILE) dep: prog/gpm-root.c
+   # make links in subdirectories
+	-@for cfiledirs in prog lib; do $(MKDIR) $$cfiledirs; \
+	cd $$cfiledirs; for cfiles in `echo $(srcdir)/$$cfiledirs/*.c`; \
+	do $(LN_S) $$cfiles 2>/dev/null; done; cd ..; done
+
+	# make links in srcdir
+	-@for cfiles in `echo $(srcdir)/*.c`; do $(LN_S) $$cfiles 2>/dev/null; done
+
+	# create dependencies
+	for DEPS in `echo *.c */*.c`; do \
+	$(CC) -I. -I $(srcdir) -M @CPPFLAGS@ $(CPPFLAGS) $$DEPS | \
+	$(SED) 's/^\(.*\)\.o\([ :]+\)/\1.o \1.lo\2/g' >> $(DEPFILE) ; done
+
+### INSTALL
+check:	all
+installdirs:
+
+install:	check 
+	$(INSTALL_PROGRAM) gpm $(sbindir)/gpm
+	$(INSTALL_DATA) -m 644 lib/libgpm.a $(libdir)/libgpm.a
+	$(INSTALL_DATA) -m 644 $(srcdir)/headers/gpm.h $(includedir)/gpm.h
+	# POSIX requires the range of a for loop be nonempty and Bash
+	# 2.x goes along; unfortunately that means an additional
+	# headache in cases like this
+	if test "x@SHLIB@" != "x" ; then \
+		$(INSTALL_DATA) -m 644 lib/libgpm.so.@abi_full@ $(libdir)/libgpm.so.@abi_full@	;	\
+		cd $(libdir) && $(LN_S) -f libgpm.so.@abi_full@ libgpm.so.@abi_lev@ 					;	\
+      echo "WARNING: We installed a lib, you should now call ldconfig" 						; 	\
+      echo "f.i.: ldconfig -n -l $(libdir)/libgpm.so.@abi_full@" 								;	\
+      echo "Or to update everything just type ldconfig"											;	\
+	fi
+#			The unversioned files seems to be not needed -> correct me, if I am wrong.
+#			&& $(LN_S) -f libgpm.so.@abi_lev@  libgpm.so 											;	\
+
+   # prog/
+	for i in $(PROG); do \
+		$(INSTALL_PROGRAM) $$i $(bindir)/`echo $$i | sed 's,prog/,,'` ;\
+	done
+
+install-strip:
+	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) $(STRIP)' install
+
+# Note: this leaves around /usr/lib/libgpm.so.1 and /usr/lib/libgpm.so.1.nn
+# This is probably the right thing, because programs may be linked to it
+uninstall:
+	rm -f $(bindir)/mev $(bindir)/gpm-root $(bindir)/disable-paste \
+	$(sbindir)/gpm $(libdir)/libgpm.a $(libdir)/libgpm.so $(includedir)/gpm.h 
+	for i in $(PROG); do \
+		rm -f $(bindir)/$$i ;\
+	done
+
+# Configure & unconfigure
+
+Makefile: Makefile.in
+	$(top_builddir)/config.status Makefile
+
+# Subdirectory prog/
+prog/gpm-root.c:	$(srcdir)/prog/gpm-root.y
+	$(YACC) $(YFLAGS) $< && mv y.tab.c prog/gpm-root.c
+
+# gpm-root needs an own rule, because gpm-root.c is not in $(srcdir)
+prog/gpm-root: prog/gpm-root.c lib/libgpm.so.@abi_lev@
+	$(CC) -I. @CPPFLAGS@ $(CPPFLAGS) @CFLAGS@ $(CFLAGS) -c -o $@.o $<
+	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $@.o @LIBS@ $(LIBS) lib/libgpm.so.@abi_lev@
+
+prog/mouse-test:	prog/mouse-test.o mice.o twiddler.o synaptics.o prog/open_console.o
+	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $^ @LIBS@ $(LIBS) -lm
+
+$(PROG):	lib/libgpm.so.@abi_lev@
+
+# Subdirectory lib/
+lib/libgpm.a:	$(LOBJ)
+	$(AR) rc lib/libgpm.a $(LOBJ)
+	$(RANLIB) lib/libgpm.a
+
+lib/libgpm.so.@abi_full@:	$(PICS)
+	$(CC) @SOLDFLAGS@libgpm.so.@abi_lev@ \
+	@LDFLAGS@ $(LDFLAGS) -o lib/libgpm.so.@abi_full@ $^ @LIBS@ @SHARED_LIBS@ $(LIBS)	
+lib/libgpm.so.@abi_lev@:	lib/libgpm.so.@abi_full@
+	$(LN_S) -f libgpm.so.@abi_full@ lib/libgpm.so.@abi_lev@
+# unneeded, isn't it?
+#lib/libgpm.so:	lib/libgpm.so.@abi_full@
+#	$(LN_S) -f libgpm.so.@abi_full@ lib/libgpm.so
+
+include $(DEPFILE)
+
+## Release / Dist
+
+
+## Cleanup
+clean:
+	rm -f gpm lib/libgpm.a lib/libgpm.so.* $(RDEPS)
+	rm -f core *~ $(GOBJ) $(LOBJ) $(POBJ) $(PICS) gpm-root.c $(DEPFILE)
+	rm -f $(PROG) $(POBJ) prog/gpm-root.c prog/open_console.o
+
+distclean: clean
+	rm -f headers/config.h headers/drivers.h \
+		Makefile $(DEPFILE)
+
+allclean: clean
+	rm -f headers/config.h.in

@@ -1,0 +1,30 @@
+--- gpm-1.19.3/gpn.c.old	Mon Feb  5 07:10:04 2001
++++ gpm-1.19.3/gpn.c	Mon Feb  5 07:52:32 2001
+@@ -223,11 +223,16 @@
+ static void
+ check_uniqueness(void)
+ {
+-  static char tmp_pidfile [] = GPM_NODE_DIR "gpmXXXXXX";
++  char *tmp_pidfile;
+   FILE* fp = 0;
+ 
+-  if (!mktemp(tmp_pidfile + strlen(GPM_NODE_DIR))) {
+-    oops("mktemp()");
++  umask(022); /* make sure file will not be world-writable */
++
++  tmp_pidfile=(char *)malloc(strlen(GPM_NODE_DIR) + strlen("/gpmXXXXXX") +1);
++  strcpy(tmp_pidfile, GPM_NODE_DIR);
++  strcat(tmp_pidfile, "/gpmXXXXXX");
++  if (!mkstemp(tmp_pidfile)) {
++    oops("mkstemp()");
+   } /*if*/
+   if ((fp = fopen(tmp_pidfile,"w")) != NULL) {
+     fprintf(fp,"%d\n",getpid());
+@@ -248,6 +253,7 @@
+     if (fp) {
+       int old_pid = -1;
+       fscanf(fp, "%d", &old_pid);
++      unlink(tmp_pidfile);
+       gpm_oops(__FILE__,__LINE__,"gpm already running as pid %d", old_pid);
+     } else {
+       oops(GPM_NODE_PID);

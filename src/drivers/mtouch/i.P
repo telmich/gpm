@@ -1,0 +1,36 @@
+drivers/mtouch/i.o: /home/user/nico/p/gpm/gpm/src/drivers/mtouch/i.c \
+  headers/config.h /usr/include/stdio.h /usr/include/features.h \
+  /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
+  /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
+  /usr/lib/gcc/x86_64-linux-gnu/4.3.2/include/stddef.h \
+  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+  /usr/lib/gcc/x86_64-linux-gnu/4.3.2/include/stdarg.h \
+  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+  /usr/include/bits/stdio.h /usr/include/unistd.h \
+  /usr/include/bits/posix_opt.h /usr/include/bits/confname.h \
+  /usr/include/getopt.h /usr/include/termios.h \
+  /usr/include/bits/termios.h /usr/include/sys/ttydefaults.h \
+  /home/user/nico/p/gpm/gpm/src/headers/types.h \
+  /home/user/nico/p/gpm/gpm/src/headers/gpm.h /usr/include/paths.h \
+  /usr/include/sys/ioctl.h /usr/include/bits/ioctls.h \
+  /usr/include/asm/ioctls.h /usr/include/asm/ioctl.h \
+  /usr/include/asm-generic/ioctl.h /usr/include/bits/ioctl-types.h
+/home/user/nico/p/gpm/gpm/src/drivers/mtouch/i.c :
+  headers/config.h /usr/include/stdio.h /usr/include/features.h :
+  /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h :
+  /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h :
+  /usr/lib/gcc/x86_64-linux-gnu/4.3.2/include/stddef.h :
+  /usr/include/bits/types.h /usr/include/bits/typesizes.h :
+  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h :
+  /usr/lib/gcc/x86_64-linux-gnu/4.3.2/include/stdarg.h :
+  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h :
+  /usr/include/bits/stdio.h /usr/include/unistd.h :
+  /usr/include/bits/posix_opt.h /usr/include/bits/confname.h :
+  /usr/include/getopt.h /usr/include/termios.h :
+  /usr/include/bits/termios.h /usr/include/sys/ttydefaults.h :
+  /home/user/nico/p/gpm/gpm/src/headers/types.h :
+  /home/user/nico/p/gpm/gpm/src/headers/gpm.h /usr/include/paths.h :
+  /usr/include/sys/ioctl.h /usr/include/bits/ioctls.h :
+  /usr/include/asm/ioctls.h /usr/include/asm/ioctl.h :
+  /usr/include/asm-generic/ioctl.h /usr/include/bits/ioctl-types.h :

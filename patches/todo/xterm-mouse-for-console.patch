@@ -1,0 +1,186 @@
+ *             xterm-style mouse reporting with "gpm"
+ *             --------------------------------------
+ *
+ *  With this patch, programs on the text console can use the mouse without
+ *  using "libgpm" by requesting to get mouse reports such as button click
+ *  events in xterm style (see "man 4 console_codes").
+ *
+ *  To let the 'ncurses' library take advantage of it, one has to add the
+ *  'kmous' capability from xterm to the LINUX console terminfo description.
+ *  Recent ncurses versions (5.0) will then use it.
+ *
+ *  The usual select and copy mechanism of gpm is still available by pressing
+ *  the CNTRL button while using the mouse. Only the SHIFT and ALT key can
+ *  be used as modifiers as described in the xterm interface.
+ *
+ *  A patched terminal description "linux-mouse.tic" is included. Use command
+ *    tic linux-mouse.tic
+ *  to install it. Setting "TERM=linux-mouse" will switch to it. One can also
+ *  substitute the original "TERM=linux" description with it. It will not
+ *  cause any harm (in case you are still using an unpatched "gpm" or not using
+ *  the mouse at all).
+ *
+ *  Advantages:
+ *   - There is no need for "libgpm" support in the ncurses library anymore.
+ *     IMHO ncurses could ship with the patched terminfo description for the
+ *     console and libgpm support could be removed.
+ *   - Simplified interface to mouse (i. e. same as xterm).
+ *
+ *  Internals:
+ *  gpm will be made to query the status of the kernel 'mouse_report' variable
+ *  before updating selection. If mouse_report is set, gpm tells the kernel to
+ *  issue the xterm escape sequence to the program.
+ *
+ *    Joerg Schoen 6/2000
+ *
+ *  This patch is under the GNU whatever-is-appropriate-here license.
+ *
+ *  I can be reached via "JoergSchoen@maf.org". ONLY text emails please!
+ *
+diff -Naur gpm.c gpm.c
+--- gpm.c	Fri Nov 12 14:27:36 1999
++++ gpm.c	Sun Jun  4 20:44:14 2000
+@@ -41,6 +41,14 @@
+ #include <sys/kd.h>        /* KDGETMODE */
+ #include <termios.h>       /* winsize */
+ 
++#include <linux/keyboard.h> /* to use KG_SHIFT and so on */
++
++/*  These two flags in event->modifiers are used to
++ *   signal mouse tracking for this console.
++ */
++#define MOUSE_REPORT      0x40
++#define MOUSE_REPORT2     0x80
++
+ #include "gpmInt.h"
+ 
+ #ifndef max
+@@ -166,8 +174,15 @@
+   if ((fd=open_console(O_WRONLY))<0)
+     oops("open_console");
+   gpm_debug_log(LOG_DEBUG,"ctl %i, mode %i",(int)*buf, arg[4]);
+-  if (ioctl(fd, TIOCLINUX, buf+sizeof(short)-1) < 0)
+-    oops("ioctl(TIOCLINUX)");
++  if (ioctl(fd, TIOCLINUX, buf+sizeof(short)-1) < 0) {
++    /*  If we ask the kernel to report a mouse event (mode & 16), it
++     *   could be that mouse report mode was switched off meanwhile,
++     *   resulting in EINVAL. Just ignore it in this case.
++     */
++    if(!((mode & 16) && errno == EINVAL))
++      oops("ioctl(TIOCLINUX)");
++  }
++
+   close(fd);
+ 
+   if (mode < 3) {
+@@ -200,11 +215,58 @@
+ }
+ 
+ /*-------------------------------------------------------------------*/
++static inline int do_mousereport(Gpm_Event *event)
++{
++  int x2,y2,mode;
++
++  x2=event->x; y2=event->y;
++  if (x2<1) x2++; else if (x2>maxx) x2--;
++  if (y2<1) y2++; else if (y2>maxy) y2--;
++
++  switch(GPM_BARE_EVENTS(event->type)) {
++  case GPM_MOVE:
++  case GPM_DRAG:
++    selection_copy(x2,y2,x2,y2,3); /* just highlight pointer */
++    return 0;
++  case GPM_DOWN:
++    switch (event->buttons) {
++    case GPM_B_LEFT:   mode = 0; break;
++    case GPM_B_MIDDLE: mode = 1; break;
++    case GPM_B_RIGHT:  mode = 2; break;
++    default:
++      /*  FIXME: Is that the right thing to do?  */
++      return 0;
++    }
++    break;
++  case GPM_UP:
++    /*  Don't report button up in report mode 1  */
++    if(!(event->modifiers & MOUSE_REPORT2)) return 0;
++    mode = 3;
++    break;
++  }
++
++  if(event->modifiers & (1<<KG_SHIFT)) mode |= 4;
++  if(event->modifiers & ((1<<KG_ALT) | (1<<KG_ALTGR))) mode |= 8;
++
++  /*  Tell kernel to report this mouse event  */
++  selection_copy(x2,y2,x2,y2,mode | 16);
++
++  return 0;
++}
++
++/*-------------------------------------------------------------------*/
+ static  inline int do_selection(Gpm_Event *event)  /* returns 0, always */
+ {
+   static int x1=1, y1=1, x2, y2;
+ #define UNPOINTER() 0
+ 
++  /*  If mouse reporting is on and the cntrl key is NOT pressed, we
++   *   report the mouse in xterm style and do not do selection
++   *    JS 06/2000
++   */
++  if((event->modifiers & ((1<<KG_CTRL)|MOUSE_REPORT)) == MOUSE_REPORT)
++    return(do_mousereport(event));
++
+   x2=event->x; y2=event->y;
+   switch(GPM_BARE_EVENTS(event->type))
+     {
+@@ -506,6 +568,18 @@
+   event->modifiers=6; /* code for the ioctl */
+   if (ioctl(i,TIOCLINUX,&(event->modifiers))<0)
+     oops("get_shift_state");
++
++  /*  Get also state of mouse_report  */
++  {
++    char report_state = 7;
++
++    if(ioctl(i,TIOCLINUX,&report_state) < 0) oops("get_mouse_report");
++
++    if(report_state)
++      event->modifiers |= report_state == 2 ?
++        (MOUSE_REPORT|MOUSE_REPORT2) : MOUSE_REPORT;
++  }
++
+   close(i);
+   event->modifiers |= j; /* add mouse-specific bits */
+   event->vc = stat.v_active;
+diff -Naur linux-mouse.tic linux-mouse.tic
+--- linux-mouse.tic	Thu Jan  1 01:00:00 1970
++++ linux-mouse.tic	Sun Jun  4 20:34:33 2000
+@@ -0,0 +1,29 @@
++linux-mouse|linux console with mouse support in xterm style, 
++	am, bce, eo, mir, msgr, xenl, xon, 
++	colors#8, it#8, ncv#18, pairs#64, 
++	acsc=+\020\,\021-\030.^Y0\333`\004a\261f\370g\361h\260i\316j\331k\277l\332m\300n\305o~p\304q\304r\304s_t\303u\264v\301w\302x\263y\363z\362{\343|\330}\234~\376, 
++	bel=^G, blink=\E[5m, bold=\E[1m, civis=\E[?25l, 
++	clear=\E[H\E[J, cnorm=\E[?25h\E[?0c, cr=^M, 
++	csr=\E[%i%p1%d;%p2%dr, cub1=^H, cud1=^J, cuf1=\E[C, 
++	cup=\E[%i%p1%d;%p2%dH, cuu1=\E[A, cvvis=\E[?25h\E[?0c, 
++	dch=\E[%p1%dP, dch1=\E[P, dim=\E[2m, dl=\E[%p1%dM, 
++	dl1=\E[M, ech=\E[%p1%dX, ed=\E[J, el=\E[K, el1=\E[1K, 
++	flash=\E[?5h\E[?5l$<200/>, home=\E[H, hpa=\E[%i%p1%dG, 
++	ht=^I, hts=\EH, ich=\E[%p1%d@, ich1=\E[@, il=\E[%p1%dL, 
++	il1=\E[L, ind=^J, invis=\E[8m, kb2=\E[G, kbs=\177, kcbt=\E[Z, 
++	kcub1=\E[D, kcud1=\E[B, kcuf1=\E[C, kcuu1=\E[A, 
++	kdch1=\E[3~, kend=\E[4~, kf1=\E[[A, kf10=\E[21~, 
++	kf11=\E[23~, kf12=\E[24~, kf13=\E[25~, kf14=\E[26~, 
++	kf15=\E[28~, kf16=\E[29~, kf17=\E[31~, kf18=\E[32~, 
++	kf19=\E[33~, kf2=\E[[B, kf20=\E[34~, kf3=\E[[C, kf4=\E[[D, 
++	kf5=\E[[E, kf6=\E[17~, kf7=\E[18~, kf8=\E[19~, kf9=\E[20~, 
++	kmous=\E[M,
++	khome=\E[1~, kich1=\E[2~, knp=\E[6~, kpp=\E[5~, kspd=^Z, 
++	nel=^M^J, op=\E[39;49m, rc=\E8, rev=\E[7m, ri=\EM, 
++	rmacs=\E[10m, rmir=\E[4l, rmpch=\E[10m, rmso=\E[27m, 
++	rmul=\E[24m, rs1=\Ec\E]R, sc=\E7, setab=\E[4%p1%dm, 
++	setaf=\E[3%p1%dm, 
++	sgr=\E[0;10%?%p1%t;7%;%?%p2%t;4%;%?%p3%t;7%;%?%p4%t;5%;%?%p5%t;2%;%?%p6%t;1%;%?%p7%t;8%;%?%p9%t;11%;m, 
++	sgr0=\E[m, smacs=\E[11m, smir=\E[4h, smpch=\E[11m, 
++	smso=\E[7m, smul=\E[4m, tbc=\E[3g, u6=\E[%i%d;%dR, 
++	u7=\E[6n, u8=\E[?6c, u9=\E[c, vpa=\E[%i%p1%dd, 

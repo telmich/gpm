@@ -1,0 +1,47 @@
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/gpm-root.y gpm-1.19.5/src/gpm-root.y
+--- gpm-1.19.5.orig/src/gpm-root.y	Sat Sep 15 17:17:19 2001
++++ gpm-1.19.5/src/gpm-root.y	Thu Oct  4 23:34:39 2001
+@@ -445,14 +445,19 @@
+ }
+ 
+ /*====================================================================*/
+-void f__fix(struct passwd *pass)
++static int f__fix(struct passwd *pass)
+ {
+-  setgid(pass->pw_gid);
+-  initgroups(pass->pw_name, pass->pw_gid);
+-  setuid(pass->pw_uid);
++  /* CPhipps 2000/02/14 -
++   * Flag failure to drop priviledges */
++  if (setgid(pass->pw_gid) || initgroups(pass->pw_name, pass->pw_gid)
++      || setuid(pass->pw_uid))
++    return -1;
++  /* We don't mind if these fail */
+   setenv("HOME",    pass->pw_dir, 1);
+   setenv("LOGNAME", pass->pw_name,1);
+   setenv("USER",    pass->pw_name,1);
++  /* Paranoia */
++  return (chdir(pass->pw_dir) && chdir("/"));
+ }
+ 
+ /*---------------------------------------------------------------------*/
+@@ -541,14 +546,16 @@
+           return 1;
+ 
+ 	case 0:
++	  /* CPhipps 2000/02/14 - we _must_ keep root priviledges as
++	   * far as the f__fix call, otherwise that won't be able to
++	   * drop groups. */
+ 	  pass=getpwuid(uid);
+ 	  if (!pass) exit(1);
+-	  f__fix(pass); /* setgid(), setuid(), setenv(), ... */
+-	  close(0); close(1); close(2);
++	  if (f__fix(pass)) exit(1); /* Abort if not dropped completely */
++	  for (i=0;i<OPEN_MAX; i++) close(i);
+ 	  open("/dev/null",O_RDONLY); /* stdin  */
+ 	  open("/dev/tty0",O_WRONLY); /* stdout */
+ 	  dup(1);                     /* stderr */  
+-	  for (i=3;i<OPEN_MAX; i++) close(i);
+ 	  execl("/bin/sh","sh","-c",self->arg,(char *)NULL);
+ 	  exit(1); /* shouldn't happen */
+ 

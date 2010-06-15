@@ -1,0 +1,69 @@
+> you can try the beta version right now. it's available at ftp.schottelius.org
+
+Makefile.include has this funny line:
+
+    MAKEINFO = no --no-split
+
+Here is a rediffed version of my patch (had a trivial conflict in
+the mouse list).
+
+Other that that, it seems to run fine at least for a few minutes.
+:-)
+
+Andrew
+
+--- mice.c.orig	Wed Feb 20 08:10:13 2002
++++ mice.c	Wed Feb 20 10:10:03 2002
+@@ -415,14 +415,39 @@ static int M_ms3(Gpm_Event *state,  unsi
+ {
+    state->buttons= ((data[0] & 0x20) >> 3)   /* left */
+       | ((data[3] & 0x10) >> 3)   /* middle */
+-      | ((data[0] & 0x10) >> 4);   /* right */
++      | ((data[0] & 0x10) >> 4)   /* right */
++      | (((data[3] & 0x0f) == 0x0f) * GPM_B_UP)     /* wheel up */
++      | (((data[3] & 0x0f) == 0x01) * GPM_B_DOWN);  /* wheel down */
+    state->dx=      (signed char)(((data[0] & 0x03) << 6) | (data[1] & 0x3F));
+    state->dy=      (signed char)(((data[0] & 0x0C) << 4) | (data[2] & 0x3F));
+-   /* wheel (dz??) is (data[3] & 0x0f) */
+ 
+    return 0;
+ }
+ 
++static int R_ms3(Gpm_Event *state, int fd)
++{
++   char buf[4] = {0, 0, 0, 0};
++   int dx, dy;
++
++   buf[0] |= 0x40;
++
++   if (state->buttons & GPM_B_LEFT)     buf[0] |= 0x20;
++   if (state->buttons & GPM_B_MIDDLE)   buf[3] |= 0x10;
++   if (state->buttons & GPM_B_RIGHT)    buf[0] |= 0x10;
++   if (state->buttons & GPM_B_UP)       buf[3] |= 0x0f;
++   if (state->buttons & GPM_B_DOWN)     buf[3] |= 0x01;
++
++   dx = limit_delta(state->dx, -128, 127);
++   buf[1] = dx & ~0xC0;
++   buf[0] |= (dx & 0xC0) >> 6;
++ 
++   dy = limit_delta(state->dy, -128, 127);
++   buf[2] = dy & ~0xC0;
++   buf[0] |= (dy & 0xC0) >> 4;
++
++   return write(fd,buf,4);
++}
++
+ /* M_brw is a variant of m$ 'Intellimouse' the middle button is different */
+ static int M_brw(Gpm_Event *state,  unsigned char *data)
+ {
+@@ -2127,7 +2152,7 @@ Gpm_Type mice[]={
+                                 {0xe0, 0x80, 0x80, 0x00}, 3, 1, 0, 0, 0},
+    {"ms3", "Microsoft Intellimouse (serial) - 3 buttons, wheel unused",
+            "", M_ms3, I_pnp, CS7 | STD_FLG,
+-                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0},
++                                {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, R_ms3},
+    {"ms+", "Like 'ms', but allows dragging with the middle button.",
+            "", M_ms_plus, I_serial, CS7 | STD_FLG,
+                                 {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
+
+

@@ -1,0 +1,360 @@
+.TH GPM 8 "February 2002"
+.UC 4
+.SH NAME
+gpm \- a cut and paste utility and mouse server for virtual consoles
+.SH SYNOPSIS
+.B gpm
+[
+.I options
+]
+.br
+.SH DESCRIPTION
+This package tries to be a useful
+mouse server for applications running on the Linux console.  It is
+based on the "selection" package, and some of its code
+comes from selection itself. This package is intended as a replacement
+for "selection" as a cut-and-paste mechanism; it also provides
+additional facilities. The "selection"
+package offered the first cut-and-paste implementation for Linux using
+two mouse buttons, and the cut buffer is still called "selection buffer"
+or just "selection" throughout this document.
+The information below is extracted from the texinfo file, which is the
+preferred source of information.
+
+.LP
+The gpm executable is meant to act like a daemon (thus, gpmd
+would be a better name for it). This section is meant to describe the
+command-line options for gpm, while its internals are outlined in
+the next section.  
+
+.LP
+Due to restrictions in the ioctl(TIOCLINUX) system call, gpm must
+be run by the superuser. The restrictions have been added in the last 1.1
+kernels to fix a security hole related to selection and screen dumping.
+
+.LP
+The server can be configured to match the user's taste, and any
+application using the mouse will inherit the server's
+attitude. From release 1.02 up to 1.19.2 is was possible
+for any user logged on the system console to change the mouse feeling
+using the -q option. This is no longer possible for security
+reasons.
+
+.LP
+As of 0.97 the server program puts itself in the background. To kill
+gpm you can just reinvoke it with the -k cmdline switch,
+although killall gpm can be a better choice.
+
+.LP
+.SH SPECIAL COMMANDS
+
+.LP
+Version 1.10 adds the capability to execute special commands on
+certain circumstances. Special commands default to rebooting and halting
+the system, but the user can specify his/her personal choice. The
+capability to invoke commands using the mouse is a handy one for
+programmers, because it allows to issue a clean shutdown when the
+keyboard is locked and no network is available to restore the system to
+a sane state.
+
+.LP
+Special commands are toggled by triple-clicking the left and right button --
+an unlikely event during normal mouse usage. The easiest way to triple-click
+is pressing one of the buttons and triple-click the other one. When special
+processing is toggled, a message appears on the console (and the speaker
+beeps twice, if you have a speaker); if the user releases all the buttons
+and presses one of them again within three seconds, then the special
+command corresponding to the button is executed.
+
+.LP
+The default special commands are:
+.TP
+left button
+Reboot the system by signalling the init process
+.TP
+middle button (if any)
+Execute /sbin/shutdown -h now
+.TP
+right button
+Execute /sbin/shutdown -r now
+
+.LP
+The -S command line switch enables special command processing and
+allows to change the three special commands. To accept the default
+commands use -S "" (i.e., specify an empty argument).  To specify
+your own commands, use a colon-separated list to specify commands
+associated to the left, middle and right button. If any of the commands
+is empty, it is interpreted as `send a signal to the init process'. This
+particular operation is supported, in addition to executing external
+commands, because sometimes bad bugs put the system to the impossibility
+to fork; in these rare case the programmer should be able to shutdown
+the system anyways, and killing init from a running process is the only
+way to do it.
+
+.LP
+As an example, -S ":telinit 1:/sbin/halt", associates killing
+init to the left button, going single user to the middle one, and halting
+the system to the right button.
+
+.LP
+System administrators should obviously be careful about special
+commands, as gpm runs with superuser permissions. Special commands are
+best suited for computers whose mouse can be physically accessed only by
+trusted people.
+
+.LP
+.SH COMMAND LINE OPTIONS
+
+.LP
+Available command line options are the following:
+.TP
+-a \fBaccel\fP
+Set the acceleration value used when a single motion event is
+longer than \fBdelta\fP (see -d\fP). 
+.TP
+-A[\fBlimit\fP]
+Start up with selection pasting disabled.  This is intended as a
+security measure; a plausible attack on a system seems to be to
+stuff a nasty shell command into the selection buffer
+(rm -rf /) including the terminating line break, then all the
+victim has to do is click the middle mouse button ..
+As of version 1.17.2, this has developed
+into a more general aging mechanism; the
+gpm daemon can disable (age) selection pasting
+automatically after a period of inactivity.  To enable this mode
+just give the optional \fBlimit\fP parameter (no space in between !)
+which is interpreted as the time in seconds for which a selection is
+considered valid and pastable.
+As of version 1.15.7, a trivial program called
+disable-paste is provided. The following makes a good
+addition to /etc/profile if you allow multiple users to
+work on your console.
+
+.LP
+case $( /usr/bin/tty ) in 
+.br
+/dev/tty[0-9]*) /usr/bin/disable-paste ;; 
+.br
+esac
+.TP
+-b \fBbaud\fP
+Set the baud rate.
+.TP
+-B \fBsequence\fP
+Set the button sequence. 123 is the
+normal sequence, 321 can be used by left-handed people,
+and 132 can be useful with two-button mice (especially within
+Emacs). All the button permutations are allowable.
+.TP
+-d \fBdelta\fP
+Set the delta value. When a single motion event
+is longer than \fBdelta\fP, \fBaccel\fP is used as a multiplying
+factor. (Must be 2 or above)
+.TP
+-D
+Do not automatically enter background operation when started,
+and log messages to the standard error stream, not the syslog
+mechanism.  This is useful for debugging; in previous releases
+it was done with a compile-time option.
+.TP
+-g \fBnumber\fP
+With glidepoint devices, emulate the specified button with tapping.
+\fBnumber\fP must be 1\fP, 2\fP, or 3\fP, and refers to the
+button number before the -B button remapping is performed.
+This option applies to the mman and ps2 decoding. No button is
+emulated by default because the ps2 tapping is incompatible with
+some normal ps2 mice
+.TP
+-h
+Print a summary of command line options.
+.TP
+-i \fBinterval\fP
+Set \fBinterval\fP to be used as an upper time limit
+for multiple clicks. If the interval between button-up and
+button-down events is less than \fBlimit\fP, the press is considered
+a double or triple click. Time is in milliseconds.
+.TP
+-k 
+Kill a running gpm. This can be used by busmouse users to kill gpm
+before running X (unless they use -R or the single-open
+limitation is removed from the kernel).
+.TP
+-l \fBcharset\fP
+Choose the inword() look up table. The
+\fBcharset\fP argument is a list of characters. -\fP is used to
+specify a range and \\  is used to escape the next character
+or to provide octal codes.
+Only visible character can appear in \fBcharset\fP because control
+characters can't appear in text-mode video memory, whence selection
+is cut. 
+.TP
+-m \fBfilename\fP
+Choose the mouse file to open. Must be before -t and -o.
+.TP
+-M
+Enable multiple mode. The daemon will read two different mouse devices.
+Any subsequent option will refer to the second device, while any
+preceding option will be used for the first device. This option
+automatically forces the repeater (-R) option on.
+.TP
+-o \fBlist-of-extra-options\fP
+The option works similary to the ``-o'' option of mount; it is
+used to specify a list of ``extra options'' that are specific
+to each mouse type. The list is comma-separated. The options
+dtr, rts or both are used by the serial
+initialization to toggle the modem lines like, compatibly with
+earlier gpm versions; note however that using -o dtr
+associated with non-plain-serial mouse types may now generate
+an error. 
+And by the way, use -o after -m and after -t.
+
+.TP
+-p
+Forces the pointer to be visible while selecting. This is the
+behaviour of selection-1.7, but it is sometimes confusing.
+The default is not to show the pointer, which can be confusing as well.
+.TP
+-r \fBnumber\fP
+Set the responsiveness. A higher responsiveness is used for a faster
+cursor motion.
+.TP
+-R[\fBname\fP]
+Causes gpm to act as a repeater: any mouse data received while
+in graphic mode will be produced on the fifo /dev/gpmdata
+in protocol \fBname\fP, given as an optional argument (no space in
+between !).  In principle, you can use the same
+names as for the -t option, although repeating into some
+protocols may not be implemented for a while.  
+In addition, you can specify raw\fP as the \fBname\fP, to repeat
+the mouse data byte by byte, without any protocol translation.
+If \fBname\fP is omitted, it defaults to msc\fP.
+Using gpm in repeater mode, you can configure the X
+server to use its fifo as a mouse device. This option is useful for
+bus-mouse owners to override the single-open limitation. It is also
+an easy way to manage those stupid dual-mode mice which force you
+to keep the middle button down while changing video mode. The option
+is forced on by the -M option.
+.TP
+-s \fBnumber\fP
+Set the sample rate for the mouse device.
+.TP
+-S \fBcommands\fP
+Enable special-command processing, and optionally specify custom
+commands as a colon-separated list. See above for a detailed
+description of special commands.
+.TP
+-t \fBname\fP
+Set the mouse type. Use -t help to get a list
+of allowable types. Since version 1.18.1, the list also shows
+which protocols are available as repeaters (see -R above),
+by marking them with an asterisk (``*'').
+
+Use -t after you selected the mouse device with -m.
+.TP
+-v
+Print version information and exit.
+.TP
+-2
+Force two buttons. This means that the middle button, if any,
+will be taken as it was the right one.
+.TP
+-3
+Force three buttons. By default the
+mouse is considered to be a 2-buttons one, until the middle button
+is pressed. If three buttons are there, the right one is used
+to extend the selection, and the middle one is used to paste it.
+Beware: if you use the -3 option with a 2-buttons mouse, you
+won't be able to paste the selection. 
+
+.LP
+.SH OPERATION
+
+.LP
+To select text press the left mouse button and drag the mouse.
+To paste text in the same or another console, press the middle button.
+The right button is used to extend the selection, like in `xterm'.
+
+.LP
+Two-button mice use the right button to paste text.
+
+.LP
+Double and triple clicks select whole word and whole lines. Use of
+the `-p' option is recommended for best visual feedback.
+
+.LP
+If a trailing space after the contents of a line is highlighted, and if
+there is no other text on the remainder of the line, the rest of the
+line will be selected automatically. If a number of lines are selected,
+highlighted trailing spaces on each line will be removed from the
+selection buffer.
+
+.LP
+Any output on the virtual console holding the selection will clear the
+highlighted selection from the screen, to maintain integrity of the
+display, although the contents of the paste buffer will be unaffected.
+
+.LP
+The selection mechanism is disabled if the controlling virtual console
+is placed in graphics mode, for example when running X11, and is
+re-enabled when text mode is resumed. (But see BUGS section below.)
+
+.LP
+.SH BUGS
+The gpm server may have problems interacting with X: if your
+mouse is a single-open device (i.e. a bus mouse), you should kill
+gpm before starting X, or use the -R option (see
+above).  To kill gpm just invoke gpm -k. This problem doesn't
+apply to serial mice.
+
+.LP
+Two instances of gpm can't run on the same system. If you have two mice use
+the -M option (see above).
+
+.LP
+While the current console is in graphic mode, gpm sleeps until
+text mode is back (unless -R is used). Thus, it won't reply to
+clients. Anyways, it is unlikely that mouse-eager clients will spur
+out in hidden consoles.
+
+.LP
+The clients shipped out with gpm are not updated, thus there are potential
+security risks when using them.
+
+.LP
+.SH AUTHORS
+.nf
+Andrew Haylett <ajh@gec-mrc.co.uk> (the original selection code)
+Ian Zimmerman <itz@speakeasy.org> (old maintainer)
+Alessandro Rubini <rubini@linux.it> (old maintainer (still helps a lot))
+Nico Schottelius <nico@schottelius.org> (maintainer)
+
+Many many contributors, to both selection and gpm.
+.fi
+
+.LP
+.SH MAINTAINERS
+
+.LP
+The current maintainer is Nico Schottelius. But without the help of
+Alessandro Rubini and the mailing list it would be impossible for me to
+maintain gpm. The development mailing list can be reached under
+gpm@lists.linux.it. More information on the list is in the README file part of
+the source distribution of gpm.
+
+.LP
+.SH FILES
+.nf
+/var/run/gpm.pid The PID of the running gpm
+/dev/gpmctl     A control socket for clients
+/dev/gpmdata    The fifo written to by a \fBrepeater\fP (`-R') daemon.
+.fi
+
+.LP
+.SH SEE ALSO
+.nf
+\fB mev(1)\fP        A sample client for the gpm daemon.
+\fB gpm-root(1)\fP   An handler for Control-Mouse events.
+
+.fi
+The info file about `gpm', which gives more complete information and
+explains how to write a gpm client.

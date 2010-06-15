@@ -1,0 +1,60 @@
+This  patch is inspired by Jonathan Atkin's imwheel2.patch,
+but (as opposed to imwheel2)  allows  to  write  a backward
+compatible, and avoid  recompiling  all existing  GPM-based
+applications. The changes look really awkward, but that was
+a mere patch to the existing package.
+
+This patch adds wheel support to serial and PS/2 models of 
+Microsoft Intellimouse, A4-tech dual-wheel (4D) mouse and
+clones. Use the following command line options:
+
+   gpm  -t ms3       # Serial Intellimouse
+   gpm  -t imps2     # PS/2   Intellimouse
+   gpm  -t a4d       # Serial A4-tech 4D
+   gpm  -t a4dps2    # PS/2   A4-tech 4D
+
+-----------------------------------------------------------
+
+Here is the short description of changes. For a detailed
+description refer to gpm.info after applying the patch:
+
+- Stucture Gpm_EventExt replaced Gpm_Event structure.
+  It has new appended members:
+    w, dw   - wheel1 displacement after previous reading, and
+              current wheel position (initially set to 0)		
+    w2, dw2 - same for wheel 2
+    pad     - reserve for future extensions
+
+- Functions Gpm_GetEventExt, Gpm_GetSnapshotExt are similar
+  to Gpm_GetEvent and Gpm_GetSnaphot, but take Gpm_GetEventExt
+  as a parameter. Gpm_EventExt is also passed as a parameter
+  to Gpm_EventExt, however the old code should work: it will
+  just give warnings during compilation. Check presence of
+  GPM_EVENT_EXT to find if GpmEventExt is available:
+
+  #ifndef GPM_EVENT_EXT
+	# define Gpm_EventExt Gpm_Event
+	# define Gpm_GetEventExt Gpm_GetEvent
+	# define Gpm_GetSnapshotExt Gpm_GetSnapshot
+  #endif
+
+- New event types
+		GPM_FWHEEL    wheel 1 forward
+		GPM_BWHEEL    wheel 1 backward
+		GPM_FWHEEL2   wheel 2 forward (right)
+		GPM_BWHEEL2   wheel 2 backward (left)
+ 
+  provide and alternative way of wheel processing similar to
+  ZAxis mapping in XFree86.
+
+-------------------------------------------------------------
+
+This patch does not associate wheel motion with a keystroke,
+and does not automatically provide text scrolling - 'imwheel'
+package by Jonathan Atkins implements those feature, however it
+may be inconsistent with the current modifications.
+
+Michael Glickman <xsadp@yahoo.com>
+
+	
+

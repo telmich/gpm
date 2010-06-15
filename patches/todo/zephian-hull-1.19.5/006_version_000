@@ -1,0 +1,16 @@
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/configure.in gpm-1.19.5/configure.in
+--- gpm-1.19.5.orig/configure.in	Thu Sep 20 17:27:21 2001
++++ gpm-1.19.5/configure.in	Thu Oct  4 23:36:45 2001
+@@ -13,9 +13,9 @@
+ 
+ dnl These are chosen so that we can switch to the libtool scheme
+ dnl transparently.
+-abi=19
+-abi_age=18
+-abi_rev=0
++abi=20
++abi_age=19
++abi_rev=5
+ 
+ abi_lev=`expr $abi - $abi_age`
+ abi_full=$abi_lev.$abi_age.$abi_rev

@@ -1,0 +1,167 @@
+--- gpm.c
++++ gpm.c
+@@ -321,7 +321,7 @@
+ /*-------------------------------------------------------------------*/
+ /*-------------------------------------------------------------------*/
+ /*-------------------------------------------------------------------*/
+-static inline char *getMouseData(int fd, Gpm_Type *type, int kd_mode)
++static inline char *getMouseData(int fd, Gpm_Type *type, int kd_mode, int *restart)
+ {
+   static unsigned char data[32]; /* quite a big margin :) */
+   char *edata=data+type->packetlen;
+@@ -336,6 +336,22 @@
+       return NULL;
+       }
+ 
++    if (data[0] == 0xaa) {
++      j=read(fd,&(data[1]),2);
++      if ((j < 1) || (data[1] != 0x0)) {
++        if (m_type->getextra) {
++	  data[1]=GPM_EXTRA_MAGIC_1; data[2]=GPM_EXTRA_MAGIC_2;
++          gpm_debug_log(LOG_DEBUG,"Extra %02x",data[0]);
++	  return data;
++	}
++        gpm_debug_log(LOG_DEBUG,"Error in protocol");
++        return NULL;
++      }
++      gpm_debug_log(LOG_DEBUG,"Mouse was replugged");
++      *restart = 1;   
++      return NULL;
++    }
++
+       if (kd_mode!=KD_TEXT && fifofd != -1 && opt_rawrep)
+ 	write(fifofd, data, howmany);
+ 
+@@ -402,6 +418,7 @@
+   fd_set fdSet;
+   static int newB=0, oldB=0, oldT=0; /* old buttons and Type to chain events */
+   /* static int buttonlock, buttonlockflag; */
++  int restart;
+ 
+ #define GET_TIME(tv) (gettimeofday(&tv, (struct timezone *)NULL))
+ #define DIF_TIME(t1,t2) ((t2.tv_sec -t1.tv_sec) *1000+ \
+@@ -432,9 +449,11 @@
+ 
+     do /* cluster loop */
+       {
+-      if (   ((data=getMouseData(fd,m_type,kd_mode))==NULL)
++      restart = 0;
++      if (   ((data=getMouseData(fd,m_type,kd_mode,&restart))==NULL)
+ 	  || ((*(m_type->fun))(&nEvent,data)==-1) )
+ 	{
++	if (restart) return -1;
+ 	if (!i) return 0;
+ 	else break;
+ 	}
+@@ -926,6 +945,40 @@
+   unlink(GPM_NODE_CTL);
+ }
+ 
++static inline int initMouse(int i, int *fd, int *maxfd)                        
++{
++  which_mouse=mouse_table+i; /* used to access options */
++
++  /* open the device with ndelay, to catch a locked device */
++  if (opt_dev)
++    {
++      if (!strcmp(opt_dev,"-"))
++        *fd=0;
++      else if ((*fd=open(opt_dev,O_RDWR | O_NDELAY))<0)
++        { oops(opt_dev); }
++    }
++  else /* use "/dev/mouse" */
++    {
++      opt_dev = "/dev/mouse";
++      if ((*fd=open(opt_dev,O_RDWR | O_NDELAY))<0)
++        { oops(opt_dev); }
++    }
++  /* and then reset the flag */
++  fcntl(*fd,F_SETFL,fcntl(*fd,F_GETFL) & ~O_NDELAY);
++  /* create argc and argv for this device */
++  mouse_argv[i] = build_argv(opt_type, opt_options, &mouse_argc[i], ',');
++
++  /* init the device, and use the return value as new mouse type */
++  if (m_type->init)
++    m_type=(m_type->init)(*fd, m_type->flags, m_type, 
++		      mouse_argc[i], mouse_argv[i]);
++  if (!m_type)
++    { oops("mouse initialization failed"); }
++
++  which_mouse->fd=*fd;
++  *maxfd=max(*fd, *maxfd);
++} 
++
+ /*-------------------------------------------------------------------*/
+ int main(int argc, char **argv)
+ {
+@@ -951,38 +1004,7 @@
+ 
+   for (i=1; i <= 1+opt_double; i++)
+     {
+-      which_mouse=mouse_table+i; /* used to access options */
+-
+-      /* open the device with ndelay, to catch a locked device */
+-      if (opt_dev)
+-        {
+-          if (!strcmp(opt_dev,"-"))
+-            fd=0;
+-          else if ((fd=open(opt_dev,O_RDWR | O_NDELAY))<0)
+-            { oops(opt_dev); }
+-        }
+-      else /* use "/dev/mouse" */
+-        {
+-          opt_dev = "/dev/mouse";
+-          if ((fd=open(opt_dev,O_RDWR | O_NDELAY))<0)
+-            { oops(opt_dev); }
+-        }
+-
+-      /* and then reset the flag */
+-      fcntl(fd,F_SETFL,fcntl(fd,F_GETFL) & ~O_NDELAY);
+-
+-      /* create argc and argv for this device */
+-      mouse_argv[i] = build_argv(opt_type, opt_options, &mouse_argc[i], ',');
+-
+-      /* init the device, and use the return value as new mouse type */
+-      if (m_type->init)
+-        m_type=(m_type->init)(fd, m_type->flags, m_type, 
+-			      mouse_argc[i], mouse_argv[i]);
+-      if (!m_type)
+-        { oops("mouse initialization failed"); }
+-
+-      which_mouse->fd=fd;
+-      maxfd=max(fd, maxfd);
++      initMouse(i, &fd, &maxfd);
+     } /*for*/
+ 
+   /* FIXME: stderr must be closed at this point, as protocol init needs it */
+@@ -1114,11 +1136,13 @@
+ 
+     for (i=1; i <= 1+opt_double; i++)
+       {
++      int rc;
+       which_mouse=mouse_table+i; /* used to access options */
+       if (FD_ISSET(which_mouse->fd,&selSet))
+ 	  {
+ 	  FD_CLR(which_mouse->fd,&selSet); pending--;
+-	  if (processMouse(which_mouse->fd, &event, m_type, kd_mode))
++	  rc = processMouse(which_mouse->fd, &event, m_type, kd_mode);
++	  if (rc > 0) {
+ 	    /*
+ 	     * pass it to the client, if any
+ 	     * or to the default handler, if any
+@@ -1127,6 +1151,15 @@
+ 	    (cinfo[event.vc] && do_client(cinfo[event.vc], &event))
+ 	       || (cinfo[0]        && do_client(cinfo[0],        &event))
+ 	       ||  do_selection(&event);
++	  }
++	  else
++	    if (rc == -1) {
++              /* try to reinitialise the mouse */
++              FD_CLR(which_mouse->fd, &selSet);
++              close(which_mouse->fd);
++              initMouse(i, &fd, &maxfd);
++              FD_CLR(which_mouse->fd, &selSet);
++            }
+ 	  }
+       }
+ 

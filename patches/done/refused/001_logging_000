@@ -1,0 +1,162 @@
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/debuglog.c gpm-1.19.5/src/debuglog.c
+--- gpm-1.19.5.orig/src/debuglog.c	Sat Sep 15 16:55:06 2001
++++ gpm-1.19.5/src/debuglog.c	Thu Oct  4 23:31:24 2001
+@@ -43,6 +43,8 @@
+ #include <errno.h>
+ #include "headers/wd.h"
+ 
++extern int errno;
++
+ #ifndef DEBUG
+ int 
+ gpm_debug_level = LOG_NOTICE;
+@@ -54,6 +56,9 @@
+ int
+ gpm_log_daemon = 0;
+ 
++int
++gpm_log = 1;
++
+ void
+ gpm_debug_log(int level, char* fmt, ...)
+ {
+@@ -62,10 +67,14 @@
+     va_start(ap, fmt);
+ #ifdef HAVE_VSYSLOG
+     vsyslog(level | (gpm_log_daemon ? LOG_DAEMON : LOG_USER), fmt, ap);
+-#else
+-    vfprintf(stderr, fmt, ap);
+-    fputs("\n", stderr);
++    if (gpm_log) {
++      vsyslog(level | (gpm_log_daemon ? LOG_DAEMON : LOG_USER), fmt, ap);
++    } else
+ #endif  
++    {
++      vfprintf(stderr, fmt, ap);
++      fputs("\n", stderr);
++    }
+     va_end(ap);
+   } /*if*/
+ }
+@@ -85,13 +94,17 @@
+ 
+     va_start(ap, s);
+ #if(defined(HAVE_VSYSLOG) && defined(HAVE_SYSLOG))
+-    pri = LOG_ERR | (gpm_log_daemon ? LOG_DAEMON : LOG_USER);
+-    syslog(pri, "oops() invoked from %s(%i)",f, n);
+-    vsyslog(pri, buf, ap);
++    if (gpm_log) {
++      pri = LOG_ERR | (gpm_log_daemon ? LOG_DAEMON : LOG_USER);
++      syslog(pri, "oops() invoked from %s(%i)",f, n);
++      vsyslog(pri, buf, ap);
++    } else
+ #endif /* always print to stderr as well */
+-    fprintf(stderr,"gpm: oops() invoked from %s(%i)\n",f, n);
+-    vfprintf(stderr, s, ap);
+-    fprintf(stderr,": %s\n", strerror(errno));
++    {
++      fprintf(stderr,"gpm: oops() invoked from %s(%i)\n",f, n);
++      vfprintf(stderr, s, ap);
++      fprintf(stderr,": %s\n", strerror(errno));
++    }
+ 
+     va_end(ap);
+   } /*if*/
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/gpm.c gpm-1.19.5/src/gpm.c
+--- gpm-1.19.5.orig/src/gpm.c	Thu Oct  4 23:31:29 2001
++++ gpm-1.19.5/src/gpm.c	Thu Oct  4 23:31:24 2001
+@@ -364,6 +364,7 @@
+ 	return data;
+ 	}
+       gpm_debug_log(LOG_DEBUG,"Error in protocol");
++      gpm_debug_log(LOG_DEBUG,"Data %02x",data[0]);
+       return NULL;
+       }
+ 
+@@ -393,6 +394,7 @@
+     if ((data[1]&(m_type->proto)[2]) != (m_type->proto)[3])
+       {
+       gpm_debug_log(LOG_NOTICE,"Skipping a data packet (?)");
++      gpm_debug_log(LOG_DEBUG,"Bad %02x %02x %02x (%02x)",data[0],data[1],data[2],data[3]);
+       return NULL;
+       }
+   gpm_debug_log(LOG_DEBUG,"Data %02x %02x %02x (%02x)",data[0],data[1],data[2],data[3]);
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/gpn.c gpm-1.19.5/src/gpn.c
+--- gpm-1.19.5.orig/src/gpn.c	Sat Sep 15 16:52:24 2001
++++ gpm-1.19.5/src/gpn.c	Thu Oct  4 23:31:24 2001
+@@ -178,6 +178,7 @@
+          "                     Use a non-existent type (e.g. \"help\") to get a list\n"
+          "    -T               test: read mouse, no clients\n"
+          "    -v               print version and exit\n"
++	 "    -e               output messages to stderr instead of syslog\n"
+          "    -V verbosity     increase number of logged messages\n", 
+          DEF_ACCEL, DEF_BAUD, DEF_SEQUENCE, DEF_DELTA, DEF_TIME, DEF_LUT,
+          DEF_SCALE, DEF_SAMPLE, DEF_TYPE);
+@@ -290,7 +291,7 @@
+ int 
+ cmdline(int argc, char **argv)
+ {
+-  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:TvV::23";
++  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pr:R::s:S:t:TveV::23";
+   int i, opt;
+   static struct {char *in; char *out;} seq[] = {
+     {"123","01234567"},
+@@ -309,6 +310,8 @@
+   /* itz Wed Jul 1 18:37:59 PDT 1998 */
+   /* run as a daemon unless told otherwise */
+   gpm_log_daemon = 1;
++  /* Run with logging to syslog unless told otherwise */
++  gpm_log = 1;
+ 
+   while ((opt = getopt(argc, argv, options)) != -1)
+     {
+@@ -366,12 +369,14 @@
+           break;
+         case '2': opt_three=-1; break;
+         case '3': opt_three=1; break;
++	case 'e': gpm_log=0; break;
+         default:
+           exit(usage("commandline"));
+         }
+     }
+ 
+-  openlog(prgname, LOG_PID, gpm_log_daemon ? LOG_DAEMON : LOG_USER);
++  if (gpm_log)
++    openlog(prgname, LOG_PID, gpm_log_daemon ? LOG_DAEMON : LOG_USER);
+   check_kill();
+ 
+   loadlut(opt_lut);
+@@ -444,14 +449,12 @@
+ 
+ /* report should be here and nothing else! */
+ 
+-#if 1 /* was: "if (!defined(HAVE_SYSLOG) || !defined(HAVE_VSYSLOG))" */
+-    if (!freopen("/dev/console","w",stderr)) /* the currently current console */
+-      {
+-        oops("freopen(stderr) failed");
+-      }
+-#else
+-    fclose(stderr);
+-#endif
++    if (gpm_log) {
++      fclose(stderr);
++    } else if (!freopen("/dev/console", "w", stderr)) { 
++      // currently current console
++      oops("freopen(stderr) failed");
++    }
+ 
+     if (setsid()<0) oops("setsid()");
+     if (chdir("/")<0) oops("/");
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/headers/wd.h gpm-1.19.5/src/headers/wd.h
+--- gpm-1.19.5.orig/src/headers/wd.h	Wed Sep 12 17:07:34 2001
++++ gpm-1.19.5/src/headers/wd.h	Thu Oct  4 23:31:24 2001
+@@ -41,6 +41,9 @@
+ extern int 
+ gpm_log_daemon;
+ 
++extern int
++gpm_log;
++
+ extern void
+ gpm_debug_log(int level, char* fmt, ...);
+ 

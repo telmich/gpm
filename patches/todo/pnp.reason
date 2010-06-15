@@ -1,0 +1,23 @@
+
+> Attached is a patch that takes this functionality from XFree86 and
+> integrates it into gpm.  And adds a mouse type specifically for this
+> auto detection.
+
+I though a while about this, and I'd like to do it in another way, to
+avoid clubbering the mouse table every so often.
+
+What I'd like to have is a "pnp.c" file, that includes the probing
+functions as well as the table of pnp mouse types. Similarly to
+synaptics and twiddler support, then, the functions in mice.c can call
+the ones defined in pnp.c.
+
+The advantage of this is that there is no need to change the mouse
+type data structure, and no need to add ID's of mice to the table of
+types, which will quickly become exceedingly long.  Moreover, having
+the table of pnp ID's as an external object allows to export it to an
+external text file, so that adding support for a new mouse type (a pnp
+one) would be trivial: no more "plese try this patch, recompile and
+tell us if it works" to ask to users, just "pleas add this line to
+/etc/gpm-pnp.conf and try again".
+
+/alessandro

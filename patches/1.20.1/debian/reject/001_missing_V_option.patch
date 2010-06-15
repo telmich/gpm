@@ -1,0 +1,12 @@
+Index: b/src/gpn.c
+===================================================================
+--- a/src/gpn.c	2008-02-25 05:18:28.000000000 +0200
++++ b/src/gpn.c	2008-02-25 05:19:23.000000000 +0200
+@@ -283,6 +283,7 @@ void cmdline(int argc, char **argv)
+          case 'u': option.autodetect = 1;                break;
+          case 'T': opt_test++;                           break;
+          case 'v': printf(GPM_MESS_VERSION "\n");        exit(0);
++         case 'V': /* Compat code */                     break;
+          case '2': opt_three = -1;                       break;
+          case '3': opt_three =  1;                       break;
+          default: exit(usage("commandline"));

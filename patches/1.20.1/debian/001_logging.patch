@@ -1,0 +1,126 @@
+Index: b/src/report.c
+===================================================================
+--- a/src/report.c	2008-02-25 06:48:59.000000000 +0200
++++ b/src/report.c	2008-02-25 06:55:31.000000000 +0200
+@@ -91,30 +91,33 @@ void gpm_report(int line, char *file, in
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_INFO | LOG_USER, GPM_STRING_INFO);
+                vsyslog(LOG_INFO | LOG_USER, text, ap2);
+-#endif               
++#else
+                fprintf(stderr,GPM_STRING_INFO);
+                vfprintf(stderr,text,ap);
+                fprintf(stderr,"\n");
++#endif
+                break;
+ 
+             case GPM_STAT_WARN:
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_DAEMON | LOG_WARNING, GPM_STRING_WARN);
+                vsyslog(LOG_DAEMON | LOG_WARNING, text, ap2);
+-#endif               
++#else
+                fprintf(stderr,GPM_STRING_WARN);
+                vfprintf(stderr,text,ap);
+                fprintf(stderr,"\n");
++#endif
+                break;
+ 
+             case GPM_STAT_ERR:
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_ERR);
+                vsyslog(LOG_DAEMON | LOG_ERR, text, ap2);
+-#endif               
++#else
+                fprintf(stderr,GPM_STRING_ERR);
+                vfprintf(stderr,text,ap);
+                fprintf(stderr,"\n");
++#endif
+                break;
+ 
+             case GPM_STAT_OOPS:
+@@ -145,20 +148,21 @@ void gpm_report(int line, char *file, in
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_DAEMON | LOG_WARNING, GPM_STRING_WARN);
+                vsyslog(LOG_DAEMON | LOG_WARNING, text, ap2);
+-#endif               
++#else
+                if((console = fopen(GPM_SYS_CONSOLE,"a")) != NULL) {
+                   fprintf(console,GPM_STRING_WARN);
+                   vfprintf(console,text,ap);
+                   fprintf(console,"\n");
+                   fclose(console);
+                }   
++#endif
+                break;
+  
+             case GPM_STAT_ERR:
+ #ifdef HAVE_VSYSLOG
+                syslog(LOG_DAEMON | LOG_ERR, GPM_STRING_ERR);
+                vsyslog(LOG_DAEMON | LOG_ERR, text, ap2);
+-#endif               
++#else
+                if((console = fopen(GPM_SYS_CONSOLE,"a")) != NULL) {
+                   fprintf(console,GPM_STRING_ERR);
+                   vfprintf(console,text,ap);
+@@ -172,6 +176,7 @@ void gpm_report(int line, char *file, in
+                   fprintf(console,"\n");
+                   fclose(console);
+                }
++#endif
+                break;
+ 
+             case GPM_STAT_OOPS:
+Index: b/src/lib/report-lib.c
+===================================================================
+--- a/src/lib/report-lib.c	2008-02-25 06:48:59.000000000 +0200
++++ b/src/lib/report-lib.c	2008-02-25 06:55:31.000000000 +0200
+@@ -27,19 +27,30 @@
+ void gpm_report(int line, char *file, int stat, char *text, ... )
+ {
+    char *string = NULL;
++   int log_level;
+    va_list ap;
+    va_start(ap,text);
+ 
+    switch(stat) {
+-      case GPM_STAT_INFO : string = GPM_TEXT_INFO ; break;
+-      case GPM_STAT_WARN : string = GPM_TEXT_WARN ; break;
+-      case GPM_STAT_ERR  : string = GPM_TEXT_ERR  ; break;
+-      case GPM_STAT_DEBUG: string = GPM_TEXT_DEBUG; break;
+-      case GPM_STAT_OOPS : string = GPM_TEXT_OOPS; break;
++      case GPM_STAT_INFO : string = GPM_TEXT_INFO ;
++                           log_level = LOG_INFO; break;
++      case GPM_STAT_WARN : string = GPM_TEXT_WARN ;
++                           log_level = LOG_WARNING; break;
++      case GPM_STAT_ERR  : string = GPM_TEXT_ERR  ;
++                           log_level = LOG_ERR; break;
++      case GPM_STAT_DEBUG: string = GPM_TEXT_DEBUG;
++                           log_level = LOG_DEBUG; break;
++      case GPM_STAT_OOPS : string = GPM_TEXT_OOPS;
++                           log_level = LOG_CRIT; break;
+    }
++#ifdef HAVE_VSYSLOG
++   syslog(log_level, string);
++   vsyslog(log_level, text, ap);
++#else
+    fprintf(stderr,"%s[%s(%d)]:\n",string,file,line);
+    vfprintf(stderr,text,ap);
+    fprintf(stderr,"\n");
++#endif
+ 
+    if(stat == GPM_STAT_OOPS) exit(1);  /* may a lib function call exit ???? */
+ }
+Index: b/src/lib/liblow.c
+===================================================================
+--- a/src/lib/liblow.c	2008-02-25 06:55:45.000000000 +0200
++++ b/src/lib/liblow.c	2008-02-25 06:56:06.000000000 +0200
+@@ -198,8 +198,6 @@ int Gpm_Open(Gpm_Connect *conn, int flag
+    char* sock_name = 0;
+    static char *consolename = NULL;
+ 
+-   gpm_report(GPM_PR_DEBUG,"VC: %d",flag);
+-
+    /*....................................... First of all, check xterm */
+ 
+    if ((term=(char *)getenv("TERM")) && !strncmp(term,"xterm",5)) {

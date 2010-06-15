@@ -1,0 +1,27 @@
+diff -ur gpm-1.19.3.orig/liblow.c gpm-1.19.3/liblow.c
+--- gpm-1.19.3.orig/liblow.c	Tue Jul 18 16:06:06 2000
++++ gpm-1.19.3/liblow.c	Tue Jun 26 06:40:01 2001
+@@ -416,7 +416,9 @@
+           Gpm_Close();
+           return 0;
+         }
+-      gpm_debug_log(LOG_NOTICE,"Read too few bytes (%i) at %s:%d",count,__FILE__,__LINE__);
++      if (count != -1)
++	  gpm_debug_log(LOG_NOTICE,"Read too few bytes (%i) at %s:%d",
++			count,__FILE__,__LINE__);
+       return -1;
+     }
+ #endif
+@@ -433,10 +435,10 @@
+ #endif
+       /*
+        * avoid to send the message if there is no data; sometimes it makes
+-       * sense to poll the mouse descriptor any now an then using a
++       * sense to poll the mouse descriptor every now and then using a
+        * non-blocking descriptor
+        */
+-      if (count != -1 || errno != EAGAIN)
++      if (count != -1)
+ 	  gpm_debug_log(LOG_NOTICE,"Read too few bytes (%i) at %s:%d",
+ 			count,__FILE__,__LINE__);
+       return -1;

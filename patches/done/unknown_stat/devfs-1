@@ -1,0 +1,47 @@
+From - Thu Jun  7 00:06:04 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id PAA24549
+	for <rubini@morgana>; Wed, 9 May 2001 15:40:20 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Wed, 09 May 2001 15:40:20 MEST
+Received: from mir.prosa.it ([217.57.75.5]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id PAA27471 for <rubini@pop.systemy.it>; Wed, 9 May 2001 15:39:30 +0200
+Received: by mir.prosa.it (Postfix)
+	id C694511F; Wed,  9 May 2001 15:39:28 +0200 (CEST)
+Delivered-To: rubini@prosa.it
+Received: from fox.tamu.edu (unix.tamu.edu [128.194.103.25])
+	by mir.prosa.it (Postfix) with ESMTP id 93AB11A
+	for <rubini@prosa.it>; Wed,  9 May 2001 15:39:27 +0200 (CEST)
+Received: from localhost (ers7067@localhost)
+	by fox.tamu.edu (8.9.3/8.9.3) with SMTP id IAA01257
+	for <rubini@prosa.it>; Wed, 9 May 2001 08:39:26 -0500 (CDT)
+Date: Wed, 9 May 2001 08:39:26 -0500 (CDT)
+From: Eric Schendel <ers7067@unix.tamu.edu>
+To: rubini@prosa.it
+Subject: GPM patch for devfs
+Message-ID: <Pine.SOL.3.96.1010509083654.902A-100000@fox.tamu.edu>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+X-UIDL: d09ac3c5d4e5825e1ee94b1606b7c5c7
+Status: RO
+
+Opps, the patch didnt go through as an attachment so I am just going to
+include it in the email. 
+
+Eric
+
+---------------------------------------------
+
+--- gpm-1.19.3/liblow.c Tue Jul 18 07:06:06 2000
++++ gpm-1.19.3f1/liblow.c       Tue May  8 18:58:43 2001
+@@ -235,7 +235,8 @@
+           if (!t && isatty(2)) t = ttyname(2); /* stderr */
+           if (!t) goto err;
+           strcpy(tty,t);
+-          if (strncmp(tty,"/dev/tty",8) || !isdigit(tty[8]))
++          if ((strncmp(tty,"/dev/vc/",8) && strncmp(tty,"/dev/tty",8))
++              || !isdigit(tty[8]))
+             goto err;
+           conn->vc=atoi(tty+8);
+         }
+

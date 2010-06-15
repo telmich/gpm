@@ -1,0 +1,230 @@
+.TH GPM-ROOT 1 "February 1995"
+.UC 4
+.SH NAME
+gpm-root \- a default handler for gpm, used to draw menus on
+the root window
+.SH SYNOPSIS
+.B gpm-root
+[
+.I options
+]
+.br
+.SH DESCRIPTION
+
+.LP
+The program gpm-root is designed to handle Control-Mouse events to
+draw menus on the background of the current tty. The actual menus
+are described by a configuration file in the user's home directory.
+
+.LP
+Please note that gpm-root needs to run with Linux 1.1.73 or
+newer, because previous kernels lack some screen handling capabilities
+required by the program.
+
+.LP
+The program uses the files /dev/vcs* to draw to the console screen.
+These are available only from kernel 1.1.81 onward. If you miss those
+device nodes, you should create them using create_vcs in the
+distribution directory. The tool won't run with kernels older than 1.1.81,
+because they lacked a full screen dump/restore capability.
+
+.LP
+Available command line options are the following:
+.TP
+-m \fBnumber\fP
+Choose the modifier to use (by default: control). The modifier
+can be provided either as a number or as a symbolic string.
+Allowed strings are shift, anyAlt, leftAlt,
+rightAlt, control.
+.TP
+-u
+Deny using user-specific configuration files. With this
+option on, only /etc/gpm-root.conf will be used as a source
+of configuration information. This option
+is intended for those system administrators who fear security could
+be broken by this daemon. Things should be sufficiently secure, but
+if you find a hole please tell me about it.
+.TP
+-D
+Do not automatically enter background operation when started,
+and log messages to the standard error stream, not the syslog
+mechanism.  This is useful for debugging; in previous releases
+it was done with a compile-time option.
+.TP
+-V \fBverbosity increment\fP
+Raise the maximum level of messages that will be logged.  Thus a
+positive argument has the effect of making the program more
+verbose.  One can also give a negative argument to hush the
+program; however, note that due to \fBgetopt(3)\fP rules a negative
+argument must follow the option with no space betwixt (that is,
+-V-1 but not -V -1).  Program Arguments,,,libc.
+The argument is optional and its default value is 1.
+
+.LP
+Each time a menu is drawn, the configuration file is reparsed if it has
+changed. This allows modification of personal setup without reinvoking
+the daemon.
+
+.LP
+The actual configuration file is better introduced by looking at your
+/etc/gpm-root.conf.
+.fi
+
+.LP
+The syntax for the file won't be described here, being it quite apparent
+from the example above. Blanks and newlines are unused in parsing the
+file, and the layout of the file is free. Comments are allowed in the
+file: any hash mark (#) found at the beginning of the line or
+after white space makes the parser discard anything up to the next
+line. To insert quotes (") in strings precede them with a backslash.
+
+.LP
+Note that recursive menus are allowed, to any level of recursion.
+
+.LP
+Keywords belong to three groups: the button keyword, the cfg
+keywords and the action keywords. They are all described in the table
+below:
+.TP
+button \fBnumber\fP \fBmenu\fP
+The button keyword is used to introduce a menu. It is
+followed by the number of the relevant button (1=left,
+2=middle, 3=right), an open brace, a menu and a closed brace.
+A menu is made up of cfg statements, followed by
+action statements. Cfg statements can come in any order,
+while the order of action statements tells the actual order
+in which actions will appear on the screen, top to bottom.
+
+.LP
+The following statements belong to the cfg set.
+.TP
+name \fBstring\fP
+If the name keyword is present, the specified
+\fBstring\fP will be used as the name for the current menu.
+.TP
+background \fBcolor\fP
+This statements is used to specify the
+background color to be used in the current menu. The \fBcolor\fP
+can be specified with one of the eight canonical strings black,
+red, cyan etc. The background defaults to black.
+.TP
+foreground \fBcolor\fP
+This statements is used to specify the
+foreground color for menu items. Its value defaults to white.
+An optional bright keyword can appear before the actual color.
+.TP
+border \fBcolor\fP
+border is used to specify the
+border color for the menu. Its value defaults to white.
+An optional bright keyword can appear before the actual color.
+.TP
+head \fBcolor\fP
+head is used to specify the
+foreground color for the title of the menu. Its value defaults
+to white.
+An optional bright keyword can appear before the actual color.
+
+.LP
+The following statements belong to the action set.
+.TP
+\fBstring\fP f.fgcmd \fBcmdstring\fP
+When the mouse button is
+released above the corresponding menu item, the \fBcmdstring\fP is
+pasted in the keyboard queue of the current console. This is
+not yet implemented.
+.TP
+\fBstring\fP f.bgcmd \fBcmdstring\fP
+When the mouse button is released above the
+corresponding menu item, a shell (/bin/sh) is forked to
+execute the specified command, with stdin
+connected to /dev/null, and stdout, stderr connected
+to the active console.
+.TP
+\fBstring\fP f.jptty \fBttynumber\fP
+When the mouse button is
+released above the corresponding menu item, the console is
+switched to the one specified. The \fBttynumber\fP must be specified
+as a string. Any tty can be reached this way, even those which are
+not accessible via the keyboard.
+.TP
+\fBstring\fP f.mktty \fBttynumber\fP
+When the mouse button is
+released above the corresponding menu item, an unused console is
+selected, and /sbin/mingetty is executed in it. The current console
+is switched to the newly opened console. I use this command to save
+kernel memory by opening a single console through /etc/inittab
+and requesting the others only when i need to login.
+.TP
+\fBstring\fP \fBWhole-menu\fP
+A menu can directly follow the label string.
+When the mouse pointer leaves the menu frame at the level of \fBstring\fP,
+a second menu is posted on screen.
+.TP
+\fBstring\fP f.lock
+When the mouse button is
+released above the corresponding menu item, the keyboard and the
+screen are locked, and only the locking user or the superuser
+can unlock them. This is not yet implemented.
+.TP
+\fBstring\fP f.load
+The current loadavg when the menu is posted is concatenated to \fBstring\fP
+to build the actual message displayed on screen. Nothing happens at
+button release.
+.TP
+\fBstring\fP f.free
+The free memory and swap when the menu is posted is concatenated
+to \fBstring\fP
+to build the actual message displayed on screen. Nothing happens at
+button release.
+.TP
+\fBstring\fP f.time
+The current time is formatted with \fBstrftime(3)\fP, according to
+\fBstring\fP. The resulting string is
+the actual message displayed on screen. Nothing happens at
+button release.
+.TP
+\fBstring\fP f.pipe \fBcmdline\fP
+When the mouse pointer leaves the menu frame at the level of \fBstring\fP,
+a message box is posted on screen showing the last ten lines
+of the output of \fBcmdline\fP. \fBcmdline\fP is executed
+by /bin/sh. This is not yet implemented.
+
+
+.TP
+\fBstring\fP f.nop
+This does nothing, it only displays \fBstring\fP on the menu.
+
+.LP
+The HOME, LOGNAME and USER environment variables are setup
+to the values for the invoking user before spawning an external
+process (f.bgcmd, f.pipe). The current directory is always /.
+
+.LP
+.SH BUGS
+
+.LP
+Known bugs have been fixed. In particular, if you invoke gpm-root
+right after gpm, it will delay a few seconds before trying to connect
+to the daemon.
+
+.LP
+.SH AUTHOR
+Alessandro Rubini <rubini@linux.it>
+
+.LP
+.SH FILES
+.nf
+/dev/gpmctl     The socket used to connect to gpm.
+/etc/gpm-root.conf  The default configuration file.
+$(HOME)/.gpm-root   The user configuration file.
+/dev/vcs*           Virtual Console Screens
+.fi
+
+.LP
+.SH SEE ALSO
+.nf
+\fB gpm(8) \fP
+
+.fi
+The info file about `gpm', which gives more complete information and
+explains how to write a gpm client.

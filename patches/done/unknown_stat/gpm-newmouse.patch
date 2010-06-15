@@ -1,0 +1,36 @@
+--- gpm-1.19.3/mice.c.orig	Tue Mar  7 15:10:00 2000
++++ gpm-1.19.3/mice.c	Sun Dec  3 01:49:35 2000
+@@ -1637,6 +1637,23 @@
+   return type;
+ }
+ 
++/*
++ * This works with Dexxa Optical Mouse, but because in X same initstring
++ * is named ExplorerPS/2 so I named it in the same way.
++ */
++static Gpm_Type *I_exps2(int fd, unsigned short flags,
++			 struct Gpm_Type *type, int argc, char **argv)
++{
++  static unsigned char s1[] = { 243, 200, 243, 200, 243, 80, };
++
++  if (check_no_argv(argc, argv)) return NULL;
++
++  write (fd, s1, sizeof (s1));
++  usleep (30000);
++  tcflush (fd, TCIFLUSH);
++  return type;
++}
++
+ static Gpm_Type *I_twid(int fd, unsigned short flags,
+ 			struct Gpm_Type *type, int argc, char **argv)
+ {
+@@ -1993,6 +2010,9 @@
+                                 {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
+   {"imps2",   "Microsoft Intellimouse (ps2) - 3 buttons, wheel unused",
+            "", M_ps2, I_imps2, STD_FLG,
++                                {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
++  {"exps2",   "IntelliMouse Explorer (ps2) - 3 buttons, wheel unused",
++           "ExplorerPS/2", M_ps2, I_exps2, STD_FLG,
+                                 {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
+   {"ms3", "Microsoft Intellimouse (serial) - 3 buttons, wheel unused",
+            "", M_ms3, I_pnp, CS7 | STD_FLG,

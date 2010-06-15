@@ -1,0 +1,233 @@
+Only in gpm-1.17.9.mod: MODIFIED
+diff -u gpm-1.17.9/README gpm-1.17.9.mod/README
+--- gpm-1.17.9/README	Fri Aug  6 01:35:34 1999
++++ gpm-1.17.9.mod/README	Fri Jan 21 20:55:49 2000
+@@ -268,3 +268,6 @@
+ 
+ Edmund Grimley Evans (edmund@vocalis.com)
+ 		Added "-t ms+lr"
++George Staikos (staikos@0wned.org)
++		Added support for auto-reinitialise of mouse.
++
+Common subdirectories: gpm-1.17.9/doc and gpm-1.17.9.mod/doc
+diff -u gpm-1.17.9/gpm.c gpm-1.17.9.mod/gpm.c
+--- gpm-1.17.9/gpm.c	Fri Aug  6 01:35:33 1999
++++ gpm-1.17.9.mod/gpm.c	Fri Jan 21 20:50:40 2000
+@@ -60,7 +60,7 @@
+   {
+   DEF_TYPE, DEF_DEV, DEF_SEQUENCE,
+   DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, 0 /* scaley */,
+-  DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_TOGGLE, DEF_GLIDEPOINT_TAP,
++  DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_TOGGLE, DEF_GLIDEPOINT_TAP, 0,
+   (Gpm_Type *)NULL
+   },
+ };
+@@ -404,7 +404,7 @@
+       if (   ((data=getMouseData(fd,m_type,kd_mode))==NULL)
+ 	  || ((*(m_type->fun))(&nEvent,data)==-1) )
+ 	{
+-	if (!i) return 0;
++	if (!i) return -1;
+ 	else break;
+ 	}
+ 
+@@ -865,27 +865,17 @@
+   unlink(GPM_NODE_CTL);
+ }
+ 
+-/*-------------------------------------------------------------------*/
+-int main(int argc, char **argv)
+-{
+-  int ctlfd, newfd;
+-  struct sockaddr_un ctladdr;
+-  int i, len, kd_mode, fd;
+-  struct   timeval timeout;
+-  int maxfd=-1;
+-  int pending;
+-  Gpm_Event event;
+ 
+-  prgname=argv[0];
+-  setuid(0); /* just in case... */
+-
+-/*....................................... parse command line */
++/*
++ *   Moved the initialization code in here so we can reuse it if
++ *   the auto-reinit flag is set and the mouse is unplugged on us.
++ *
++ *               George Staikos <staikos@0wned.org> - Jan 21/2000
++ */
+ 
+-  cmdline(argc, argv);
+-  atexit(gpm_exited);
++static inline int initMouse(int i, int *fd, int *maxfd)
++{
+ 
+-  for (i=1; i <= 1+opt_double; i++)
+-    {
+       which_mouse=mouse_table+i; /* used to access options */
+ 
+       /* open the device with ndelay, to catch a locked device */
+@@ -893,22 +883,22 @@
+         {
+           if (!strcmp(opt_dev,"-"))
+             fd=0;
+-          else if ((fd=open(opt_dev,O_RDWR | O_NDELAY))<0)
++          else if ((*fd=open(opt_dev,O_RDWR | O_NDELAY))<0)
+             { oops(opt_dev); }
+         }
+       else /* use "/dev/mouse" */
+         {
+           opt_dev = "/dev/mouse";
+-          if ((fd=open(opt_dev,O_RDWR | O_NDELAY))<0)
++          if ((*fd=open(opt_dev,O_RDWR | O_NDELAY))<0)
+             { oops(opt_dev); }
+         }
+ 
+       /* and then reset the flag */
+-      fcntl(fd,F_SETFL,fcntl(fd,F_GETFL) & ~O_NDELAY);
++      fcntl(*fd,F_SETFL,fcntl(*fd,F_GETFL) & ~O_NDELAY);
+ 
+       /* init the device, and change mouse type */
+       if (m_type->init)
+-        m_type=(m_type->init)(fd, m_type->flags, m_type);
++        m_type=(m_type->init)(*fd, m_type->flags, m_type);
+       if (!m_type)
+         { oops("mouse initialization failed"); }
+ 
+@@ -916,13 +906,39 @@
+         {
+           unsigned int modem_lines;
+ 
+-          ioctl(fd, TIOCMGET, &modem_lines);
++          ioctl(*fd, TIOCMGET, &modem_lines);
+           modem_lines &= ~opt_toggle;
+-          ioctl(fd, TIOCMSET, &modem_lines);
++          ioctl(*fd, TIOCMSET, &modem_lines);
+         }
+ 
+-      which_mouse->fd=fd;
+-      maxfd=max(fd, maxfd);
++      which_mouse->fd=*fd;
++      *maxfd=max(*fd, *maxfd);
++}
++
++
++
++/*-------------------------------------------------------------------*/
++int main(int argc, char **argv)
++{
++  int ctlfd, newfd;
++  struct sockaddr_un ctladdr;
++  int i, len, kd_mode, fd;
++  struct   timeval timeout;
++  int maxfd=-1;
++  int pending;
++  Gpm_Event event;
++
++  prgname=argv[0];
++  setuid(0); /* just in case... */
++
++/*....................................... parse command line */
++
++  cmdline(argc, argv);
++  atexit(gpm_exited);
++
++  for (i=1; i <= 1+opt_double; i++)
++    {
++       initMouse(i, &fd, &maxfd);
+     } /*for*/
+ 
+ /*....................................... catch interesting signals */
+@@ -1055,8 +1071,10 @@
+       which_mouse=mouse_table+i; /* used to access options */
+       if (FD_ISSET(which_mouse->fd,&selSet))
+ 	  {
++          int rc;
+ 	  FD_CLR(which_mouse->fd,&selSet); pending--;
+-	  if (processMouse(which_mouse->fd, &event, m_type, kd_mode))
++	  rc = processMouse(which_mouse->fd, &event, m_type, kd_mode);
++	  if (rc > 0)
+ 	    /*
+ 	     * pass it to the client, if any
+ 	     * or to the default handler, if any
+@@ -1065,6 +1083,16 @@
+ 	    (cinfo[event.vc] && do_client(cinfo[event.vc], &event))
+ 	       || (cinfo[0]        && do_client(cinfo[0],        &event))
+ 	       ||  do_selection(&event);
++	  else if ((rc == -1) && opt_auto_reinit) {
++             /* try to reinitialise the mouse */
++             gpm_debug_log(LOG_WARNING, 
++                           "Mouse was removed.  Trying to reinitialise.\n");
++             FD_CLR(which_mouse->fd, &selSet);
++             close(which_mouse->fd);
++             initMouse(i, &fd, &maxfd);
++             FD_CLR(which_mouse->fd, &selSet);
++	  }
++	  } else {
+ 	  }
+       }
+ 
+diff -u gpm-1.17.9/gpmInt.h gpm-1.17.9.mod/gpmInt.h
+--- gpm-1.17.9/gpmInt.h	Fri Aug  6 01:35:34 1999
++++ gpm-1.17.9.mod/gpmInt.h	Fri Jan 21 20:19:38 2000
+@@ -87,6 +87,7 @@
+   char *opt_type, *opt_dev, *opt_sequence;
+   int opt_baud,opt_sample,opt_delta, opt_accel, opt_scale, opt_scaley;
+   int opt_time, opt_cluster, opt_three, opt_toggle, opt_glidepoint_tap;
++  int opt_auto_reinit;
+   Gpm_Type *m_type;
+   int fd;
+ };
+@@ -110,7 +111,8 @@
+ #define opt_toggle   (which_mouse->opt_toggle)
+ #define opt_glidepoint_tap \
+                      (which_mouse->opt_glidepoint_tap)
+-
++#define opt_auto_reinit    \
++                     (which_mouse->opt_auto_reinit)
+ #define m_type       (which_mouse->m_type)
+ 
+ /* the other variables */
+diff -u gpm-1.17.9/gpn.c gpm-1.17.9.mod/gpn.c
+--- gpm-1.17.9/gpn.c	Fri Aug  6 01:35:33 1999
++++ gpm-1.17.9.mod/gpn.c	Fri Jan 21 20:13:18 2000
+@@ -212,7 +212,8 @@
+          "                     Use a non-existent type (e.g. \"help\") to get a list\n"
+          "    -T               test: read mouse, no clients\n"
+          "    -v               print version and exit\n"
+-         "    -V verbosity     increase number of logged messages\n", 
++         "    -V verbosity     increase number of logged messages\n"
++         "    -y               automatically reinitialize when unplugged\n",
+          DEF_ACCEL, DEF_BAUD, DEF_SEQUENCE, DEF_DELTA, DEF_TIME, DEF_LUT,
+          DEF_SCALE, DEF_SAMPLE, DEF_TYPE);
+   return 1;
+@@ -296,7 +297,7 @@
+ int 
+ cmdline(int argc, char **argv)
+ {
+-  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pqr:R::s:S:t:TvV::23";
++  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pqr:R::s:S:t:TyvV::23";
+   int i, opt;
+   FILE *f;
+   static struct {char *in; char *out;} seq[] = {
+@@ -374,6 +375,7 @@
+           break;
+         case 't': opt_type=optarg; break;
+         case 'T': opt_test++; break;
++        case 'y': opt_auto_reinit++; break;
+         case 'v': printf(GPM_NAME " " GPM_RELEASE ", " GPM_DATE "\n"); exit(0);
+         case 'V': 
+           gpm_debug_level += (0 == optarg ? 1 : strtol(optarg, 0, 0));
+diff -u gpm-1.17.9/mouse-test.c gpm-1.17.9.mod/mouse-test.c
+--- gpm-1.17.9/mouse-test.c	Fri Aug  6 01:35:34 1999
++++ gpm-1.17.9.mod/mouse-test.c	Fri Jan 21 20:18:57 2000
+@@ -54,7 +54,7 @@
+ struct mouse_features mymouse = {
+   DEF_TYPE, DEF_DEV, DEF_SEQUENCE,
+   DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, DEF_SCALE /*scaley*/,
+-  DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_TOGGLE, DEF_GLIDEPOINT_TAP,
++  DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_TOGGLE, DEF_GLIDEPOINT_TAP, 0,
+   (Gpm_Type *)NULL
+ };
+ 
+Common subdirectories: gpm-1.17.9/sample and gpm-1.17.9.mod/sample

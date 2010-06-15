@@ -1,0 +1,33 @@
+well, I noticed that my vim caught a segfault in the linux console 
+everytime it called Gpm_Open() a second time.
+
+I've tracked down this problem to the initialization of the option 
+variable in Gpm_Open(). It's initialized to NULL everytime Gpm_Open() is 
+called, but to the value of Gpm_get_console() only the first time.
+Also this variable is declared extern but included from a header file, too.
+It works for me now, with the patch below.
+
+Nico Huber
+
+PS. I'm not subscribed to this list, so please CC me when replying.
+
+--- liblow.c.orig	2005-01-28 05:18:35.000000000 +0100
++++ liblow.c	2005-01-28 05:19:58.000000000 +0100
+@@ -193,5 +193,4 @@
+     char *term = NULL;
+     int i;
+-   extern struct options option;
+     static int checked_con = 0;
+     struct sockaddr_un addr;
+@@ -200,6 +199,4 @@
+     char* sock_name = 0;
+
+-   option.consolename = NULL;
+-
+     gpm_report(GPM_PR_DEBUG,"VC: %d",flag);
+
+_______________________________________________
+gpm mailing list
+gpm@lists.linux.it
+http://lists.linux.it/listinfo/gpm
+

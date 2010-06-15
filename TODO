@@ -1,0 +1,117 @@
+================================================================================
+=      /------\    /-----\    |----\     /-----\                              =
+=         ||       |     |    |     |    |     |                              =
+=         ||       |     |    |     |    |     |   thanks for every help. ;)  =
+=         ||       \-----/    |____/     \-----/                              =
+================================================================================
+
+Last edited:
+Nico Schottelius <nico@schottelius.org>, 24 Dec 2002
+
+Intro:
+
+Welcome to the todo list. You are invited to help me. Select something
+you wanna fix/introduce and I will tell you how you can add it.
+items marked with a 'D' are done.
+
+Tasks:
+
+2002-12-24 Nico Schottelius <nico@schottelius.org>
+   * -D must be checked before calling anything else.
+      Currently, -m mousedev -D -t ps2 calls add_mouse first without debug
+
+2002-11-21 Nico Schottelius <nico@schottelius.org>
+   * remove -M, allow multiply -m,-t; -> allow n mice and cleaner code
+    --> means use of add_mouse(), init_mice()
+   * remove old opt_* 
+D  * cleanup gpn.c/cmdline to its real purpose
+   * make protocol / port autodection: gpm -u [later...]
+      => ONLY FOR DEVFS!
+
+2002-11-09 Nico Schottelius <nico@schottelius.org>
+D  * cleanup gpm further: main.c
+   * do init,protocol,disable functions forced
+D  * introducte global option structure
+
+2002-03-10 Nico Schottelius <nico@schottelius.org>
+   * make buffer accessable from X and vice versa
+
+2002-03-02 Nico Schottelius <nico@schottelius.org>
+D  * remove large messages: (just cd $srcdir...)
+      /home/user/nico/computer/sources/linux/gpm/gpm-1.20.1/src/mice.c ->
+      src/mice.c or mice.c
+
+      It's a problem with gcc's command line:
+         gcc -o file filename.c -> filename.c
+         gcc -o file /path/to/filename.c -> /path/to/filename.c
+   
+2002-02-20 Nico Schottelius <nico@schottelius.org>
+   * add contrib/other/TPdetect.cc [Allan Sandfeld Jensen
+   <snowwolf@one2one-networks.com>] to the gpm source.
+
+2002-02-08 Nico Schottelius <nico@schottelius.org>
+   * fix problems with the following clients:
+      - gpm-root complains about /dev/vcs0 in devfs
+      - disable-past: segmenatation fault
+      - mev: segmenatation fault
+      - hltest: stdin: not a system console [ devfs problem ? ]
+      - mouse-test does not work (does not do anything after key pressed)
+D  * add better ps2 initialization: after mouse is screwed up with synps2
+     data, the init of ps2 should be able to get the mouse work again...
+     [ btw, currenty I_empty is used :( ]
+D  * update documentation and MANIFEST
+
+2002-02-04 Nico Schottelius <nico@schottelius.org>
+   * use gpm_report in all gpm sources. Check for run_status.
+     [ report_lib does not need run_status! ]
+   * export synaptic.c messages to message.h
+   * cleanup debugging support in synaptics.c
+   * remove all strings in c files and place them into message.h
+
+2002-01-07 Nico Schottelius <nico@schottelius.org>
+   * cleanup gpm-root (it will not run currently with devfs)
+D  * add pseudo root support
+D  * add protocol reset (after synps2 i.e.)
+   * add serial console support into gpm_report
+   * add howtos:
+      - add a protocol (?)
+      - add a messsage (message.h)
+   * remove hardwired names in sample clients.
+D  * cleanup Gpm_Open (problem with devfs still exists)
+   * remove dirty gotos
+
+2001-09-29 Frédéric L. W. Meunier <0@pervalidus.net>
+   * Add GNU screen support to libgpm.
+
+2001-09-23 Nico Schottelius <nico@schottelius.org>
+D  * put dependings from sources to src/.depend
+D  * set version _everywhere_ via configure (doc.gpm and others)
+D  * really remove oops() output, add clearer text to the user(also use stderr)
+D  * remove more hardwired things in gpm ! [partly solved. gpm-root is missing]
+D  * oops rewrite or use another function for rep_err()
+     --> calls oops() of we need to exit. Give oops() a va_* type, Filename,line
+     --> normally report(STATUS, text, ... ) --> 
+     --> STATUS = (char * filename(__FILE__), int line(__LINE__), int status) 
+     --> status: WARN, CRIT(or ABRT)
+
+D * 27th of July 2k+1:
+   - report(char *filename, int line, int status, char *text, ... )
+     Destinations:
+      * stderr -> startup
+      * current console (/dev/tty, /dev/vc/0) -> debug, daemon
+      * console (/dev/console) ->  running, daemon
+      * syslogd                ->  running, daemon
+     Status:
+      * LOG_INFO
+      * LOG_WARN
+      * LOG_ERR
+      * LOG_DEBUG
+     
+
+D * 7th of July 2k+1: [partly done. many patches left]
+   - analysing patches
+   - applying patches
+   - detail stuff:
+    - message function:
+      destination depend on current state
+      change debuglevel by using SIGUSR1/SIGUSR2

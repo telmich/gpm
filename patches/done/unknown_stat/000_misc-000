@@ -1,0 +1,63 @@
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/gpm.c gpm-1.19.5/src/gpm.c
+--- gpm-1.19.5.orig/src/gpm.c	Tue Sep 18 10:17:23 2001
++++ gpm-1.19.5/src/gpm.c	Thu Oct  4 23:30:06 2001
+@@ -315,11 +315,12 @@
+     goto scan;
+ 
+   /* if not managed, use default mask */
+-  if (!(info.eventMask & GPM_BARE_EVENTS(event->type)))
++  if (!(info.eventMask & GPM_BARE_EVENTS(event->type))) {
+     if (res)
+       return res;
+     else
+       goto scan;
++  }
+ 
+   /* WARNING */ /* This can generate a SIGPIPE... I'd better catch it */
+   MAGIC_P((write(fd,&magic, sizeof(int))));
+@@ -777,7 +778,7 @@
+ #if !defined(__GLIBC__)
+   int len;
+ #else /* __GLIBC__ */
+-  size_t len;
++  socklen_t len;
+ #endif /* __GLIBC__ */
+   struct sockaddr_un addr; /* reuse this each time */
+   struct stat statbuf;
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/headers/gpmCfg.h gpm-1.19.5/src/headers/gpmCfg.h
+--- gpm-1.19.5.orig/src/headers/gpmCfg.h	Tue Sep 18 17:57:16 2001
++++ gpm-1.19.5/src/headers/gpmCfg.h	Thu Oct  4 23:30:06 2001
+@@ -53,7 +53,7 @@
+ #define DEF_ACCEL            2
+ #define DEF_SCALE           10
+ #define DEF_TIME           250    /* time interval (ms) for multiple clicks */
+-#define DEF_CLUSTER         10    /* maximum number of clustered events */
++#define DEF_CLUSTER          0    /* maximum number of clustered events */
+ #define DEF_THREE            0    /* have three buttons? */
+ #define DEF_KERNEL           0    /* no kernel module, by default */
+ 
+diff -ruN -x Makefile -x configure -x config.cache -x config.h -x *.[178] -x gpm.info -x gpmdoc.ps -x gpmdoc.txt -x gpm-root.c -x stamp-h -x *.elc gpm-1.19.5.orig/src/mice.c gpm-1.19.5/src/mice.c
+--- gpm-1.19.5.orig/src/mice.c	Sat Sep 15 16:53:38 2001
++++ gpm-1.19.5/src/mice.c	Thu Oct  4 23:30:06 2001
+@@ -284,7 +284,7 @@
+ /* (Frank Holtz) hof@bigfoot.de Tue Feb 23 21:04:09 MET 1999 */
+ int SUMMA_BORDER=100;
+ int summamaxx,summamaxy;
+-char summaid=-1;
++signed short summaid=-1;
+ static int M_summa(Gpm_Event *state, unsigned char *data)
+ {
+   int x, y;
+@@ -475,10 +475,11 @@
+ 
+   if (data[0]==0 && opt_glidepoint_tap) /* by default this is false */
+     state->buttons = tap_active = opt_glidepoint_tap;
+-  else if (tap_active)
++  else if (tap_active) {
+     if (data[0]==8)
+       state->buttons = tap_active = 0;
+     else state->buttons = tap_active;
++  }
+ 
+  /* Some PS/2 mice send reports with negative bit set in data[0]
+   * and zero for movement.  I think this is a bug in the mouse, but

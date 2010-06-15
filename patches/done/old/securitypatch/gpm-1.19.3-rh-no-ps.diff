@@ -1,0 +1,11 @@
+--- gpm-1.19.0/doc/Makefile.in.nops	Thu Jan 20 22:52:46 2000
++++ gpm-1.19.0/doc/Makefile.in	Sun Mar 19 00:37:35 2000
+@@ -93,7 +93,7 @@
+ 
+ # Main portion
+ 
+-all: $(srcdir)/gpmdoc.ps $(srcdir)/gpm.info $(srcdir)/gpmdoc.txt $(MANPAGES)
++all: $(srcdir)/gpm.info $(srcdir)/gpmdoc.txt $(MANPAGES)
+ 
+ $(MANPAGES): $(srcdir)/doc.gpm $(srcdir)/manpager
+ 	cd $(srcdir) && gawk -f ./manpager doc.gpm

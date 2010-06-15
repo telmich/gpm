@@ -1,0 +1,70 @@
+#			-*-makefile-*- (gpm/include)
+#
+# Copyright (C) 2001 Nico Schottelius <nico@schottelius.org>
+#
+
+# set root, if you want to install to a virtual root
+ROOT = 
+ifndef ROOT
+ROOT = $(DESTDIR)
+endif
+
+SHELL = /bin/sh
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+# directories
+libdir      = $(ROOT)@libdir@
+datadir     = $(ROOT)@datadir@
+bindir      = $(ROOT)@bindir@
+sbindir     = $(ROOT)@sbindir@
+includedir  = $(ROOT)@includedir@
+sysconfdir  = $(ROOT)@sysconfdir@
+mandir      = $(ROOT)@mandir@
+man1dir     = $(mandir)/man1
+man7dir     = $(mandir)/man7
+man8dir     = $(mandir)/man8
+infodir     = $(ROOT)@infodir@
+
+# autconf wants this, otherwise issues this warning:
+# config.status: WARNING:  Makefile.include.in seems to ignore the --datarootdir setting
+datarootdir  = @datarootdir@
+
+# it would be nice to figure this out automatically, but the Emacs
+# load path often has many elements, most of them reserved for
+# specialised packages like w3 and auctex.
+lispdir = @lispdir@
+
+# programs
+CC                = @CC@
+RANLIB            = @RANLIB@
+YACC              = @YACC@
+INSTALL           = @INSTALL@
+INSTALL_PROGRAM   = @INSTALL_PROGRAM@
+INSTALL_DATA      = @INSTALL_DATA@
+LN_S              = @LN_S@
+EMACS             = @EMACS@
+ELISP             = @ELISP@
+SHLIB             = @SHLIB@
+SED               = @SED@
+DIFF              = @DIFF@
+TEX               = @TEX@
+TEXINDEX          = @TEXINDEX@
+DVIPS             = @DVIPS@
+MAKEINFO          = @MAKEINFO@
+TEXI2HTML         = texi2html
+STRIP             = -s
+
+AR                = ar
+ETAGS             = etags
+AWK               = awk
+CP                = cp -a
+MKDIR             = mkdir -p # linux specific, but who cares ?
+                             # gpm is linux specific, too.
+RM                = rm
+
+
+DEPFILE = .depend
+
+release = @release@

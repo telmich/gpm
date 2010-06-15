@@ -1,0 +1,7 @@
+Show clock when cursor moved to upper right corner. Originally by Marco d'Itri
+<md@linux.it>. Random fixes and rediff for latest gpm version by Petr Baudis
+<pasky@ji.cz>.
+
+clockfix.diff is original clock.diff + some fixes
+clockfix2.diff applieas on the top of it and fixes some of the fixes ;)
+clock.diff is merge of these two

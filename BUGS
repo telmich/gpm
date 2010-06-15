@@ -1,0 +1,37 @@
+Hello World. 
+
+This files lists all current known bugs of gpm. If you have some spare time,
+please help to fix them. Thanks from the current maintainer (Nico).
+
+Additional bug information can be found in the TODO file. Everything not done
+is more or less a bug...
+
+/*============================================================================*/
+From: maintainer (Nico)
+
+src/headers/config.h:
+   SBINDIR and SYSCONFDIR are corrupted: ${prefix} should disappear!
+
+/*============================================================================*/
+From: maintainer (Nico)
+
+Following probles crash/do not work correctly: (most due to problems with devfs)
+   - mev
+   - gpm-root
+   - disable-paste
+   - mouse-test
+
+/*============================================================================*/
+
+From: D Richard Felker III <dalias@aerifal.cx>
+
+One is the way the baud rate setting is done. It worked fine in old
+versions of gpm, but the special case for mman in the baud rate
+setting code now actually *breaks* support for my Logitech MoiseMan
+(the version with 4 buttons). Could you provide an way to initialize
+it to 9600 baud just like all the other mice, without using the
+special mman code that doesn't work for this mouse?
+
+[...]
+
+/*============================================================================*/

@@ -1,0 +1,126 @@
+From gpm-request@prosa.it  Thu Apr 27 12:07:30 2000
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id MAA19031
+	for <rubini@localhost>; Thu, 27 Apr 2000 12:07:29 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini/localhost> (single-drop); Thu, 27 Apr 2000 12:07:29 MEST
+Received: from giga.prosa.it (root@[213.255.48.147]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id NAA03517 for <rubini@pop.systemy.it>; Mon, 24 Apr 2000 13:30:37 +0200
+Received: (from lists@localhost)
+	by giga.prosa.it (8.9.3/8.9.3/Debian/GNU) id NAA16706;
+	Mon, 24 Apr 2000 13:30:35 +0200
+Resent-Date: Mon, 24 Apr 2000 13:30:35 +0200
+X-Authentication-Warning: giga.prosa.it: lists set sender to gpm-request@lists.prosa.it using -f
+From: "Adam J. Richter" <adam@yggdrasil.com>
+Date: Mon, 24 Apr 2000 03:43:11 -0700
+Message-Id: <200004241043.DAA28678@adam.yggdrasil.com>
+To: gpm@prosa.it
+Subject: Patch adding devfs support to gpm-1.19.2
+Resent-Message-ID: <Do4YZC.A.jEE.sADB5@giga>
+Resent-From: gpm@prosa.it
+Reply-To: gpm@prosa.it
+X-Mailing-List: <gpm@lists.prosa.it> archive/latest/717
+X-Loop: gpm@lists.prosa.it
+Precedence: bulk
+Resent-Sender: gpm-request@prosa.it
+X-UIDL: a6c102abee205325fb8ebf43077d9567
+Status: RO
+
+
+	The following patch fixes gpm-1.19.2 to allow use of
+the virtual console names built into devfs (at least for
+linux-2.3.99pre5.5).  Although it is possible to add the
+old names (or some other names) to a devfs-based system, these
+names will always be present on all devfs-based systems, eliminating
+another potential incompatability.  If you apply this patch, gpm
+should still work on all of the systems that it worked on before,
+although I have not tested it on a non-devfs system.  I hope you
+will apply this patch or some variant of it for the next release.
+
+Adam J. Richter     __     ______________   4880 Stevens Creek Blvd, Suite 104
+adam@yggdrasil.com     \ /                  San Jose, California 95129-1034
++1 408 261-6630         | g g d r a s i l   United States of America
+fax +1 408 261-6631      "Free Software For The Rest Of Us."
+
+
+diff -u -r gpm-1.19.2/gpm-root.c gpm/gpm-root.c
+--- gpm-1.19.2/gpm-root.c	Tue Apr 18 22:53:38 2000
++++ gpm/gpm-root.c	Mon Apr 24 03:35:00 2000
+@@ -1868,6 +1868,10 @@
+   sprintf(dumpname,"/dev/vcsa%i",vc);
+   dumpfd=open(dumpname,O_RDONLY);
+   if (dumpfd<0) {
++    sprintf(dumpname,"/dev/vcc/a%i",vc);
++    dumpfd=open(dumpname,O_RDONLY);
++  }
++  if (dumpfd<0) {
+     gpm_debug_log(LOG_ERR,"%s: %s", dumpname, strerror(errno));
+     return;
+   } /*if*/
+@@ -1888,6 +1892,10 @@
+ 
+   sprintf(dumpname,"/dev/vcsa%i",vc);
+   dumpfd=open(dumpname,O_WRONLY);
++  if (dumpfd < 0) {
++    sprintf(dumpname,"/dev/vcc/a%i",vc);
++    dumpfd=open(dumpname,O_WRONLY);
++  }
+   if (dumpfd<0) {
+     gpm_debug_log(LOG_ERR,"%s: %s", dumpname, strerror(errno));
+     return;
+@@ -2090,9 +2098,11 @@
+         exit(1);
+       }
+ 
+-    if (stat("/dev/vcs0",&sbuf)<0 && stat("/dev/vcs",&sbuf)<0)
++    if (stat("/dev/vcs0",&sbuf)<0
++	&& stat("/dev/vcs",&sbuf)<0
++	&& stat("/dev/vcc/0",&sbuf)<0)
+       {
+-        fprintf(stderr,"%s: /dev/vcs0: %s\n",prgname,strerror(errno));
++        fprintf(stderr,"%s: /dev/vcc/0: %s\n",prgname,strerror(errno));
+         fprintf(stderr,"%s: do you have vcs devices? Refer to the manpage\n",
+                 prgname);
+         exit(1);
+diff -u -r gpm-1.19.2/hltest.c gpm/hltest.c
+--- gpm-1.19.2/hltest.c	Mon Jan 17 13:34:00 2000
++++ gpm/hltest.c	Mon Apr 24 03:35:32 2000
+@@ -456,7 +456,11 @@
+   /* open your dump/restore buffers */
+ 
+   sprintf(devname,"/dev/vcsa%i",vc);
+-  if ((dev_vcs=open(devname,O_RDWR))<0)
++  if ((dev_vcs=open(devname,O_RDWR))<0) {
++    sprintf(devname,"/dev/vcc/a%i",vc);
++    dev_vcs=open(devname,O_RDWR);
++  }
++  if (dev_vcs<0)
+ 	{ perror(devname); exit(1); }
+ 
+   if (Gpm_Open(&conn,0)==-1)
+diff -u -r gpm-1.19.2/liblow.c gpm/liblow.c
+--- gpm-1.19.2/liblow.c	Thu Jan 27 14:09:00 2000
++++ gpm/liblow.c	Mon Apr 24 03:05:21 2000
+@@ -226,6 +226,8 @@
+         {  /* forced vc number */
+           conn->vc=flag;
+           sprintf(tty,"/dev/tty%i",flag);
++	  if (access(tty, F_OK) < 0)
++	      sprintf(tty,"/dev/vc/%i",flag);
+         }
+       else if (flag==0)  /* use your current vc */
+         {
+@@ -235,7 +237,8 @@
+           if (!t && isatty(2)) t = ttyname(2); /* stderr */
+           if (!t) goto err;
+           strcpy(tty,t);
+-          if (strncmp(tty,"/dev/tty",8) || !isdigit(tty[8]))
++          if ((strncmp(tty,"/dev/tty",8) && strncmp(tty, "/dev/vc/",8))
++	       || !isdigit(tty[8]))
+             goto err;
+           conn->vc=atoi(tty+8);
+         }
+
+-- 
+Bored?      echo unsubscribe | mail gpm-request@lists.prosa.it
+

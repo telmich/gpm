@@ -1,0 +1,11 @@
+--- gpm-1.19.2/special.c.openmax	Mon Jan 17 16:34:00 2000
++++ gpm-1.19.2/special.c	Fri Jun 30 10:49:40 2000
+@@ -154,7 +154,7 @@
+       open("/dev/null",O_RDONLY); /* stdin  */
+       open("/dev/tty0",O_WRONLY); /* stdout */
+       dup(1);                     /* stderr */
+-      for (i=3;i<OPEN_MAX; i++) close(i);
++      for (i=3;i<sysconf(_SC_OPEN_MAX); i++) close(i);
+       execl("/bin/sh","sh","-c",command,(char *)NULL);
+       exit(1); /* shouldn't happen */
+       

@@ -1,0 +1,1876 @@
+From aeb@cwi.nl  Fri Aug  3 10:16:54 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id KAA03296
+	for <rubini@morgana>; Fri, 3 Aug 2001 10:16:54 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Fri, 03 Aug 2001 10:16:54 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id NAA12404 for <rubini@pop.systemy.it>; Thu, 2 Aug 2001 13:57:41 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105] (may be forged))
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id LAA15417
+	for <rubini@systemy.it>; Thu, 2 Aug 2001 11:57:40 GMT
+Received: from vision.unipv.it (vision.unipv.it [193.204.34.82])
+	by spock.linux.it (Postfix) with ESMTP id 5CD8A197F0
+	for <rubini@linux.it>; Thu,  2 Aug 2001 13:57:35 +0200 (CEST)
+Received: from hera.cwi.nl (hera.cwi.nl [192.16.191.8])
+	by vision.unipv.it (8.9.3/8.9.3) with ESMTP id MAA29536
+	for <rubini@vision.unipv.it>; Thu, 2 Aug 2001 12:21:26 +0200
+Received: from vlet.cwi.nl (vlet.cwi.nl [192.16.191.67]) by hera.cwi.nl with ESMTP
+	id NAA22247 for ; Thu, 2 Aug 2001 13:55:51 +0200 (MEST)
+From: Andries.Brouwer@cwi.nl
+Received: (from aeb@localhost)
+	by vlet.cwi.nl (8.8.6/8.9.3) id LAA89271;
+	Thu, 2 Aug 2001 11:55:51 GMT
+Date: Thu, 2 Aug 2001 11:55:51 GMT
+Message-Id: <200108021155.LAA89271@vlet.cwi.nl>
+To: alan@lxorguk.ukuu.org.uk, garloff@suse.de, torvalds@transmeta.com
+Subject: Re: [PATCH] make psaux reconnect adjustable
+Cc: brent@linux1.org, linux-kernel@vger.kernel.org, mantel@suse.de,
+        rubini@vision.unipv.it
+X-UIDL: mH&!!69L!!)/N!!9H%!!
+Status: RO
+
+    From: Kurt Garloff <garloff@suse.de>
+
+    working on notebooks I got used to the touchpads.
+    Now, a lot of notebooks have a Synaptics touchpad.
+    It offers a few additional features, such as tossing or the third mouse
+    button (by a short click in the corner) ...
+
+    Unfortunately, the synps2 generates nonstandard codes when in
+    extended mode, amongst which the reconnect (170) token.
+    The kernel (since 2.2.15) does interpret it as such and empties the queue.
+
+    This seems to appropriate for a real plug event. For a synps2, it's not,
+    but makes your mouse dead for a second. Instead the data should just
+    be passed to userspace (gpm).
+
+    So I made the behaviour switchable via a sysctl.=20
+
+Hmm. I don't think there exists a "reconnect token" AA.
+At power up or after a reset (FF) the mouse sends AA
+(self test passed) followed by 00 (the ID: I am a PS/2 mouse).
+During operation the value AA is entirely legal and has no special
+significance.
+
+Moreover, it seems that the specs say that the host should not react
+to the AA but wait for the 00. The expected protocol at power up is:
+Mouse: AA 00. Host: F4 (enable). Mouse: FA (ack).
+Afterwards the host will send F3 to set the sample rate
+(or to initialize a wheelmouse).
+
+A quote [1]:
+"At power-on, the PS/2 device performs a self-test and calibration,
+then transmits the completion code $AA and ID code $00.  If the
+device fails its self-test, it transmits error code $FC and ID code $00.
+This processing also occurs when a software Reset ($FF) command is received.
+The host should not attempt to send commands to the device until
+the calibration/self-test is complete.
+Power-on self-test and calibration takes 300­1000ms."
+
+The reaction to FF (reset) from the host is an immediate FA (ack)
+followed half a second later by AA 00.
+
+Therefore, I think the kernel mouse handling was broken when this
+strange AUX_RECONNECT stuff was introduced. It caused a tiny trickle
+of complaints.
+Bug 1: AA is not necessarily anything special
+Bug 2: the sequence AA 00 from the mouse should not be interrupted
+
+I don't think that it is a good idea to start building infrastructure
+around it. By default this AUX_RECONNECT should be disabled, since
+it is just plain wrong. Then the Synaptics touchpad will work.
+In other words, no sysctl but #if 0 ... #endif.
+
+For people who unplug and replug their PS/2 mouse with running
+machine, or who use a KVM switch (I think it was only Brent Verner
+who asked for this code): if what I say is correct you should
+always see 00 following the AA. So, there may exist a more cautious
+patch that will bite fewer people and does not react to AA but to
+the sequence AA 00.
+
+Andries
+
+[1] See http://www.synaptics.com/decaf/utilities/tp-intf2-4.PDF
+
+From garloff@garloff.de  Fri Aug  3 10:17:11 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id KAA03455
+	for <rubini@morgana>; Fri, 3 Aug 2001 10:17:11 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Fri, 03 Aug 2001 10:17:11 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id SAA25088 for <rubini@pop.systemy.it>; Thu, 2 Aug 2001 18:20:32 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105] (may be forged))
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id QAA18370
+	for <rubini@systemy.it>; Thu, 2 Aug 2001 16:20:29 GMT
+Received: from vision.unipv.it (vision.unipv.it [193.204.34.82])
+	by spock.linux.it (Postfix) with ESMTP id 526AF197FD
+	for <rubini@linux.it>; Thu,  2 Aug 2001 18:20:28 +0200 (CEST)
+Received: from etpmod.phys.tue.nl (etpmod.phys.tue.nl [131.155.111.35])
+	by vision.unipv.it (8.9.3/8.9.3) with ESMTP id QAA31115
+	for <rubini@vision.unipv.it>; Thu, 2 Aug 2001 16:44:17 +0200
+Received: from pckurt.casa-etp.nl (root@pckurt.casa-etp.nl [192.168.157.2])
+	by etpmod.phys.tue.nl (8.9.3/8.9.3/SuSE Linux 8.9.3-0.1) with ESMTP id SAA28559;
+	Thu, 2 Aug 2001 18:20:24 +0200
+Received: (from garloff@localhost)
+	by pckurt.casa-etp.nl (8.9.3/8.9.3/SuSE Linux 8.9.3-0.1) id SAA15174;
+	Thu, 2 Aug 2001 18:18:34 +0200
+Date: Thu, 2 Aug 2001 18:18:34 +0200
+From: Kurt Garloff <garloff@suse.de>
+To: Andries.Brouwer@cwi.nl
+Cc: alan@lxorguk.ukuu.org.uk, brent@linux1.org, linux-kernel@vger.kernel.org,
+        mantel@suse.de, rubini@vision.unipv.it, torvalds@transmeta.com
+Subject: Re: [PATCH] make psaux reconnect adjustable
+Message-ID: <20010802181834.B14708@pckurt.casa-etp.nl>
+Mail-Followup-To: Kurt Garloff <garloff@suse.de>, Andries.Brouwer@cwi.nl,
+	alan@lxorguk.ukuu.org.uk, brent@linux1.org,
+	linux-kernel@vger.kernel.org, mantel@suse.de,
+	rubini@vision.unipv.it, torvalds@transmeta.com
+References: <200108021602.QAA113498@vlet.cwi.nl>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="8GpibOaaTibBMecb"
+Content-Disposition: inline
+In-Reply-To: <200108021602.QAA113498@vlet.cwi.nl>
+User-Agent: Mutt/1.3.20i
+X-Operating-System: Linux 2.4.7-SMP i686
+X-PGP-Info: on http://www.garloff.de/kurt/mykeys.pgp
+X-PGP-Key: 1024D/1C98774E, 1024R/CEFC9215
+Organization: TU/e(NL), SuSE(DE)
+X-UIDL: D\h"!`_h!!Sci!!p3S"!
+Status: RO
+
+
+--8GpibOaaTibBMecb
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Thu, Aug 02, 2001 at 04:02:38PM +0000, Andries Brouwer wrote:
+> From: Alan Cox <alan@lxorguk.ukuu.org.uk>:
+>=20
+> > 2.2 has had the sysctl for ages, and it defaults to off
+
+I would definitely not object to defaulting to off.
+
+> Not precisely - it is a boot parameter "psaux-reconnect".
+> That is better than a sysctl.
+
+Why should that be better than a sysctl? Boot parameters are ugly. You=20
+need to reboot in order to change them ...
+
+Your other mail implies that we can fix the problem without manual
+intervention by parsing AA 00 instead of just AA. If it's true, I'd=20
+consider that the best solution.=20
+Otherwise, I'd like my patch to be applied maybe with a changed default.
+
+Regards,
+--=20
+Kurt Garloff  <garloff@suse.de>                          Eindhoven, NL
+GPG key: See mail header, key servers         Linux kernel development
+SuSE GmbH, Nuernberg, DE                                SCSI, Security
+
+--8GpibOaaTibBMecb
+Content-Type: application/pgp-signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.0.6 (GNU/Linux)
+Comment: For info see http://www.gnupg.org
+
+iD8DBQE7aX1ZxmLh6hyYd04RApT9AKDHFa2hTt8CIkrzSQ2hLGjNUBBsugCgpXHZ
+6yFa+mIM8HhuiH2NRCRhd04=
+=5vOe
+-----END PGP SIGNATURE-----
+
+--8GpibOaaTibBMecb--
+
+From aeb@cwi.nl  Fri Aug  3 10:17:13 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id KAA03487
+	for <rubini@morgana>; Fri, 3 Aug 2001 10:17:12 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Fri, 03 Aug 2001 10:17:12 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id TAA26954 for <rubini@pop.systemy.it>; Thu, 2 Aug 2001 19:27:15 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105] (may be forged))
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id RAA18729
+	for <rubini@systemy.it>; Thu, 2 Aug 2001 17:27:12 GMT
+Received: from vision.unipv.it (vision.unipv.it [193.204.34.82])
+	by spock.linux.it (Postfix) with ESMTP id 18E5119805
+	for <rubini@linux.it>; Thu,  2 Aug 2001 19:27:11 +0200 (CEST)
+Received: from hera.cwi.nl (hera.cwi.nl [192.16.191.8])
+	by vision.unipv.it (8.9.3/8.9.3) with ESMTP id RAA31523
+	for <rubini@vision.unipv.it>; Thu, 2 Aug 2001 17:51:00 +0200
+Received: from vlet.cwi.nl (vlet.cwi.nl [192.16.191.67]) by hera.cwi.nl with ESMTP
+	id TAA28832 for ; Thu, 2 Aug 2001 19:27:08 +0200 (MEST)
+From: Andries.Brouwer@cwi.nl
+Received: (from aeb@localhost)
+	by vlet.cwi.nl (8.8.6/8.9.3) id RAA113816;
+	Thu, 2 Aug 2001 17:27:07 GMT
+Date: Thu, 2 Aug 2001 17:27:07 GMT
+Message-Id: <200108021727.RAA113816@vlet.cwi.nl>
+To: Andries.Brouwer@cwi.nl, garloff@suse.de
+Subject: Re: [PATCH] make psaux reconnect adjustable
+Cc: alan@lxorguk.ukuu.org.uk, linux-kernel@vger.kernel.org, mantel@suse.de,
+        rubini@vision.unipv.it, torvalds@transmeta.com
+X-UIDL: 8El!!!\_!![&!#!ZU<"!
+Status: RO
+
+    From: Kurt Garloff <garloff@suse.de>
+
+    > Not precisely - it is a boot parameter "psaux-reconnect".
+    > That is better than a sysctl.
+
+    Why should that be better than a sysctl? Boot parameters are ugly. You
+    need to reboot in order to change them ...
+
+Of course I hope that we'll handle this correctly at some point,
+without any options or parameters. In my eyes a sysctl is heavier
+infrastructure than a boot parameter, so I prefer the latter
+when a temporary fix is needed.
+
+    Your other mail implies that we can fix the problem without manual
+    intervention by parsing AA 00 instead of just AA. If it's true, I'd=20
+    consider that the best solution.=20
+
+Maybe precisely one person reported this, and his address
+now bounces. If there exist people who need this "psaux-reconnect"
+they can report on the codes they see. Note that just like AA is
+a perfectly normal code, also the sequence AA 00 is perfectly
+normal. Testing for that only diminishes the probability of
+getting it by accident.
+
+Instead of adding boot parameters or sysctls or heuristics,
+probably we should just transfer the codes seen to user space,
+e.g. to gpm.  Then it is up to gpm to recognize an AA 00 sequence
+and decide whether that is something special.
+
+Andries
+
+
+From alan@lxorguk.ukuu.org.uk  Fri Aug  3 10:17:13 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id KAA03497
+	for <rubini@morgana>; Fri, 3 Aug 2001 10:17:13 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Fri, 03 Aug 2001 10:17:13 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id TAA27204 for <rubini@pop.systemy.it>; Thu, 2 Aug 2001 19:34:02 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105] (may be forged))
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id RAA18757
+	for <rubini@systemy.it>; Thu, 2 Aug 2001 17:33:59 GMT
+Received: from vision.unipv.it (vision.unipv.it [193.204.34.82])
+	by spock.linux.it (Postfix) with ESMTP id 7E3B219805
+	for <rubini@linux.it>; Thu,  2 Aug 2001 19:33:59 +0200 (CEST)
+Received: from the-village.bc.nu (router-100M.swansea.linux.org.uk [194.168.151.17])
+	by vision.unipv.it (8.9.3/8.9.3) with ESMTP id RAA31555
+	for <rubini@vision.unipv.it>; Thu, 2 Aug 2001 17:57:46 +0200
+Received: from alan by the-village.bc.nu with local (Exim 3.22 #1)
+	id 15SMN6-00015y-00; Thu, 02 Aug 2001 18:34:56 +0100
+Subject: Re: [PATCH] make psaux reconnect adjustable
+To: Andries.Brouwer@cwi.nl
+Date: Thu, 2 Aug 2001 18:34:56 +0100 (BST)
+Cc: garloff@suse.de, alan@lxorguk.ukuu.org.uk, linux-kernel@vger.kernel.org,
+        mantel@suse.de, rubini@vision.unipv.it, torvalds@transmeta.com
+In-Reply-To: <no.id> from "Andries.Brouwer@cwi.nl" at Aug 02, 2001 05:27:07 PM
+X-Mailer: ELM [version 2.5 PL5]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Message-Id: <E15SMN6-00015y-00@the-village.bc.nu>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
+X-UIDL: ,k9!!~k2!!E1k!!Ybi"!
+Status: RO
+
+> Of course I hope that we'll handle this correctly at some point,
+> without any options or parameters. In my eyes a sysctl is heavier
+> infrastructure than a boot parameter, so I prefer the latter
+> when a temporary fix is needed.
+
+The input device infrastructure pending for 2.5 already handles all of
+these issues
+
+From garloff@garloff.de  Thu Aug  2 10:27:44 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id KAA28565
+	for <rubini@morgana>; Thu, 2 Aug 2001 10:27:43 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Thu, 02 Aug 2001 10:27:43 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id EAA25642 for <rubini@pop.systemy.it>; Thu, 2 Aug 2001 04:23:33 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105] (may be forged))
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id CAA11977
+	for <rubini@systemy.it>; Thu, 2 Aug 2001 02:23:32 GMT
+Received: from vision.unipv.it (vision.unipv.it [193.204.34.82])
+	by spock.linux.it (Postfix) with ESMTP id 09411197E8
+	for <rubini@linux.it>; Thu,  2 Aug 2001 04:23:29 +0200 (CEST)
+Received: from etpmod.phys.tue.nl (etpmod.phys.tue.nl [131.155.111.35])
+	by vision.unipv.it (8.9.3/8.9.3) with ESMTP id CAA25998
+	for <rubini@vision.unipv.it>; Thu, 2 Aug 2001 02:47:24 +0200
+Received: from pckurt.casa-etp.nl (root@pckurt.casa-etp.nl [192.168.157.2])
+	by etpmod.phys.tue.nl (8.9.3/8.9.3/SuSE Linux 8.9.3-0.1) with ESMTP id EAA18388;
+	Thu, 2 Aug 2001 04:23:24 +0200
+Received: (from garloff@localhost)
+	by pckurt.casa-etp.nl (8.9.3/8.9.3/SuSE Linux 8.9.3-0.1) id EAA15231;
+	Thu, 2 Aug 2001 04:21:00 +0200
+Date: Thu, 2 Aug 2001 04:21:00 +0200
+From: Kurt Garloff <garloff@suse.de>
+To: Linus Torvalds <torvalds@transmeta.com>,
+        Alan Cox <alan@lxorguk.ukuu.org.uk>
+Cc: Alessandro Rubini <rubini@vision.unipv.it>, Hubert Mantel <mantel@suse.de>,
+        Linux kernel list <linux-kernel@vger.kernel.org>
+Subject: [PATCH] make psaux reconnect adjustable
+Message-ID: <20010802042100.B14010@pckurt.casa-etp.nl>
+Mail-Followup-To: Kurt Garloff <garloff@suse.de>,
+	Linus Torvalds <torvalds@transmeta.com>,
+	Alan Cox <alan@lxorguk.ukuu.org.uk>,
+	Alessandro Rubini <rubini@ipvvis.unipv.it>,
+	Hubert Mantel <mantel@suse.de>,
+	Linux kernel list <linux-kernel@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="69pVuxX8awAiJ7fD"
+Content-Disposition: inline
+User-Agent: Mutt/1.3.20i
+X-Operating-System: Linux 2.4.7-SMP i686
+X-PGP-Info: on http://www.garloff.de/kurt/mykeys.pgp
+X-PGP-Key: 1024D/1C98774E, 1024R/CEFC9215
+Organization: TU/e(NL), SuSE(DE)
+X-UIDL: 8JL"!c8N!!e'[!!jN;"!
+Status: RO
+
+
+--69pVuxX8awAiJ7fD
+Content-Type: multipart/mixed; boundary="i9LlY+UWpKt15+FH"
+Content-Disposition: inline
+
+
+--i9LlY+UWpKt15+FH
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi Linus Alan,
+
+working on notebooks I got used to the touchpads.
+Now, a lot of notebooks have a Synaptics touchpad.
+It offers a few additional features, such as tossing or the third mouse
+button (by a short click in the corner) ...
+
+gpm -t synps2 does support those additional features and via the -R epeater
+mode you also get it under X11.
+
+Unfortunately, the synps2 generates nonstandard codes when in extended mode,
+amongst which the reconnect (170) token.
+The kernel (since 2.2.15) does interpret it as such and empties the queue.
+
+This seems to appropriate for a real plug event. For a synps2, it's not, but
+makes your mouse dead for a second. Instead the data should just be passed
+to userspace (gpm).
+
+So I made the behaviour switchable via a sysctl.=20
+/proc/sys/dev/ps2/psmouse_reconnect (defaults to 1 =3D the interpret behavi=
+our)
+Being at it, I also made the kbd error and unknown scancode reporting
+switchable. (It used to be ifdefs.)
+
+Please apply attached patch (against 2.4.7).
+
+Allesandro, should I submit a patch for gpm to automatically handle this for
+synps2 in case the kernel patch gets accepted?
+
+Regards,
+--=20
+Kurt Garloff                   <kurt@garloff.de>         [Eindhoven, NL]
+Physics: Plasma simulations  <K.Garloff@Phys.TUE.NL>  [TU Eindhoven, NL]
+Linux: SCSI, Security          <garloff@suse.de>    [SuSE Nuernberg, DE]
+ (See mail header or public key servers for PGP2 and GPG public keys.)
+
+--i9LlY+UWpKt15+FH
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: attachment; filename="247-psaux-reconnect-sysctl.diff"
+Content-Transfer-Encoding: quoted-printable
+
+--- linux/include/linux/sysctl.h.orig	Tue Jul 31 23:49:42 2001
++++ linux/include/linux/sysctl.h	Thu Aug  2 03:41:34 2001
+@@ -594,7 +594,8 @@
+ 	DEV_HWMON=3D2,
+ 	DEV_PARPORT=3D3,
+ 	DEV_RAID=3D4,
+-	DEV_MAC_HID=3D5
++	DEV_MAC_HID=3D5,
++	DEV_PSAUX=3D6,
+ };
+=20
+ /* /proc/sys/dev/cdrom */
+@@ -653,6 +654,13 @@
+ 	DEV_MAC_HID_MOUSE_BUTTON2_KEYCODE=3D4,
+ 	DEV_MAC_HID_MOUSE_BUTTON3_KEYCODE=3D5,
+ 	DEV_MAC_HID_ADB_MOUSE_SENDS_KEYCODES=3D6
++};
++
++/* /proc/sys/dev/psaux */
++enum {
++	DEV_PSMOUSE_RECONNECT=3D1,
++	DEV_KBD_REPORT_UNKN=3D2,
++	DEV_KBD_REPORT_TO=3D3,
+ };
+=20
+ #ifdef __KERNEL__
+--- linux/drivers/char/pc_keyb.c.orig	Fri Apr  6 19:42:55 2001
++++ linux/drivers/char/pc_keyb.c	Thu Aug  2 04:01:15 2001
+@@ -92,8 +92,83 @@
+ #define AUX_INTS_ON  (KBD_MODE_KCC | KBD_MODE_SYS | KBD_MODE_MOUSE_INT | K=
+BD_MODE_KBD_INT)
+=20
+ #define MAX_RETRIES	60		/* some aux operations take long time*/
++
+ #endif /* CONFIG_PSMOUSE */
+=20
++/* We want to be able to handle the psmouse reconnect token; unfortunately=
+ the
++ * Synaptics touchpads (and probably others too) use it for their extented
++ * functionality and produce them in extended mode (as set by gpm -t synps=
+2).
++ * So we make this adjustable via a sysctl.  garloff@suse.de, 2001-08-01 */
++
++#ifdef CONFIG_SYSCTL
++#include <linux/sysctl.h>
++#ifdef CONFIG_PSMOUSE
++int sysctl_psmouse_reconnect =3D 1;
++#endif
++int sysctl_kbd_report_unkn =3D 0;
++int sysctl_kbd_report_to =3D 0;
++
++static int psaux_sysctl_handler (ctl_table *ctl, int write, struct file *f=
+ilp,
++				 void *buffer, size_t *lenp)
++{
++	int *valp =3D ctl->data;
++	int ret =3D proc_dointvec(ctl, write, filp, buffer, lenp);=20
++	if (write) {
++		if (*valp)
++			*valp =3D 1;
++	}
++	return ret;
++}
++		=09
++
++ctl_table psaux_table[] =3D {
++#ifdef CONFIG_PSMOUSE  =20
++        {DEV_PSMOUSE_RECONNECT, "psmouse_reconnect", &sysctl_psmouse_recon=
+nect,
++                sizeof(int), 0644, NULL, &psaux_sysctl_handler},
++#endif  =20
++	{DEV_KBD_REPORT_UNKN, "kbd_report_unknown", &sysctl_kbd_report_unkn,
++                sizeof(int), 0644, NULL, &psaux_sysctl_handler},
++        {DEV_KBD_REPORT_TO, "kbd_report_timeout", &sysctl_kbd_report_to,
++                sizeof(int), 0644, NULL, &psaux_sysctl_handler},
++	{0}
++};
++
++ctl_table psaux_psaux_table[] =3D {
++        {DEV_CDROM, "ps2", NULL, 0, 0555, psaux_table},
++        {0}
++        };
++
++ctl_table psaux_root_table[] =3D {
++#ifdef CONFIG_PROC_FS
++        {CTL_DEV, "dev", NULL, 0, 0555, psaux_psaux_table},
++#endif /* CONFIG_PROC_FS */
++        {0}
++        };
++static struct ctl_table_header *psaux_sysctl_header;
++
++static void psaux_sysctl_register (void)
++{
++	static int initialized;
++	if (initialized) return;
++=09
++	psaux_sysctl_header =3D register_sysctl_table (psaux_root_table, 1);
++	/*psaux_root_table->child->de->owner =3D THIS_MODULE;*/
++	initialized++;
++}
++
++/*
++static void psaux_sysctl_unregister (void)
++{
++	if (psaux_sysctl_header)
++		unregister_sysctl_table (psaux_sysctl_header);
++}
++ */
++#else /* CONFIG_SYSCTL */
++#define sysctl_psmouse_reconnect 1
++#define sysctl_kbd_report_unkn 0
++#define sysctl_kbd_report_to 0
++#endif /* CONFIG_SYSCTL */
++
+ /*
+  * Wait for keyboard controller input buffer to drain.
+  *
+@@ -123,9 +198,8 @@
+ 		mdelay(1);
+ 		timeout--;
+ 	} while (timeout);
+-#ifdef KBD_REPORT_TIMEOUTS
+-	printk(KERN_WARNING "Keyboard timed out[1]\n");
+-#endif
++	if (sysctl_kbd_report_to)
++		printk(KERN_WARNING "Keyboard timed out[1]\n");
+ }
+=20
+ /*
+@@ -320,10 +394,8 @@
+ 		  *keycode =3D E1_PAUSE;
+ 		  prev_scancode =3D 0;
+ 	      } else {
+-#ifdef KBD_REPORT_UNKN
+-		  if (!raw_mode)
++		  if (!raw_mode && sysctl_kbd_report_unkn)
+ 		    printk(KERN_INFO "keyboard: unknown e1 escape sequence\n");
+-#endif
+ 		  prev_scancode =3D 0;
+ 		  return 0;
+ 	      }
+@@ -348,11 +420,9 @@
+ 	      if (e0_keys[scancode])
+ 		*keycode =3D e0_keys[scancode];
+ 	      else {
+-#ifdef KBD_REPORT_UNKN
+-		  if (!raw_mode)
++		  if (!raw_mode && sysctl_kbd_report_unkn)
+ 		    printk(KERN_INFO "keyboard: unknown scancode e0 %02x\n",
+ 			   scancode);
+-#endif
+ 		  return 0;
+ 	      }
+ 	  }
+@@ -370,11 +440,9 @@
+ 	  *keycode =3D high_keys[scancode - SC_LIM];
+=20
+ 	  if (!*keycode) {
+-	      if (!raw_mode) {
+-#ifdef KBD_REPORT_UNKN
++	      if (!raw_mode && sysctl_kbd_report_unkn) {
+ 		  printk(KERN_INFO "keyboard: unrecognized scancode (%02x)"
+ 			 " - ignored\n", scancode);
+-#endif
+ 	      }
+ 	      return 0;
+ 	  }
+@@ -404,12 +472,15 @@
+ 		mouse_reply_expected =3D 0;
+ 	}
+ 	else if(scancode =3D=3D AUX_RECONNECT){
+-		queue->head =3D queue->tail =3D 0;  /* Flush input queue */
+-		__aux_write_ack(AUX_ENABLE_DEV);  /* ping the mouse :) */
+-		return;
++		if (sysctl_psmouse_reconnect) {
++			queue->head =3D queue->tail =3D 0;  /* Flush input queue */
++			__aux_write_ack(AUX_ENABLE_DEV);  /* ping the mouse :) */
++			return;
++		}
+ 	}
++	else
++		add_mouse_randomness(scancode);
+=20
+-	add_mouse_randomness(scancode);
+ 	if (aux_count) {
+ 		int head =3D queue->head;
+=20
+@@ -511,17 +582,14 @@
+ 			if (resend)
+ 				break;
+ 			mdelay(1);
+-			if (!--timeout) {
+-#ifdef KBD_REPORT_TIMEOUTS
++			if (!--timeout && sysctl_kbd_report_to) {
+ 				printk(KERN_WARNING "keyboard: Timeout - AT keyboard not present?\n");
+-#endif
+ 				return 0;
+ 			}
+ 		}
+ 	} while (retries-- > 0);
+-#ifdef KBD_REPORT_TIMEOUTS
+-	printk(KERN_WARNING "keyboard: Too many NACKs -- noisy kbd cable?\n");
+-#endif
++	if (sysctl_kbd_report_to)
++		printk(KERN_WARNING "keyboard: Too many NACKs -- noisy kbd cable?\n");
+ 	return 0;
+ }
+=20
+@@ -751,6 +819,7 @@
+=20
+ 	/* Ok, finally allocate the IRQ, and off we go.. */
+ 	kbd_request_irq(keyboard_interrupt);
++	psaux_sysctl_register ();
+ }
+=20
+ #if defined CONFIG_PSMOUSE
+
+--i9LlY+UWpKt15+FH--
+
+--69pVuxX8awAiJ7fD
+Content-Type: application/pgp-signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.0.6 (GNU/Linux)
+Comment: For info see http://www.gnupg.org
+
+iD8DBQE7aLkLxmLh6hyYd04RAtTfAJ0Y5pDpKz/cMablMNOe7Et6KOIYXQCg0hQ2
+VP6sTljkegsAQX4fy5vGwzI=
+=8pPh
+-----END PGP SIGNATURE-----
+
+--69pVuxX8awAiJ7fD--
+
+From garloff@garloff.de  Wed Aug 15 15:40:12 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id PAA12797
+	for <rubini@morgana>; Wed, 15 Aug 2001 15:40:11 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Wed, 15 Aug 2001 15:40:11 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id LAA04351 for <rubini@pop.systemy.it>; Tue, 14 Aug 2001 11:57:18 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105])
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id JAA25466
+	for <rubini@systemy.it>; Tue, 14 Aug 2001 09:57:18 GMT
+Received: from vision.unipv.it (vision.unipv.it [193.204.34.82])
+	by spock.linux.it (Postfix) with ESMTP id 84F3C197E6
+	for <rubini@linux.it>; Tue, 14 Aug 2001 11:08:53 +0200 (CEST)
+Received: from etpmod.phys.tue.nl (etpmod.phys.tue.nl [131.155.111.35])
+	by vision.unipv.it (8.9.3/8.9.3) with ESMTP id KAA29979
+	for <rubini@vision.unipv.it>; Tue, 14 Aug 2001 10:18:46 +0200
+Received: from garloff.etpnet.phys.tue.nl (gum01m.etpnet.phys.tue.nl [192.168.84.65])
+	by etpmod.phys.tue.nl (8.9.3/8.9.3/SuSE Linux 8.9.3-0.1) with ESMTP id LAA30279;
+	Tue, 14 Aug 2001 11:57:05 +0200
+Received: (from garloff@localhost)
+	by garloff.etpnet.phys.tue.nl (8.11.3/8.11.3/SuSE Linux 8.11.1-0.5) id f7E9v1S02420;
+	Tue, 14 Aug 2001 11:57:01 +0200
+Date: Tue, 14 Aug 2001 11:57:01 +0200
+From: Kurt Garloff <garloff@suse.de>
+To: Andries.Brouwer@cwi.nl
+Cc: alan@lxorguk.ukuu.org.uk, linux-kernel@vger.kernel.org, mantel@suse.de,
+        rubini@vision.unipv.it, torvalds@transmeta.com
+Subject: Re: [PATCH] make psaux reconnect adjustable
+Message-ID: <20010814115701.A1952@gum01m.etpnet.phys.tue.nl>
+Mail-Followup-To: Kurt Garloff <garloff@suse.de>, Andries.Brouwer@cwi.nl,
+	alan@lxorguk.ukuu.org.uk, linux-kernel@vger.kernel.org,
+	mantel@suse.de, rubini@vision.unipv.it, torvalds@transmeta.com
+References: <200108021727.RAA113816@vlet.cwi.nl>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="jho1yZJdad60DJr+"
+Content-Disposition: inline
+In-Reply-To: <200108021727.RAA113816@vlet.cwi.nl>
+User-Agent: Mutt/1.3.20i
+X-Operating-System: Linux 2.4.7 i686
+X-PGP-Info: on http://www.garloff.de/kurt/mykeys.pgp
+X-PGP-Key: 1024D/1C98774E, 1024R/CEFC9215
+Organization: TU/e(NL), SuSE(DE)
+X-UIDL: 481f3d3391eba7ce48596873968fe7df
+Status: RO
+
+
+--jho1yZJdad60DJr+
+Content-Type: multipart/mixed; boundary="OgqxwSJOaUobr8KG"
+Content-Disposition: inline
+
+
+--OgqxwSJOaUobr8KG
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi Andries,
+
+On Thu, Aug 02, 2001 at 05:27:07PM +0000, Andries Brouwer wrote:
+>     Your other mail implies that we can fix the problem without manual
+>     intervention by parsing AA 00 instead of just AA. If it's true, I'd=
+=3D20
+>     consider that the best solution.=3D20
+>=20
+> Maybe precisely one person reported this, and his address
+> now bounces. If there exist people who need this "psaux-reconnect"
+> they can report on the codes they see. Note that just like AA is
+> a perfectly normal code, also the sequence AA 00 is perfectly
+> normal. Testing for that only diminishes the probability of
+> getting it by accident.
+
+I can confirm what you suggest: My mouse (Logitech wheel USB/PS2) sends
+indeed AA 00.=20
+So, I extended my patch (which you will dislike even more, I know, as you're
+against sysctls unlike me):
+psmouse_reconnect =3D 0: Do nothing (just pass all to userspace)
+psmouse_reconnect =3D 1: Flush Q & ping mouse on AA 00 (default)
+psmouse_reconnect =3D 2: Flush Q & ping mouse on AA (old behaviour)
+
+> Instead of adding boot parameters or sysctls or heuristics,
+> probably we should just transfer the codes seen to user space,
+> e.g. to gpm.  Then it is up to gpm to recognize an AA 00 sequence
+> and decide whether that is something special.
+
+With reconnect 1 or 2: After reconnecting, mouse behaves strange (jumping
+			around the screen)
+With reconnect 0:      Mouse is dead
+
+In both cases restarting gpm gets the mouse back to work again.
+It seems the imps2 driver does some initialization to the mouse.
+
+If I use the plain ps2 driver, then finally, I see the benefit of the
+reconnect code in the kernel:
+With reconnect =3D 1 or 2: It works after replugging
+With reconnect =3D 0:      Mouse is dead after replugging
+
+In the latter case restarting gpm helps.
+
+Patch is attached.
+It adds the sysctls as the last patch did, but now the psmouse_reconnect has
+3 possible values. Also, I added a printk, so the kernel logs detected mouse
+reconnect events.
+
+Linus, Alan, I'd like to have your input:
+
+Do you like the patch as is? Should I remove the sysctls and just look for
+AA 00 (as Andries may prefer)? Shouldn't the AA 00 be passed to userspace
+as well in any case (to allow e.g. the imps2 driver to do reinitialization)?
+
+Regards,
+--=20
+Kurt Garloff  <garloff@suse.de>                          Eindhoven, NL
+GPG key: See mail header, key servers         Linux kernel development
+SuSE GmbH, Nuernberg, DE                                SCSI, Security
+
+--OgqxwSJOaUobr8KG
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: attachment; filename="247-psaux-reconnect-sysctl2.diff"
+Content-Transfer-Encoding: quoted-printable
+
+diff -uNr linux-2.4.7.kurt-1/drivers/char/pc_keyb.c linux-2.4.7.kurt-1-psau=
+x/drivers/char/pc_keyb.c
+--- linux-2.4.7.kurt-1/drivers/char/pc_keyb.c	Tue Jul 24 18:42:36 2001
++++ linux-2.4.7.kurt-1-psaux/drivers/char/pc_keyb.c	Tue Aug 14 10:44:50 2001
+@@ -81,8 +81,9 @@
+=20
+ static int __init psaux_init(void);
+=20
+-#define AUX_RECONNECT 170 /* scancode when ps2 device is plugged (back) in=
+ */
+-=20
++#define AUX_RECONNECT1 170 /* scancode when ps2 device is plugged (back) i=
+n */
++#define AUX_RECONNECT2 0   /* scancode when ps2 device is plugged (back) i=
+n */
++
+ static struct aux_queue *queue;	/* Mouse data buffer. */
+ static int aux_count;
+ /* used when we send commands to the mouse that expect an ACK. */
+@@ -92,8 +93,83 @@
+ #define AUX_INTS_ON  (KBD_MODE_KCC | KBD_MODE_SYS | KBD_MODE_MOUSE_INT | K=
+BD_MODE_KBD_INT)
+=20
+ #define MAX_RETRIES	60		/* some aux operations take long time*/
++
+ #endif /* CONFIG_PSMOUSE */
+=20
++/* We want to be able to handle the psmouse reconnect token; unfortunately=
+ the
++ * Synaptics touchpads (and probably others too) use it for their extented
++ * functionality and produce them in extended mode (as set by gpm -t synps=
+2).
++ * So we make this adjustable via a sysctl.  garloff@suse.de, 2001-08-01 */
++
++#ifdef CONFIG_SYSCTL
++#include <linux/sysctl.h>
++#ifdef CONFIG_PSMOUSE
++int sysctl_psmouse_reconnect =3D 1;
++#endif
++int sysctl_kbd_report_unkn =3D 0;
++int sysctl_kbd_report_to =3D 0;
++
++static int psaux_sysctl_handler (ctl_table *ctl, int write, struct file *f=
+ilp,
++				 void *buffer, size_t *lenp)
++{
++	int *valp =3D ctl->data;
++	int ret =3D proc_dointvec(ctl, write, filp, buffer, lenp);=20
++	if (write) {
++		if (*valp > 2)
++			*valp =3D 2;
++	}
++	return ret;
++}
++		=09
++
++ctl_table psaux_table[] =3D {
++#ifdef CONFIG_PSMOUSE  =20
++        {DEV_PSMOUSE_RECONNECT, "psmouse_reconnect", &sysctl_psmouse_recon=
+nect,
++                sizeof(int), 0644, NULL, &psaux_sysctl_handler},
++#endif  =20
++	{DEV_KBD_REPORT_UNKN, "kbd_report_unknown", &sysctl_kbd_report_unkn,
++                sizeof(int), 0644, NULL, &psaux_sysctl_handler},
++        {DEV_KBD_REPORT_TO, "kbd_report_timeout", &sysctl_kbd_report_to,
++                sizeof(int), 0644, NULL, &psaux_sysctl_handler},
++	{0}
++};
++
++ctl_table psaux_psaux_table[] =3D {
++        {DEV_CDROM, "ps2", NULL, 0, 0555, psaux_table},
++        {0}
++        };
++
++ctl_table psaux_root_table[] =3D {
++#ifdef CONFIG_PROC_FS
++        {CTL_DEV, "dev", NULL, 0, 0555, psaux_psaux_table},
++#endif /* CONFIG_PROC_FS */
++        {0}
++        };
++static struct ctl_table_header *psaux_sysctl_header;
++
++static void psaux_sysctl_register (void)
++{
++	static int initialized;
++	if (initialized) return;
++=09
++	psaux_sysctl_header =3D register_sysctl_table (psaux_root_table, 1);
++	/*psaux_root_table->child->de->owner =3D THIS_MODULE;*/
++	initialized++;
++}
++
++/*
++static void psaux_sysctl_unregister (void)
++{
++	if (psaux_sysctl_header)
++		unregister_sysctl_table (psaux_sysctl_header);
++}
++ */
++#else /* CONFIG_SYSCTL */
++#define sysctl_psmouse_reconnect 1
++#define sysctl_kbd_report_unkn 0
++#define sysctl_kbd_report_to 0
++#endif /* CONFIG_SYSCTL */
++
+ /*
+  * Wait for keyboard controller input buffer to drain.
+  *
+@@ -123,9 +199,8 @@
+ 		mdelay(1);
+ 		timeout--;
+ 	} while (timeout);
+-#ifdef KBD_REPORT_TIMEOUTS
+-	printk(KERN_WARNING "Keyboard timed out[1]\n");
+-#endif
++	if (sysctl_kbd_report_to)
++		printk(KERN_WARNING "Keyboard timed out[1]\n");
+ }
+=20
+ /*
+@@ -324,10 +399,8 @@
+ 		  *keycode =3D E1_PAUSE;
+ 		  prev_scancode =3D 0;
+ 	      } else {
+-#ifdef KBD_REPORT_UNKN
+-		  if (!raw_mode)
++		  if (!raw_mode && sysctl_kbd_report_unkn)
+ 		    printk(KERN_INFO "keyboard: unknown e1 escape sequence\n");
+-#endif
+ 		  prev_scancode =3D 0;
+ 		  return 0;
+ 	      }
+@@ -352,11 +425,9 @@
+ 	      if (e0_keys[scancode])
+ 		*keycode =3D e0_keys[scancode];
+ 	      else {
+-#ifdef KBD_REPORT_UNKN
+-		  if (!raw_mode)
++		  if (!raw_mode && sysctl_kbd_report_unkn)
+ 		    printk(KERN_INFO "keyboard: unknown scancode e0 %02x\n",
+ 			   scancode);
+-#endif
+ 		  return 0;
+ 	      }
+ 	  }
+@@ -374,11 +445,9 @@
+ 	  *keycode =3D high_keys[scancode - SC_LIM];
+=20
+ 	  if (!*keycode) {
+-	      if (!raw_mode) {
+-#ifdef KBD_REPORT_UNKN
++	      if (!raw_mode && sysctl_kbd_report_unkn) {
+ 		  printk(KERN_INFO "keyboard: unrecognized scancode (%02x)"
+ 			 " - ignored\n", scancode);
+-#endif
+ 	      }
+ 	      return 0;
+ 	  }
+@@ -397,6 +466,7 @@
+ 	    return 0200;
+ }
+=20
++static unsigned char psaux_prev;
+ static inline void handle_mouse_event(unsigned char scancode)
+ {
+ #ifdef CONFIG_PSMOUSE
+@@ -407,13 +477,24 @@
+ 		}
+ 		mouse_reply_expected =3D 0;
+ 	}
+-	else if(scancode =3D=3D AUX_RECONNECT){
++	else if(scancode =3D=3D AUX_RECONNECT1=20
++		&& sysctl_psmouse_reconnect =3D=3D 2) {
++		printk (KERN_DEBUG "PS2 mouse reconnect detected.\n");
++		queue->head =3D queue->tail =3D 0;  /* Flush input queue */
++		__aux_write_ack(AUX_ENABLE_DEV);  /* ping the mouse :) */
++		return;
++	}
++	else if (scancode =3D=3D AUX_RECONNECT2 && psaux_prev =3D=3D AUX_RECONNEC=
+T1
++		 && sysctl_psmouse_reconnect =3D=3D 1 ) {
++		printk (KERN_DEBUG "PS2 mouse reconnect detected.\n");
+ 		queue->head =3D queue->tail =3D 0;  /* Flush input queue */
+ 		__aux_write_ack(AUX_ENABLE_DEV);  /* ping the mouse :) */
+ 		return;
+ 	}
+=20
+ 	add_mouse_randomness(scancode);
++	psaux_prev =3D scancode;
++
+ 	if (aux_count) {
+ 		int head =3D queue->head;
+=20
+@@ -515,17 +596,14 @@
+ 			if (resend)
+ 				break;
+ 			mdelay(1);
+-			if (!--timeout) {
+-#ifdef KBD_REPORT_TIMEOUTS
++			if (!--timeout && sysctl_kbd_report_to) {
+ 				printk(KERN_WARNING "keyboard: Timeout - AT keyboard not present?\n");
+-#endif
+ 				return 0;
+ 			}
+ 		}
+ 	} while (retries-- > 0);
+-#ifdef KBD_REPORT_TIMEOUTS
+-	printk(KERN_WARNING "keyboard: Too many NACKs -- noisy kbd cable?\n");
+-#endif
++	if (sysctl_kbd_report_to)
++		printk(KERN_WARNING "keyboard: Too many NACKs -- noisy kbd cable?\n");
+ 	return 0;
+ }
+=20
+@@ -755,6 +833,7 @@
+=20
+ 	/* Ok, finally allocate the IRQ, and off we go.. */
+ 	kbd_request_irq(keyboard_interrupt);
++	psaux_sysctl_register ();
+ }
+=20
+ #if defined CONFIG_PSMOUSE
+diff -uNr linux-2.4.7.kurt-1/include/linux/sysctl.h linux-2.4.7.kurt-1-psau=
+x/include/linux/sysctl.h
+--- linux-2.4.7.kurt-1/include/linux/sysctl.h	Tue Jul 24 18:48:05 2001
++++ linux-2.4.7.kurt-1-psaux/include/linux/sysctl.h	Tue Aug 14 10:37:54 2001
+@@ -594,7 +594,8 @@
+ 	DEV_HWMON=3D2,
+ 	DEV_PARPORT=3D3,
+ 	DEV_RAID=3D4,
+-	DEV_MAC_HID=3D5
++	DEV_MAC_HID=3D5,
++	DEV_PSAUX=3D6,
+ };
+=20
+ /* /proc/sys/dev/cdrom */
+@@ -653,6 +654,13 @@
+ 	DEV_MAC_HID_MOUSE_BUTTON2_KEYCODE=3D4,
+ 	DEV_MAC_HID_MOUSE_BUTTON3_KEYCODE=3D5,
+ 	DEV_MAC_HID_ADB_MOUSE_SENDS_KEYCODES=3D6
++};
++
++/* /proc/sys/dev/psaux */
++enum {
++	DEV_PSMOUSE_RECONNECT=3D1,
++	DEV_KBD_REPORT_UNKN=3D2,
++	DEV_KBD_REPORT_TO=3D3,
+ };
+=20
+ #ifdef __KERNEL__
+
+--OgqxwSJOaUobr8KG--
+
+--jho1yZJdad60DJr+
+Content-Type: application/pgp-signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.0.6 (GNU/Linux)
+Comment: For info see http://www.gnupg.org
+
+iD8DBQE7ePXtxmLh6hyYd04RAtjyAJ9yB7UclerJDTGLJ7/fRRuKKpt3UQCgv8lZ
+DkKvb6jTel1rBPPB1U3zEwI=
+=nhjD
+-----END PGP SIGNATURE-----
+
+--jho1yZJdad60DJr+--
+
+From aeb@cwi.nl  Wed Aug 15 15:40:17 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id PAA12838
+	for <rubini@morgana>; Wed, 15 Aug 2001 15:40:16 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Wed, 15 Aug 2001 15:40:16 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id NAA06534 for <rubini@pop.systemy.it>; Tue, 14 Aug 2001 13:12:41 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105])
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id LAA26110
+	for <rubini@systemy.it>; Tue, 14 Aug 2001 11:12:39 GMT
+Received: from vision.unipv.it (vision.unipv.it [193.204.34.82])
+	by spock.linux.it (Postfix) with ESMTP id 1CDEC197B0
+	for <rubini@linux.it>; Tue, 14 Aug 2001 12:24:16 +0200 (CEST)
+Received: from hera.cwi.nl (hera.cwi.nl [192.16.191.8])
+	by vision.unipv.it (8.9.3/8.9.3) with ESMTP id LAA30422
+	for <rubini@vision.unipv.it>; Tue, 14 Aug 2001 11:34:09 +0200
+Received: from vlet.cwi.nl (vlet.cwi.nl [192.16.191.54]) by hera.cwi.nl with ESMTP
+	id NAA25182 for ; Tue, 14 Aug 2001 13:12:30 +0200 (MEST)
+From: Andries.Brouwer@cwi.nl
+Received: (from aeb@localhost)
+	by vlet.cwi.nl (8.8.6/8.9.3) id LAA99888;
+	Tue, 14 Aug 2001 11:12:29 GMT
+Date: Tue, 14 Aug 2001 11:12:29 GMT
+Message-Id: <200108141112.LAA99888@vlet.cwi.nl>
+To: Andries.Brouwer@cwi.nl, garloff@suse.de
+Subject: Re: [PATCH] make psaux reconnect adjustable
+Cc: alan@lxorguk.ukuu.org.uk, linux-kernel@vger.kernel.org, mantel@suse.de,
+        rubini@vision.unipv.it, torvalds@transmeta.com
+X-UIDL: 01036beb2df8ccc4bba2d0dc24296831
+Status: RO
+
+    From garloff@garloff.de Tue Aug 14 11:57:23 2001
+
+    I can confirm what you suggest:
+	My mouse (Logitech wheel USB/PS2) sends indeed AA 00.
+    So, I extended my patch:
+    psmouse_reconnect = 0: Do nothing (just pass all to userspace)
+    psmouse_reconnect = 1: Flush Q & ping mouse on AA 00 (default)
+    psmouse_reconnect = 2: Flush Q & ping mouse on AA (old behaviour)
+
+    With reconnect 1 or 2: After reconnecting, mouse behaves strange
+	(jumping around the screen)
+    With reconnect 0:      Mouse is dead
+
+    In both cases restarting gpm gets the mouse back to work again.
+    It seems the imps2 driver does some initialization to the mouse.
+
+    If I use the plain ps2 driver, then finally, I see the benefit of the
+    reconnect code in the kernel:
+    With reconnect = 1 or 2: It works after replugging
+    With reconnect = 0:      Mouse is dead after replugging
+
+    In the latter case restarting gpm helps.
+
+Before having an opinion about what would be appropriate,
+let me make sure that I understand the facts that you report.
+
+You talk about reconnect, but what is your definition of reconnect?
+Is it that the mouse sends AA or AA 00, or is it that you unplug
+and replug the mouse?
+
+Andries
+
+From garloff@garloff.de  Wed Aug 15 15:40:27 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id PAA12966
+	for <rubini@morgana>; Wed, 15 Aug 2001 15:40:27 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Wed, 15 Aug 2001 15:40:27 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id RAA11366 for <rubini@pop.systemy.it>; Tue, 14 Aug 2001 17:06:23 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105])
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id PAA27516
+	for <rubini@systemy.it>; Tue, 14 Aug 2001 15:06:22 GMT
+Received: from vision.unipv.it (vision.unipv.it [193.204.34.82])
+	by spock.linux.it (Postfix) with ESMTP id 3A388197B0
+	for <rubini@linux.it>; Tue, 14 Aug 2001 16:16:44 +0200 (CEST)
+Received: from etpmod.phys.tue.nl (etpmod.phys.tue.nl [131.155.111.35])
+	by vision.unipv.it (8.9.3/8.9.3) with ESMTP id PAA31732
+	for <rubini@vision.unipv.it>; Tue, 14 Aug 2001 15:26:35 +0200
+Received: from garloff.etpnet.phys.tue.nl (gum01m.etpnet.phys.tue.nl [192.168.84.65])
+	by etpmod.phys.tue.nl (8.9.3/8.9.3/SuSE Linux 8.9.3-0.1) with ESMTP id RAA01811;
+	Tue, 14 Aug 2001 17:03:47 +0200
+Received: (from garloff@localhost)
+	by garloff.etpnet.phys.tue.nl (8.11.3/8.11.3/SuSE Linux 8.11.1-0.5) id f7EF36O05943;
+	Tue, 14 Aug 2001 17:03:06 +0200
+Date: Tue, 14 Aug 2001 17:03:06 +0200
+From: Kurt Garloff <garloff@suse.de>
+To: Andries.Brouwer@cwi.nl, alan@lxorguk.ukuu.org.uk,
+        linux-kernel@vger.kernel.org, mantel@suse.de, rubini@vision.unipv.it,
+        torvalds@transmeta.com
+Subject: Re: [PATCH] make psaux reconnect adjustable
+Message-ID: <20010814170306.Q1085@gum01m.etpnet.phys.tue.nl>
+Mail-Followup-To: Kurt Garloff <garloff@suse.de>, Andries.Brouwer@cwi.nl,
+	alan@lxorguk.ukuu.org.uk, linux-kernel@vger.kernel.org,
+	mantel@suse.de, rubini@vision.unipv.it, torvalds@transmeta.com
+References: <200108021727.RAA113816@vlet.cwi.nl> <20010814115701.A1952@gum01m.etpnet.phys.tue.nl>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="GFHULmA0mO3kKGOo"
+Content-Disposition: inline
+In-Reply-To: <20010814115701.A1952@gum01m.etpnet.phys.tue.nl>
+User-Agent: Mutt/1.3.20i
+X-Operating-System: Linux 2.4.7 i686
+X-PGP-Info: on http://www.garloff.de/kurt/mykeys.pgp
+X-PGP-Key: 1024D/1C98774E, 1024R/CEFC9215
+Organization: TU/e(NL), SuSE(DE)
+X-UIDL: 2657c8b50ec315e0f9505a3199547b77
+Status: RO
+
+
+--GFHULmA0mO3kKGOo
+Content-Type: multipart/mixed; boundary="+S4DbcR7QPeSsP0V"
+Content-Disposition: inline
+
+
+--+S4DbcR7QPeSsP0V
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, Aug 14, 2001 at 11:57:01AM +0200, Kurt Garloff wrote:
+> Linus, Alan, I'd like to have your input:
+>=20
+> Do you like the patch as is?=20
+
+Well, probably not, as it contains a typo which lets machines without kbd
+hang. Fixed version attached. Sorry!
+
+Regards,
+--=20
+Kurt Garloff  <garloff@suse.de>                          Eindhoven, NL
+GPG key: See mail header, key servers         Linux kernel development
+SuSE GmbH, Nuernberg, DE                                SCSI, Security
+
+--+S4DbcR7QPeSsP0V
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: attachment; filename="247-psaux-reconnect-sysctl3.diff"
+Content-Transfer-Encoding: quoted-printable
+
+diff -uNr linux-2.4.7.kurt-1/drivers/char/pc_keyb.c linux-2.4.7.kurt-1-psau=
+x/drivers/char/pc_keyb.c
+--- linux-2.4.7.kurt-1/drivers/char/pc_keyb.c	Tue Jul 24 18:42:36 2001
++++ linux-2.4.7.kurt-1-psaux/drivers/char/pc_keyb.c	Tue Aug 14 16:56:58 2001
+@@ -81,8 +81,9 @@
+=20
+ static int __init psaux_init(void);
+=20
+-#define AUX_RECONNECT 170 /* scancode when ps2 device is plugged (back) in=
+ */
+-=20
++#define AUX_RECONNECT1 170 /* scancode when ps2 device is plugged (back) i=
+n */
++#define AUX_RECONNECT2 0   /* scancode when ps2 device is plugged (back) i=
+n */
++
+ static struct aux_queue *queue;	/* Mouse data buffer. */
+ static int aux_count;
+ /* used when we send commands to the mouse that expect an ACK. */
+@@ -92,8 +93,83 @@
+ #define AUX_INTS_ON  (KBD_MODE_KCC | KBD_MODE_SYS | KBD_MODE_MOUSE_INT | K=
+BD_MODE_KBD_INT)
+=20
+ #define MAX_RETRIES	60		/* some aux operations take long time*/
++
+ #endif /* CONFIG_PSMOUSE */
+=20
++/* We want to be able to handle the psmouse reconnect token; unfortunately=
+ the
++ * Synaptics touchpads (and probably others too) use it for their extented
++ * functionality and produce them in extended mode (as set by gpm -t synps=
+2).
++ * So we make this adjustable via a sysctl.  garloff@suse.de, 2001-08-01 */
++
++#ifdef CONFIG_SYSCTL
++#include <linux/sysctl.h>
++#ifdef CONFIG_PSMOUSE
++int sysctl_psmouse_reconnect =3D 1;
++#endif
++int sysctl_kbd_report_unkn =3D 1;
++int sysctl_kbd_report_to =3D 1;
++
++static int psaux_sysctl_handler (ctl_table *ctl, int write, struct file *f=
+ilp,
++				 void *buffer, size_t *lenp)
++{
++	int *valp =3D ctl->data;
++	int ret =3D proc_dointvec(ctl, write, filp, buffer, lenp);=20
++	if (write) {
++		if (*valp > 2)
++			*valp =3D 2;
++	}
++	return ret;
++}
++		=09
++
++ctl_table psaux_table[] =3D {
++#ifdef CONFIG_PSMOUSE  =20
++        {DEV_PSMOUSE_RECONNECT, "psmouse_reconnect", &sysctl_psmouse_recon=
+nect,
++                sizeof(int), 0644, NULL, &psaux_sysctl_handler},
++#endif  =20
++	{DEV_KBD_REPORT_UNKN, "kbd_report_unknown", &sysctl_kbd_report_unkn,
++                sizeof(int), 0644, NULL, &psaux_sysctl_handler},
++        {DEV_KBD_REPORT_TO, "kbd_report_timeout", &sysctl_kbd_report_to,
++                sizeof(int), 0644, NULL, &psaux_sysctl_handler},
++	{0}
++};
++
++ctl_table psaux_psaux_table[] =3D {
++        {DEV_CDROM, "ps2", NULL, 0, 0555, psaux_table},
++        {0}
++        };
++
++ctl_table psaux_root_table[] =3D {
++#ifdef CONFIG_PROC_FS
++        {CTL_DEV, "dev", NULL, 0, 0555, psaux_psaux_table},
++#endif /* CONFIG_PROC_FS */
++        {0}
++        };
++static struct ctl_table_header *psaux_sysctl_header;
++
++static void psaux_sysctl_register (void)
++{
++	static int initialized;
++	if (initialized) return;
++=09
++	psaux_sysctl_header =3D register_sysctl_table (psaux_root_table, 1);
++	/*psaux_root_table->child->de->owner =3D THIS_MODULE;*/
++	initialized++;
++}
++
++/*
++static void psaux_sysctl_unregister (void)
++{
++	if (psaux_sysctl_header)
++		unregister_sysctl_table (psaux_sysctl_header);
++}
++ */
++#else /* CONFIG_SYSCTL */
++#define sysctl_psmouse_reconnect 1
++#define sysctl_kbd_report_unkn 1
++#define sysctl_kbd_report_to 1
++#endif /* CONFIG_SYSCTL */
++
+ /*
+  * Wait for keyboard controller input buffer to drain.
+  *
+@@ -123,9 +199,8 @@
+ 		mdelay(1);
+ 		timeout--;
+ 	} while (timeout);
+-#ifdef KBD_REPORT_TIMEOUTS
+-	printk(KERN_WARNING "Keyboard timed out[1]\n");
+-#endif
++	if (sysctl_kbd_report_to)
++		printk(KERN_WARNING "Keyboard timed out[1]\n");
+ }
+=20
+ /*
+@@ -324,10 +399,8 @@
+ 		  *keycode =3D E1_PAUSE;
+ 		  prev_scancode =3D 0;
+ 	      } else {
+-#ifdef KBD_REPORT_UNKN
+-		  if (!raw_mode)
++		  if (!raw_mode && sysctl_kbd_report_unkn)
+ 		    printk(KERN_INFO "keyboard: unknown e1 escape sequence\n");
+-#endif
+ 		  prev_scancode =3D 0;
+ 		  return 0;
+ 	      }
+@@ -352,11 +425,9 @@
+ 	      if (e0_keys[scancode])
+ 		*keycode =3D e0_keys[scancode];
+ 	      else {
+-#ifdef KBD_REPORT_UNKN
+-		  if (!raw_mode)
++		  if (!raw_mode && sysctl_kbd_report_unkn)
+ 		    printk(KERN_INFO "keyboard: unknown scancode e0 %02x\n",
+ 			   scancode);
+-#endif
+ 		  return 0;
+ 	      }
+ 	  }
+@@ -374,11 +445,9 @@
+ 	  *keycode =3D high_keys[scancode - SC_LIM];
+=20
+ 	  if (!*keycode) {
+-	      if (!raw_mode) {
+-#ifdef KBD_REPORT_UNKN
++	      if (!raw_mode && sysctl_kbd_report_unkn) {
+ 		  printk(KERN_INFO "keyboard: unrecognized scancode (%02x)"
+ 			 " - ignored\n", scancode);
+-#endif
+ 	      }
+ 	      return 0;
+ 	  }
+@@ -397,6 +466,7 @@
+ 	    return 0200;
+ }
+=20
++static unsigned char psaux_prev;
+ static inline void handle_mouse_event(unsigned char scancode)
+ {
+ #ifdef CONFIG_PSMOUSE
+@@ -407,13 +477,24 @@
+ 		}
+ 		mouse_reply_expected =3D 0;
+ 	}
+-	else if(scancode =3D=3D AUX_RECONNECT){
++	else if(scancode =3D=3D AUX_RECONNECT1=20
++		&& sysctl_psmouse_reconnect =3D=3D 2) {
++		printk (KERN_DEBUG "PS2 mouse reconnect detected.\n");
++		queue->head =3D queue->tail =3D 0;  /* Flush input queue */
++		__aux_write_ack(AUX_ENABLE_DEV);  /* ping the mouse :) */
++		return;
++	}
++	else if (scancode =3D=3D AUX_RECONNECT2 && psaux_prev =3D=3D AUX_RECONNEC=
+T1
++		 && sysctl_psmouse_reconnect =3D=3D 1 ) {
++		printk (KERN_DEBUG "PS2 mouse reconnect detected.\n");
+ 		queue->head =3D queue->tail =3D 0;  /* Flush input queue */
+ 		__aux_write_ack(AUX_ENABLE_DEV);  /* ping the mouse :) */
+ 		return;
+ 	}
+=20
+ 	add_mouse_randomness(scancode);
++	psaux_prev =3D scancode;
++
+ 	if (aux_count) {
+ 		int head =3D queue->head;
+=20
+@@ -516,16 +597,14 @@
+ 				break;
+ 			mdelay(1);
+ 			if (!--timeout) {
+-#ifdef KBD_REPORT_TIMEOUTS
+-				printk(KERN_WARNING "keyboard: Timeout - AT keyboard not present?\n");
+-#endif
++				if (sysctl_kbd_report_to)
++					printk(KERN_WARNING "keyboard: Timeout - AT keyboard not present?\n");
+ 				return 0;
+ 			}
+ 		}
+ 	} while (retries-- > 0);
+-#ifdef KBD_REPORT_TIMEOUTS
+-	printk(KERN_WARNING "keyboard: Too many NACKs -- noisy kbd cable?\n");
+-#endif
++	if (sysctl_kbd_report_to)
++		printk(KERN_WARNING "keyboard: Too many NACKs -- noisy kbd cable?\n");
+ 	return 0;
+ }
+=20
+@@ -755,6 +834,7 @@
+=20
+ 	/* Ok, finally allocate the IRQ, and off we go.. */
+ 	kbd_request_irq(keyboard_interrupt);
++	psaux_sysctl_register ();
+ }
+=20
+ #if defined CONFIG_PSMOUSE
+diff -uNr linux-2.4.7.kurt-1/include/linux/sysctl.h linux-2.4.7.kurt-1-psau=
+x/include/linux/sysctl.h
+--- linux-2.4.7.kurt-1/include/linux/sysctl.h	Tue Jul 24 18:48:05 2001
++++ linux-2.4.7.kurt-1-psaux/include/linux/sysctl.h	Tue Aug 14 10:37:54 2001
+@@ -594,7 +594,8 @@
+ 	DEV_HWMON=3D2,
+ 	DEV_PARPORT=3D3,
+ 	DEV_RAID=3D4,
+-	DEV_MAC_HID=3D5
++	DEV_MAC_HID=3D5,
++	DEV_PSAUX=3D6,
+ };
+=20
+ /* /proc/sys/dev/cdrom */
+@@ -653,6 +654,13 @@
+ 	DEV_MAC_HID_MOUSE_BUTTON2_KEYCODE=3D4,
+ 	DEV_MAC_HID_MOUSE_BUTTON3_KEYCODE=3D5,
+ 	DEV_MAC_HID_ADB_MOUSE_SENDS_KEYCODES=3D6
++};
++
++/* /proc/sys/dev/psaux */
++enum {
++	DEV_PSMOUSE_RECONNECT=3D1,
++	DEV_KBD_REPORT_UNKN=3D2,
++	DEV_KBD_REPORT_TO=3D3,
+ };
+=20
+ #ifdef __KERNEL__
+
+--+S4DbcR7QPeSsP0V--
+
+--GFHULmA0mO3kKGOo
+Content-Type: application/pgp-signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.0.6 (GNU/Linux)
+Comment: For info see http://www.gnupg.org
+
+iD8DBQE7eT2qxmLh6hyYd04RAkdVAKDWsk64qjIijqnd7OhfUabDk93DuwCeNs8v
+2N8GBj91DmP0Sxgh6OamUaw=
+=F2r7
+-----END PGP SIGNATURE-----
+
+--GFHULmA0mO3kKGOo--
+
+From torvalds@transmeta.com  Wed Aug 15 15:40:51 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id PAA13043
+	for <rubini@morgana>; Wed, 15 Aug 2001 15:40:51 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Wed, 15 Aug 2001 15:40:51 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id TAA12956 for <rubini@pop.systemy.it>; Tue, 14 Aug 2001 19:01:01 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105])
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id RAA27985
+	for <rubini@systemy.it>; Tue, 14 Aug 2001 17:00:58 GMT
+Received: from vision.unipv.it (vision.unipv.it [193.204.34.82])
+	by spock.linux.it (Postfix) with ESMTP id 1C28219853
+	for <rubini@linux.it>; Tue, 14 Aug 2001 18:11:20 +0200 (CEST)
+Received: from neon-gw.transmeta.com (neon-gw-l3.transmeta.com [63.209.4.196])
+	by vision.unipv.it (8.9.3/8.9.3) with ESMTP id RAA32362
+	for <rubini@vision.unipv.it>; Tue, 14 Aug 2001 17:21:08 +0200
+Received: (from root@localhost)
+	by neon-gw.transmeta.com (8.9.3/8.9.3) id JAA00580;
+	Tue, 14 Aug 2001 09:59:33 -0700
+Received: from mailhost.transmeta.com(10.1.1.15) by neon-gw.transmeta.com via smap (V2.1)
+	id xma000571; Tue, 14 Aug 01 09:59:28 -0700
+Received: from penguin.transmeta.com (penguin.transmeta.com [10.10.27.78])
+	by deepthought.transmeta.com (8.9.3/8.9.3) with ESMTP id JAA13406;
+	Tue, 14 Aug 2001 09:59:30 -0700 (PDT)
+Received: from localhost (torvalds@localhost) by penguin.transmeta.com (8.11.2/8.7.3) with ESMTP id f7EGwtS01753; Tue, 14 Aug 2001 09:58:55 -0700
+X-Authentication-Warning: penguin.transmeta.com: torvalds owned process doing -bs
+Date: Tue, 14 Aug 2001 09:58:55 -0700 (PDT)
+From: Linus Torvalds <torvalds@transmeta.com>
+To: Kurt Garloff <garloff@suse.de>
+Cc: <Andries.Brouwer@cwi.nl>, <alan@lxorguk.ukuu.org.uk>,
+        <linux-kernel@vger.kernel.org>, <mantel@suse.de>,
+        <rubini@vision.unipv.it>
+Subject: Re: [PATCH] make psaux reconnect adjustable
+In-Reply-To: <20010814170306.Q1085@gum01m.etpnet.phys.tue.nl>
+Message-ID: <Pine.LNX.4.33.0108140954390.1679-100000@penguin.transmeta.com>
+MIME-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+X-UIDL: ca99923198dca96e1919c7a0ca08e81b
+Status: RO
+
+
+> Well, probably not, as it contains a typo which lets machines without kbd
+> hang. Fixed version attached. Sorry!
+
+Hmm..
+
+I really have two comments, but I haven't followed the whole discussion,
+so feel free to just say that it's been hashed out already:
+
+ - sysconf entries are suspicious for stuff like this. If some code really
+   requires this to work correctly, that's exactly the kind of code that
+   would run automatically at bootup. A sysconf doesn't really help people
+   in that case - we'd be much better off with just a bootup switch.
+
+ - do we actually need the config switch AT ALL, whether at bootup or not?
+   What exactly breaks if we just always pass the AA 00 values through?
+   Apparently nothing ever breaks, which makes me suspect that people are
+   just being unnecessarily defensive.
+
+In short, I'd prefer a patch that just unconditionally removes the code,
+unless somebody KNOWS that it could break something. That failing, a
+simple kernel command line option sounds better than more files in /proc.
+
+Remember: the biggest mistake to do is to overdesign. The road to hell is
+paved with good intentions.
+
+		Linus
+
+From garloff@garloff.de  Wed Aug 15 15:41:03 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id PAA13073
+	for <rubini@morgana>; Wed, 15 Aug 2001 15:41:03 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Wed, 15 Aug 2001 15:41:03 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id TAA13510 for <rubini@pop.systemy.it>; Tue, 14 Aug 2001 19:38:57 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105])
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id RAA28130
+	for <rubini@systemy.it>; Tue, 14 Aug 2001 17:38:55 GMT
+Received: from vision.unipv.it (vision.unipv.it [193.204.34.82])
+	by spock.linux.it (Postfix) with ESMTP id 4A6C719873
+	for <rubini@linux.it>; Tue, 14 Aug 2001 18:49:18 +0200 (CEST)
+Received: from etpmod.phys.tue.nl (etpmod.phys.tue.nl [131.155.111.35])
+	by vision.unipv.it (8.9.3/8.9.3) with ESMTP id RAA32525
+	for <rubini@vision.unipv.it>; Tue, 14 Aug 2001 17:57:53 +0200
+Received: from garloff.etpnet.phys.tue.nl (gum01m.etpnet.phys.tue.nl [192.168.84.65])
+	by etpmod.phys.tue.nl (8.9.3/8.9.3/SuSE Linux 8.9.3-0.1) with ESMTP id TAA03978;
+	Tue, 14 Aug 2001 19:36:23 +0200
+Received: (from garloff@localhost)
+	by garloff.etpnet.phys.tue.nl (8.11.3/8.11.3/SuSE Linux 8.11.1-0.5) id f7EHZhq10174;
+	Tue, 14 Aug 2001 19:35:43 +0200
+Date: Tue, 14 Aug 2001 19:35:43 +0200
+From: Kurt Garloff <garloff@suse.de>
+To: Linus Torvalds <torvalds@transmeta.com>
+Cc: Kurt Garloff <garloff@suse.de>, Andries.Brouwer@cwi.nl,
+        alan@lxorguk.ukuu.org.uk, linux-kernel@vger.kernel.org, mantel@suse.de,
+        rubini@vision.unipv.it
+Subject: Re: [PATCH] make psaux reconnect adjustable
+Message-ID: <20010814193543.V1085@gum01m.etpnet.phys.tue.nl>
+Mail-Followup-To: Kurt Garloff <garloff@suse.de>,
+	Linus Torvalds <torvalds@transmeta.com>, Andries.Brouwer@cwi.nl,
+	alan@lxorguk.ukuu.org.uk, linux-kernel@vger.kernel.org,
+	mantel@suse.de, rubini@vision.unipv.it
+References: <20010814170306.Q1085@gum01m.etpnet.phys.tue.nl> <Pine.LNX.4.33.0108140954390.1679-100000@penguin.transmeta.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="GOaLjq+VdFesH+wR"
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.33.0108140954390.1679-100000@penguin.transmeta.com>
+User-Agent: Mutt/1.3.20i
+X-Operating-System: Linux 2.4.7 i686
+X-PGP-Info: on http://www.garloff.de/kurt/mykeys.pgp
+X-PGP-Key: 1024D/1C98774E, 1024R/CEFC9215
+Organization: TU/e(NL), SuSE(DE)
+X-UIDL: 0b1ef96a0d05d0b79e99084d0eba334c
+Status: RO
+
+
+--GOaLjq+VdFesH+wR
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+Hi Linus,
+
+thanks for your comments.
+
+On Tue, Aug 14, 2001 at 09:58:55AM -0700, Linus Torvalds wrote:
+> I really have two comments, but I haven't followed the whole discussion,
+> so feel free to just say that it's been hashed out already:
+>=20
+>  - sysconf entries are suspicious for stuff like this. If some code really
+>    requires this to work correctly, that's exactly the kind of code that
+>    would run automatically at bootup. A sysconf doesn't really help people
+>    in that case - we'd be much better off with just a bootup switch.
+
+Maybe that's the difference of whether you define the kernel behaviour by
+deciding what goes in and the one that tries to avoid a breakage without
+changing the default behaviour ...
+Of course the sysctl is less intrusive (from a user's point of view).
+
+>  - do we actually need the config switch AT ALL, whether at bootup or not?
+>    What exactly breaks if we just always pass the AA 00 values through?
+>    Apparently nothing ever breaks, which makes me suspect that people are
+>    just being unnecessarily defensive.
+
+PS2 mouses need this ping thing to be operational after being plugged.
+But, there's no reason it needs to be done in the kernel.
+* It works for plain PS2 only (not: imps2, synps2, ...)
+* The userspace driver (gpm, X11) can do it as well, AFAICS
+
+I guess the thing has been introduced because it was more convenient than
+fixing userspace.
+Maybe the kernel does it a bit more efficient by throwing away the queue ...
+
+> In short, I'd prefer a patch that just unconditionally removes the code,
+> unless somebody KNOWS that it could break something. That failing, a
+> simple kernel command line option sounds better than more files in /proc.
+
+I'd be happy with removing it.
+Patch will follow!
+
+> Remember: the biggest mistake to do is to overdesign. The road to hell is
+> paved with good intentions.
+
+A few sysctls don't qualify as overdesign yet, I hope.
+
+Regards,
+--=20
+Kurt Garloff  <garloff@suse.de>                          Eindhoven, NL
+GPG key: See mail header, key servers         Linux kernel development
+SuSE GmbH, Nuernberg, DE                                SCSI, Security
+
+--GOaLjq+VdFesH+wR
+Content-Type: application/pgp-signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.0.6 (GNU/Linux)
+Comment: For info see http://www.gnupg.org
+
+iD8DBQE7eWFvxmLh6hyYd04RAid0AJkBRbQAelKjAXzaA8rRQifEPscH2ACfUUsp
+BqZqeLRrmag8Bsup3yELdnY=
+=dhec
+-----END PGP SIGNATURE-----
+
+--GOaLjq+VdFesH+wR--
+
+From garloff@garloff.de  Wed Aug 15 15:41:42 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id PAA13231
+	for <rubini@morgana>; Wed, 15 Aug 2001 15:41:41 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Wed, 15 Aug 2001 15:41:41 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id XAA17995 for <rubini@pop.systemy.it>; Tue, 14 Aug 2001 23:29:52 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105])
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id VAA28856
+	for <rubini@systemy.it>; Tue, 14 Aug 2001 21:29:50 GMT
+Received: from vision.unipv.it (vision.unipv.it [193.204.34.82])
+	by spock.linux.it (Postfix) with ESMTP id 6CDD9197B0
+	for <rubini@linux.it>; Tue, 14 Aug 2001 22:41:27 +0200 (CEST)
+Received: from etpmod.phys.tue.nl (etpmod.phys.tue.nl [131.155.111.35])
+	by vision.unipv.it (8.9.3/8.9.3) with ESMTP id VAA01350
+	for <rubini@vision.unipv.it>; Tue, 14 Aug 2001 21:51:15 +0200
+Received: from garloff.etpnet.phys.tue.nl (gum01m.etpnet.phys.tue.nl [192.168.84.65])
+	by etpmod.phys.tue.nl (8.9.3/8.9.3/SuSE Linux 8.9.3-0.1) with ESMTP id XAA07270;
+	Tue, 14 Aug 2001 23:29:48 +0200
+Received: (from garloff@localhost)
+	by garloff.etpnet.phys.tue.nl (8.11.3/8.11.3/SuSE Linux 8.11.1-0.5) id f7ELTlV16541;
+	Tue, 14 Aug 2001 23:29:47 +0200
+Date: Tue, 14 Aug 2001 23:29:47 +0200
+From: Kurt Garloff <garloff@suse.de>
+To: Linus Torvalds <torvalds@transmeta.com>
+Cc: Andries.Brouwer@cwi.nl, alan@lxorguk.ukuu.org.uk,
+        linux-kernel@vger.kernel.org, mantel@suse.de, rubini@vision.unipv.it
+Subject: Re: [PATCH] make psaux reconnect adjustable
+Message-ID: <20010814232947.A16332@gum01m.etpnet.phys.tue.nl>
+Mail-Followup-To: Kurt Garloff <garloff@suse.de>,
+	Linus Torvalds <torvalds@transmeta.com>, Andries.Brouwer@cwi.nl,
+	alan@lxorguk.ukuu.org.uk, linux-kernel@vger.kernel.org,
+	mantel@suse.de, rubini@vision.unipv.it
+References: <20010814170306.Q1085@gum01m.etpnet.phys.tue.nl> <Pine.LNX.4.33.0108140954390.1679-100000@penguin.transmeta.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="pAwQNkOnpTn9IO2O"
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.33.0108140954390.1679-100000@penguin.transmeta.com>
+User-Agent: Mutt/1.3.20i
+X-Operating-System: Linux 2.4.7 i686
+X-PGP-Info: on http://www.garloff.de/kurt/mykeys.pgp
+X-PGP-Key: 1024D/1C98774E, 1024R/CEFC9215
+Organization: TU/e(NL), SuSE(DE)
+X-UIDL: 186d845e4a17613c167f0da418f5f7f5
+Status: RO
+
+
+--pAwQNkOnpTn9IO2O
+Content-Type: multipart/mixed; boundary="RASg3xLB4tUQ4RcS"
+Content-Disposition: inline
+
+
+--RASg3xLB4tUQ4RcS
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Tue, Aug 14, 2001 at 09:58:55AM -0700, Linus Torvalds wrote:
+>  - do we actually need the config switch AT ALL, whether at bootup or not?
+>    What exactly breaks if we just always pass the AA 00 values through?
+>    Apparently nothing ever breaks, which makes me suspect that people are
+>    just being unnecessarily defensive.
+>=20
+> In short, I'd prefer a patch that just unconditionally removes the code,
+> unless somebody KNOWS that it could break something. That failing, a
+> simple kernel command line option sounds better than more files in /proc.
+
+OK, here come two patches. The first one removes the special PSAUX reconnect
+handling completely. So userspace should handle it. (Which is possible; just
+not implemented in gpm/X11 at this time AFAIK.)
+
+Second patch reintroduces the special handling again, but does
+* react on AA 00 instead of just AA, thus much less likely breaking other
+  drivers (such as synps2). All PS/2 mouses I could access (about 5
+  different models) produced AA 00, so this seems OK.
+* is disabled by default, and needs to be enabled by the psaux-reconnect
+  boot parameter, like in 2.2.19.
+
+Second patch depends on first. Please apply just the first or both.
+
+(Current failure of gpm/X11 would make me choose for both, but then I'm=20
+ more the one thinking of customers of a distro than the one trying to keep
+ the kernel clean. On the long term, I'd drop the second in any case.)
+
+Regards,
+--=20
+Kurt Garloff  <garloff@suse.de>                          Eindhoven, NL
+GPG key: See mail header, key servers         Linux kernel development
+SuSE GmbH, Nuernberg, DE                                SCSI, Security
+
+--RASg3xLB4tUQ4RcS
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: attachment; filename="247-noreconnect.diff"
+Content-Transfer-Encoding: quoted-printable
+
+diff -uNr linux-2.4.7.kurt-1/drivers/char/pc_keyb.c linux-2.4.7.kurt-1-nore=
+connect/drivers/char/pc_keyb.c
+--- linux-2.4.7.kurt-1/drivers/char/pc_keyb.c	Tue Jul 24 18:42:36 2001
++++ linux-2.4.7.kurt-1-noreconnect/drivers/char/pc_keyb.c	Tue Aug 14 22:47:=
+38 2001
+@@ -81,8 +81,6 @@
+=20
+ static int __init psaux_init(void);
+=20
+-#define AUX_RECONNECT 170 /* scancode when ps2 device is plugged (back) in=
+ */
+-=20
+ static struct aux_queue *queue;	/* Mouse data buffer. */
+ static int aux_count;
+ /* used when we send commands to the mouse that expect an ACK. */
+@@ -406,11 +404,6 @@
+ 			return;
+ 		}
+ 		mouse_reply_expected =3D 0;
+-	}
+-	else if(scancode =3D=3D AUX_RECONNECT){
+-		queue->head =3D queue->tail =3D 0;  /* Flush input queue */
+-		__aux_write_ack(AUX_ENABLE_DEV);  /* ping the mouse :) */
+-		return;
+ 	}
+=20
+ 	add_mouse_randomness(scancode);
+
+--RASg3xLB4tUQ4RcS
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: attachment; filename="247-reconnect_bootpar.diff"
+Content-Transfer-Encoding: quoted-printable
+
+diff -uNr linux-2.4.7.kurt-1-noreconnect/drivers/char/pc_keyb.c linux-2.4.7=
+.kurt-1-recon_bootpar/drivers/char/pc_keyb.c
+--- linux-2.4.7.kurt-1-noreconnect/drivers/char/pc_keyb.c	Tue Aug 14 22:47:=
+38 2001
++++ linux-2.4.7.kurt-1-recon_bootpar/drivers/char/pc_keyb.c	Tue Aug 14 23:1=
+3:49 2001
+@@ -63,6 +63,7 @@
+ #ifdef CONFIG_PSMOUSE
+ static void aux_write_ack(int val);
+ static void __aux_write_ack(int val);
++static int aux_reconnect =3D 0;
+ #endif
+=20
+ static spinlock_t kbd_controller_lock =3D SPIN_LOCK_UNLOCKED;
+@@ -81,6 +82,9 @@
+=20
+ static int __init psaux_init(void);
+=20
++#define AUX_RECONNECT1 0xaa	/* scancode1 when ps2 device is plugged (back)=
+ in */
++#define AUX_RECONNECT2 0x00	/* scancode2 when ps2 device is plugged (back)=
+ in */
++=20
+ static struct aux_queue *queue;	/* Mouse data buffer. */
+ static int aux_count;
+ /* used when we send commands to the mouse that expect an ACK. */
+@@ -398,6 +402,7 @@
+ static inline void handle_mouse_event(unsigned char scancode)
+ {
+ #ifdef CONFIG_PSMOUSE
++	static unsigned char prev_code;
+ 	if (mouse_reply_expected) {
+ 		if (scancode =3D=3D AUX_ACK) {
+ 			mouse_reply_expected--;
+@@ -405,7 +410,15 @@
+ 		}
+ 		mouse_reply_expected =3D 0;
+ 	}
++	else if(scancode =3D=3D AUX_RECONNECT2 && prev_code =3D=3D AUX_RECONNECT1
++		&& aux_reconnect) {
++		printk (KERN_INFO "PS/2 mouse reconnect detected\n");
++		queue->head =3D queue->tail =3D 0;	/* Flush input queue */
++		__aux_write_ack(AUX_ENABLE_DEV);  /* ping the mouse :) */
++		return;
++	}
+=20
++	prev_code =3D scancode;
+ 	add_mouse_randomness(scancode);
+ 	if (aux_count) {
+ 		int head =3D queue->head;
+@@ -751,6 +764,14 @@
+ }
+=20
+ #if defined CONFIG_PSMOUSE
++
++static int __init aux_reconnect_setup (char *str)
++{
++	aux_reconnect =3D 1;
++	return 1;
++}
++
++__setup("psaux-reconnect", aux_reconnect_setup);
+=20
+ /*
+  * Check if this is a dual port controller.
+
+--RASg3xLB4tUQ4RcS--
+
+--pAwQNkOnpTn9IO2O
+Content-Type: application/pgp-signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.0.6 (GNU/Linux)
+Comment: For info see http://www.gnupg.org
+
+iD8DBQE7eZhLxmLh6hyYd04RAnJTAJ9CyWixEyMZ8qkmapcBwl/73IM7DwCfRR5s
+TJ1yuGaW+r28gNeBOI1sVP8=
+=HZo+
+-----END PGP SIGNATURE-----
+
+--pAwQNkOnpTn9IO2O--
+
+From aeb@cwi.nl  Wed Aug 15 15:41:58 2001
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id PAA13289
+	for <rubini@morgana>; Wed, 15 Aug 2001 15:41:58 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Wed, 15 Aug 2001 15:41:58 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id CAA20482 for <rubini@pop.systemy.it>; Wed, 15 Aug 2001 02:21:05 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105])
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id AAA29238
+	for <rubini@systemy.it>; Wed, 15 Aug 2001 00:21:05 GMT
+Received: from hera.cwi.nl (hera.cwi.nl [192.16.191.8])
+	by spock.linux.it (Postfix) with ESMTP id 6A5D6197B0
+	for <rubini@linux.it>; Wed, 15 Aug 2001 01:32:41 +0200 (CEST)
+Received: from vlet.cwi.nl (vlet.cwi.nl [192.16.191.54]) by hera.cwi.nl with ESMTP
+	id CAA29683 for <rubini@linux.it>; Wed, 15 Aug 2001 02:21:01 +0200 (MEST)
+From: Andries.Brouwer@cwi.nl
+Received: (from aeb@localhost)
+	by vlet.cwi.nl (8.8.6/8.9.3) id AAA100247
+	for rubini@linux.it; Wed, 15 Aug 2001 00:21:01 GMT
+Date: Wed, 15 Aug 2001 00:21:01 GMT
+Message-Id: <200108150021.AAA100247@vlet.cwi.nl>
+To: rubini@linux.it
+Subject: gpm
+X-UIDL: 9ee7c4ae6dd7eb661b4e97eedfbe1025
+Status: RO
+
+Dear Alessandro,
+
+[Long ago!]
+There was some discussion on linux-kernel about the right way
+to handle mouse disconnect and reconnect events.
+A PS/2 mouse, and also the imps2 mouse, will send AA 00 after
+reconnection (that is, at mouse power-on time).
+At this moment the imps2 mouse needs an initialization sequence,
+otherwise it reverts to being an ordinary ps2.
+
+So, the right setup probably is to let gpm recognize this AA 00.
+If it recognizes this, perhaps the fd should be closed and reopened,
+somewhat like happens now in wait_text().
+
+Any idea on how you would like this added to gpm.c / mice.c ?
+It will be a bit messy in all cases, I am afraid.
+
+Andries
+

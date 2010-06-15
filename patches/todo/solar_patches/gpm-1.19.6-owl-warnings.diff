@@ -1,0 +1,211 @@
+diff -ur gpm-1.19.6.orig/src/gpm.c gpm-1.19.6/src/gpm.c
+--- gpm-1.19.6.orig/src/gpm.c	Tue Oct  2 00:02:25 2001
++++ gpm-1.19.6/src/gpm.c	Sat Oct  6 04:45:26 2001
+@@ -1144,9 +1144,9 @@
+ 	     * or to the default handler, if any
+ 	     * or to the selection handler
+ 	     */ /* FIXME -- check event.vc */
+-	    (cinfo[event.vc] && do_client(cinfo[event.vc], &event))
+-	       || (cinfo[0]        && do_client(cinfo[0],        &event))
+-	       ||  do_selection(&event);
++	    if (!(cinfo[event.vc] && do_client(cinfo[event.vc], &event)))
++	      if (!(cinfo[0] && do_client(cinfo[0], &event)))
++	        do_selection(&event);
+ 	  }
+       }
+ 
+diff -ur gpm-1.19.6.orig/src/libcurses.c gpm-1.19.6/src/libcurses.c
+--- gpm-1.19.6.orig/src/libcurses.c	Sun Sep 23 23:00:03 2001
++++ gpm-1.19.6/src/libcurses.c	Sat Oct  6 04:45:26 2001
+@@ -93,7 +93,7 @@
+ /* JD patch 11/08/1998 */
+ #define MAXNBPREVCHAR 4         /* I don't think more is usefull, JD */
+     static int nbprevchar=0, prevchar[MAXNBPREVCHAR];
+-    extern gpm_convert_event(char *data, Gpm_Event *event);
++    extern int gpm_convert_event(unsigned char *data, Gpm_Event *event);
+     int c; unsigned char mdata[4];
+ 
+ /* JD patch 11/08/1998 */
+diff -ur gpm-1.19.6.orig/src/liblow.c gpm-1.19.6/src/liblow.c
+--- gpm-1.19.6.orig/src/liblow.c	Tue Oct  2 00:08:47 2001
++++ gpm-1.19.6/src/liblow.c	Sat Oct  6 04:45:26 2001
+@@ -529,7 +529,7 @@
+ #define DELAY_MS 100
+         static struct timeval to={0,DELAY_MS*1000};
+         static fd_set selSet;
+-        extern gpm_convert_event(unsigned char *data, Gpm_Event *event);
++        int gpm_convert_event(unsigned char *data, Gpm_Event *event);
+         int c; unsigned char mdata[4];
+ 
+         if (nbprevchar)  /* if there are some consumed char ... */
+diff -ur gpm-1.19.6.orig/src/mice.c gpm-1.19.6/src/mice.c
+--- gpm-1.19.6.orig/src/mice.c	Thu Sep 27 16:50:29 2001
++++ gpm-1.19.6/src/mice.c	Sat Oct  6 04:45:26 2001
+@@ -50,7 +50,7 @@
+ #include <termios.h>
+ #include <errno.h>
+ #include <unistd.h>
+-#include <strings.h>
++#include <string.h>
+ #include <ctype.h>
+ 
+ #include <sys/types.h>
+@@ -665,10 +665,10 @@
+   int  treshold;
+ } wcmodell[] = {
+   /* ModellName    Magic     MaxX     MaxY  Border  Tresh */
+-     "UltraPad"  , "UD",        0,       0,    250,    20, 
+-  /* "Intuos"    , "GD",        0,       0,      0,    20, not yet supported */
+-     "PenPartner", "CT",        0,       0,      0,    20, 
+-     "Graphire"  , "ET",     5103,    3711,      0,    20
++    {"UltraPad"  , "UD",        0,       0,    250,    20},
++  /*{"Intuos"    , "GD",        0,       0,      0,    20}, not yet supported */
++    {"PenPartner", "CT",        0,       0,      0,    20},
++    {"Graphire"  , "ET",     5103,    3711,      0,    20}
+   };
+ 
+ #define IsA(m) ((WacomModell==(-1))? 0:!strcmp(#m,wcmodell[WacomModell].name))
+@@ -1687,7 +1687,8 @@
+ 
+ /* intellimouse, ps2 version: Ben Pfaff and Colin Plumb */
+ /* Autodetect: Steve Bennett */
+-static Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type)
++static Gpm_Type *I_imps2(int fd, unsigned short flags,
++                         struct Gpm_Type *type, int argc, char **argv)
+ {
+   int id;
+   static unsigned char basic_init[] = { GPM_AUX_ENABLE_DEV, GPM_AUX_SET_SAMPLE, 100 };
+diff -ur gpm-1.19.6.orig/src/synaptics.c gpm-1.19.6/src/synaptics.c
+--- gpm-1.19.6.orig/src/synaptics.c	Sun Sep 23 23:00:03 2001
++++ gpm-1.19.6/src/synaptics.c	Sat Oct  6 04:46:45 2001
+@@ -182,11 +182,12 @@
+   { 0,                  No_Action } /* flag value */
+ };
+ 
++#if 0
+ static corner_action_type *upper_left_action  = &corner_actions [0];
+ static corner_action_type *lower_left_action  = &corner_actions [1];
+ static corner_action_type *upper_right_action = &corner_actions [2];
+ static corner_action_type *lower_right_action = &corner_actions [3];
+-
++#endif
+ 
+ /*
+ ** These types are used to read the configuration data from the config file.
+@@ -212,43 +213,43 @@
+ 
+ static param_data_type param_data [] = {
+   /* enabling configuration parameters */
+-  { "edge_motion_enabled",        Flag_Param,    &edge_motion_enabled        },
+-  { "edge_motion_speed_enabled",  Flag_Param,    &edge_motion_speed_enabled  },
+-  { "corner_taps_enabled",        Flag_Param,    &corner_taps_enabled        },
+-  { "taps_enabled",               Flag_Param,    &taps_enabled               },
+-  { "pressure_speed_enabled",     Flag_Param,    &pressure_speed_enabled     },
+-  { "tossing_enabled",            Flag_Param,    &tossing_enabled            },
+-  { "does_toss_use_static_speed", Flag_Param,    &does_toss_use_static_speed },
++  { "edge_motion_enabled",        Flag_Param,    {&edge_motion_enabled}       },
++  { "edge_motion_speed_enabled",  Flag_Param,    {&edge_motion_speed_enabled} },
++  { "corner_taps_enabled",        Flag_Param,    {&corner_taps_enabled}       },
++  { "taps_enabled",               Flag_Param,    {&taps_enabled}              },
++  { "pressure_speed_enabled",     Flag_Param,    {&pressure_speed_enabled}    },
++  { "tossing_enabled",            Flag_Param,    {&tossing_enabled}           },
++  { "does_toss_use_static_speed", Flag_Param,    {&does_toss_use_static_speed}},
+   /* pressure induced speed related configuration parameters */
+-  { "low_pressure",               Integer_Param, &low_pressure               },
+-  { "speed_up_pressure",          Integer_Param, &speed_up_pressure          },
+-  { "pressure_factor",            Float_Param,   &pressure_factor            },
+-  { "standard_speed_factor",      Float_Param,   &standard_speed_factor      },
++  { "low_pressure",               Integer_Param, {&low_pressure}              },
++  { "speed_up_pressure",          Integer_Param, {&speed_up_pressure}         },
++  { "pressure_factor",            Float_Param,   {&pressure_factor}           },
++  { "standard_speed_factor",      Float_Param,   {&standard_speed_factor}     },
+   /* toss/catch related parameters */
+-  { "min_toss_time",              Integer_Param, &min_toss_time              },
+-  { "max_toss_time",              Integer_Param, &max_toss_time              },
+-  { "toss_cleanup_time",          Integer_Param, &toss_cleanup_time          },
+-  { "min_toss_dist",              Integer_Param, &min_toss_dist              },
+-  { "static_toss_speed",          Integer_Param, &static_toss_speed          },
+-  { "toss_speed_factor",          Float_Param,   &toss_speed_factor          },
++  { "min_toss_time",              Integer_Param, {&min_toss_time}             },
++  { "max_toss_time",              Integer_Param, {&max_toss_time}             },
++  { "toss_cleanup_time",          Integer_Param, {&toss_cleanup_time}         },
++  { "min_toss_dist",              Integer_Param, {&min_toss_dist}             },
++  { "static_toss_speed",          Integer_Param, {&static_toss_speed}         },
++  { "toss_speed_factor",          Float_Param,   {&toss_speed_factor}         },
+   /* edge motion related configuration parameters */
+-  { "edge_speed",                 Integer_Param, &edge_speed                 },
++  { "edge_speed",                 Integer_Param, {&edge_speed}                },
+   /* corner tap actions */
+-  { "upper_left_action",          Corner_Param,  &corner_actions [0]         },
+-  { "lower_left_action",          Corner_Param,  &corner_actions [1]         },
+-  { "upper_right_action",         Corner_Param,  &corner_actions [2]         },
+-  { "lower_right_action",         Corner_Param,  &corner_actions [3]         },
++  { "upper_left_action",          Corner_Param,  {&corner_actions [0]}        },
++  { "lower_left_action",          Corner_Param,  {&corner_actions [1]}        },
++  { "upper_right_action",         Corner_Param,  {&corner_actions [2]}        },
++  { "lower_right_action",         Corner_Param,  {&corner_actions [3]}        },
+   /* use wmode */
+-  { "use_wmode",		  Flag_Param,	 &use_wmode		     },
+-  { "finger_threshold",		  Integer_Param, &finger_threshold	     },
+-  { "tap_lower_limit",		  Integer_Param, &tap_lower_limit	     },
+-  { "tap_upper_limit",		  Integer_Param, &tap_upper_limit	     },
+-  { "tap_range",		  Integer_Param, &tap_range		     },
+-  { "tap_interval",		  Integer_Param, &tap_interval		     },
+-  { "drag_lock",		  Flag_Param,	 &drag_lock		     },
+-  { "multiple_click_delay",	  Integer_Param, &multiple_click_delay	     },
++  { "use_wmode",		  Flag_Param,	 {&use_wmode}                 },
++  { "finger_threshold",		  Integer_Param, {&finger_threshold}          },
++  { "tap_lower_limit",		  Integer_Param, {&tap_lower_limit}           },
++  { "tap_upper_limit",		  Integer_Param, {&tap_upper_limit}           },
++  { "tap_range",		  Integer_Param, {&tap_range}                 },
++  { "tap_interval",		  Integer_Param, {&tap_interval}              },
++  { "drag_lock",		  Flag_Param,	 {&drag_lock}                 },
++  { "multiple_click_delay",	  Integer_Param, {&multiple_click_delay}      },
+   /* end of list */
+-  { NULL,                         Flag_Param,    NULL                        }
++  { NULL,                         Flag_Param,    {NULL}                       }
+ };
+ 
+ 
+@@ -1080,6 +1081,7 @@
+   }
+ }
+ 
++#if 0
+ /* write 'cmd' to mode byte 1 */
+ static void ps2_set_mode1(int fd,
+ 			  byte cmd) 
+@@ -1088,6 +1090,7 @@
+   ps2_putbyte(fd, 0xF3);
+   ps2_putbyte(fd, 0x0A);
+ }
++#endif
+ 
+ /* write 'cmd' to mode byte 2 */
+ static void ps2_set_mode2(int fd,
+@@ -1155,6 +1158,7 @@
+   cap->cap_palm_detect  = check_bits (bytes[2], 0x01);
+ }
+ 
++#if 0
+ /* read the modes from the touchpad (in ps/2 format) */
+ static void read_ps2_modes (int fd) 
+ {
+@@ -1165,6 +1169,7 @@
+   gpm_debug_log (LOG_DEBUG,"PS/2 modes: %02X", bytes [2]);
+ #endif
+ }
++#endif
+ 
+ /* Translate the reported data into a record for processing */
+ static void syn_translate_ps2_report (unsigned char *data,
+@@ -1229,9 +1234,6 @@
+   static int drag_locked = 0;
+ 
+   if (((data[0] & 0xc8) == 0x80) && ((data[3] & 0xc8) == 0xc0)) {
+-    unsigned int w = ((data[3] & 0x04) >> 2) |
+-	    		((data[0] & 0x04) >> 1) |
+-			((data[0] & 0x30) >> 2);
+     report->left     = check_bits (data[0], 0x01);
+     report->middle   = check_bits (data[0] ^ data[3], 0x01);
+     report->down     = check_bits (data[0] ^ data[3], 0x02);

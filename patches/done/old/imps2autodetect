@@ -1,0 +1,213 @@
+From - Fri Jul 27 00:24:34 2001
+Return-Path: <rubini@gnu.systemy.it>
+Delivered-To: nico@schottelius.org
+Received: (qmail 18456 invoked by uid 0); 4 Jul 2001 10:24:59 -0000
+Received: from dns.pcsystems.de (HELO pcsystems.de) (217.89.38.234)
+  by dns.schottelius.org with SMTP; 4 Jul 2001 10:24:59 -0000
+Received: (qmail 23917 invoked by uid 577); 4 Jul 2001 10:18:19 -0000
+Delivered-To: nicos@pcsystems.de
+Received: (qmail 23914 invoked by uid 0); 4 Jul 2001 10:18:18 -0000
+Received: from unknown (HELO morgana.systemy.it) (194.20.140.51)
+  by dns.pcsystems.de with SMTP; 4 Jul 2001 10:18:18 -0000
+Received: (from rubini@localhost)
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) id MAA15398
+	for nicos@pcsystems.de; Wed, 4 Jul 2001 12:21:26 +0200
+Received: from localhost (rubini@localhost [127.0.0.1])
+	by morgana.systemy.it (8.9.3/8.9.3/Debian/GNU) with ESMTP id TAA21587
+	for <rubini@morgana>; Fri, 29 Jun 2001 19:29:57 +0200
+Received: from pop
+	by fetchmail-4.6.4 POP3
+	for <rubini@morgana> (single-drop); Fri, 29 Jun 2001 19:29:58 MEST
+Received: from systemy.systemy.it (systemy.systemy.it [194.20.140.20]) by pop.systemy.it (8.8.8/8.8.3) with ESMTP id SAA13158 for <rubini@pop.systemy.it>; Fri, 29 Jun 2001 18:28:04 +0200
+Received: from spock.linux.it (spock.linux.it [62.177.1.105] (may be forged))
+	by systemy.systemy.it (8.8.8/8.8.8) with ESMTP id QAA15187
+	for <rubini@systemy.it>; Fri, 29 Jun 2001 16:26:32 GMT
+Received: from gateway.riverstone.com (unknown [206.31.85.126])
+	by spock.linux.it (Postfix) with ESMTP id 7CA5E196B9
+	for <rubini@linux.it>; Fri, 29 Jun 2001 18:26:28 +0200 (CEST)
+Received: from ozemail.com.au (IDENT:steveb@ganges.riverstone.com [192.168.1.2])
+	by gateway.riverstone.com (8.9.3/8.8.7) with ESMTP id LAA28233
+	for <rubini@linux.it>; Fri, 29 Jun 2001 11:22:12 -0500
+Sender: rubini@gnu.systemy.it
+Message-ID: <3B3CABF1.D82BC05D@ozemail.com.au>
+Date: Fri, 29 Jun 2001 11:25:21 -0500
+From: Steve Bennett <msteveb@ozemail.com.au>
+X-Mailer: Mozilla 4.61 [en] (X11; U; Linux 2.2.17-14smp i686)
+X-Accept-Language: en
+MIME-Version: 1.0
+To: rubini@linux.it
+Subject: Patch for gpm
+Content-Type: multipart/mixed;
+ boundary="------------335CB4A2F62766DD7699430A"
+X-Mozilla-Status: 8001
+X-Mozilla-Status2: 00000000
+X-UIDL: 994242300.18459.suppe
+
+This is a multi-part message in MIME format.
+--------------335CB4A2F62766DD7699430A
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+
+Hi,
+
+Are you the maintainer for gpm?
+I have a patch which you may be interested in including in the next version.
+I use a laptop which has a builtin touchpad which emulates a standard PS/2
+mouse, but when I'm not on the road, I use an Intellimouse PS/2 mouse. The
+problem is that I have to reconfigure the mouse each time I switch.
+With this patch, gpm mouse type "imps2" will auto-detect whether the type is
+imps2 or ps2.
+
+The patch is against an older version (1.17.9), but I could update it to be
+against the latest version if necessary.
+
+Cheers,
+Steve
+
+--
+Steve Bennett
+Email: msteveb@ozemail.com.au
+Web:   http://members.ozemail.com.au/~msteveb/
+
+
+
+--------------335CB4A2F62766DD7699430A
+Content-Type: text/plain; charset=us-ascii;
+ name="gpm-imps2-detect.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline;
+ filename="gpm-imps2-detect.patch"
+
+diff  -u gpm-1.17.9/mice.c
+--- gpm-1.17.9/mice.c.orig
++++ gpm-1.17.9/mice.c	Mon Jun 25 13:17:49 2001
+@@ -57,6 +57,7 @@
+ 
+ #include <linux/kdev_t.h> /* MAJOR */
+ #include <linux/keyboard.h>
++#include <linux/pc_keyb.h>
+ 
+ #ifdef HAVE_LINUX_JOYSTICK_H
+ #include <linux/joystick.h>
+@@ -1147,17 +1148,109 @@
+   return type;
+ }
+ 
+-/* intellimouse, ps2 version: Ben Pfaff and Colin Plumb */
+-static Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type)
++#define AUX_SEND_ID 0xF2
++#define AUX_ID_ERROR  -1
++#define AUX_ID_PS2    0
++#define AUX_ID_IMPS2  3
++
++/*
++ * Sends the SEND_ID command to the mouse.
++ * Return one of AUX_ID_...
++ */
++static int read_mouse_id(int fd)
+ {
+-  static unsigned char s1[] = { 243, 200, 243, 100, 243, 80, };
+-  static unsigned char s2[] = { 246, 230, 244, 243, 100, 232, 3, };
+-  write (fd, s1, sizeof (s1));
+-  usleep (30000);
+-  write (fd, s2, sizeof (s2));
++  unsigned char c = AUX_SEND_ID;
++  unsigned char id;
++
++  write(fd, &c, 1);
++  read(fd, &c, 1);
++  if (c != AUX_ACK) {
++    return(-1);
++  }
++  read(fd, &id, 1);
++
++#ifdef DEBUG
++  fprintf(stderr, "Returning mouse id %d (ack=%d)\n", id, c);
++#endif
++
++  return(id);
++}
++
++static int write_to_mouse(int fd, unsigned char *data, size_t len)
++{
++  int i;
++  int error = 0;
++  for (i = 0; i < len; i++) {
++    unsigned char c;
++    write(fd, &data[i], 1);
++    read(fd, &c, 1);
++#ifdef DEBUG
++    fprintf(stderr, "Wrote: %02X, Read: %02X\n", data[i], c);
++#endif
++    if (c != AUX_ACK) {
++      error++;
++    }
++  }
+   usleep (30000);
+   tcflush (fd, TCIFLUSH);
+-  return type;
++  return(error);
++}
++
++/* intellimouse, ps2 version: Ben Pfaff and Colin Plumb */
++static Gpm_Type *I_imps2(int fd, unsigned short flags, struct Gpm_Type *type)
++{
++  int i;
++  int id;
++  static unsigned char basic_init[] = { AUX_ENABLE_DEV, AUX_SET_SAMPLE, 100 };
++  static unsigned char imps2_init[] = { AUX_SET_SAMPLE, 200, AUX_SET_SAMPLE, 100, AUX_SET_SAMPLE, 80, };
++  static unsigned char ps2_init[] = { AUX_SET_SCALE11, AUX_ENABLE_DEV, AUX_SET_SAMPLE, 100, AUX_SET_RES, 3, };
++
++  /* Do a basic init in case the mouse is confused */
++  write_to_mouse(fd, basic_init, sizeof (basic_init));
++
++  /* Now try again and make sure we have a PS/2 mouse */
++  if (write_to_mouse(fd, basic_init, sizeof (basic_init)) != 0) {
++    gpm_debug_log(LOG_ERR, "imps2: PS/2 mouse failed init");
++    return(NULL);
++  }
++
++  /* Now try to switch to 3 button mode */
++  if (write_to_mouse(fd, imps2_init, sizeof (imps2_init)) != 0) {
++    gpm_debug_log(LOG_ERR, "imps2: PS/2 mouse failed (3 button) init");
++    return(NULL);
++  }
++
++  /* Now read the mouse id */
++  id = read_mouse_id(fd);
++  if (id == AUX_ID_ERROR) {
++    gpm_debug_log(LOG_ERR, "imps2: PS/2 mouse failed to read id");
++    return(NULL);
++  }
++
++  /* And do the real initialisation */
++  if (write_to_mouse(fd, ps2_init, sizeof (ps2_init)) != 0) {
++    gpm_debug_log(LOG_ERR, "imps2: PS/2 mouse failed setup");
++    return(NULL);
++  }
++
++  if (id == AUX_ID_IMPS2) {
++    /* Really an intellipoint, so initialise 3 button mode (4 byte packets) */
++    gpm_debug_log(LOG_NOTICE, "imps2: Auto-detected intellimouse PS/2");
++
++    return type;
++  }
++  if (id == AUX_ID_PS2) {
++    gpm_debug_log(LOG_NOTICE, "imps2: Auto-detected standard PS/2");
++    for (type=mice; type->fun; type++) {
++      if (strcmp(type->name, "ps2") == 0) {
++        return(type);
++      }
++    }
++    /* ps2 was not found!!! */
++    return(NULL);
++  }
++  gpm_debug_log(LOG_ERR, "imps2: Auto-detected unknown mouse type");
++  return(NULL);
+ }
+ 
+ static Gpm_Type *I_twid(int fd, unsigned short flags, struct Gpm_Type *type)
+
+--------------335CB4A2F62766DD7699430A--
+
+

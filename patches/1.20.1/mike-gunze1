@@ -1,0 +1,23 @@
+this one is from Fedora ...
+
+gunze_calib is declared as int[4], so referring to idx #4 is
+obviously a bad idea :)
+
+--- gpm-1.20.1/src/mice.c
++++ gpm-1.20.1/src/mice.c
+@@ -2112,7 +2112,7 @@
+       for (i=0; i<4; i++)
+          if (gunze_calib[i] & ~1023) calibok = 0;
+       if (gunze_calib[0] == gunze_calib[2]) calibok = 0;
+-      if (gunze_calib[1] == gunze_calib[4]) calibok = 0;
++      if (gunze_calib[1] == gunze_calib[3]) calibok = 0;
+       fclose(f);
+    }
+    if (!calibok) {
+
+-mike
+_______________________________________________
+gpm mailing list
+gpm@lists.linux.it
+http://lists.linux.it/listinfo/gpm
+

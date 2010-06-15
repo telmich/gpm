@@ -1,0 +1,88 @@
+diff -ur gpm-1.19.3.orig/README gpm-1.19.3/README
+--- gpm-1.19.3.orig/README	Tue Jul 18 16:39:11 2000
++++ gpm-1.19.3/README	Sat Jan  6 10:31:18 2001
+@@ -159,9 +159,9 @@
+ better "ldd /usr/sbin/gpm").  And the compiler messages, obviously.
+ 
+ * When a program hangs or segfaults, please reinvoke the program under strace:
+-	strace -tf -o /tmp/trace.gpm gpm -t msc
++	strace -tf -o /var/run/trace.gpm gpm -t msc
+                                      ^^^^^^^^^^ put your true cmdline here.
+-Then send me /tmp/trace.gpm* (they may be one or two files, according
++Then send me /var/run/trace.gpm* (they may be one or two files, according
+ to the strace version), and a description of how you reproduce the problem.
+ 
+ The last resort is a core dump, but I'll ask it personally if I have real
+diff -ur gpm-1.19.3.orig/doc/doc.gpm gpm-1.19.3/doc/doc.gpm
+--- gpm-1.19.3.orig/doc/doc.gpm	Tue Jul 18 16:43:18 2000
++++ gpm-1.19.3/doc/doc.gpm	Sat Jan  6 10:32:15 2001
+@@ -2012,7 +2012,7 @@
+   "load: "    f.load
+   "free:"     f.free
+   "---------" f.nop
+-  "disk usage" f.bgcmd  "du | sort -rn > /tmp/du"
++  "disk usage" f.bgcmd  "du | sort -rn > /var/run/du"
+ @}
+ 
+ button 3 @{
+diff -ur gpm-1.19.3.orig/doc/gpm.info gpm-1.19.3/doc/gpm.info
+--- gpm-1.19.3.orig/doc/gpm.info	Tue Jul 18 17:21:19 2000
++++ gpm-1.19.3/doc/gpm.info	Sat Jan  6 10:32:22 2001
+@@ -1626,7 +1626,7 @@
+        "load: "    f.load
+        "free:"     f.free
+        "---------" f.nop
+-       "disk usage" f.bgcmd  "du | sort -rn > /tmp/du"
++       "disk usage" f.bgcmd  "du | sort -rn > /var/run/du"
+      }
+      
+      button 3 {
+diff -ur gpm-1.19.3.orig/doc/gpmdoc.ps gpm-1.19.3/doc/gpmdoc.ps
+--- gpm-1.19.3.orig/doc/gpmdoc.ps	Tue Jul 18 17:21:19 2000
++++ gpm-1.19.3/doc/gpmdoc.ps	Sat Jan  6 10:32:32 2001
+@@ -3466,7 +3466,7 @@
+ 2190 y("")477 b(f.nop)430 2294 y("load:)46 b(")191 b(f.load)430
+ 2398 y("free:")237 b(f.free)430 2501 y("---------")45
+ b(f.nop)430 2605 y("disk)h(usage")g(f.bgcmd)94 b("du)47
+-b(|)g(sort)g(-rn)g(>)g(/tmp/du")334 2709 y(})334 2916
++b(|)g(sort)g(-rn)g(>)g(/var/run/du")334 2709 y(})334 2916
+ y(button)g(3)g({)430 3020 y(name)g("jump")430 3228 y(foreground)e
+ (black)430 3332 y(background)g(red)430 3435 y(border)h(bright)g(yellow)
+ 430 3539 y(head)h(bright)f(yellow)430 3747 y("tty1")94
+diff -ur gpm-1.19.3.orig/doc/gpmdoc.txt gpm-1.19.3/doc/gpmdoc.txt
+--- gpm-1.19.3.orig/doc/gpmdoc.txt	Tue Jul 18 17:21:19 2000
++++ gpm-1.19.3/doc/gpmdoc.txt	Sat Jan  6 10:32:41 2001
+@@ -1589,7 +1589,7 @@
+        "load: "    f.load
+        "free:"     f.free
+        "---------" f.nop
+-       "disk usage" f.bgcmd  "du | sort -rn > /tmp/du"
++       "disk usage" f.bgcmd  "du | sort -rn > /var/run/du"
+      }
+      
+      button 3 {
+diff -ur gpm-1.19.3.orig/gpn.c gpm-1.19.3/gpn.c
+--- gpm-1.19.3.orig/gpn.c	Tue Jul 18 16:06:06 2000
++++ gpm-1.19.3/gpn.c	Sat Jan  6 10:30:20 2001
+@@ -223,13 +223,17 @@
+ static void
+ check_uniqueness(void)
+ {
+-  static char tmp_pidfile [] = GPM_NODE_DIR "gpmXXXXXX";
++  static char tmp_pidfile [64];
++  int fd;
+   FILE* fp = 0;
+ 
+-  if (!mktemp(tmp_pidfile + strlen(GPM_NODE_DIR))) {
+-    oops("mktemp()");
++  tmp_pidfile[0];
++  strncat (tmp_pidfile, GPM_NODE_DIR "gpmXXXXXX", sizeof(tmp_pidfile) - 1);
++
++  if ((fd = mkstemp(tmp_pidfile)) == -1) {
++    oops("mkstemp()");
+   } /*if*/
+-  if ((fp = fopen(tmp_pidfile,"w")) != NULL) {
++  if ((fp = fdopen(fd,"w")) != NULL) {
+     fprintf(fp,"%d\n",getpid());
+     fclose(fp);
+   } else if (getuid()) {

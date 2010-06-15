@@ -1,0 +1,252 @@
+diff -r -u gpm-1.18.0/doc/gpm.8 gpm-1.18.0-wheel/doc/gpm.8
+--- gpm-1.18.0/doc/gpm.8	Mon Sep 13 08:33:54 1999
++++ gpm-1.18.0-wheel/doc/gpm.8	Sun Oct 10 15:23:48 1999
+@@ -263,6 +263,10 @@
+ optional and its default value is 1.  Default verbosity level is
+ 5 (`LOG_NOTICE'). 
+ .TP
++-w
++Simulate wheel operation by pressing middle mouse button and
++y-axis movement.
++.TP
+ -2
+ Force two buttons. This means that the middle button, if any,
+ will be taken as it was the right one.
+diff -r -u gpm-1.18.0/gpm.c gpm-1.18.0-wheel/gpm.c
+--- gpm-1.18.0/gpm.c	Mon Sep 13 08:33:54 1999
++++ gpm-1.18.0-wheel/gpm.c	Sun Oct 10 15:18:15 1999
+@@ -61,6 +61,7 @@
+   DEF_TYPE, DEF_DEV, DEF_SEQUENCE,
+   DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, 0 /* scaley */,
+   DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_TOGGLE, DEF_GLIDEPOINT_TAP,
++  DEF_SIMWHEEL,
+   (Gpm_Type *)NULL
+   },
+ };
+@@ -387,20 +388,23 @@
+       {
+       event->x=nEvent.x;
+       event->y=nEvent.y;
++      event->z=nEvent.z;
+       }
+     event->dx=nEvent.dx;
+     event->dy=nEvent.dy;
++    event->dz=nEvent.dz;
+     event->buttons=nEvent.buttons;
+     }
+   else
+     {
+-    event->dx=event->dy=0;
++    event->dx=event->dy=event->dz=0;
+ 
+     nEvent.modifiers = 0; /* some mice set them */
+     FD_ZERO(&fdSet); FD_SET(fd,&fdSet); i=0;
+ 
+     do /* cluster loop */
+       {
++      nEvent.dx=nEvent.dy=nEvent.dz=0;
+       if (   ((data=getMouseData(fd,m_type,kd_mode))==NULL)
+ 	  || ((*(m_type->fun))(&nEvent,data)==-1) )
+ 	{
+@@ -408,6 +412,12 @@
+ 	else break;
+ 	}
+ 
++      if (which_mouse->opt_simwheel && (nEvent.buttons & GPM_B_MIDDLE) && nEvent.dy) {
++	nEvent.buttons &= !GPM_B_MIDDLE;
++	nEvent.dz = nEvent.dy;
++	nEvent.dy = 0;
++      }
++
+       event->modifiers = nEvent.modifiers; /* propagate modifiers */
+ 
+       /* propagate buttons */
+@@ -430,6 +440,7 @@
+ 	/* increment the reported dx,dy */
+ 	event->dx+=nEvent.dx;
+ 	event->dy+=nEvent.dy;
++	event->dz+=nEvent.dz;
+ 	}
+       else /* a pen */
+ 	{
+@@ -459,12 +470,13 @@
+              static struct timeval rept1,rept2;
+              gettimeofday(&rept2, (struct timezone *)NULL);
+              if (((rept2.tv_sec -rept1.tv_sec) *1000+(rept2.tv_usec-rept1.tv_usec)/1000)>250) 
+-                { event->dx=0; event->dy=0; }
++                { event->dx=0; event->dy=0; event->dz=0; }
+              rept1=rept2;
+              
+              event->dy=event->dy*((win.ws_col/win.ws_row)+1);
+ 	     event->x=nEvent.x; 
+ 	     event->y=nEvent.y;
++	     event->z=nEvent.z;
+           }
+         repeated_type->repeat_fun(event, fifofd); /* itz Mon Jan 11 23:39:44 PST 1999 */
+       }
+@@ -497,7 +509,7 @@
+ 
+ /*....................................... fill missing fields */
+ 
+-  event->x+=event->dx, event->y+=event->dy;
++  event->x+=event->dx, event->y+=event->dy; event->z+=event->dz;
+   statusB=event->buttons;
+ 
+   i=open_console(O_RDONLY);
+diff -r -u gpm-1.18.0/gpm.h gpm-1.18.0-wheel/gpm.h
+--- gpm-1.18.0/gpm.h	Mon Sep 13 08:33:55 1999
++++ gpm-1.18.0-wheel/gpm.h	Sat Oct  9 20:45:44 1999
+@@ -114,7 +114,7 @@
+ typedef struct Gpm_Event {
+   unsigned char buttons, modifiers;  /* try to be a multiple of 4 */
+   unsigned short vc;
+-  short dx, dy, x, y;
++  short dx, dy, dz, x, y, z;
+   enum Gpm_Etype type;
+   int clicks;
+   enum Gpm_Margin margin;
+diff -r -u gpm-1.18.0/gpmCfg.h gpm-1.18.0-wheel/gpmCfg.h
+--- gpm-1.18.0/gpmCfg.h	Mon Sep 13 08:33:55 1999
++++ gpm-1.18.0-wheel/gpmCfg.h	Sun Oct 10 14:16:21 1999
+@@ -63,5 +63,7 @@
+ #define DEF_PTRDRAG          1    /* double or triple click */
+ #define DEF_TOGGLE           0
+ #define DEF_GLIDEPOINT_TAP   0    /* tapping emulates no buttons by default */
++#define DEF_SIMWHEEL         0    /* simulate wheel with middle button and */
++				  /* y-axis movement */
+ 
+ #endif /* _GPMCFG_INCLUDED */
+diff -r -u gpm-1.18.0/gpmInt.h gpm-1.18.0-wheel/gpmInt.h
+--- gpm-1.18.0/gpmInt.h	Mon Sep 13 08:33:55 1999
++++ gpm-1.18.0-wheel/gpmInt.h	Sun Oct 10 14:12:19 1999
+@@ -87,6 +87,7 @@
+   char *opt_type, *opt_dev, *opt_sequence;
+   int opt_baud,opt_sample,opt_delta, opt_accel, opt_scale, opt_scaley;
+   int opt_time, opt_cluster, opt_three, opt_toggle, opt_glidepoint_tap;
++  int opt_simwheel;
+   Gpm_Type *m_type;
+   int fd;
+ };
+diff -r -u gpm-1.18.0/gpn.c gpm-1.18.0-wheel/gpn.c
+--- gpm-1.18.0/gpn.c	Mon Sep 13 08:33:54 1999
++++ gpm-1.18.0-wheel/gpn.c	Sun Oct 10 15:37:31 1999
+@@ -212,7 +212,9 @@
+          "                     Use a non-existent type (e.g. \"help\") to get a list\n"
+          "    -T               test: read mouse, no clients\n"
+          "    -v               print version and exit\n"
+-         "    -V verbosity     increase number of logged messages\n", 
++         "    -V verbosity     increase number of logged messages\n"
++         "    -w               simulate wheel operation by pressing middle\n"
++         "                     mouse button and y-axis movement\n",
+          DEF_ACCEL, DEF_BAUD, DEF_SEQUENCE, DEF_DELTA, DEF_TIME, DEF_LUT,
+          DEF_SCALE, DEF_SAMPLE, DEF_TYPE);
+   return 1;
+@@ -296,7 +298,7 @@
+ int 
+ cmdline(int argc, char **argv)
+ {
+-  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pqr:R::s:S:t:TvV::23";
++  char options[]="a:A::b:B:d:Dg:hi:kl:m:Mo:pqr:R::s:S:t:TvV::w23";
+   int i, opt;
+   FILE *f;
+   static struct {char *in; char *out;} seq[] = {
+@@ -377,6 +379,9 @@
+         case 'v': printf(GPM_NAME " " GPM_RELEASE ", " GPM_DATE "\n"); exit(0);
+         case 'V': 
+           gpm_debug_level += (0 == optarg ? 1 : strtol(optarg, 0, 0));
++          break;
++	case 'w':
++          which_mouse->opt_simwheel=1;
+           break;
+         case '2': opt_three=-1; break;
+         case '3': opt_three=1; break;
+diff -r -u gpm-1.18.0/mice.c gpm-1.18.0-wheel/mice.c
+--- gpm-1.18.0/mice.c	Mon Sep 13 08:33:54 1999
++++ gpm-1.18.0-wheel/mice.c	Sun Oct 10 15:29:24 1999
+@@ -366,6 +366,61 @@
+   return 0;
+ }
+ 
++static int M_imps2(Gpm_Event *state,  unsigned char *data)
++{
++  static int tap_active=0; /* there exist glidepoint ps2 mice */
++
++  state->buttons=
++    !!(data[0]&1) * GPM_B_LEFT +
++    !!(data[0]&2) * GPM_B_RIGHT +
++    !!(data[0]&4) * GPM_B_MIDDLE;
++
++  if (data[0]==0 && opt_glidepoint_tap) /* by default this is false */
++    state->buttons = tap_active = opt_glidepoint_tap;
++  else if (tap_active)
++    if (data[0]==8)
++      state->buttons = tap_active = 0;
++    else state->buttons = tap_active;
++
++ /* Some PS/2 mice send reports with negative bit set in data[0]
++  * and zero for movement.  I think this is a bug in the mouse, but
++  * working around it only causes artifacts when the actual report is -256;
++  * they'll be treated as zero. This should be rare if the mouse sampling
++  * rate is set to a reasonable value; the default of 100 Hz is plenty.
++  * (Stephen Tell)
++  */
++  if(data[1] != 0)
++    state->dx=   (data[0] & 0x10) ? data[1]-256 : data[1];
++  else
++    state->dx = 0;
++  if(data[2] != 0)
++    state->dy= -((data[0] & 0x20) ? data[2]-256 : data[2]);
++  else
++    state->dy = 0;
++  state->dz = (data[3] > 128) ? data[3]-256 : data[3];
++
++  return 0;
++}
++
++static int R_imps2(Gpm_Event *state, int fd)
++{
++  unsigned char buffer[4];
++
++  buffer[0] = ((state->buttons & GPM_B_LEFT)   ? 0x01 : 0) |
++	      ((state->buttons & GPM_B_RIGHT)  ? 0x02 : 0) |
++	      ((state->buttons & GPM_B_MIDDLE) ? 0x04 : 0);
++
++  if (state->dx < 0) buffer[0] |= 0x10;
++  if (state->dy > 0) buffer[0] |= 0x20;
++
++  buffer[1] = ( state->dx >= 0) ?  state->dx : 256+state->dx;
++  buffer[2] = (-state->dy >= 0) ? -state->dy : 256-state->dy;
++  buffer[3] = ( state->dz >= 0) ?  state->dz : 256+state->dz;
++
++  return write(fd,buffer,4);
++}
++
++
+ static int M_netmouse(Gpm_Event *state,  unsigned char *data)
+ {
+   /* Avoid this beasts if you can.  They connect to normal PS/2 port,
+@@ -1447,9 +1502,9 @@
+   {"pnp",  "Plug and pray. New mice may not run with '-t ms'.",
+            "", M_bare, I_pnp, CS7 | STD_FLG,
+                                 {0x40, 0x40, 0x40, 0x00}, 3, 1, 0, 0, 0},
+-  {"imps2",   "Microsoft Intellimouse (ps2) - 3 buttons, wheel unused",
+-           "", M_ps2, I_imps2, STD_FLG,
+-                                {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
++  {"imps2",   "Microsoft Intellimouse (ps2) - 3 buttons, wheel",
++           "", M_imps2, I_imps2, STD_FLG,
++                                {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, R_imps2},
+   {"ms3", "Microsoft Intellimouse (serial) - 3 buttons, wheel unused",
+            "", M_ms3, I_pnp, CS7 | STD_FLG,
+                                 {0xc0, 0x40, 0xc0, 0x00}, 4, 1, 0, 0, 0},
+diff -r -u gpm-1.18.0/mouse-test.c gpm-1.18.0-wheel/mouse-test.c
+--- gpm-1.18.0/mouse-test.c	Mon Sep 13 08:33:54 1999
++++ gpm-1.18.0-wheel/mouse-test.c	Sun Oct 10 14:24:28 1999
+@@ -55,6 +55,7 @@
+   DEF_TYPE, DEF_DEV, DEF_SEQUENCE,
+   DEF_BAUD, DEF_SAMPLE, DEF_DELTA, DEF_ACCEL, DEF_SCALE, DEF_SCALE /*scaley*/,
+   DEF_TIME, DEF_CLUSTER, DEF_THREE, DEF_TOGGLE, DEF_GLIDEPOINT_TAP,
++  DEF_SIMWHEEL,
+   (Gpm_Type *)NULL
+ };
+ 
+

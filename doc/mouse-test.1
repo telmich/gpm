@@ -1,0 +1,44 @@
+.TH mouse-test 1 "March 26, 1998" ""
+.SH NAME
+mouse-test \- a tool for determining mouse type and device it's attached to.
+.SH SYNTAX
+\fBmouse-test\fR [ \fIdevice\fR ... ]
+.SH DESCRIPTION
+
+.LP
+This experimental and incomplete application tries to help in detecting
+which protocol does your mouse speak. It is able to detect MouseMan
+devices, and to choose between -t ms (three-buttons aware) and
+-t bare old two-buttons-only serial mice.
+
+.LP
+.SH BUGS
+
+.LP
+I know the application is buggy, but I only own one mouse device.
+If you are interested in this application, just call me and awake me
+from my laziness.
+
+.LP
+.SS OPTIONS
+.IP \fIdevice\fP
+[ \fIdevice\fP ... ]
+.PP
+Check this \fIdevice\fP for a mouse.  If no devices are listed, mouse-test will try all possible devices.
+
+.LP
+.SH AUTHOR
+Alessandro Rubini <rubini@linux.it>
+
+.LP
+.SH FILES
+.nf
+/dev/*              The devices used to search for a mouse
+.fi
+
+.LP
+.SH SEE ALSO
+.nf
+gpm(8)
+
+.fi
