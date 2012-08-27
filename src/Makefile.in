@@ -79,7 +79,7 @@ prog/%:	prog/%.o
 #		| $(SED) '\''s/\($*\)\.o\([ :]*\)/\1.o \1.lo\2/g'\'' > $(DEPDIR)/$@'
 
 # Do it all!
-all:	gpm lib/libgpm.so.@abi_lev@ lib/libgpm.a $(PROG)
+all:	gpm lib/libgpm.so.@abi_lev@ @LIBGPM_A@ $(PROG)
 
 gpm:	$(GOBJ)
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $(GOBJ) @LIBS@ $(LIBS) -lm
@@ -105,7 +105,9 @@ installdirs:
 
 install:	check 
 	$(INSTALL_PROGRAM) gpm $(sbindir)/gpm
-	$(INSTALL_DATA) -m 644 lib/libgpm.a $(libdir)/libgpm.a
+	if [ -f lib/libgpm.a ] ; then \
+	$(INSTALL_DATA) -m 644 lib/libgpm.a $(libdir)/libgpm.a ; \
+	fi
 	$(INSTALL_DATA) -m 644 $(srcdir)/headers/gpm.h $(includedir)/gpm.h
 	# POSIX requires the range of a for loop be nonempty and Bash
 	# 2.x goes along; unfortunately that means an additional

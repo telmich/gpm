@@ -79,6 +79,16 @@ AC_CHECK_HEADERS(sys/sysmacros.h linux/major.h linux/tty.h)
 # Required headers
 AC_CHECK_HEADERS(sys/socket.h,,[AC_MSG_ERROR([Required header file missing])])
 
+AC_ARG_ENABLE([static],
+[  --enable-static         build static libraries @<:@default=no@:>@])
+
+LIBGPM_A=
+
+AS_IF([test "x$enable_static" = "xyes"], [
+        LIBGPM_A=lib/libgpm.a
+])
+
+
 AC_ARG_WITH(curses,
 [  --without-curses        disable curses support even if curses found])
 
@@ -138,6 +148,7 @@ AC_SUBST(ELISP)
 AC_SUBST(SHLIB)
 AC_SUBST(PICFLAGS)
 AC_SUBST(SOLDFLAGS)
+AC_SUBST(LIBGPM_A)
 AC_SUBST(CURSES_OBJS)
 AC_SUBST(SHARED_LIBS)
 AC_SUBST(lispdir)
