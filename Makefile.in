@@ -39,25 +39,6 @@ uninstall:	do-uninstall
 clean: do-clean
 	rm -f config.status.lineno
 
-# regen, if it changed; ignore if git is missing / fails
-versioncheck:
-	@v1="$$(git-describe 2>/dev/null)"; \
-	if [ -z "$$v1" ]; then					\
-		echo "No git available, not updating version"; 	\
-		exit 0; 														\
-	fi;											\
-	v2="$$(cat .gitversion)"; 				\
-	if [ "$$v1" != "$$v2" ]; then 		\
-	echo "updating versionfiles"; 		\
-	date="$$(date +%Y%m%d\ %T\ %z)"; 	\
-	version="$$v1"; 							\
-	echo "define([AC_PACKAGE_VERSION], [$${version} $${date}])" > .gitversion.m4; \
-	echo "$${version}" > .gitversion; 	\
-	echo "$${date}"    > .releasedate; 	\
-	fi
-
-$(versionfiles): .git/HEAD versioncheck
-
 aclocal.m4: acinclude.m4
 	$(MKDIR) config
 	aclocal -I config
