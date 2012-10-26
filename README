@@ -21,24 +21,15 @@ Icaza and an emacs library included in this release. Recent dialog
 distributions and the Jed editor use gpm as well, and the same do
 several custom applications.
 
-There are still some new features to add (f.i. clean devfs support).
-Some of gpm's code needs a cleanup.
-
 If you want to make a patch to gpm, please read doc/HACK_GPM.
 
 For additionally documentation and other READMEs have a look into doc/.
 
-=========== REPORT SUCCESS
-
-As it is always nice to see as an author of FOSS that the software is
-used and alive und which options are used, you can send a success
-report to me via ./scripts/report_success.sh.
-
-
 =========== MAINTENANCE
 
-As of 1.19.4, gpm is officially maintained again. Most of the README is written
-by Alessandro Rubine, only minor changes are made by me.
+As of 1.19.4, gpm is officially maintained again.
+Most of the README is written by Alessandro Rubine,
+only minor changes are made by Nico Schottelius.
 
 
 =========== MAILING LIST
@@ -61,8 +52,7 @@ For example:
 
 The latest releases can always be found in one of the following place:
 
-   http://unix.schottelius.org/gpm/archives/
-   http://unix.schottelius.org/gpm/browse_source/
+   http://www.nico.schottelius.org/software/gpm/archives/
 
    Mirror:
 
@@ -71,11 +61,11 @@ The latest releases can always be found in one of the following place:
 
 The homepage of gpm can be found at
 
-   http://unix.schottelius.org/gpm/
+   http://www.nico.schottelius.org/software/gpm/
 
 You can get the latest development tree of gpm via git:
 
-   git-clone http://unix.schottelius.org/git/gpm 
+   git-clone git://git.schottelius.org/gpm
 
 There are three branches available:
 
@@ -83,14 +73,10 @@ There are three branches available:
    gpm-1-stable: Contains the latest stable source code.
    gpm-2-dev: Contains work that heads to gpm2.
 
-You can browse the git-tree via gitweb:
-
-   http://unix.schottelius.org/cgi-bin/gitweb.cgi?p=gpm;a=summary
-
-
 =========== COMPILING AND INSTALLING
 
-The package uses autoconf as of 2.12. Use "./configure && make" to
+The package uses autoconf as of 2.12. 
+Use "./autogen.sh && ./configure && make" to
 compile the gpm suite.  To install "make install". This installs
 everything under the "prefix" directory, which by default is
 /usr/local.
@@ -106,12 +92,6 @@ under $(prefix)/info.
 
 If you would like to 'clean'up very tidy, use distclean. Don't forget to use
 make distclean config! Otherwise there will be no configure script!
-
-If any errors occur, please report them to me. Something like this
-could be an easy (though brutal) way to do it:
- make clean;(uname -a; make) | mail -s "gpm compile err." nicos-gpm@pcsystems.de
-
-What remains to do after installation is a little configuration
 
 
 =========== CONFIGURING
