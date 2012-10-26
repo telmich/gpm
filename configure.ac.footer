@@ -1,11 +1,9 @@
-AC_REVISION(configure.in,v 1.7 2008/02/16 nico)
+AC_REVISION(configure.in,v 1.8 2012-10-26 nico)
 
 dnl Process this file with autoconf to produce a configure script.
 dnl written jan/1997 - T.E.Dickey <dickey@clark.net>
 
 AC_PREREQ(2.61)
-
-AC_INIT([gpm],["version-set-in-.gitversion-via-acinclude.m4"],[http://www.nico.schottelius.org/software/gpm/])
 
 AC_CONFIG_SRCDIR([src/daemon/main.c])
 AC_CONFIG_AUX_DIR([config])
@@ -32,10 +30,6 @@ AC_DEFINE_UNQUOTED([GPM_ABI_LEV], [$abi_lev], [Library level])
 AC_DEFINE_UNQUOTED([GPM_ABI_AGE], [$abi_age], [Library age])
 AC_DEFINE_UNQUOTED([GPM_ABI_REV], [$abi_rev], [Library revision])
 AC_DEFINE_UNQUOTED([GPM_ABI_FULL],["$abi_full"],[Full library version])
-
-releasedate="`cat $srcdir/.releasedate`"
-release="`cat $srcdir/.gitversion`"
-
 
 #
 # Find programs
