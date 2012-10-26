@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 
 [ -d config ] || mkdir config
 
