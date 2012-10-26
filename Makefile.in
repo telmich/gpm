@@ -103,10 +103,6 @@ TAGS:	$(SRCS) $(HDRS) src/prog/gpm-root.y do-TAGS
 ### RELEASE STUFF
 TARS  =../gpm-$(release).tar.gz
 TARS +=../gpm-$(release).tar.bz2 ../gpm-$(release).tar.lzma
-D_HOST=home.schottelius.org
-D_BASE=www/unix.schottelius.org/www/gpm
-D_DIR=$(D_BASE)/archives/
-D_SOURCE=$(D_BASE)/browse_source/
 
 M_HOST=arcana.linux.it
 M_DIR=gpm/
@@ -130,30 +126,15 @@ distconf: Makefile.in Makefile.include.in configure acinclude.m4 $(versionfiles)
 	lzma -9 -c $< > $@
 
 # 3. Put package together into .tar.gz and .tar.bz2
-#dist: distclean distconf gpm-$(release).tar.bz2 gpm-$(release).tar.gz
-dist: disttest distclean distconf nicotest $(TARS)
-	chmod 0644 $(TARS)
-	scp $(TARS) $(D_HOST):$(D_DIR)
+dist: disttest distclean distconf $(TARS)
 	scp $(TARS) $(M_HOST):$(M_DIR)
-	ssh "$(D_HOST)" "tar xvfz $(D_DIR)/gpm-$(release).tar.gz -C $(D_SOURCE)"
-	ssh "$(D_HOST)" "find \"$(D_SOURCE)/\" -type f -exec chmod 0644 {} \\;"
-	ssh "$(D_HOST)" "find \"$(D_SOURCE)/\" -type d -exec chmod 0755 {} \\;"
-
+	mv $(TARS) ~/niconetz/software/gpm/archives
 
 ### TEST: on nicos machine: not to be used anywhere else currently
 # create / update configure, delete other parts from earlier build
 disttest: distconf clean
 	./configure
 	make all
-
-TESTBUILDDIR=~/temp/gpm-build-test
-nicotest: $(TARS)
-	rm -rf $(TESTBUILDDIR)
-	mkdir -p $(TESTBUILDDIR)
-	cp $(TARS) $(TESTBUILDDIR)
-	cd $(TESTBUILDDIR); tar xvfj gpm-$(release).tar.bz2;
-	cd $(TESTBUILDDIR)/gpm-$(release); ./configure && make && ./src/gpm -v
-	rm -rf $(TESTBUILDDIR)
 
 ### CLEANUP
 distclean: clean do-clean do-distclean
