@@ -1,8 +1,9 @@
-1.20.7:
+1.20.7: 2012-10-26
 	* Fix inclusion of unwanted binary data
 	* Even more cleanups (Mike Frysinger)
 	* Fix hyphen-used-as-minus-sign issues in manpages. (ﺄﺤﻣﺩ ﺎﻠﻤﺤﻣﻭﺪﻳ)
 	* Don't build static libgpm by default (Sean McGovern)
+	* autogen.sh is now required to create setup version in autoconf (Nico Schottelius)
 
 1.20.5: 9th of February 2009
 	* Some cleanups (Mike Frysinger/Nico Schottelius)
