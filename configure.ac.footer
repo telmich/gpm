@@ -1,13 +1,11 @@
-AC_INIT([gpm],[1.20.6-38-g4fb7b9c],[http://www.nico.schottelius.org/software/gpm/])
-
-releasedate="2012-10-26 20:23:38 +0200"
-release="1.20.6-38-g4fb7b9c"
-AC_REVISION(configure.in,v 1.8 2012-10-26 nico)
+AC_REVISION(configure.in,v 1.7 2008/02/16 nico)
 
 dnl Process this file with autoconf to produce a configure script.
 dnl written jan/1997 - T.E.Dickey <dickey@clark.net>
 
 AC_PREREQ(2.61)
+
+AC_INIT([gpm],["version-set-in-.gitversion-via-acinclude.m4"],[http://www.nico.schottelius.org/software/gpm/])
 
 AC_CONFIG_SRCDIR([src/daemon/main.c])
 AC_CONFIG_AUX_DIR([config])
@@ -35,8 +33,8 @@ AC_DEFINE_UNQUOTED([GPM_ABI_AGE], [$abi_age], [Library age])
 AC_DEFINE_UNQUOTED([GPM_ABI_REV], [$abi_rev], [Library revision])
 AC_DEFINE_UNQUOTED([GPM_ABI_FULL],["$abi_full"],[Full library version])
 
-releasedate="$(grep '^[[:digit:]]' doc/changelog | head -n1 | cut -d: -f2)"
-release="$(grep '^[[:digit:]]' doc/changelog | head -n1 | cut -d: -f1)"
+releasedate="`cat $srcdir/.releasedate`"
+release="`cat $srcdir/.gitversion`"
 
 
 #

@@ -3,7 +3,7 @@
 # Copyright 1994,1997  rubini@linux.it
 # Copyright 1997       dickey@clark.net
 # Copyright (C) 1998 Ian Zimmerman <itz@rahul.net>
-# Copyright (C) 2001 Nico Schottelius <nico@schottelius.org>
+# Copyright (C) 2001-2012 Nico Schottelius
 #
 
 SHELL = /bin/sh
@@ -38,11 +38,6 @@ uninstall:	do-uninstall
 
 clean: do-clean
 	rm -f config.status.lineno
-
-
-versionfiles =  .gitversion .gitversion.m4 .releasedate
-dotfiles =  .gitignore .git/HEAD $(versionfiles)
-distfiles = configure
 
 # regen, if it changed; ignore if git is missing / fails
 versioncheck:
@@ -142,7 +137,6 @@ distconf: Makefile.in Makefile.include.in configure acinclude.m4 $(versionfiles)
 
 ../gpm-$(release).tar: $(srcdir) distclean distconf
 	# no exclude possible of .git with pax it seems, so the following is not possible:
-	#pax -w -x ustar -s ';^;gpm-$(release)/;' -f $@ -w $(dotfiles) *
 	git archive --prefix "gpm-$(release)/" -o $@ HEAD
 
 ../gpm-$(release).tar.gz:  ../gpm-$(release).tar
@@ -187,4 +181,4 @@ distclean: clean do-clean do-distclean
 	rm -f src/$(DEPFILE)
 
 allclean: do-allclean distclean
-	rm -f configure $(versionfiles) aclocal.m4
+	rm -f configure  aclocal.m4
