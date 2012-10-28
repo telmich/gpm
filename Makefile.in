@@ -102,7 +102,7 @@ TAGS:	$(SRCS) $(HDRS) src/prog/gpm-root.y do-TAGS
 
 ### RELEASE STUFF
 TARS  =../gpm-$(release).tar.gz
-TARS +=../gpm-$(release).tar.bz2 ../gpm-$(release).tar.lzma
+TARS +=../gpm-$(release).tar.bz2 ../gpm-$(release).tar.xz
 
 M_HOST=arcana.linux.it
 M_DIR=gpm/
@@ -122,8 +122,8 @@ distconf: Makefile.in Makefile.include.in configure acinclude.m4 $(versionfiles)
 ../gpm-$(release).tar.bz2:  ../gpm-$(release).tar
 	bzip2 -9 -c $< > $@
 
-../gpm-$(release).tar.lzma:  ../gpm-$(release).tar
-	lzma -9 -c $< > $@
+../gpm-$(release).tar.xz:  ../gpm-$(release).tar
+	xz -9 -c $< > $@
 
 # 3. Put package together into .tar.gz and .tar.bz2
 dist: disttest distclean distconf $(TARS)
