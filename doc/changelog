@@ -1,3 +1,7 @@
+1.20.8:
+	* Remove lzma, use xz (Mike Frysinger)
+	* Install shared lib with +x perms (Mike Frysinger)
+
 1.20.7: 2012-10-26
 	* Fix inclusion of unwanted binary data
 	* Even more cleanups (Mike Frysinger)
