@@ -108,6 +108,7 @@ M_HOST=arcana.linux.it
 M_DIR=gpm/
 
 tars: $(TARS)
+	chmod a+r $<
 
 # configure headers, produce new configure script
 distconf: Makefile.in Makefile.include.in configure acinclude.m4 $(versionfiles)
@@ -126,7 +127,7 @@ distconf: Makefile.in Makefile.include.in configure acinclude.m4 $(versionfiles)
 	xz -9 -c $< > $@
 
 # 3. Put package together into .tar.gz and .tar.bz2
-dist: disttest distclean distconf $(TARS)
+dist: disttest distclean distconf $(TARS) tars
 	scp $(TARS) $(M_HOST):$(M_DIR)
 	mv $(TARS) ~/niconetz/software/gpm/archives
 
