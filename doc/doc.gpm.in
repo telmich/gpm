@@ -88,7 +88,7 @@ by the Free Software Foundation.
 @subtitle A general purpose mouse server for the Linux console
 @subtitle @value{update-month}
 
-@author by Nico Schottelius <nico@@schottelius.org>
+@author by Nico Schottelius <nico-gpm2008@@schottelius.org>
 
 @end titlepage
 @setchapternewpage off
@@ -525,7 +525,7 @@ security risks when using them.
 Andrew Haylett <ajh@gec-mrc.co.uk> (the original selection code)
 Ian Zimmerman <itz@speakeasy.org> (old maintainer)
 Alessandro Rubini <rubini@linux.it> (old maintainer (still helps a lot))
-Nico Schottelius <nico@schottelius.org> (maintainer)
+Nico Schottelius <nico-gpm2008@schottelius.org> (maintainer)
 
 Many many contributors, to both selection and gpm.
 .fi
