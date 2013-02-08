@@ -250,7 +250,6 @@ static inline int twiddler_use_item(char *item)
 int twiddler_key(unsigned long message)
 {
    char **table = twiddler_get_table(message);
-   char *val;
   /*
    * These two are needed to avoid transmitting single keys when typing
    * chords. When the number of keys being held down decreases, data
@@ -269,7 +268,6 @@ int twiddler_key(unsigned long message)
 
    if (!table) return 0;
    message &= 0xff;
-   val = table[message];
 
    if ((message < last_message) && !marked) { /* ok, do it */
       marked++; /* don't retransmit on release */
@@ -428,8 +426,11 @@ char *twiddler_rest_to_value(char *s)
       buf[ibuf]='\0';
       return strdup(buf);
    }
-   if (*ptr == '\\')
-      return (char *)twiddler_escape_sequence(ptr+1, &len /* unused */);
+   if (*ptr == '\\') {
+      buf[ibuf++] = twiddler_escape_sequence(ptr+1, &len /* unused */);
+      buf[ibuf] = '\0';
+      return strdup(buf);
+   }
 
    if (strlen(ptr)==1) return ((char *)((unsigned long)*ptr & 0xFF));
 
