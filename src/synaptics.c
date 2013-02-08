@@ -214,6 +214,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <limits.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
 
@@ -2241,8 +2242,7 @@ static void syn_process_config (info_type ident,
 
 
 
-static unsigned char tp_hextoint (unsigned char byte1,
-				  unsigned char byte2) 
+static unsigned char tp_hextoint (unsigned byte1,unsigned byte2) 
 {
   unsigned char bytes [3];
   int result;
@@ -2250,7 +2250,7 @@ static unsigned char tp_hextoint (unsigned char byte1,
   bytes [0] = byte1;
   bytes [1] = byte2;
   bytes [2] = '\0';
-  sscanf (bytes, "%x", &result);
+  sscanf ((char *)bytes, "%x", &result);
   return result;
 }
 
@@ -2311,8 +2311,7 @@ static void tp_serial_read (int fd,
 }
 
 /* Write a string of commands */
-static void tp_serial_send_cmd(int fd,
-			       unsigned char *cmd) 
+static void tp_serial_send_cmd(int fd, const char *cmd) 
 {
   unsigned char junk [15];
 
@@ -2329,7 +2328,7 @@ static void tp_serial_send_cmd(int fd,
 static void syn_serial_set_mode (int fd,
 				 unsigned char mode) 
 {
-  unsigned char bytes [15];
+  char bytes [15];
 
   sprintf (bytes, "%%C3B%02X5555", mode);
 #if DEBUG_SENT_DATA
