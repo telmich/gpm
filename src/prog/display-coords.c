@@ -33,6 +33,7 @@
  */
 
 #include <unistd.h>           /* write, read, open    */
+#include <stdint.h>
 #include <stdlib.h>           /* strtol()             */
 #include <stdio.h>            /* printf()             */
 #include <time.h>             /* time()               */
@@ -50,7 +51,7 @@ int display_data(Gpm_Event *event, void *data)
    last  = now;
 
    /* display time, delta time */
-   printf("[%d] delta: %ds",now,delta);
+   printf("[%jd] delta: %ds",(intmax_t)now,delta);
    
    /* display mouse information */
    printf(": x=%2i, y=%2i, dx=%2i, dy=%2i\n", event->x, event->y, event->dx, event->dy);
