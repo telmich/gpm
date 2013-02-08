@@ -192,10 +192,11 @@ int old_main()
                 * or to the default handler, if any
                 * or to the selection handler
                 */ /* FIXME -- check event.vc */
-               /* can't we please rewrite the following a bit nicer?*/
-               (cinfo[event.vc] && do_client(cinfo[event.vc], &event))
-               || (cinfo[0]        && do_client(cinfo[0],        &event))
-               ||  do_selection(&event);
+               if(!cinfo[event.vc] || !do_client(cinfo[event.vc], &event)) {
+                    if(!cinfo[0] || !do_client(cinfo[0],&event)) {
+                        do_selection(&event);
+                    }
+	       }
             }
       }
 
