@@ -79,7 +79,7 @@ prog/%:	prog/%.o
 #		| $(SED) '\''s/\($*\)\.o\([ :]*\)/\1.o \1.lo\2/g'\'' > $(DEPDIR)/$@'
 
 # Do it all!
-all:	gpm lib/libgpm.so.@abi_lev@ @LIBGPM_A@ $(PROG)
+all:	gpm lib/libgpm.so.@abi_lev@ lib/libgpm.so @LIBGPM_A@ $(PROG)
 
 gpm:	$(GOBJ)
 	$(CC) @LDFLAGS@ $(LDFLAGS) -o $@ $(GOBJ) @LIBS@ $(LIBS) -lm
@@ -168,9 +168,8 @@ lib/libgpm.so.@abi_full@:	$(PICS)
 	@LDFLAGS@ $(LDFLAGS) -o lib/libgpm.so.@abi_full@ $^ @LIBS@ @SHARED_LIBS@ $(LIBS)	
 lib/libgpm.so.@abi_lev@:	lib/libgpm.so.@abi_full@
 	$(LN_S) -f libgpm.so.@abi_full@ lib/libgpm.so.@abi_lev@
-# unneeded, isn't it?
-#lib/libgpm.so:	lib/libgpm.so.@abi_full@
-#	$(LN_S) -f libgpm.so.@abi_full@ lib/libgpm.so
+lib/libgpm.so:	lib/libgpm.so.@abi_full@
+	$(LN_S) -f libgpm.so.@abi_full@ lib/libgpm.so
 
 include $(DEPFILE)
 
