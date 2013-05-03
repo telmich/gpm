@@ -124,7 +124,7 @@ No|no|N|n) SHARED_LIBS=-lc ;;
     done
     TERMLIBS=$LIBS
     LIBS=
-    for i in ncurses curses; do
+    for i in ncurses curses ncursesw; do
         if test x$LIBS = x; then
             AC_CHECK_LIB($i, wgetch,,,$TERMLIBS)
         else :; fi
