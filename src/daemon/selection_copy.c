@@ -27,7 +27,7 @@
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 
-void selection_copy(int x1, int y1, int x2, int y2, int mode)
+void selection_copy(int fd, int x1, int y1, int x2, int y2, int mode)
 {
 /*
  * The approach in "selection" causes a bus error when run under SunOS 4.1
@@ -35,7 +35,6 @@ void selection_copy(int x1, int y1, int x2, int y2, int mode)
  */
    unsigned char buf[6*sizeof(short)];
    unsigned short *arg = (unsigned short *)buf + 1;
-   int fd;
 
    buf[sizeof(short)-1] = 2;  /* set selection */
 
@@ -45,13 +44,10 @@ void selection_copy(int x1, int y1, int x2, int y2, int mode)
    arg[3]=(unsigned short)y2;
    arg[4]=(unsigned short)mode;
 
-   if ((fd=open_console(O_WRONLY))<0)
-      gpm_report(GPM_PR_OOPS,GPM_MESS_OPEN_CON);
    /* FIXME: should be replaced with string constant (headers/message.h) */
    gpm_report(GPM_PR_DEBUG,"ctl %i, mode %i",(int)*buf, arg[4]);
    if (ioctl(fd, TIOCLINUX, buf+sizeof(short)-1) < 0)
      gpm_report(GPM_PR_OOPS,GPM_MESS_IOCTL_TIOCLINUX);
-   close(fd);
 
    if (mode < 3) {
       opt_aged = 0;

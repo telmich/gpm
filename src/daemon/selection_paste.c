@@ -26,10 +26,9 @@
 #include "headers/message.h"        /* messaging in gpm */
 #include "headers/daemon.h"         /* daemon internals */
 
-void selection_paste(void)
+void selection_paste(int fd)
 {
    char c=3;
-   int fd;
 
    if (!opt_aged && (0 != opt_age_limit) &&
       (last_selection_time + opt_age_limit < time(0))) {
@@ -41,9 +40,7 @@ void selection_paste(void)
       return;
    }
 
-   fd=open_console(O_WRONLY);
    if(ioctl(fd, TIOCLINUX, &c) < 0)
       gpm_report(GPM_PR_OOPS,GPM_MESS_IOCTL_TIOCLINUX);
-   close(fd);
 }
 

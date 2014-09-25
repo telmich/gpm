@@ -211,8 +211,8 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode);
 int processRequest(Gpm_Cinfo *ci, int vc);
 int processSpecial(Gpm_Event *event);
 
-void selection_copy(int x1, int y1, int x2, int y2, int mode);
-void selection_paste(void);
+void selection_copy(int fd, int x1, int y1, int x2, int y2, int mode);
+void selection_paste(int fd);
 
 void startup(int argc, char **argv);
 

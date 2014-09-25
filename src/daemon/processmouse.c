@@ -204,7 +204,6 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
     */
    if (stat.v_active != j)
       get_console_size(event);
-   close(i);
 
    event->vc = stat.v_active;
 
@@ -212,6 +211,12 @@ int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode)
       event->type = (event->buttons ? GPM_DRAG : GPM_MOVE);
    else
       event->type = (event->buttons > oldB ? GPM_DOWN : GPM_UP);
+
+   if (ioctl(i,TIOCGWINSZ,&win)==0) {
+      maxx=win.ws_col;
+      maxy=win.ws_row;
+   }
+   close(i);
 
    switch(event->type) {                /* now provide the cooked bits */
       case GPM_DOWN:
