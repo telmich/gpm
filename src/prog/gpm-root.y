@@ -1199,9 +1199,9 @@ int main(int argc, char **argv)
 #if defined(__GLIBC__)
    __sigemptyset(&childaction.sa_mask);
 #else /* __GLIBC__ */
-   childaction.sa_mask=0;
+   sigemptyset(&childaction.sa_mask);
 #endif /* __GLIBC__ */
-   childaction.sa_flags=SA_INTERRUPT; /* need to break the select() call */
+   childaction.sa_flags=0;
    sigaction(SIGCHLD,&childaction,NULL);
 
    /*....................................... Connect and get your buffer */

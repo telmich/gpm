@@ -21,6 +21,7 @@
 
 #include <fcntl.h>                  /* open and co.      */
 #include <sys/stat.h>               /* stat()            */
+#include <sys/types.h>              /* major()           */
 #include <sys/ioctl.h>              /* ioctl             */
 
 /* Linux specific (to be outsourced in gpm2 */
