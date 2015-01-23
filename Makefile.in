@@ -65,9 +65,13 @@ install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) $(STRIP)' install
 
 installdirs:
-	$(MKDIR) $(libdir) $(bindir) $(sbindir) $(includedir) $(sysconfdir); \
+	$(INSTALL_DIR) $(DESTDIR)$(libdir)
+	$(INSTALL_DIR) $(DESTDIR)$(bindir)
+	$(INSTALL_DIR) $(DESTDIR)$(sbindir)
+	$(INSTALL_DIR) $(DESTDIR)$(includedir)
+	$(INSTALL_DIR) $(DESTDIR)$(sysconfdir); \
 	if test "x$(ELISP)" != "x" ; then \
-		$(MKDIR) $(lispdir) ; \
+		$(MKDIR) $(DESTDIR)$(lispdir) ; \
 	fi
 
 ### GENERIC
