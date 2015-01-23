@@ -43,6 +43,7 @@ YACC              = @YACC@
 INSTALL           = @INSTALL@
 INSTALL_PROGRAM   = @INSTALL_PROGRAM@
 INSTALL_DATA      = @INSTALL_DATA@
+INSTALL_DIR       = @INSTALL@ -d
 LN_S              = @LN_S@
 EMACS             = @EMACS@
 ELISP             = @ELISP@
