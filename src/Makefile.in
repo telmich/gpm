@@ -104,17 +104,17 @@ check:	all
 installdirs:
 
 install:	check 
-	$(INSTALL_PROGRAM) gpm $(sbindir)/gpm
+	$(INSTALL_PROGRAM) gpm $(DESTDIR)$(sbindir)/gpm
 	if [ -f lib/libgpm.a ] ; then \
-	$(INSTALL_DATA) -m 644 lib/libgpm.a $(libdir)/libgpm.a ; \
+	$(INSTALL_DATA) -m 644 lib/libgpm.a $(DESTDIR)$(libdir)/libgpm.a ; \
 	fi
-	$(INSTALL_DATA) -m 644 $(srcdir)/headers/gpm.h $(includedir)/gpm.h
+	$(INSTALL_DATA) -m 644 $(srcdir)/headers/gpm.h $(DESTDIR)$(includedir)/gpm.h
 	# POSIX requires the range of a for loop be nonempty and Bash
 	# 2.x goes along; unfortunately that means an additional
 	# headache in cases like this
 	if test "x@SHLIB@" != "x" ; then \
-		$(INSTALL_DATA) -m 755 lib/libgpm.so.@abi_full@ $(libdir)/libgpm.so.@abi_full@	;	\
-		cd $(libdir) && $(LN_S) -f libgpm.so.@abi_full@ libgpm.so.@abi_lev@ 					;	\
+		$(INSTALL_DATA) -m 644 lib/libgpm.so.@abi_full@ $(DESTDIR)$(libdir)/libgpm.so.@abi_full@	;	\
+		cd $(DESTDIR)$(libdir) && $(LN_S) -f libgpm.so.@abi_full@ libgpm.so.@abi_lev@ 					;	\
       echo "WARNING: We installed a lib, you should now call ldconfig" 						; 	\
       echo "f.i.: ldconfig -n -l $(libdir)/libgpm.so.@abi_full@" 								;	\
       echo "Or to update everything just type ldconfig"											;	\
@@ -124,7 +124,7 @@ install:	check
 
    # prog/
 	for i in $(PROG); do \
-		$(INSTALL_PROGRAM) $$i $(bindir)/`echo $$i | sed 's,prog/,,'` ;\
+		$(INSTALL_PROGRAM) $$i $(DESTDIR)$(bindir)/`echo $$i | sed 's,prog/,,'` ;\
 	done
 
 install-strip:
@@ -133,10 +133,11 @@ install-strip:
 # Note: this leaves around /usr/lib/libgpm.so.1 and /usr/lib/libgpm.so.1.nn
 # This is probably the right thing, because programs may be linked to it
 uninstall:
-	rm -f $(bindir)/mev $(bindir)/gpm-root $(bindir)/disable-paste \
-	$(sbindir)/gpm $(libdir)/libgpm.a $(libdir)/libgpm.so $(includedir)/gpm.h 
+   rm -f $(DESTDIR)$(bindir)/mev $(DESTDIR)$(bindir)/gpm-root $(DESTDIR)$(bindir)/disable-paste \
+   $(DESTDIR)$(sbindir)/gpm $(DESTDIR)$(libdir)/libgpm.a $(DESTDIR)$(libdir)/libgpm.so \
+   $(DESTDIR) $(includedir)/gpm.h
 	for i in $(PROG); do \
-		rm -f $(bindir)/$$i ;\
+		rm -f $(DESTDIR)$(bindir)/$$i ;\
 	done
 
 # Configure & unconfigure
