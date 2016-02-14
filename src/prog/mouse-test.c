@@ -182,7 +182,7 @@ Gpm_Type *(*I_serial)(int fd, unsigned short flags, struct Gpm_Type *type,
 /*----------------------------------------------------------------------------- 
    Place the description here.
  -----------------------------------------------------------------------------*/
-int mousereopen(int oldfd, char *name, Gpm_Type *type)
+int mousereopen(int oldfd, const char *name, Gpm_Type *type)
 {
    int fd;
    if (!type) type=mice+1; /* ms */

@@ -226,7 +226,7 @@
 /* #define GPM_MESS_                   "" */
 
 /* functions */
-void gpm_report(int line, char *file, int stat, char *text, ... );
+void gpm_report(int line, const char *file, int stat, const char *text, ... );
 
 /* rest of wd.h */
 #ifdef HAVE_SYSLOG_H

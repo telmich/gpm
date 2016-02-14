@@ -24,9 +24,9 @@
 
 #include "headers/message.h"
 
-void gpm_report(int line, char *file, int stat, char *text, ... )
+void gpm_report(int line, const char *file, int stat, const char *text, ... )
 {
-   char *string = NULL;
+   const char *string = NULL;
    int log_level;
    va_list ap;
 
