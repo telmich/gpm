@@ -189,7 +189,7 @@ int mousereopen(int oldfd, const char *name, Gpm_Type *type)
    close(oldfd);
    usleep(100000);
    fd=open(name,O_RDWR);
-   if (fd < 0) gpm_report(GPM_PR_OOPS,name);
+   if (fd < 0) gpm_report(GPM_PR_OOPS, "%s", name);
    (*I_serial)(fd,type->flags,type,1,&type->name); /* ms initialization */
    return fd;
 }

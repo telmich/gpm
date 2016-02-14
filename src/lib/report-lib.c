@@ -47,7 +47,7 @@ void gpm_report(int line, const char *file, int stat, const char *text, ... )
                            log_level = LOG_CRIT; break;
    }
 #ifdef HAVE_VSYSLOG
-   syslog(log_level, string);
+   syslog(log_level, "%s", string);
    vsyslog(log_level, text, ap);
 #else
    fprintf(stderr,"%s[%s(%d)]:\n",string,file,line);
