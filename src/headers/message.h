@@ -226,6 +226,9 @@
 /* #define GPM_MESS_                   "" */
 
 /* functions */
+#ifdef __GNUC__
+__attribute__((__format__(printf, 4, 5)))
+#endif
 void gpm_report(int line, const char *file, int stat, const char *text, ... );
 
 /* rest of wd.h */

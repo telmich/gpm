@@ -280,9 +280,15 @@ int   Gpm_GetSnapshot(Gpm_Event *ePtr);
 char *Gpm_get_console( void );
 int Gpm_x_high_y(int base, int pot_y);
 int Gpm_cnt_digits(int number);
+#ifdef __GNUC__
+__attribute__((__format__(printf, 3, 4)))
+#endif
 void gpm_oops(int line, const char *file, const char *text, ... );
 
 /* report.c / report-lib.c */
+#ifdef __GNUC__
+__attribute__((__format__(printf, 4, 5)))
+#endif
 void gpm_report(int line, const char *file, int stat, const char *text, ... );
 
 #ifdef __cplusplus
