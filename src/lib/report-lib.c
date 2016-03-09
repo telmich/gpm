@@ -24,9 +24,9 @@
 
 #include "headers/message.h"
 
-void gpm_report(int line, char *file, int stat, char *text, ... )
+void gpm_report(int line, const char *file, int stat, const char *text, ... )
 {
-   char *string = NULL;
+   const char *string = NULL;
    int log_level;
    va_list ap;
 
@@ -47,7 +47,7 @@ void gpm_report(int line, char *file, int stat, char *text, ... )
                            log_level = LOG_CRIT; break;
    }
 #ifdef HAVE_VSYSLOG
-   syslog(log_level, string);
+   syslog(log_level, "%s", string);
    vsyslog(log_level, text, ap);
 #else
    fprintf(stderr,"%s[%s(%d)]:\n",string,file,line);

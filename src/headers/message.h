@@ -226,7 +226,10 @@
 /* #define GPM_MESS_                   "" */
 
 /* functions */
-void gpm_report(int line, char *file, int stat, char *text, ... );
+#ifdef __GNUC__
+__attribute__((__format__(printf, 4, 5)))
+#endif
+void gpm_report(int line, const char *file, int stat, const char *text, ... );
 
 /* rest of wd.h */
 #ifdef HAVE_SYSLOG_H

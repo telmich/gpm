@@ -443,6 +443,7 @@ void f__fix(struct passwd *pass)
 }
 
 /*---------------------------------------------------------------------*/
+#if 0
 static int f_debug_one(FILE *f, Draw *draw)
 {
    DrawItem *ip;
@@ -465,6 +466,7 @@ static int f_debug_one(FILE *f, Draw *draw)
 #undef LINE
    return 0;
 }
+#endif
 
 int f_debug(int mode, DrawItem *self, int uid)
 {
@@ -960,10 +962,8 @@ static inline void scr_dump(int fd, FILE *f, unsigned char *buffer, int vc)
 /*------------*/
 static inline void scr_restore(int fd, FILE *f, unsigned char *buffer, int vc)
 {
-   int x,y, dumpfd;
+   int dumpfd;
    char dumpname[20];
-
-   x=buffer[2]; y=buffer[3];
    
    /* WILL NOT WORK WITH DEVFS! FIXME! */
    sprintf(dumpname,"/dev/vcsa%i",vc);
