@@ -24,6 +24,10 @@
 #include <sys/types.h>              /* major()           */
 #include <sys/ioctl.h>              /* ioctl             */
 
+#ifdef HAVE_SYS_SYSMACROS_H
+#include <sys/sysmacros.h>          /* major() w/newer glibc */
+#endif
+
 /* Linux specific (to be outsourced in gpm2 */
 #include <linux/serial.h>           /* for serial console check */
 #include <asm/ioctls.h>            /* for serial console check */
