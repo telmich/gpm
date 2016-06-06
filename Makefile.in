@@ -115,7 +115,11 @@ distconf: Makefile.in Makefile.include.in configure acinclude.m4 $(versionfiles)
 
 ../gpm-$(release).tar: $(srcdir) distclean distconf
 	# no exclude possible of .git with pax it seems, so the following is not possible:
-	git archive --prefix "gpm-$(release)/" -o $@ HEAD
+	rm -rf "gpm-$(release)/"
+	git archive --prefix "gpm-$(release)/" HEAD | tar xf -
+	cd "gpm-$(release)/" && ./autogen.sh && rm -rf autom4te.cache
+	tar cf $@ "gpm-$(release)/"
+	rm -rf "gpm-$(release)/"
 
 ../gpm-$(release).tar.gz:  ../gpm-$(release).tar
 	gzip -9 -c $< > $@
