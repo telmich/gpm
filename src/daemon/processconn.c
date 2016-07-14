@@ -67,7 +67,8 @@ int processConn(int fd)
       return -1;
    }
 
-   if((vc = request->vc) > MAX_VC) {
+   vc = request->vc;
+   if(vc > MAX_VC || vc < 0) {
       gpm_report(GPM_PR_DEBUG, GPM_MESS_REQUEST_ON, vc, MAX_VC);
       free(info);
       close(newfd);
