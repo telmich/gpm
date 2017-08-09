@@ -29,7 +29,7 @@
 #include <signal.h>        /* SIGPIPE */
 #include <time.h>          /* time() */
 #include <sys/param.h>
-#include <sys/fcntl.h>     /* O_RDONLY */
+#include <fcntl.h>         /* O_RDONLY */
 #include <sys/wait.h>      /* wait()   */
 #include <sys/stat.h>      /* mkdir()  */
 #include <sys/time.h>      /* timeval */
