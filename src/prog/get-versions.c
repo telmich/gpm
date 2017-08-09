@@ -22,7 +22,7 @@
  ********/
 
 #include <stdio.h>            /* printf()             */
-#include <gpm.h>              /* gpm information      */
+#include "headers/gpm.h"      /* gpm information      */
 
 int main()
 {

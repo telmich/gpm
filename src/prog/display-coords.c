@@ -39,7 +39,7 @@
 #include <time.h>             /* time()               */
 #include <errno.h>            /* errno                */
 #include <sys/select.h>       /* fd_set and FD_*      */
-#include <gpm.h>              /* gpm information      */
+#include "headers/gpm.h"      /* gpm information      */
 
 /* display resulting data */
 int display_data(Gpm_Event *event, void *data)
