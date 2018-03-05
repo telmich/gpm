@@ -254,6 +254,151 @@ static int M_evdev (Gpm_Event * state, unsigned char *data)
    }
    return 0;
 }
+
+struct AbsEvDev {
+  //x's and y's are relative to the event, not the window/screen
+  int fake3buttons;
+  int swapXY;
+  int reverseX;
+  int reverseY;
+  int size_x;
+  int size_y;
+  float scaleX;
+  float scaleY;
+  float winX; // could be columns or rows depending on swapXY
+  float winY; // could be columns or rows depending on swapXY
+  void  (*pos_funX)(struct input_event *ev, Gpm_Event *state);
+  void  (*pos_funY)(struct input_event *ev, Gpm_Event *state);
+  struct input_absinfo info_x;
+  struct input_absinfo info_y;
+} abs_event_props;
+
+char *dumpAbsInfo(struct input_absinfo i){
+  char *ret;//how the heck do I free this?
+   asprintf(&ret,"input_absinfo={current=%d minimum=%d maximum=%d fuzz=%d flat=%d resolution=%d units/mm or units/g}\n",
+       i.value, i.minimum, i.maximum,
+       i.fuzz, i.flat, i.resolution);
+   return ret;
+}
+/* 
+ * Have no devices with a minimum>0, so subtracting it is untested.
+ * Event dev docs also has mystery comment that may imply value might be greater than maximum.
+ * Not sure if I should be clamping minimum<=value<=maximum
+ */
+void posSwapXYRevX(struct input_event *ev, Gpm_Event *state){
+  state->y = (short)(abs_event_props.winX - ((float)(ev->value-abs_event_props.info_x.minimum) * abs_event_props.scaleX));
+}
+
+void posSwapXYForX(struct input_event *ev, Gpm_Event *state){
+  state->y = (short)((float)(ev->value-abs_event_props.info_x.minimum) * abs_event_props.scaleX);
+}
+
+void posSwapXYRevY(struct input_event *ev, Gpm_Event *state){
+  state->x = (short)(abs_event_props.winY - ((float)(ev->value-abs_event_props.info_y.minimum) * abs_event_props.scaleY));
+}
+
+void posSwapXYForY(struct input_event *ev, Gpm_Event *state){
+  state->x = (short)( (float)(ev->value-abs_event_props.info_y.minimum) * abs_event_props.scaleY);
+}
+
+
+static int M_evdevabs(Gpm_Event *state,  unsigned char *data)
+{
+  static unsigned char peak_finger=0;
+  static unsigned char release_nexttime=0;
+  static char is_initialized=0;
+  struct input_event thisevent;
+  memcpy (&thisevent, data, sizeof (struct input_event));
+  /* win isn't set before I_evdevabs is called, so have to init more stuff here. */
+  if(is_initialized !=1){
+    if(abs_event_props.swapXY){
+      abs_event_props.winX = win.ws_row;
+      abs_event_props.winY = win.ws_col;
+    }else{
+      abs_event_props.winX = win.ws_col;
+      abs_event_props.winY = win.ws_row;
+    }
+    abs_event_props.scaleY = abs_event_props.winY/(float)abs_event_props.size_y;
+    abs_event_props.scaleX = abs_event_props.winX/(float)abs_event_props.size_x;
+    is_initialized=1;
+  }
+
+
+  if(abs_event_props.fake3buttons && release_nexttime==1) {
+    state->buttons = 0;
+    peak_finger=0;
+    release_nexttime=0;
+  }
+
+  if (thisevent.type == EV_ABS) {
+
+    switch(thisevent.code){
+      case ABS_X:
+	abs_event_props.pos_funX(&thisevent, state);
+	break;
+      case ABS_Y:
+	abs_event_props.pos_funY(&thisevent, state);
+	break;
+      case ABS_MT_SLOT:
+	if(abs_event_props.fake3buttons && thisevent.value>peak_finger){
+	  peak_finger = thisevent.value; 
+	}
+	break;
+    }
+
+  } else if (thisevent.type == EV_KEY) {
+    /*
+     * Value is 1 as soon as one or more fingers are on the display. 
+     * Touching with more fingers doesn't change value.
+     * Value becomes 0 when no fingers are touching.
+     * Perhaps MT_* could be used for other buttons but I have no
+     * idea what the standard way of doing that is on a touchscreen.
+     *
+     * As this is, a quick touch and release creates a click.
+     * A touch and move creates a drag, selecting between the 
+     * previous touch event and the current finger position.
+     */
+    if(thisevent.code == BTN_TOUCH){
+
+      if(abs_event_props.fake3buttons==1) {
+	if(thisevent.value == 0){
+	  release_nexttime=1;
+	  printf("peak_finger %d at release\n",peak_finger);
+	  switch(peak_finger){
+	    case 0:
+	      state->buttons = GPM_B_LEFT;
+	      printf("left click\n");
+	      break;
+	    case 1:
+	      state->buttons = GPM_B_MIDDLE;
+	      printf("middle click\n");
+	      break;
+	    case 2:
+	      state->buttons = GPM_B_RIGHT;
+	      printf("right click\n");
+	      break;
+	    default:
+	      state->buttons = GPM_B_RIGHT;
+	      printf("right click\n");
+	      break;
+	  }
+	}
+      }else{
+	if(thisevent.value == 1){
+	  state->buttons = GPM_B_LEFT;
+	}else{
+	  state->buttons = 0;
+	}
+      }
+    }
+  }
+  return 0;
+}
+
+
+
+
+
 #endif /* HAVE_LINUX_INPUT_H */
 
 static int M_ms(Gpm_Event *state,  unsigned char *data)
@@ -2019,6 +2164,38 @@ static Gpm_Type *I_exps2(int fd, unsigned short flags,
    return type;
 }
 
+static Gpm_Type *I_evdevabs(int fd, unsigned short flags,
+          struct Gpm_Type *type, int argc, char **argv)
+{
+  static argv_helper optioninfo[] = {
+    {"fake3buttons",  ARGV_BOOL, u: {iptr: &abs_event_props.fake3buttons}, value:  1},
+    {"swapXY",  ARGV_BOOL, u: {iptr: &abs_event_props.swapXY}, value: 1},
+    {"reverseX",  ARGV_BOOL, u: {iptr: &abs_event_props.reverseX}, value:  1},
+    {"reverseY",  ARGV_BOOL, u: {iptr: &abs_event_props.reverseY}, value:  1},
+    {"",       ARGV_END} 
+  };
+  parse_argv(optioninfo, argc, argv); 
+
+  if(ioctl(fd, EVIOCGABS(ABS_X), &abs_event_props.info_x)) {
+    gpm_report(GPM_PR_ERR,GPM_MESS_IOCTL_EVIOCGABS,"ABS_X", strerror(errno));
+  }
+
+  if(ioctl(fd, EVIOCGABS(ABS_Y), &abs_event_props.info_y)) {
+    gpm_report(GPM_PR_ERR,GPM_MESS_IOCTL_EVIOCGABS,"ABS_Y", strerror(errno));
+  }
+
+  gpm_report(GPM_PR_DEBUG,GPM_MESS_IOCTL_EVIOCGABS,"ABS_X", dumpAbsInfo(abs_event_props.info_x));
+  gpm_report(GPM_PR_DEBUG,GPM_MESS_IOCTL_EVIOCGABS,"ABS_Y", dumpAbsInfo(abs_event_props.info_y));
+
+  abs_event_props.size_x = abs_event_props.info_x.maximum - abs_event_props.info_x.minimum;
+  abs_event_props.size_y = abs_event_props.info_y.maximum - abs_event_props.info_y.minimum;
+
+  abs_event_props.pos_funX = (abs_event_props.reverseX==1) ? posSwapXYRevX : posSwapXYForX;
+  abs_event_props.pos_funY = (abs_event_props.reverseY==1) ? posSwapXYRevY : posSwapXYForY;
+
+  return type;
+}
+
 static Gpm_Type *I_twid(int fd, unsigned short flags,
          struct Gpm_Type *type, int argc, char **argv)
 {
@@ -2404,7 +2581,12 @@ Gpm_Type mice[]={
    {"evdev", "Linux Event Device",
             "", M_evdev, I_empty, STD_FLG,
                         {0x00, 0x00, 0x00, 0x00} , 16, 16, 0, 0, NULL},
+
+   {"evdev.abs", "Linux Event Device - absolute mode", 
+	  "ft5406", M_evdevabs, I_evdevabs, STD_FLG,
+			{0x00, 0x00, 0x00, 0x00}, 16, 16, 0, 1, NULL },
 #endif /* HAVE_LINUX_INPUT_H */
+   
    {"exps2",   "IntelliMouse Explorer (ps2) - 3 buttons, wheel unused",
            "ExplorerPS/2", M_imps2, I_exps2, STD_FLG,
                                 {0xc0, 0x00, 0x00, 0x00}, 4, 1, 0, 0, 0},
