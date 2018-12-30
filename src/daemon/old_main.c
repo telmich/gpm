@@ -25,6 +25,7 @@
 #include <signal.h>                 /* guess again       */
 #include <errno.h>                  /* guess again       */
 #include <unistd.h>                 /* unlink            */
+#include <string.h>                 /* strcpy, bzero     */
 #include <sys/stat.h>               /* chmod             */
 
 #include <linux/kd.h>               /* linux hd*         */
