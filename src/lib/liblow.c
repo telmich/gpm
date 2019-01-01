@@ -29,11 +29,12 @@
 #include <string.h>        /* strncmp */
 #include <unistd.h>        /* select(); */
 #include <errno.h>
+#include <fcntl.h>         /* O_RDONLY */
+
 #include <sys/time.h>      /* timeval */
 #include <sys/types.h>     /* socket() */
 #include <sys/socket.h>    /* socket() */
 #include <sys/un.h>        /* struct sockaddr_un */
-#include <fcntl.h>     /* O_RDONLY */
 #include <sys/stat.h>      /* stat() */
 
 #ifdef  SIGTSTP         /* true if BSD system */
