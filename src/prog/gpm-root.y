@@ -1196,11 +1196,7 @@ int main(int argc, char **argv)
                                                         LOG_DAEMON : LOG_USER);
    /* reap your zombies */
    childaction.sa_handler=reap_children;
-#if defined(__GLIBC__)
-   __sigemptyset(&childaction.sa_mask);
-#else /* __GLIBC__ */
    sigemptyset(&childaction.sa_mask);
-#endif /* __GLIBC__ */
    childaction.sa_flags=0;
    sigaction(SIGCHLD,&childaction,NULL);
 
