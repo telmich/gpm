@@ -33,7 +33,7 @@
 #include <sys/types.h>     /* socket() */
 #include <sys/socket.h>    /* socket() */
 #include <sys/un.h>        /* struct sockaddr_un */
-#include <sys/fcntl.h>     /* O_RDONLY */
+#include <fcntl.h>         /* O_RDONLY */
 #include <sys/stat.h>      /* stat() */
 
 #ifdef  SIGTSTP         /* true if BSD system */
@@ -173,7 +173,7 @@ static void gpm_suspend_hook (int signum)
   /* Reincarnation. Prepare for another death early. */
   sigemptyset(&sa.sa_mask);
   sa.sa_handler = gpm_suspend_hook;
-  sa.sa_flags = SA_NOMASK;
+  sa.sa_flags = SA_NODEFER;
   sigaction (SIGTSTP, &sa, 0);
 
   /* Pop the gpm stack by closing the useless connection */
