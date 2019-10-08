@@ -29,11 +29,12 @@
 #include <string.h>        /* strncmp */
 #include <unistd.h>        /* select(); */
 #include <errno.h>
+#include <fcntl.h>         /* O_RDONLY */
+
 #include <sys/time.h>      /* timeval */
 #include <sys/types.h>     /* socket() */
 #include <sys/socket.h>    /* socket() */
 #include <sys/un.h>        /* struct sockaddr_un */
-#include <sys/fcntl.h>     /* O_RDONLY */
 #include <sys/stat.h>      /* stat() */
 
 #ifdef  SIGTSTP         /* true if BSD system */
@@ -173,7 +174,7 @@ static void gpm_suspend_hook (int signum)
   /* Reincarnation. Prepare for another death early. */
   sigemptyset(&sa.sa_mask);
   sa.sa_handler = gpm_suspend_hook;
-  sa.sa_flags = SA_NOMASK;
+  sa.sa_flags = SA_NODEFER;
   sigaction (SIGTSTP, &sa, 0);
 
   /* Pop the gpm stack by closing the useless connection */
@@ -364,7 +365,7 @@ int Gpm_Open(Gpm_Connect *conn, int flag)
 
          /* if signal was originally ignored, job control is not supported */
          if (gpm_saved_suspend_hook.sa_handler != SIG_IGN) {
-            sa.sa_flags = SA_NOMASK;
+            sa.sa_flags = SA_NODEFER;
             sa.sa_handler = gpm_suspend_hook;
             sigaction(SIGTSTP, &sa, 0);
          }
