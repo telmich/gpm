@@ -180,7 +180,7 @@ extern struct mouse_features  mouse_table[3],
 extern Gpm_Type         mice[];
 extern Gpm_Type         *repeated_type;
 
-time_t                  last_selection_time;
+extern time_t           last_selection_time;
 
 
 
