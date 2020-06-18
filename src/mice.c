@@ -254,6 +254,43 @@ static int M_evdev (Gpm_Event * state, unsigned char *data)
    }
    return 0;
 }
+static int M_vboxevdev (Gpm_Event * state, unsigned char *data)
+{
+   struct input_event thisevent;
+   (void) memcpy (&thisevent, data, sizeof (struct input_event));
+   if (thisevent.type==EV_ABS) {
+     if (thisevent.code==ABS_X) { //X:
+       state->x = (thisevent.value * (win.ws_col+1) / 65535);
+       int myrealposx=thisevent.value/4;
+       realposx=myrealposx;
+     } else if (thisevent.code==ABS_Y) { //Y:
+       state->y = 1 + thisevent.value * (win.ws_row)/65535;
+       int myrealposy=thisevent.value/4;
+       realposy=myrealposy;
+     }
+   } 
+   else if (thisevent.type==EV_KEY) { 
+     unsigned char mybuttons=state->buttons;
+     if (thisevent.code==BTN_LEFT) { //Left-Button:
+       if (thisevent.value==1) {  //Press:
+         mybuttons |= GPM_B_LEFT;
+       } else {
+         mybuttons &= ~(GPM_B_LEFT);
+       }
+     } else if (thisevent.code=BTN_RIGHT) { //Right-Button:
+       if (thisevent.value==1) { //Press:
+         mybuttons |= GPM_B_RIGHT;
+       } else {
+         mybuttons &= ~(GPM_B_RIGHT);
+       }
+     }
+     state->buttons = mybuttons;
+   }
+         
+   //printf("type=%d code=%d value=%d buttons=%d\n",thisevent.type,thisevent.code,thisevent.value,state->buttons);
+       
+   return 0;
+}
 #endif /* HAVE_LINUX_INPUT_H */
 
 static int M_ms(Gpm_Event *state,  unsigned char *data)
@@ -2404,6 +2441,9 @@ Gpm_Type mice[]={
    {"evdev", "Linux Event Device",
             "", M_evdev, I_empty, STD_FLG,
                         {0x00, 0x00, 0x00, 0x00} , 16, 16, 0, 0, NULL},
+   {"vboxevdev", "Linux Event Device2",
+            "", M_vboxevdev, I_empty, STD_FLG,
+                        {0x00, 0x00, 0x00, 0x00} , 24, 24, 0, 1, NULL},
 #endif /* HAVE_LINUX_INPUT_H */
    {"exps2",   "IntelliMouse Explorer (ps2) - 3 buttons, wheel unused",
            "ExplorerPS/2", M_imps2, I_exps2, STD_FLG,
