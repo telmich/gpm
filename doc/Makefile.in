@@ -111,29 +111,18 @@ gpmdoc.ps:	gpm.ps
 # install & uninstall
 
 installdirs:	
-	$(MKDIR) $(man1dir) $(man7dir) $(man8dir) $(infodir)	
+	$(INSTALL_DIR) $(DESTDIR)$(man1dir)
+	$(INSTALL_DIR) $(DESTDIR)$(man7dir)
+	$(INSTALL_DIR) $(DESTDIR)$(man8dir)
+	$(INSTALL_DIR) $(DESTDIR)$(infodir)	
 
 install:	all installdirs
-	$(INSTALL_DATA) -m 644 mev.1          $(man1dir)
-	$(INSTALL_DATA) -m 644 mouse-test.1   $(man1dir)
-	$(INSTALL_DATA) -m 644 gpm-root.1     $(man1dir)
-	$(INSTALL_DATA) -m 644 gpm-types.7    $(man7dir)
-	$(INSTALL_DATA) -m 644 gpm.8          $(man8dir)
-	$(INSTALL_DATA) -m 644 $(srcdir)/gpm.info       $(infodir)
-	# Use install-info if available
-	-if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
-	  if [ -f $(infodir)/dir ] ; then \
-		install-info --dir-file=$(infodir)/dir $(infodir)/gpm.info; \
-	  fi; \
-	fi
-	#itz Sat Dec 26 23:21:05 PST 1998
-	#i keep all my infopages compressed and i'm tired to do it by
-	#hand, so check if there are any compressed pages and do this
-	#one too
-	-ls $(infodir)/*[-.]info.gz >/dev/null 2>&1 \
-		&& gzip -f $(infodir)/gpm.info
-	# Hmm.... shouldn't man pages be compressed too?
-   # maybe they should, but at least at my system they are not.
+$(INSTALL_DATA) -m 644 mev.1          $(DESTDIR)$(man1dir)
+	$(INSTALL_DATA) -m 644 mouse-test.1   $(DESTDIR)$(man1dir)
+	$(INSTALL_DATA) -m 644 gpm-root.1     $(DESTDIR)$(man1dir)
+	$(INSTALL_DATA) -m 644 gpm-types.7    $(DESTDIR)$(man7dir)
+	$(INSTALL_DATA) -m 644 gpm.8          $(DESTDIR)$(man8dir)
+	$(INSTALL_DATA) -m 644 $(srcdir)/gpm.info       $(DESTDIR)$(infodir)
 
 # This potentially leaves around cached manpages,
 # e.g. /var/cache/man/cat1/mev.1.gz.  Deleting these is not our job,
