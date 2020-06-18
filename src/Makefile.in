@@ -115,6 +115,7 @@ install:	check
 	if test "x@SHLIB@" != "x" ; then \
 		$(INSTALL_DATA) -m 755 lib/libgpm.so.@abi_full@ $(libdir)/libgpm.so.@abi_full@	;	\
 		cd $(libdir) && $(LN_S) -f libgpm.so.@abi_full@ libgpm.so.@abi_lev@ 					;	\
+		cd $(libdir) && $(LN_S) -f libgpm.so.@abi_full@ libgpm.so 					;	\
       echo "WARNING: We installed a lib, you should now call ldconfig" 						; 	\
       echo "f.i.: ldconfig -n -l $(libdir)/libgpm.so.@abi_full@" 								;	\
       echo "Or to update everything just type ldconfig"											;	\
