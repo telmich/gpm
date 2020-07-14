@@ -1794,9 +1794,10 @@ static int I_wacom_wait_wacom(int fd)
 }
 
 static int I_wacom_RequestData(char *cmd, int fd, char *buffer,
-        unsigned int buffer_len, char *p)
+        unsigned int buffer_len)
 {
    int err;
+   char *p;
    /*
     * Send cmd if not null, and get back answer from tablet.
     * Get Data to buffer until full or timeout.
@@ -1840,10 +1841,10 @@ static Gpm_Type *I_wacom(int fd, unsigned short flags,
    I_wacom_reset_wacom(fd);
 
    /* "Flush" input queque */
-   while(I_wacom_RequestData(NULL, fd, buffer, BUFFER_SIZE, p)) ;
+   while(I_wacom_RequestData(NULL, fd, buffer, BUFFER_SIZE));
 
    /* read WACOM-ID */
-   I_wacom_RequestData(UD_FIRMID, fd, buffer, BUFFER_SIZE, p); 
+   I_wacom_RequestData(UD_FIRMID, fd, buffer, BUFFER_SIZE);
 
    /* Search for matching modell */
    for(WacomModell=0;
@@ -1864,7 +1865,7 @@ static Gpm_Type *I_wacom(int fd, unsigned short flags,
    
    /* read Wacom max size */
    if(WacomModell!=(-1) && (!wcmodell[WacomModell].maxX)) {
-      I_wacom_RequestData(UD_COORD, fd, buffer, BUFFER_SIZE, p);
+      I_wacom_RequestData(UD_COORD, fd, buffer, BUFFER_SIZE);
       sscanf(buffer+2, "%d,%d", &wmaxx, &wmaxy);
       wmaxx = (wmaxx-wcmodell[WacomModell].border);
       wmaxy = (wmaxy-wcmodell[WacomModell].border);
