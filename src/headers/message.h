@@ -208,6 +208,7 @@
 #define GPM_MESS_IOCTL_KDGETMODE    "ioctl(KDGETMODE)"
 #define GPM_MESS_IOCTL_TIOCLINUX    "ioctl(TIOCLINUX)"
 #define GPM_MESS_IOCTL_TIOCSTI      "%s: ioctl(TIOCSTI): %s"
+#define GPM_MESS_IOCTL_EVIOCGABS    "ioctl(EVIOCGABS(%s): %s"
 
 /* debug */
 #define GPM_MESS_PEER_SCK_UID       "peer socket uid = %d"
