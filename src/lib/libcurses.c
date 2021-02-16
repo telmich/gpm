@@ -41,7 +41,12 @@
 #endif /* HAVE_NCURSES_CURSES_H */
 #endif /* HAVE_NCURSES_H */
 
-#define GET(win) ((win) ? wgetch(win) : getch())
+/* If win != NULL, it must have been created by ncurses anyway.
+   Avoid circular library dependencies.  */
+#pragma weak wgetch
+#pragma weak stdscr
+
+#define GET(win) ((win && wgetch) ? wgetch(win) : getch())
 
 int Gpm_Wgetch(WINDOW *win)
 {
