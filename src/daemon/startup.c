@@ -135,6 +135,13 @@ void startup(int argc, char **argv)
    check_uniqueness();
    gpm_report(GPM_PR_INFO,GPM_MESS_STARTED);
 
+   // close extra fds
+   if (option.run_status == GPM_RUN_STARTUP ) {
+       close(0);
+       close(1);
+       close(2);
+   }
+
    //return mouse_table[1].fd; /* the second is handled in the main() */
 
    /****************** OLD CODE from gpn.c  END ***********************/

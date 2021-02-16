@@ -129,7 +129,7 @@ No|no|N|n) SHARED_LIBS=-lc ;;
             AC_CHECK_LIB($i, wgetch,,,$TERMLIBS)
         else :; fi
     done
-    SHARED_LIBS="$LIBS $TERMLIBS -lc"
+    SHARED_LIBS="-lc"
     LIBS=$SAVELIBS ;;
 esac    
 

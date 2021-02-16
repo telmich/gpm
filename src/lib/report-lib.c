@@ -24,8 +24,16 @@
 
 #include "headers/message.h"
 
+static int gpm_silent() {
+   if ( getenv( "GPM_VERBOSE" ) == NULL ) return 1;
+   return 0;
+}
+
 void gpm_report(int line, const char *file, int stat, const char *text, ... )
 {
+   if ( gpm_silent() && stat != GPM_STAT_OOPS )
+      return;
+
    const char *string = NULL;
    int log_level;
    va_list ap;
