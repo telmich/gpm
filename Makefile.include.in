@@ -56,7 +56,7 @@ MAKEINFO          = @MAKEINFO@
 TEXI2HTML         = texi2html
 STRIP             = -s
 
-AR                = ar
+AR                = @AR@
 ETAGS             = etags
 AWK               = awk
 CP                = cp -a

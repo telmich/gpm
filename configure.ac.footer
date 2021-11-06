@@ -75,6 +75,9 @@ AC_CHECK_HEADERS(sys/socket.h,,[AC_MSG_ERROR([Required header file missing])])
 
 AC_ARG_ENABLE([static],
 [  --enable-static         build static libraries @<:@default=no@:>@])
+AC_ARG_ENABLE([shared],
+[  --enable-shared         build shared libraries @<:@default=yes@:>@])
+
 
 LIBGPM_A=
 
@@ -131,9 +134,22 @@ No|no|N|n) SHARED_LIBS=-lc ;;
     done
     SHARED_LIBS="$LIBS $TERMLIBS -lc"
     LIBS=$SAVELIBS ;;
-esac    
+esac
+
+LIBGPM_SO=
+LIBGPM_SO_LEV=
+LIBGPM_SO_FULL=
+
+AS_IF([test "x$enable_shared" = "xyes"], [
+        LIBGPM_SO=lib/libgpm.so
+        LIBGPM_SO_LEV=lib/libgpm.so.$abi_lev
+        LIBGPM_SO_FULL=lib/libgpm.so.$abi_full
+])
 
 GPMXTERM=
+AC_SUBST(LIBGPM_SO)
+AC_SUBST(LIBGPM_SO_LEV)
+AC_SUBST(LIBGPM_SO_FULL)
 AC_SUBST(GPMXTERM)
 AC_SUBST(abi_lev)
 AC_SUBST(abi_full)
