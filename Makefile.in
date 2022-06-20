@@ -61,6 +61,8 @@ Makefile.include: config.status $(srcdir)/Makefile.include.in
 
 install:	check installdirs do-install
 
+do-install: installdirs
+
 install-strip:
 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) $(STRIP)' install
 
