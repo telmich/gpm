@@ -268,7 +268,14 @@ Gpm_Roi * Gpm_LowerRoi(Gpm_Roi *which, Gpm_Roi *after);
 /* libcurses.c */
 /* #include <curses.h>  Hmm... seems risky */
 
-extern int Gpm_Wgetch();
+/* Window handle is an opaque pointer that Gpm_Wgetch()
+ * passes through to ncurses if it's not null and calls getch
+ * if it's null. Code doesn't care what's inside the handle
+ * as long as it agrees with curses definition.
+*/
+typedef struct _win_st WINDOW;
+
+extern int Gpm_Wgetch(WINDOW *);
 #define Gpm_Getch() (Gpm_Wgetch(NULL))
 
 /* libxtra.c */

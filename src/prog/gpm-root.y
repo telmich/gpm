@@ -128,7 +128,7 @@ typedef struct DrawItem {
    char *name;
    char *arg;   /* a cmd string */
    void *clientdata;  /* a (Draw *) for menus or whatever   */
-   int (*fun)();
+   int (*fun)(int, struct DrawItem *, int);
    struct DrawItem *next;
 } DrawItem;
 
@@ -159,7 +159,7 @@ int yyerror(char *s);
 int yylex(void);
 
 DrawItem *cfg_cat(DrawItem *, DrawItem *);
-DrawItem *cfg_makeitem(int mode, char *msg, int(*fun)(), void *detail);
+DrawItem *cfg_makeitem(int mode, char *msg, int(*fun)(int,  DrawItem *, int), void *detail);
 
 
 /*===================================================================*
@@ -195,7 +195,7 @@ int f_pipe(int mode, DrawItem *self, int uid);
       char *string;
       Draw *draw;
       DrawItem *item;
-      int (*fun)();
+      int (*fun)(int,  DrawItem *, int);
       }
 
 %token <string> T_STRING
@@ -284,7 +284,7 @@ struct tokenName tokenList[] = {
 struct funcName {
    char *name;
    int token;
-   int (*fun)();
+   int (*fun)(int,  DrawItem *, int);
    };
 struct funcName funcList[] = {
    {"f.debug",T_FUNC,f_debug},
@@ -390,7 +390,7 @@ Draw *cfg_alloc(void)
 
 /*---------------------------------------------------------------------*/
 /* malloc an empty DrawItem and fill it */
-DrawItem *cfg_makeitem(int mode, char *msg, int(*fun)(), void *detail)
+DrawItem *cfg_makeitem(int mode, char *msg, int(*fun)(int,  DrawItem *, int), void *detail)
 {
    DrawItem *new=calloc(1,sizeof(DrawItem));
 
@@ -405,7 +405,7 @@ DrawItem *cfg_makeitem(int mode, char *msg, int(*fun)(), void *detail)
 
       case 'F': /* a function without args */
          new->fun=fun;
-         if (fun) fun(F_CREATE,new);
+         if (fun) fun(F_CREATE,new,0);
          break;
 
       case 'M':
@@ -941,7 +941,7 @@ static unsigned short clear_sel_args[6]={0, 0,0, 0,0, 4};
 static unsigned char *clear_sel_arg= (unsigned char *)clear_sel_args+1;
 
 /*------------*/
-static inline void scr_dump(int fd, FILE *f, unsigned char *buffer, int vc)
+static inline void gpm_scr_dump(int fd, FILE *f, unsigned char *buffer, int vc)
 {
    int dumpfd;
    char dumpname[20];
@@ -960,7 +960,7 @@ static inline void scr_dump(int fd, FILE *f, unsigned char *buffer, int vc)
 }
 
 /*------------*/
-static inline void scr_restore(int fd, FILE *f, unsigned char *buffer, int vc)
+static inline void gpm_scr_restore(int fd, FILE *f, unsigned char *buffer, int vc)
 {
    int dumpfd;
    char dumpname[20];
@@ -1002,7 +1002,7 @@ Posted *postmenu(int fd, FILE *f, Draw *draw, int x, int y, int console)
    if (!new) return NULL;
    new->draw=draw;
    new->dump=dump=malloc(opt_buf);
-   scr_dump(fd,f,dump,console);
+   gpm_scr_dump(fd,f,dump,console);
    lines=dump[0]; columns=dump[1];
    i=(columns*dump[3]+dump[2])*2+1; /* where to get it */
    if (i<0) i=1;
@@ -1047,7 +1047,7 @@ Posted *postmenu(int fd, FILE *f, Draw *draw, int x, int y, int console)
    }
    /* sides and items */
    for (item=draw->menu; y++, item; item=item->next) {
-         if (item->fun) (*(item->fun))(F_POST,item);
+         if (item->fun) (*(item->fun))(F_POST,item,0);
          GOTO(x,y); PUTC(VERLINE,draw->bord,draw->back);
          for (i=0;i<item->pad;i++) PUTC(' ',draw->fore,draw->back);
          PUTS(item->name,draw->fore,draw->back); i+=strlen(item->name);
@@ -1060,7 +1060,7 @@ Posted *postmenu(int fd, FILE *f, Draw *draw, int x, int y, int console)
    for (i=0; i<draw->width; i++) PUTC(HORLINE,draw->bord,draw->back);
    PUTC(LRCORNER,draw->bord,draw->back);
 
-   scr_restore(fd,f,dump,console);
+   gpm_scr_restore(fd,f,dump,console);
    free(dump);
 
 #undef PUTC
@@ -1077,7 +1077,7 @@ Posted *unpostmenu(int fd, FILE *f, Posted *which, int vc)
 {
    Posted *prev=which->prev;
 
-   scr_restore(fd,f,which->dump, vc);
+   gpm_scr_restore(fd,f,which->dump, vc);
    ioctl(fd,TCXONC,TCOON); /* activate the console */  
    free(which->dump);
    free(which);

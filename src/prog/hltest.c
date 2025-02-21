@@ -80,7 +80,6 @@ int wid,hei,vcsize;
 unsigned short clear_sel_args[6]={0, 0,0, 0,0, 4};
 unsigned char *clear_sel_arg= (unsigned char *)clear_sel_args+1;
 
-
 static inline int scrdump(char *buf)
 {
    clear_sel_arg[0]=2;  /* clear_selection */
@@ -99,7 +98,7 @@ static inline int scrrestore(char *buf)
 
 
 /* I don't like curses, so I'm doing low level stuff here */
-static void raw(void)
+static void gpm_raw(void)
 {
 struct termios it;
 
@@ -115,7 +114,7 @@ tcsetattr(fileno(stdin),TCSANOW,&it);
 
 }
 
-static void noraw(void)
+static void gpm_noraw(void)
 {
 struct termios it;
 
@@ -136,7 +135,7 @@ void killed(int signo)
 {
    CLEAR;
    fprintf(stderr,"hltest: killed by signal %i\r\n",signo);
-   noraw();
+   gpm_noraw();
    exit(0);
 }
 
@@ -525,7 +524,7 @@ int main(int argc, char **argv)
    gpm_roi_handler=xhandler;
    gpm_roi_data=NULL;
 
-   raw();
+   gpm_raw();
    newmsg(0,NULL); /* init data structures */
    while((c=Gpm_Getchar())!=EOF) {
       char s[32];
@@ -538,6 +537,6 @@ int main(int argc, char **argv)
    newmsg(roi ? ((WinInfo *)roi->clientdata)->number : 0,s);
    }
 
-   noraw();
+   gpm_noraw();
    exit(0);
 }

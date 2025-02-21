@@ -106,7 +106,7 @@ return 0;
 /*----------------------------------------------------------------------------- 
    Place the description here.
  -----------------------------------------------------------------------------*/
-static void raw(void)
+static void gpm_raw(void)
 {
    struct termios it;
 
@@ -125,7 +125,7 @@ static void raw(void)
 /*----------------------------------------------------------------------------- 
    Place the description here.
  -----------------------------------------------------------------------------*/
-static void noraw(void)
+static void gpm_noraw(void)
 {
    struct termios it;
 
@@ -144,7 +144,7 @@ static void noraw(void)
 void killed(int signo)
 {
    fprintf(stderr,"mouse-test: killed by signal %i\r\n",signo);
-   noraw();
+   gpm_noraw();
    exit(0);
 }
 
@@ -196,7 +196,7 @@ int mousereopen(int oldfd, const char *name, Gpm_Type *type)
 
 int noneofthem(void)
 {
-   noraw();
+   gpm_noraw();
    printf("\n\nSomething went wrong, I didn't manage to detect your"
 	 "protocol\n\nFeel free to report your problems to the author\n");
    exit(1);
@@ -336,7 +336,7 @@ int main(int argc, char **argv)
    I_serial=mice->init; /* the first one has I_serial */
 
    signal(SIGINT,killed);   /* control-C kills us */
-   raw();
+   gpm_raw();
 
 /*====================================== First of all, detect the device */
 
@@ -568,7 +568,7 @@ int main(int argc, char **argv)
    /* why checking and not using return value ??? */
    CHECKFAIL(typecount);
    if (typecount==1) {
-      noraw();
+      gpm_noraw();
       printf("\n\n\nWell, it seems like your mouse is already detected:\n"
       "it is on the device \"%s\", and speaks the protocol \"%s\"\n",
       mousename,list->this->name);
@@ -587,7 +587,7 @@ int main(int argc, char **argv)
    } while(i!='y' && i!='n');
 
    if (i=='n') {
-      noraw();
+      gpm_noraw();
       printf("\nThen, you should use the \"bare\" protocol on \"%s\"\n",
 	   mousename);
       exit(0);
@@ -634,7 +634,7 @@ int main(int argc, char **argv)
    for (pending=0,i=0;i<got-16;i++)
       if(!memcmp(buf+i,buf+i+8,8)) pending++;
    if (pending > 3) {
-      noraw();
+      gpm_noraw();
       printf("\nYour mouse seems to be a 'mman' one  on \"%s\" (%i matches)\n",
 	   mousename,pending);
       exit(0);
@@ -660,7 +660,7 @@ int main(int argc, char **argv)
          continue;
       }
 	   if (pending>3) {
-	      noraw();
+	      gpm_noraw();
 	      printf("\nYour mouse seems to be a '%s' one on \"%s\" (%i matches)\n",
 		   cur->this->name,mousename,pending);
 	      exit(0);
@@ -695,7 +695,7 @@ int main(int argc, char **argv)
          for (pending=0,i=0;i<got-20;i++)
             if(!memcmp(buf+i,buf+i+10,10)) pending++;
          if (pending>3) {
-            noraw();
+            gpm_noraw();
             printf("\nYour mouse becomes a 3-buttons ('-t msc') one when\n"
 	         "gpm gets '-o %s' on it command line, and X gets\n"
 	         "%s in XF86Config\nThe device is \"%s\"",
@@ -726,7 +726,7 @@ int main(int argc, char **argv)
    for (pending=0,i=0;i<got-20;i++)
       if(!memcmp(buf+i,buf+i+10,10)) pending++;
    if (pending>3) {
-      noraw();
+      gpm_noraw();
       printf("\nWorked. You should keep the button pressed every time the\n"
 	   "computer boots, and run gpm in '-R' mode in order to ignore\n"
 	   "such hassle when starting X\n\nStill better, but a better mouse\n"
@@ -734,7 +734,7 @@ int main(int argc, char **argv)
 
       exit(0);
    }
-   noraw();
+   gpm_noraw();
    printf("\nI'm lost. Can't tell you how to use your middle button\n");
    return 0;
 }
