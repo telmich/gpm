@@ -19,7 +19,7 @@
  *
  ********/
 
-#include <time.h>                   /* time              */
+#include <sys/time.h>               /* gettimeofday      */
 #include <fcntl.h>                  /* open              */
 #include <unistd.h>                 /* close             */
 
@@ -30,10 +30,13 @@ void selection_paste(void)
 {
    char c=3;
    int fd;
+   struct timeval now;
 
-   if (!opt_aged && (0 != opt_age_limit) &&
-      (last_selection_time + opt_age_limit < time(0))) {
-      opt_aged = 1;
+   if (!opt_aged && (0 != opt_age_limit)) {
+      gettimeofday(&now, NULL);
+      if (last_selection_time.tv_sec + opt_age_limit < now.tv_sec) {
+         opt_aged = 1;
+      }
    }
 
    if (opt_aged) {

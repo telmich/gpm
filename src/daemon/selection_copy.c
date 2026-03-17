@@ -21,7 +21,7 @@
 
 #include <fcntl.h>                  /* open              */
 #include <unistd.h>                 /* close             */
-#include <time.h>                   /* time              */
+#include <sys/time.h>               /* gettimeofday      */
 
 
 #include "headers/message.h"        /* messaging in gpm */
@@ -55,7 +55,7 @@ void selection_copy(int x1, int y1, int x2, int y2, int mode)
 
    if (mode < 3) {
       opt_aged = 0;
-      last_selection_time = time(0);
+      gettimeofday(&last_selection_time, NULL);
    }
 }
 

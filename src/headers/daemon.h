@@ -26,6 +26,7 @@
  */
 #include "gpm.h"           /* Gpm_Event         */
 #include <sys/select.h>    /* fd_set            */
+#include <sys/time.h>      /* timeval           */
 
 /*************************************************************************
  * Types / structures
@@ -180,7 +181,7 @@ extern struct mouse_features  mouse_table[3],
 extern Gpm_Type         mice[];
 extern Gpm_Type         *repeated_type;
 
-extern time_t           last_selection_time;
+extern struct timeval   last_selection_time;
 
 
 

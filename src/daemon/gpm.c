@@ -95,7 +95,7 @@ int fifofd=-1;
 int eventFlag=0;
 Gpm_Cinfo *cinfo[MAX_VC+1];
 
-time_t last_selection_time;
+struct timeval last_selection_time;
 time_t opt_age_limit = 0;
 
 
