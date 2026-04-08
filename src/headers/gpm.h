@@ -268,7 +268,10 @@ Gpm_Roi * Gpm_LowerRoi(Gpm_Roi *which, Gpm_Roi *after);
 /* libcurses.c */
 /* #include <curses.h>  Hmm... seems risky */
 
-extern int Gpm_Wgetch();
+/* Forward-declare ncurses WINDOW type for C23 compatibility.
+ * In C23, empty () means (void), so we need a proper prototype. */
+struct _win_st;
+extern int Gpm_Wgetch(struct _win_st *);
 #define Gpm_Getch() (Gpm_Wgetch(NULL))
 
 /* libxtra.c */
