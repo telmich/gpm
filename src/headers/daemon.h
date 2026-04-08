@@ -204,7 +204,7 @@ void  gpm_exited(void);
 void  gpm_killed(int signo);
 
 int   open_console(const int mode);
-int old_main();
+int old_main(void);
 
 int processConn(int fd);
 int processMouse(int fd, Gpm_Event *event, Gpm_Type *type, int kd_mode);
@@ -234,7 +234,7 @@ void check_uniqueness(void);
 void check_kill(void);
 
 /* gpm.c */
-int old_main();
+int old_main(void);
 
 
 #endif

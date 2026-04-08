@@ -39,7 +39,7 @@
 #endif
 
 
-int old_main()
+int old_main(void)
 {
    int ctlfd, newfd;
    struct sockaddr_un ctladdr;
